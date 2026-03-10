@@ -109,11 +109,11 @@ const ADJUDICACIONES = [
 ];
 
 const LOTES_SALA = [
-  {id:1,name:"Tractor John Deere 6130B",         cat:"Maquinaria",year:2018,base:18500000,img:null,desc:"3.200 hrs, cabina climatizada, doble traccion.",      inc:500000 },
-  {id:2,name:"Parcela 12 Hec. Santa Cruz",        cat:"Inmueble",  year:null,base:95000000,img:null,desc:"Tierra agricola, riego asegurado, escrituras al dia.",inc:2000000},
-  {id:3,name:"Cosechadora Case IH 8230",          cat:"Maquinaria",year:2016,base:42000000,img:null,desc:"Motor 354 HP, cabezal 30 pies incluido.",             inc:1000000},
-  {id:4,name:"Camioneta Ford Ranger XLT",         cat:"Vehiculo",  year:2021,base:16900000,img:null,desc:"Diesel 3.2L, 72.000 km, unico dueno.",                inc:300000 },
-  {id:5,name:"Galpon Industrial 800m2",           cat:"Inmueble",  year:2010,base:68000000,img:null,desc:"Estructura metalica, 3 fases, permiso vigente.",      inc:1500000},
+  {id:1,name:"Tractor John Deere 6130B",         cat:"Maquinaria",year:2018,base:18500000,imgs:[],desc:"3.200 hrs, cabina climatizada, doble traccion.",      inc:500000 },
+  {id:2,name:"Parcela 12 Hec. Santa Cruz",        cat:"Inmueble",  year:null,base:95000000,imgs:[],desc:"Tierra agricola, riego asegurado, escrituras al dia.",inc:2000000},
+  {id:3,name:"Cosechadora Case IH 8230",          cat:"Maquinaria",year:2016,base:42000000,imgs:[],desc:"Motor 354 HP, cabezal 30 pies incluido.",             inc:1000000},
+  {id:4,name:"Camioneta Ford Ranger XLT",         cat:"Vehiculo",  year:2021,base:16900000,imgs:[],desc:"Diesel 3.2L, 72.000 km, unico dueno.",                inc:300000 },
+  {id:5,name:"Galpon Industrial 800m2",           cat:"Inmueble",  year:2010,base:68000000,imgs:[],desc:"Estructura metalica, 3 fases, permiso vigente.",      inc:1500000},
 ];
 
 const INC_OPTIONS = [100000,200000,300000,500000,750000,1000000,1500000,2000000,3000000,5000000];
@@ -144,7 +144,162 @@ const calcLiquidacion = (lotes, postor) => {
   return { lineas, totalEx, totalCom, totalAf, iva, total, garantia, totalAPagar };
 };
 
-// ── CSS ───────────────────────────────────────────────────────────
+const printLiquidacion = (c, liqFecha, remateNombre) => {
+  const p = c.postorData;
+  const l = c.liq;
+  const fmt = n => "$\u00a0" + Math.round(n).toLocaleString("es-CL");
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<title>Liquidacion — Comprador N° ${String(c.key).padStart(2,"0")}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;font-size:11pt;color:#111;background:#fff;padding:2cm;}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:3px solid #2F80ED;}
+  .logo-area{display:flex;align-items:center;gap:12px;}
+  .logo-text{font-size:10pt;font-weight:400;color:#5a7fa8;letter-spacing:.1em;text-transform:uppercase;}
+  .doc-title{text-align:right;}
+  .doc-title h1{font-size:18pt;font-weight:800;color:#2F80ED;text-transform:uppercase;letter-spacing:-.02em;}
+  .doc-title p{font-size:9pt;color:#666;margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+  .remate-banner{background:#f0f7ff;border:1px solid #c0d8f8;border-radius:6px;padding:.5rem 1rem;margin-bottom:1.2rem;font-size:9.5pt;color:#1a5fb8;font-weight:600;}
+  .datos-grid{display:grid;grid-template-columns:1fr 1fr;gap:.25rem .8rem;margin-bottom:1.2rem;padding:.8rem 1rem;background:#f8f9fa;border-radius:6px;border:1px solid #e5e7eb;font-size:9.5pt;}
+  .dato{display:flex;gap:.4rem;}
+  .dato-key{color:#666;min-width:90px;flex-shrink:0;}
+  .dato-val{font-weight:600;color:#111;}
+  table{width:100%;border-collapse:collapse;margin-bottom:1.2rem;font-size:9.5pt;}
+  thead tr{background:#1e3a5f;color:#fff;}
+  thead th{padding:.4rem .6rem;text-align:left;font-size:8.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  thead th.r{text-align:right;}
+  tbody tr{border-bottom:1px solid #e5e7eb;}
+  tbody tr:nth-child(even){background:#f8f9fa;}
+  td{padding:.4rem .6rem;color:#333;}
+  td.r{text-align:right;font-family:monospace;}
+  td.ex{text-align:center;font-size:8pt;font-weight:700;color:#059669;background:#ecfdf5;border-radius:3px;padding:.1rem .3rem;}
+  td.af{text-align:center;font-size:8pt;font-weight:700;color:#2F80ED;background:#eff6ff;border-radius:3px;padding:.1rem .3rem;}
+  td.lote-name{font-weight:600;color:#111;}
+  td.com{color:#666;font-style:italic;}
+  td.gadm{color:#d97706;}
+  .totales-row{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;align-items:start;}
+  .totales-tabla{font-size:9.5pt;}
+  .totales-tabla div{display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid #e5e7eb;}
+  .totales-tabla .total-final{font-size:11pt;font-weight:800;border-top:2px solid #2F80ED;border-bottom:none;margin-top:.3rem;padding-top:.4rem;color:#111;}
+  .totales-tabla .total-final span:last-child{color:#2F80ED;}
+  .garantia-box{background:#eff6ff;border:1.5px solid #93c5fd;border-radius:8px;padding:.8rem 1rem;font-size:9.5pt;}
+  .garantia-box .g-row{display:flex;justify-content:space-between;margin-bottom:.35rem;color:#444;}
+  .garantia-box .total-pagar{display:flex;justify-content:space-between;padding-top:.4rem;border-top:1.5px solid #93c5fd;margin-top:.35rem;}
+  .garantia-box .total-pagar span:first-child{font-weight:700;font-size:11pt;}
+  .garantia-box .total-pagar span:last-child{font-weight:800;font-size:13pt;color:#2F80ED;font-family:monospace;}
+  .footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid #e5e7eb;font-size:8pt;color:#999;text-align:center;}
+  @media print{body{padding:1cm;}@page{size:letter;margin:1cm;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo-area">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="8" fill="#EBF4FF" stroke="#93C5FD" stroke-width="1"/>
+      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#2F80ED" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1e3a5f" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    </svg>
+    <span class="logo-text">Auction Software</span>
+  </div>
+  <div class="doc-title">
+    <h1>Liquidación</h1>
+    <p>Comprador N° ${String(c.key).padStart(2,"0")}</p>
+  </div>
+</div>
+
+<div class="remate-banner">
+  📋 ${remateNombre || "Remate"} &nbsp;·&nbsp; Fecha: ${liqFecha}
+</div>
+
+<div class="datos-grid">
+  ${[
+    ["Comprador N°", String(c.key).padStart(2,"0")],
+    ["Fecha", liqFecha],
+    ["Señor(es)", p?.razonSocial||"—"],
+    ["R.U.T.", p?.rut||"—"],
+    ["Giro", p?.giro||"—"],
+    ["Teléfono", p?.tel||"—"],
+    ["Dirección", p?.direccion||"—"],
+    ["Email", p?.email||"—"],
+    ["Comuna", p?.comuna||"—"],
+  ].map(([k,v])=>`<div class="dato"><span class="dato-key">${k}</span><span class="dato-val">${v}</span></div>`).join("")}
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Expediente</th>
+      <th>Cant.</th>
+      <th>Descripción</th>
+      <th style="text-align:center">ND</th>
+      <th class="r">Unitario</th>
+      <th class="r">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${l.lineas.map((ln,i)=>`
+      <tr>
+        <td style="font-family:monospace;font-size:8.5pt;color:#666">${ln.exp||`Lote ${i+1}`}</td>
+        <td style="text-align:center;color:#666">1</td>
+        <td class="lote-name">${ln.lote}</td>
+        <td><span class="ex">EX</span></td>
+        <td class="r">${fmt(ln.monto)}</td>
+        <td class="r">${fmt(ln.monto)}</td>
+      </tr>
+      <tr>
+        <td style="font-family:monospace;font-size:8.5pt;color:#666">${ln.exp||`Lote ${i+1}`}</td>
+        <td style="text-align:center;color:#666">1</td>
+        <td class="com">Comisión ${ln.comPct}%</td>
+        <td><span class="af">AF</span></td>
+        <td class="r">${fmt(ln.com)}</td>
+        <td class="r">${fmt(ln.com)}</td>
+      </tr>
+      ${ln.motorizado?`
+      <tr>
+        <td style="font-family:monospace;font-size:8.5pt;color:#666">G-ADMIN</td>
+        <td style="text-align:center;color:#666">1</td>
+        <td class="gadm">Gastos Administrativos — Vehículo Motorizado (${ln.exp||`Lote ${i+1}`})</td>
+        <td><span class="af">AF</span></td>
+        <td class="r" style="color:#d97706">${fmt(ln.gastosAdm)}</td>
+        <td class="r" style="color:#d97706">${fmt(ln.gastosAdm)}</td>
+      </tr>`:""}
+    `).join("")}
+  </tbody>
+</table>
+
+<div class="totales-row">
+  <div class="totales-tabla">
+    <div><span>Total Compras Exentas:</span><span style="font-family:monospace">${fmt(l.totalEx)}</span></div>
+    <div><span>Total Compras Afectas:</span><span style="font-family:monospace">${fmt(l.totalAf)}</span></div>
+    <div><span>Total Comisión:</span><span style="font-family:monospace">${fmt(l.totalCom)}</span></div>
+    <div><span>19% IVA:</span><span style="font-family:monospace">${fmt(l.iva)}</span></div>
+    <div class="total-final"><span>Total:</span><span>${fmt(l.total)}</span></div>
+  </div>
+  <div class="garantia-box">
+    <div class="g-row"><span>Total:</span><span style="font-family:monospace">${fmt(l.total)}</span></div>
+    <div class="g-row"><span>Garantía abonada:</span><span style="font-family:monospace;color:#059669">− ${fmt(l.garantia)}</span></div>
+    <div class="total-pagar">
+      <span>Total a Pagar:</span>
+      <span>${fmt(l.totalAPagar)}</span>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Documento generado por GR Auction Software · ${new Date().toLocaleDateString("es-CL")} · gestionderemates.cl
+</div>
+
+<script>window.onload=()=>{window.print();}<\/script>
+</body>
+</html>`;
+  const w = window.open("","_blank","width=900,height=700");
+  w.document.write(html);
+  w.document.close();
+};
 const CSS = `
 ${FONT}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -166,7 +321,7 @@ ${FONT}
   --rd:#f56565;
   --yl:#f6ad55;
 }
-html,body{height:100%;background:var(--bg);color:var(--wh2);font-family:'Inter',sans-serif;overflow:hidden;font-size:14px;}
+html,body{height:100%;background:var(--bg);color:var(--wh2);font-family:'Inter',sans-serif;overflow:hidden;font-size:15px;}
 button,input,select{font-family:'Inter',sans-serif;}
 
 /* ── APP SHELL ── */
@@ -577,6 +732,7 @@ const Icon = ({ name }) => {
     sala:      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>,
     postores:  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2.2-5 5-5s5 2 5 5"/><circle cx="13" cy="5" r="2"/><path d="M13 8c1.5.5 2.5 2 2.5 4"/></svg>,
     factura:   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h4"/></svg>,
+    vendedor:  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5"/><path d="M11 8l2 2-2 2"/></svg>,
     reportes:  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M2 12l3-4 3 2 3-5 3 3"/><path d="M2 15h12"/></svg>,
     garantia:  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M8 1L2 4v4c0 3.5 2.5 6 6 7 3.5-1 6-3.5 6-7V4z"/><path d="M5 8l2 2 4-4"/></svg>,
     adjudic:   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2.5 2.5L11 5"/></svg>,
@@ -996,85 +1152,177 @@ function AuthScreen({ onLogin }) {
   );
 }
 
-// Buyer-facing view — minimal sala pública
+// Buyer-facing view — sala pública simplificada para postores
 function BuyerView({ user, onLogout }) {
+  const [photoIdx, setPhotoIdx] = React.useState(0);
+  const intervalRef = React.useRef(null);
+
+  // Mock lote activo — en producción viene de Supabase Realtime
+  const loteActivo = {
+    nombre: "Tractor John Deere 6130B",
+    cat: "Maquinaria · 2018",
+    lote: "Lote 01 de 5",
+    desc: "3.200 hrs, cabina climatizada, doble tracción.",
+    base: 18500000,
+    puja: 22500000,
+    tiempo: "01:24",
+    estado: "live", // "waiting" | "live" | "sold"
+    imgs: [], // en producción llegan las URLs de Supabase Storage
+  };
+
+  const historial = [
+    { num:"P-0318", monto:22500000, tiempo:"11:42:05" },
+    { num:"P-0112", monto:22000000, tiempo:"11:41:52" },
+    { num:"P-0044", monto:21500000, tiempo:"11:41:38" },
+    { num:"P-0318", monto:21000000, tiempo:"11:41:20" },
+  ];
+
+  // Auto-avance carrusel
+  React.useEffect(() => {
+    if (loteActivo.imgs.length > 1) {
+      intervalRef.current = setInterval(() => setPhotoIdx(p => (p+1) % loteActivo.imgs.length), 4000);
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, []);
+
+  const fmt = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n);
+
   const BUYER_CSS = `
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #070f1c; }
     .bv-root { min-height: 100vh; background: #070f1c; font-family: 'Inter', sans-serif; color: #e0eaf4; }
-    .bv-header { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.5rem; background: #0b1f38; border-bottom: 1px solid rgba(255,255,255,.07); }
-    .bv-header-left { display: flex; align-items: center; gap: .75rem; }
+    .bv-header { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.5rem; background: #0b1f38; border-bottom: 1px solid rgba(255,255,255,.07); position: sticky; top: 0; z-index: 10; }
     .bv-casa { font-size: .82rem; font-weight: 700; color: #e0eaf4; }
     .bv-paleta { font-family: 'DM Mono', monospace; font-size: .75rem; background: rgba(47,128,237,.15); color: #2F80ED; border: 1px solid rgba(47,128,237,.3); padding: .18rem .55rem; border-radius: 4px; }
     .bv-logout { background: transparent; border: 1px solid rgba(255,255,255,.1); color: #4a6a8a; font-size: .72rem; padding: .3rem .7rem; border-radius: 5px; cursor: pointer; }
-    .bv-logout:hover { color: #e05252; border-color: rgba(224,82,82,.3); }
-    .bv-body { max-width: 720px; margin: 3rem auto; padding: 0 1.5rem; }
-    .bv-welcome { font-size: 1.3rem; font-weight: 700; margin-bottom: .3rem; }
-    .bv-welcome span { color: #2F80ED; }
-    .bv-sub { font-size: .82rem; color: #4a6a8a; margin-bottom: 2.5rem; }
-    .bv-card { background: #0b1f38; border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 1.4rem; margin-bottom: 1rem; }
-    .bv-card-title { font-size: .72rem; font-weight: 700; color: #2F80ED; letter-spacing: .06em; text-transform: uppercase; margin-bottom: .75rem; }
-    .bv-row { display: flex; justify-content: space-between; align-items: center; padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.04); }
-    .bv-row:last-child { border-bottom: none; }
-    .bv-row-l { font-size: .78rem; color: #4a6a8a; }
-    .bv-row-v { font-size: .82rem; font-weight: 600; color: #e0eaf4; }
-    .bv-row-v.ac { color: #2F80ED; }
-    .bv-row-v.gr { color: #22d3a0; }
-    .bv-row-v.yl { color: #f6ad55; }
-    .bv-status { display: flex; align-items: center; gap: .4rem; }
-    .bv-dot { width: 7px; height: 7px; border-radius: 50%; background: #22d3a0; animation: bv-pulse 1.5s infinite; }
+    .bv-body { max-width: 760px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .bv-card { background: #0b1f38; border: 1px solid rgba(255,255,255,.07); border-radius: 12px; overflow: hidden; }
+    .bv-card-header { padding: .7rem 1.1rem; border-bottom: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; justify-content: space-between; }
+    .bv-card-title { font-size: .7rem; font-weight: 700; color: #2F80ED; letter-spacing: .06em; text-transform: uppercase; }
+    .bv-card-body { padding: 1rem 1.1rem; }
+    .bv-dot-live { width: 8px; height: 8px; border-radius: 50%; background: #22d3a0; animation: bv-pulse 1.5s infinite; display: inline-block; margin-right: .35rem; }
     @keyframes bv-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
-    .bv-info { padding: 1rem 1.2rem; background: rgba(47,128,237,.06); border: 1px solid rgba(47,128,237,.15); border-radius: 8px; font-size: .78rem; color: #5a7fa8; line-height: 1.6; margin-top: 1.5rem; }
+    .bv-lote-nombre { font-size: 1.2rem; font-weight: 800; color: #e0eaf4; margin-bottom: .2rem; }
+    .bv-lote-cat { font-size: .72rem; color: #4a6a8a; margin-bottom: .7rem; }
+    .bv-lote-desc { font-size: .78rem; color: #5a7fa8; line-height: 1.6; }
+    .bv-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .7rem; margin-top: .9rem; }
+    .bv-stat { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; padding: .65rem .8rem; text-align: center; }
+    .bv-stat-v { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 700; color: #2F80ED; }
+    .bv-stat-v.gr { color: #22d3a0; }
+    .bv-stat-v.yl { color: #f6ad55; }
+    .bv-stat-l { font-size: .62rem; color: #4a6a8a; margin-top: .15rem; text-transform: uppercase; letter-spacing: .04em; }
+    .bv-hist-row { display: flex; align-items: center; justify-content: space-between; padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .bv-hist-row:last-child { border-bottom: none; }
+    .bv-hist-num { font-size: .75rem; font-weight: 600; color: #4a6a8a; font-family: 'DM Mono', monospace; }
+    .bv-hist-monto { font-size: .8rem; font-weight: 700; color: #e0eaf4; font-family: 'DM Mono', monospace; }
+    .bv-hist-time { font-size: .68rem; color: #2a4a6a; font-family: 'DM Mono', monospace; }
+    .bv-info { padding: .85rem 1.1rem; background: rgba(47,128,237,.05); border: 1px solid rgba(47,128,237,.12); border-radius: 10px; font-size: .76rem; color: #4a6a8a; line-height: 1.7; }
   `;
+
   return (
     <div className="bv-root">
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');`}</style>
       <style>{BUYER_CSS}</style>
+
+      {/* Header */}
       <div className="bv-header">
-        <div className="bv-header-left">
+        <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
           <GRLogo/>
           <div style={{width:1,height:24,background:"rgba(255,255,255,.1)"}}/>
           <div className="bv-casa">{user.casaNombre}</div>
           <div className="bv-paleta">Paleta {user.token}</div>
         </div>
-        <button className="bv-logout" onClick={onLogout}>Salir</button>
+        <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
+          <span style={{fontSize:".72rem",color:"#22d3a0"}}><span className="bv-dot-live"/>En vivo</span>
+          <button className="bv-logout" onClick={onLogout}>Salir</button>
+        </div>
       </div>
-      <div className="bv-body">
-        <div className="bv-welcome">Hola, <span>{user.name.split(" ")[0]}</span></div>
-        <div className="bv-sub">RUT {user.rut} — {user.casaNombre}</div>
 
+      <div className="bv-body">
+
+        {/* Fotos del lote — carrusel */}
         <div className="bv-card">
-          <div className="bv-card-title">Estado del remate</div>
-          <div className="bv-row">
-            <div className="bv-row-l">Remate activo</div>
-            <div className="bv-row-v">Remate Industrial Marzo 2026</div>
+          <div className="bv-card-header">
+            <span className="bv-card-title">Lote en subasta</span>
+            <span style={{fontSize:".68rem",color:"#4a6a8a",fontFamily:"DM Mono,monospace"}}>{loteActivo.lote}</span>
           </div>
-          <div className="bv-row">
-            <div className="bv-row-l">Estado</div>
-            <div className="bv-row-v">
-              <div className="bv-status"><div className="bv-dot"/>En vivo</div>
+          {/* Imagen */}
+          <div style={{position:"relative",background:"#050c18",height:260,display:"flex",alignItems:"center",justifyContent:"center"}}>
+            {loteActivo.imgs.length > 0 ? (
+              <>
+                <img src={loteActivo.imgs[photoIdx]} alt={loteActivo.nombre}
+                  style={{width:"100%",height:260,objectFit:"cover",display:"block"}}/>
+                {loteActivo.imgs.length > 1 && (
+                  <>
+                    <button onClick={()=>setPhotoIdx(p=>(p-1+loteActivo.imgs.length)%loteActivo.imgs.length)}
+                      style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.6)",border:"none",borderRadius:"50%",width:34,height:34,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M8 2L4 6l4 4"/></svg>
+                    </button>
+                    <button onClick={()=>setPhotoIdx(p=>(p+1)%loteActivo.imgs.length)}
+                      style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.6)",border:"none",borderRadius:"50%",width:34,height:34,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 2l4 4-4 4"/></svg>
+                    </button>
+                    <div style={{position:"absolute",bottom:10,left:"50%",transform:"translateX(-50%)",display:"flex",gap:5}}>
+                      {loteActivo.imgs.map((_,i)=>(
+                        <div key={i} onClick={()=>setPhotoIdx(i)}
+                          style={{width:i===photoIdx?18:7,height:7,borderRadius:4,background:i===photoIdx?"#2F80ED":"rgba(255,255,255,.35)",cursor:"pointer",transition:"all .2s"}}/>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div style={{textAlign:"center",color:"#2a4a6a"}}>
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="4" y="8" width="32" height="24" rx="3"/><circle cx="20" cy="20" r="6"/><path d="M15 8l2.5-4h5L25 8"/></svg>
+                <div style={{fontSize:".75rem",marginTop:".5rem"}}>El martillero cargará las fotos del lote</div>
+              </div>
+            )}
+          </div>
+          {/* Info lote */}
+          <div className="bv-card-body">
+            <div className="bv-lote-nombre">{loteActivo.nombre}</div>
+            <div className="bv-lote-cat">{loteActivo.cat}</div>
+            <div className="bv-lote-desc">{loteActivo.desc}</div>
+            {/* Stats */}
+            <div className="bv-stats">
+              <div className="bv-stat">
+                <div className="bv-stat-v gr">{fmt(loteActivo.puja)}</div>
+                <div className="bv-stat-l">Puja actual</div>
+              </div>
+              <div className="bv-stat">
+                <div className="bv-stat-v yl">{loteActivo.tiempo}</div>
+                <div className="bv-stat-l">Tiempo</div>
+              </div>
+              <div className="bv-stat">
+                <div className="bv-stat-v">{fmt(loteActivo.base)}</div>
+                <div className="bv-stat-l">Precio base</div>
+              </div>
             </div>
           </div>
-          <div className="bv-row">
-            <div className="bv-row-l">Tu paleta</div>
-            <div className="bv-row-v ac">{user.token}</div>
-          </div>
-          <div className="bv-row">
-            <div className="bv-row-l">Garantia</div>
-            <div className="bv-row-v gr">$300.000 — Aprobada</div>
-          </div>
         </div>
 
+        {/* Historial de pujas */}
         <div className="bv-card">
-          <div className="bv-card-title">Lote actual en subasta</div>
-          <div className="bv-row"><div className="bv-row-l">Articulo</div><div className="bv-row-v">Hyundai Santa Fe 2.4 2019</div></div>
-          <div className="bv-row"><div className="bv-row-l">Precio base</div><div className="bv-row-v">$4.500.000</div></div>
-          <div className="bv-row"><div className="bv-row-l">Puja actual</div><div className="bv-row-v ac">$6.500.000</div></div>
-          <div className="bv-row"><div className="bv-row-l">Tiempo restante</div><div className="bv-row-v yl">01:24</div></div>
+          <div className="bv-card-header">
+            <span className="bv-card-title">Historial de pujas</span>
+            <span style={{fontSize:".68rem",color:"#22d3a0"}}>{historial.length} pujas</span>
+          </div>
+          <div className="bv-card-body">
+            {historial.map((h,i) => (
+              <div key={i} className="bv-hist-row">
+                <span className="bv-hist-num">{h.num}</span>
+                <span className="bv-hist-monto">{fmt(h.monto)}</span>
+                <span className="bv-hist-time">{h.tiempo}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
+        {/* Info */}
         <div className="bv-info">
-          Para pujar, levanta tu paleta en la sala presencial o comunicate con el martillero a traves del chat en vivo. Las adjudicaciones y liquidaciones se enviaran a tu correo al finalizar el remate.
+          Para pujar, levanta tu paleta en la sala presencial o comunícate con el martillero a través del chat en vivo. Las adjudicaciones y liquidaciones serán enviadas a tu correo al finalizar el remate.
         </div>
+
       </div>
     </div>
   );
@@ -1111,6 +1359,7 @@ function Dashboard({ session, onLogout }) {
   // Liquidaciones agrupadas por comprador para revisión post-remate
   const [liqReview,  setLiqReview]  = useState(null);  // null | { compradores: [...] }
   const [liqExpanded,setLiqExpanded]= useState(null);  // nComprador expandido
+  const [selectedRemate, setSelectedRemate] = useState(null); // remate seleccionado en post-remate
 
   // ── Auction state ──────────────────────────────────────────────
   const [lots,        setLots]        = useState(LOTES_SALA);
@@ -1129,8 +1378,27 @@ function Dashboard({ session, onLogout }) {
     {id:2,from:"P-0112 (Online)",text:"Buenos dias",time:"11:59"},
   ]);
   const [modalidad,   setModalidad]   = useState("hibrido"); // "presencial" | "online" | "hibrido"
+  // Carrusel fotos
+  const [photoIdx,    setPhotoIdx]    = useState(0);
+  const photoIntervalRef = React.useRef(null);
+  // Video martillero
+  const videoRef      = React.useRef(null);
+  const streamRef     = React.useRef(null);
+  const [camActiva,   setCamActiva]   = useState(false);
+  const [camError,    setCamError]    = useState(null);
   // Post-remate: liquidaciones y devoluciones generadas automáticamente
   const [liquidaciones, setLiquidaciones] = useState([]);
+
+  // ── Vendedores/Consignatarios ──
+  const VENDEDORES_MOCK = [
+    {id:"V-01", nombre:"JUZGADO CIVIL DE RANCAGUA",    rut:"61.002.000-2", giro:"Organismo Judicial",        direccion:"Av. España 585",      comuna:"Rancagua",   tel:"+56 72 234 5678", email:"civil@pjud.cl"},
+    {id:"V-02", nombre:"AGRICOLA DEL VALLE LTDA.",      rut:"76.543.210-K", giro:"Agricultura y Ganadería",   direccion:"Fundo El Roble s/n",  comuna:"Rengo",      tel:"+56 9 8765 4321", email:"contacto@agrvalle.cl"},
+    {id:"V-03", nombre:"BANCO ESTADO",                  rut:"97.030.000-7", giro:"Servicios Financieros",     direccion:"Av. Libertador 467",  comuna:"Rancagua",   tel:"+56 72 210 0000", email:"remates@bancoestado.cl"},
+    {id:"V-04", nombre:"SUCESION PEREZ GONZALEZ",       rut:"55.123.456-8", giro:"Particular",                direccion:"Los Boldos 234",      comuna:"San Fernando",tel:"+56 9 7654 3210", email:"sucesion@gmail.com"},
+  ];
+  const [vendedorSel,   setVendedorSel]   = useState("");
+  const [vendedorForm,  setVendedorForm]  = useState({comVenta:5, comDefensa:2, publicidad:0});
+  const [vendedorLiqGenerada, setVendedorLiqGenerada] = useState(null);
   const [devoluciones,  setDevoluciones]  = useState([]);
   const [remateTerminado, setRemateTerminado] = useState(false);
 
@@ -1243,6 +1511,40 @@ function Dashboard({ session, onLogout }) {
     }
   };
 
+  // ── Carrusel auto-avance ──
+  const startCarousel = (imgs) => {
+    if (photoIntervalRef.current) clearInterval(photoIntervalRef.current);
+    if (!imgs || imgs.length <= 1) return;
+    photoIntervalRef.current = setInterval(() => {
+      setPhotoIdx(p => (p + 1) % imgs.length);
+    }, 4000);
+  };
+  React.useEffect(() => {
+    const imgs = lots[idx]?.imgs || [];
+    setPhotoIdx(0);
+    startCarousel(imgs);
+    return () => { if (photoIntervalRef.current) clearInterval(photoIntervalRef.current); };
+  }, [idx, lots]);
+
+  // ── Cámara en vivo martillero ──
+  const activarCamara = async () => {
+    setCamError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      streamRef.current = stream;
+      if (videoRef.current) videoRef.current.srcObject = stream;
+      setCamActiva(true);
+    } catch(e) {
+      setCamError("No se pudo acceder a la cámara. Verifica los permisos del navegador.");
+    }
+  };
+  const detenerCamara = () => {
+    if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setCamActiva(false);
+  };
+
   // Cerrar remate completo → genera todas las liquidaciones/devoluciones pendientes
   const cerrarRemateCompleto = () => {
     setRemateTerminado(true);
@@ -1265,9 +1567,10 @@ function Dashboard({ session, onLogout }) {
       ...c,
       liq: calcLiquidacion(c.lotes, c.postorData),
       enviado: false,
+      facturado: false,
     }));
 
-    setLiqReview({ compradores, fecha: new Date().toLocaleDateString("es-CL") });
+    setLiqReview({ compradores, fecha: new Date().toLocaleDateString("es-CL"), remateNombre: "Remate Industrial Marzo 2026", remateId:"R-044" });
     notify("Remate cerrado. Revisando liquidaciones antes de enviar.", "sold");
     setPage("liquidac");
   };
@@ -1276,7 +1579,168 @@ function Dashboard({ session, onLogout }) {
   const pauseAuction  = () => { setAState("paused"); setBidTimer(null); };
   const adjudicar     = () => doAdjudicar(true);
   const resetAuction  = () => { setAState("waiting"); setTimeLeft(120); setBidTimer(null); setLastBidder(null); setBids(lots.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null}))); };
-  const handlePhoto   = (i,e) => { const f=e.target.files[0]; if(!f) return; setLots(p=>{const n=[...p];n[i]={...n[i],img:URL.createObjectURL(f)};return n;}); notify("Foto cargada.","inf"); };
+  const handlePhoto   = (i,e) => { const f=e.target.files[0]; if(!f) return; setLots(p=>{const n=[...p];const imgs=[...(n[i].imgs||[]),URL.createObjectURL(f)];n[i]={...n[i],imgs};return n;}); notify("Foto agregada.","inf"); };
+  const removePhoto   = (loteI, photoI) => { setLots(p=>{const n=[...p];const imgs=n[loteI].imgs.filter((_,j)=>j!==photoI);n[loteI]={...n[loteI],imgs};return n;}); setPhotoIdx(0); };
+
+  // Genera e imprime PDF de liquidación de un comprador
+  const generarPDFLiquidacion = async (c, fechaRemate) => {
+    const { jsPDF } = await import("jspdf");
+    const { default: autoTable } = await import("jspdf-autotable");
+    const p   = c.postorData;
+    const l   = c.liq;
+    const num = String(c.key).padStart(2,"0");
+    const casaNombre = session?.casaNombre || "Remates Ahumada";
+    const fmtCLP = v => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(v);
+
+    const doc = new jsPDF({ orientation:"portrait", unit:"mm", format:"letter" });
+    const W = doc.internal.pageSize.getWidth();
+    let y = 18;
+
+    // ── Cabecera ──
+    doc.setFillColor(47,128,237);
+    doc.rect(14, y-6, W-28, 0.8, "F");
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(18);
+    doc.setTextColor(47,128,237);
+    doc.text("LIQUIDACIÓN DE COMPRA", 14, y+4);
+    doc.setFontSize(9);
+    doc.setTextColor(100,100,100);
+    doc.text(casaNombre.toUpperCase(), 14, y+10);
+    doc.setFontSize(10);
+    doc.setTextColor(50,50,50);
+    doc.text(`Fecha remate: ${fechaRemate}`, W-14, y+4, {align:"right"});
+    doc.setFontSize(9);
+    doc.setTextColor(120,120,120);
+    doc.text(`Comprador N° ${num}`, W-14, y+10, {align:"right"});
+    y += 18;
+
+    // ── Badge comprador ──
+    doc.setFillColor(47,128,237);
+    doc.roundedRect(14, y, 52, 8, 2, 2, "F");
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(11);
+    doc.setTextColor(255,255,255);
+    doc.text(`COMPRADOR N° ${num}`, 40, y+5.5, {align:"center"});
+    y += 13;
+
+    // ── Datos comprador ──
+    doc.setFillColor(247,249,252);
+    doc.setDrawColor(221,227,240);
+    doc.roundedRect(14, y, W-28, 32, 2, 2, "FD");
+    const datos = [
+      ["Señor(es):", p?.razonSocial||"—"],
+      ["R.U.T:", p?.rut||"—"],
+      ["Giro:", p?.giro||"—"],
+      ["Dirección:", p?.direccion||"—"],
+      ["Comuna:", p?.comuna||"—"],
+      ["Teléfono:", p?.tel||"—"],
+      ["Email:", p?.email||"—"],
+    ];
+    const col1 = datos.slice(0,4), col2 = datos.slice(4);
+    let dy = y+6;
+    col1.forEach(([k,v])=>{
+      doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(140,140,140);
+      doc.text(k, 18, dy);
+      doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30);
+      doc.text(v, 42, dy);
+      dy += 6;
+    });
+    dy = y+6;
+    col2.forEach(([k,v])=>{
+      doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(140,140,140);
+      doc.text(k, W/2+4, dy);
+      doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30);
+      doc.text(v, W/2+22, dy);
+      dy += 6;
+    });
+    y += 37;
+
+    // ── Tabla lotes ──
+    const rows = [];
+    l.lineas.forEach(ln => {
+      rows.push([ln.exp||"—", ln.lote, "EX", fmtCLP(ln.monto), fmtCLP(ln.monto)]);
+      rows.push([ln.exp||"—", `Comisión ${ln.comPct}%`, "AF", fmtCLP(ln.com), fmtCLP(ln.com)]);
+      if(ln.motorizado) rows.push(["G-ADMIN", `Gastos Adm. Vehículo Motorizado (${ln.exp||ln.lote})`, "AF", fmtCLP(ln.gastosAdm), fmtCLP(ln.gastosAdm)]);
+    });
+
+    autoTable(doc, {
+      startY: y,
+      head: [["Expediente","Descripción","ND","Unitario","Total"]],
+      body: rows,
+      styles: { fontSize:8.5, cellPadding:2.5, textColor:[50,50,50] },
+      headStyles: { fillColor:[26,37,64], textColor:255, fontStyle:"bold", fontSize:8 },
+      columnStyles: {
+        0:{cellWidth:22, textColor:[140,140,140], fontSize:8},
+        2:{cellWidth:12, halign:"center"},
+        3:{cellWidth:28, halign:"right", font:"courier"},
+        4:{cellWidth:28, halign:"right", font:"courier", fontStyle:"bold"},
+      },
+      alternateRowStyles: { fillColor:[250,251,253] },
+      didDrawCell: (data) => {
+        if(data.section==="body" && data.column.index===2){
+          const txt = data.cell.raw;
+          const x=data.cell.x+1, cy=data.cell.y+1.5, w=data.cell.width-2, h=data.cell.height-3;
+          if(txt==="EX"){ doc.setFillColor(232,245,233); doc.setDrawColor(165,214,167); }
+          else if(txt==="AF"){ doc.setFillColor(227,240,255); doc.setDrawColor(144,202,249); }
+          doc.roundedRect(x,cy,w,h,1,1,"FD");
+          doc.setFontSize(7);
+          doc.setTextColor(txt==="EX"?46:21, txt==="EX"?125:101, txt==="EX"?50:192);
+          doc.setFont("helvetica","bold");
+          doc.text(txt, x+w/2, cy+h-1.5, {align:"center"});
+        }
+      },
+    });
+    y = doc.lastAutoTable.finalY + 8;
+
+    // ── Totales ──
+    const totales = [
+      ["Total Compras Exentas:", l.totalEx],
+      ["Total Compras Afectas:", l.totalAf],
+      ["Total Comisión:", l.totalCom],
+      ["19% IVA:", l.iva],
+    ];
+    const txLeft = 14, txRight = W/2 - 4;
+    totales.forEach(([k,v]) => {
+      doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(80,80,80);
+      doc.text(k, txLeft, y);
+      doc.setFont("helvetica","bold"); doc.setTextColor(30,30,30);
+      doc.text(fmtCLP(v), txRight, y, {align:"right"});
+      doc.setDrawColor(238,240,245);
+      doc.line(txLeft, y+1.5, txRight, y+1.5);
+      y += 6;
+    });
+    // Total
+    doc.setDrawColor(47,128,237); doc.setLineWidth(0.5);
+    doc.line(txLeft, y-1, txRight, y-1);
+    doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(47,128,237);
+    doc.text("Total:", txLeft, y+4);
+    doc.text(fmtCLP(l.total), txRight, y+4, {align:"right"});
+
+    // ── Caja Total a Pagar ──
+    const bx = W/2+4, bw = W/2-18, by = doc.lastAutoTable.finalY+8;
+    doc.setFillColor(227,240,255); doc.setDrawColor(47,128,237); doc.setLineWidth(0.8);
+    doc.roundedRect(bx, by, bw, 28, 3, 3, "FD");
+    doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(80,80,80);
+    doc.text("Garantía pagada:", bx+4, by+8);
+    doc.setFont("helvetica","bold"); doc.setTextColor(46,125,50);
+    doc.text(`− ${fmtCLP(l.garantia)}`, bx+bw-4, by+8, {align:"right"});
+    doc.setDrawColor(144,202,249); doc.setLineWidth(0.3);
+    doc.line(bx+4, by+13, bx+bw-4, by+13);
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(26,37,64);
+    doc.text("Total a Pagar:", bx+4, by+21);
+    doc.setFontSize(14); doc.setTextColor(47,128,237);
+    doc.text(fmtCLP(l.totalAPagar), bx+bw-4, by+21, {align:"right"});
+
+    // ── Footer ──
+    const fy = doc.internal.pageSize.getHeight() - 12;
+    doc.setDrawColor(221,227,240); doc.setLineWidth(0.3);
+    doc.line(14, fy-3, W-14, fy-3);
+    doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(170,170,170);
+    doc.text(`${casaNombre} — Liquidación generada por GR Auction Software`, 14, fy+2);
+    doc.text(`Remate del ${fechaRemate} — Comprador N° ${num}`, W-14, fy+2, {align:"right"});
+
+    doc.save(`liquidacion-comprador-${num}-${fechaRemate.replace(/\//g,"-")}.pdf`);
+  };
 
   const sendChat = () => {
     if (!chatInput.trim()) return;
@@ -1303,11 +1767,12 @@ function Dashboard({ session, onLogout }) {
     { id:"liquidac",     icon:"liq",       label:"Liquidaciones", badge: liquidaciones.filter(l=>!l.enviado).length||undefined },
     { id:"devoluciones", icon:"dev",       label:"Devoluciones",  badge: devoluciones.filter(d=>d.estado==="pendiente").length||undefined },
     { id:"factura",      icon:"factura",   label:"Balance" },
+    { id:"vendedores",   icon:"vendedor",  label:"Vendedores" },
     { id:"reportes",     icon:"reportes",  label:"Reportes" },
     { id:"config",       icon:"config",    label:"Configuracion" },
   ];
 
-  const PAGE_TITLE = {dashboard:"Dashboard",remates:"Remates",lotes:"Lotes",sala:"Sala en vivo",postores:"Postores",garantias:"Garantias",adjudicac:"Adjudicaciones",liquidac:"Liquidaciones",devoluciones:"Devoluciones de Garantia",factura:"Balance Económico",reportes:"Estadísticas",config:"Configuracion"};
+  const PAGE_TITLE = {dashboard:"Dashboard",remates:"Remates",lotes:"Lotes",sala:"Sala en vivo",postores:"Postores",garantias:"Garantias",adjudicac:"Adjudicaciones",liquidac:"Liquidaciones",devoluciones:"Devoluciones de Garantia",factura:"Balance Económico",vendedores:"Liquidación de Vendedores",reportes:"Estadísticas",config:"Configuracion"};
 
   return (
     <div className="app">
@@ -1586,25 +2051,59 @@ function Dashboard({ session, onLogout }) {
       <aside className="sidebar">
         <div className="sb-logo"><GRLogo/></div>
         <div style={{height:".5rem"}}/>
-        <div className="sb-section">Principal</div>
-        {NAV.slice(0,3).map(n => (
+
+        {/* GESTIÓN */}
+        <div className="sb-section">Gestión</div>
+        {[
+          {id:"dashboard", icon:"dashboard", label:"Dashboard"},
+          {id:"remates",   icon:"remates",   label:"Remates",  badge:3},
+          {id:"lotes",     icon:"lotes",     label:"Lotes",    badge:LOTES_REALES.length},
+          {id:"postores",  icon:"postores",  label:"Postores"},
+          {id:"garantias", icon:"garantia",  label:"Garantías", badge:GARANTIAS.filter(g=>g.estado==="pendiente").length||undefined},
+        ].map(n => (
           <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>setPage(n.id)}>
             <span className="sb-icon"><Icon name={n.icon}/></span>{n.label}
-            {n.badge && <span className="sb-badge">{n.badge}</span>}
+            {n.badge ? <span className="sb-badge">{n.badge}</span> : null}
           </div>
         ))}
-        <div className="sb-section">Remate Live</div>
+
+        {/* REMATE EN VIVO */}
+        <div className="sb-section">Remate en vivo</div>
         <div className={`sb-item${page==="sala"?" on":""}`} onClick={()=>setPage("sala")}>
           <span className="sb-icon"><Icon name="sala"/></span>Sala en vivo
           {aState==="live" && <div className="ldot" style={{marginLeft:"auto"}}/>}
         </div>
-        <div className="sb-section">Gestion</div>
-        {NAV.slice(4).map(n => (
+
+        {/* POST-REMATE */}
+        <div className="sb-section">Post-remate</div>
+        {[
+          {id:"adjudicac",    icon:"adjudic",  label:"Adjudicaciones"},
+          {id:"liquidac",     icon:"liq",      label:"Liquidaciones", badge:liquidaciones.filter(l=>!l.enviado).length||undefined},
+          {id:"devoluciones", icon:"dev",      label:"Devoluciones",  badge:devoluciones.filter(d=>d.estado==="pendiente").length||undefined},
+          {id:"vendedores",   icon:"vendedor", label:"Vendedores"},
+        ].map(n => (
           <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>setPage(n.id)}>
             <span className="sb-icon"><Icon name={n.icon}/></span>{n.label}
             {n.badge ? <span className="sb-badge" style={{background:"var(--yl)",color:"#0b1f38"}}>{n.badge}</span> : null}
           </div>
         ))}
+
+        {/* FINANZAS */}
+        <div className="sb-section">Finanzas</div>
+        {[
+          {id:"factura",  icon:"factura",  label:"Balance Económico"},
+          {id:"reportes", icon:"reportes", label:"Estadísticas"},
+        ].map(n => (
+          <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>setPage(n.id)}>
+            <span className="sb-icon"><Icon name={n.icon}/></span>{n.label}
+          </div>
+        ))}
+
+        {/* SISTEMA */}
+        <div className="sb-section">Sistema</div>
+        <div className={`sb-item${page==="config"?" on":""}`} onClick={()=>setPage("config")}>
+          <span className="sb-icon"><Icon name="config"/></span>Configuración
+        </div>
         <div className="sb-footer">
           <div className="sb-user">
             <div className="sb-ava">{session?.name?.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()||"??"}</div>
@@ -1772,7 +2271,44 @@ function Dashboard({ session, onLogout }) {
                           </span>
                         </td>
                       )}
-                      <td><button className="btn-sec" onClick={()=>{setPage("sala");notify("Abriendo sala...","inf");}}>Abrir sala</button></td>
+                      <td>
+                        <div style={{display:"flex",gap:".4rem",flexWrap:"nowrap"}}>
+                          {r.estado==="activo"
+                            ? <button className="btn-primary" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={()=>{setPage("sala");notify("Abriendo sala...","inf");}}>Abrir sala</button>
+                            : <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={()=>{setPage("sala");notify("Abriendo sala...","inf");}}>Ver sala</button>
+                          }
+                          {r.estado==="cerrado" && (
+                            <button
+                              className="btn-primary"
+                              style={{fontSize:".7rem",whiteSpace:"nowrap",background:"rgba(34,211,160,.12)",color:"var(--gr)",border:"1px solid rgba(34,211,160,.25)"}}
+                              onClick={()=>{
+                                // Si ya hay liquidaciones generadas las carga, si no avisa
+                                if(liqReview){
+                                  setPage("liquidac");
+                                } else {
+                                  // Genera liquidaciones para este remate cerrado
+                                  const todasLiq = [...ADJUDICACIONES.map(a=>({
+                                    lote:a.lote, exp:"", monto:a.monto, comPct:3, motorizado:false, postor:a.postor, rut:a.rut||"—", email:"",
+                                  })),...liquidaciones];
+                                  const byComprador = {};
+                                  todasLiq.forEach(l=>{
+                                    const postorData = POSTORES.find(p=>p.name===l.postor||p.razonSocial===l.postor)||null;
+                                    const key = postorData?.nComprador??l.postor;
+                                    if(!byComprador[key]) byComprador[key]={postorData,lotes:[],key};
+                                    byComprador[key].lotes.push(l);
+                                  });
+                                  const compradores = Object.values(byComprador).map(c=>({...c,liq:calcLiquidacion(c.lotes,c.postorData),enviado:false,facturado:false}));
+                                  setLiqReview({compradores, fecha:r.fecha, remateNombre:r.name, remateId:r.id});
+                                  setPage("liquidac");
+                                  notify(`Liquidaciones del remate ${r.name} cargadas.`,"sold");
+                                }
+                              }}
+                            >
+                              Ver liquidaciones
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -2058,6 +2594,277 @@ function Dashboard({ session, onLogout }) {
           </div>
         )}
 
+        {/* ══ VENDEDORES / CONSIGNATARIOS ══ */}
+        {page==="vendedores" && (()=>{
+          const vd = VENDEDORES_MOCK.find(v=>v.id===vendedorSel);
+          // Banner selector remate (inline)
+          const BannerRemate = () => {
+            const cerrados = REMATES.filter(r => r.estado === "cerrado");
+            return (
+              <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
+                <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
+                <select value={selectedRemate||""} onChange={e=>setSelectedRemate(e.target.value||null)}
+                  style={{flex:1,maxWidth:340,padding:".4rem .7rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:7,color:"var(--wh2)",fontSize:".8rem",fontFamily:"Inter,sans-serif",cursor:"pointer"}}>
+                  <option value="">— Todos los remates cerrados —</option>
+                  {cerrados.map(r=><option key={r.id} value={r.id}>{r.name} · {r.fecha} · {r.casa}</option>)}
+                </select>
+                {selectedRemate && <button onClick={()=>setSelectedRemate(null)} style={{background:"transparent",border:"1px solid var(--b2)",borderRadius:6,color:"var(--mu2)",fontSize:".7rem",padding:".3rem .6rem",cursor:"pointer"}}>Ver todos</button>}
+              </div>
+            );
+          };
+          // Calcular lotes del vendedor seleccionado (mock: todos los lotes reales)
+          const lotesVendedor = LOTES_REALES.filter((_,i)=>i<4); // mock: primeros 4 lotes
+          const adjVendedor   = [...ADJUDICACIONES,...liquidaciones].filter(a=>
+            lotesVendedor.find(l=>l.name===a.lote)
+          );
+          const totalVentas   = adjVendedor.reduce((s,a)=>s+(a.monto||0),0);
+          const lotesNoVendidos = lotesVendedor.filter(l=>!adjVendedor.find(a=>a.lote===l.name));
+          const totalNoVendido  = lotesNoVendidos.reduce((s,l)=>s+(l.base||0),0);
+          const comVentaMonto  = Math.round(totalVentas * (vendedorForm.comVenta/100));
+          const comDefensaMonto= Math.round(totalNoVendido * (vendedorForm.comDefensa/100));
+          const ivaBase        = comVentaMonto + comDefensaMonto + Number(vendedorForm.publicidad||0);
+          const iva            = Math.round(ivaBase * 0.19);
+          const totalDescuentos= comVentaMonto + comDefensaMonto + Number(vendedorForm.publicidad||0) + iva;
+          const liquidoAPagar  = totalVentas - totalDescuentos;
+
+          const generarPDFVendedor = async () => {
+            const { jsPDF } = await import("jspdf");
+            const { default: autoTable } = await import("jspdf-autotable");
+            const casaNombre = session?.casaNombre || "Remates Ahumada";
+            const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"letter"});
+            const W = doc.internal.pageSize.getWidth();
+            let y = 18;
+            const fmtCLP = v => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(v);
+
+            // Cabecera
+            doc.setFillColor(47,128,237);
+            doc.rect(14,y-6,W-28,0.8,"F");
+            doc.setFont("helvetica","bold"); doc.setFontSize(18); doc.setTextColor(47,128,237);
+            doc.text("LIQUIDACIÓN DE VENDEDOR",14,y+4);
+            doc.setFontSize(9); doc.setTextColor(100,100,100);
+            doc.text(casaNombre.toUpperCase(),14,y+10);
+            doc.setFontSize(10); doc.setTextColor(50,50,50);
+            doc.text(`Fecha: ${new Date().toLocaleDateString("es-CL")}`,W-14,y+4,{align:"right"});
+            doc.setFontSize(9); doc.setTextColor(120,120,120);
+            doc.text(`Remate: ${REMATES[0]?.name||"—"}`,W-14,y+10,{align:"right"});
+            y+=18;
+
+            // Datos vendedor
+            doc.setFillColor(247,249,252); doc.setDrawColor(221,227,240);
+            doc.roundedRect(14,y,W-28,26,2,2,"FD");
+            const datosV = [["Propietario/Vendedor:",vd?.nombre||"—"],["R.U.T:",vd?.rut||"—"],["Giro:",vd?.giro||"—"],["Dirección:",vd?.direccion||"—"],["Comuna:",vd?.comuna||"—"],["Email:",vd?.email||"—"]];
+            let dy=y+6;
+            datosV.slice(0,3).forEach(([k,v])=>{
+              doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(140,140,140); doc.text(k,18,dy);
+              doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30); doc.text(v,52,dy); dy+=7;
+            });
+            dy=y+6;
+            datosV.slice(3).forEach(([k,v])=>{
+              doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(140,140,140); doc.text(k,W/2+4,dy);
+              doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30); doc.text(v,W/2+22,dy); dy+=7;
+            });
+            y+=31;
+
+            // Tabla lotes vendidos
+            doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(26,37,64);
+            doc.text("Lotes vendidos",14,y); y+=4;
+            autoTable(doc,{
+              startY:y,
+              head:[["Expediente","Descripción","Precio martillo"]],
+              body: adjVendedor.map(a=>[lotesVendedor.find(l=>l.name===a.lote)?.exp||"—", a.lote, fmtCLP(a.monto||0)]),
+              styles:{fontSize:9,cellPadding:2.5},
+              headStyles:{fillColor:[26,37,64],textColor:255,fontStyle:"bold",fontSize:8},
+              columnStyles:{2:{halign:"right",font:"courier",fontStyle:"bold"}},
+              alternateRowStyles:{fillColor:[250,251,253]},
+            });
+            y=doc.lastAutoTable.finalY+6;
+
+            // Tabla lotes no vendidos
+            if(lotesNoVendidos.length>0){
+              doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(26,37,64);
+              doc.text("Lotes no vendidos (base para comisión defensa)",14,y); y+=4;
+              autoTable(doc,{
+                startY:y,
+                head:[["Expediente","Descripción","Base"]],
+                body:lotesNoVendidos.map(l=>[l.exp||"—",l.name,fmtCLP(l.base||0)]),
+                styles:{fontSize:9,cellPadding:2.5},
+                headStyles:{fillColor:[100,100,100],textColor:255,fontStyle:"bold",fontSize:8},
+                columnStyles:{2:{halign:"right",font:"courier"}},
+              });
+              y=doc.lastAutoTable.finalY+6;
+            }
+
+            // Liquidación financiera
+            const items = [
+              ["Total ventas martillo:", totalVentas, false],
+              [`Comisión ventas ${vendedorForm.comVenta}%:`, -comVentaMonto, true],
+              [`Comisión defensa ${vendedorForm.comDefensa}%:`, -comDefensaMonto, true],
+              ["Avisos publicitarios:", -Number(vendedorForm.publicidad||0), true],
+              ["IVA 19% s/comisiones:", -iva, true],
+            ];
+            items.forEach(([k,v,desc])=>{
+              doc.setFont("helvetica",desc?"normal":"bold"); doc.setFontSize(9.5);
+              doc.setTextColor(desc?80:30,desc?80:30,desc?80:30);
+              doc.text(k,14,y);
+              doc.setFont("helvetica","bold"); doc.setTextColor(desc?200:47, desc?80:128, desc?80:237);
+              doc.text(fmtCLP(v),W-14,y,{align:"right"});
+              doc.setDrawColor(238,240,245); doc.line(14,y+2,W-14,y+2);
+              y+=8;
+            });
+            // Línea total
+            doc.setDrawColor(47,128,237); doc.setLineWidth(0.8); doc.line(14,y-2,W-14,y-2);
+            doc.setFont("helvetica","bold"); doc.setFontSize(13); doc.setTextColor(47,128,237);
+            doc.text("Líquido a pagar al vendedor:",14,y+6);
+            doc.setFontSize(15); doc.text(fmtCLP(liquidoAPagar),W-14,y+6,{align:"right"});
+
+            // Footer
+            const fy=doc.internal.pageSize.getHeight()-12;
+            doc.setDrawColor(221,227,240); doc.setLineWidth(0.3); doc.line(14,fy-3,W-14,fy-3);
+            doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(170,170,170);
+            doc.text(`${casaNombre} — Liquidación generada por GR Auction Software`,14,fy+2);
+            doc.text(new Date().toLocaleDateString("es-CL"),W-14,fy+2,{align:"right"});
+            doc.save(`liquidacion-vendedor-${(vd?.nombre||"vendedor").replace(/\s+/g,"-").toLowerCase()}.pdf`);
+          };
+
+          return (
+            <div className="page">
+              <BannerRemate/>
+              <div style={{display:"grid",gridTemplateColumns:"380px 1fr",gap:"1.2rem",alignItems:"start"}}>
+
+                {/* ── Formulario selección vendedor ── */}
+                <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1.2rem 1.3rem"}}>
+                  <div style={{fontSize:".72rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:"1rem"}}>Seleccionar vendedor / consignatario</div>
+
+                  <div style={{marginBottom:".85rem"}}>
+                    <label className="fl">Propietario / Vendedor</label>
+                    <select className="fsel" value={vendedorSel} onChange={e=>setVendedorSel(e.target.value)}>
+                      <option value="">Seleccione un vendedor</option>
+                      {VENDEDORES_MOCK.map(v=><option key={v.id} value={v.id}>{v.nombre}</option>)}
+                    </select>
+                  </div>
+
+                  {vd && (
+                    <div style={{padding:".65rem .85rem",background:"rgba(47,128,237,.05)",border:"1px solid rgba(47,128,237,.15)",borderRadius:8,marginBottom:".85rem",fontSize:".72rem",color:"var(--mu2)",lineHeight:1.8}}>
+                      <div><strong style={{color:"var(--wh2)"}}>RUT:</strong> {vd.rut}</div>
+                      <div><strong style={{color:"var(--wh2)"}}>Giro:</strong> {vd.giro}</div>
+                      <div><strong style={{color:"var(--wh2)"}}>Dirección:</strong> {vd.direccion}, {vd.comuna}</div>
+                      <div><strong style={{color:"var(--wh2)"}}>Email:</strong> {vd.email}</div>
+                    </div>
+                  )}
+
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".7rem",marginBottom:".7rem"}}>
+                    <div>
+                      <label className="fl">Comisión ventas (%)</label>
+                      <input className="fi" type="number" step="0.01" min="0" max="100"
+                        value={vendedorForm.comVenta}
+                        onChange={e=>setVendedorForm(f=>({...f,comVenta:parseFloat(e.target.value)||0}))}/>
+                    </div>
+                    <div>
+                      <label className="fl">Comisión defensa (%)</label>
+                      <input className="fi" type="number" step="0.01" min="0" max="100"
+                        value={vendedorForm.comDefensa}
+                        onChange={e=>setVendedorForm(f=>({...f,comDefensa:parseFloat(e.target.value)||0}))}/>
+                    </div>
+                  </div>
+                  <div style={{marginBottom:"1rem"}}>
+                    <label className="fl">Avisos publicitarios ($)</label>
+                    <input className="fi" type="number" min="0"
+                      value={vendedorForm.publicidad}
+                      onChange={e=>setVendedorForm(f=>({...f,publicidad:parseInt(e.target.value)||0}))}/>
+                  </div>
+
+                  <div style={{padding:".6rem .85rem",background:"rgba(255,255,255,.03)",border:"1px solid var(--b1)",borderRadius:7,fontSize:".69rem",color:"var(--mu)",lineHeight:1.6,marginBottom:"1rem"}}>
+                    <strong style={{color:"var(--mu2)"}}>Comisión defensa</strong> — se aplica sobre la base de los lotes <strong style={{color:"var(--wh2)"}}>no vendidos</strong> como penalización o retiro anticipado.
+                  </div>
+
+                  <button className="btn-primary" style={{width:"100%"}}
+                    onClick={()=>{ if(!vendedorSel){notify("Selecciona un vendedor primero.","inf");return;} setVendedorLiqGenerada({vd,lotesVendedor,adjVendedor,lotesNoVendidos,totalVentas,comVentaMonto,comDefensaMonto,publicidad:Number(vendedorForm.publicidad||0),iva,totalDescuentos,liquidoAPagar,comVenta:vendedorForm.comVenta,comDefensa:vendedorForm.comDefensa}); notify("Liquidación generada.","sold"); }}>
+                    Generar liquidación
+                  </button>
+                </div>
+
+                {/* ── Preview liquidación ── */}
+                <div>
+                  {!vendedorLiqGenerada && !vendedorSel && (
+                    <div style={{padding:"4rem 2rem",textAlign:"center",opacity:.5}}>
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--mu)" strokeWidth="1.5" style={{marginBottom:"1rem"}}><rect x="8" y="4" width="32" height="40" rx="3"/><path d="M16 16h16M16 24h16M16 32h8"/></svg>
+                      <div style={{fontSize:".85rem",color:"var(--mu)"}}>Selecciona un vendedor para comenzar</div>
+                    </div>
+                  )}
+
+                  {/* Preview en vivo mientras se llena el form */}
+                  {vendedorSel && (
+                    <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1.2rem 1.3rem"}}>
+                      <div style={{fontSize:".72rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:"1rem"}}>
+                        Preview liquidación — {vd?.nombre}
+                      </div>
+
+                      {/* Lotes vendidos */}
+                      <div style={{fontSize:".71rem",fontWeight:700,color:"var(--mu2)",marginBottom:".4rem",textTransform:"uppercase"}}>Lotes vendidos ({adjVendedor.length})</div>
+                      <div style={{background:"var(--s3)",borderRadius:8,overflow:"hidden",marginBottom:".85rem"}}>
+                        {adjVendedor.length===0
+                          ? <div style={{padding:".8rem",fontSize:".73rem",color:"var(--mu)",textAlign:"center",fontStyle:"italic"}}>Sin adjudicaciones para este vendedor aún</div>
+                          : adjVendedor.map((a,i)=>(
+                            <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:".5rem .85rem",borderBottom:"1px solid var(--b1)"}}>
+                              <span style={{fontSize:".75rem",color:"var(--wh2)",fontWeight:600}}>{a.lote}</span>
+                              <span style={{fontFamily:"DM Mono,monospace",fontSize:".76rem",color:"var(--gr)",fontWeight:700}}>{fmt(a.monto||0)}</span>
+                            </div>
+                          ))}
+                        <div style={{display:"flex",justifyContent:"space-between",padding:".5rem .85rem",background:"rgba(34,211,160,.05)"}}>
+                          <span style={{fontSize:".72rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase"}}>Total ventas</span>
+                          <span style={{fontFamily:"DM Mono,monospace",fontWeight:800,color:"var(--gr)"}}>{fmt(totalVentas)}</span>
+                        </div>
+                      </div>
+
+                      {/* Descuentos */}
+                      <div style={{fontSize:".71rem",fontWeight:700,color:"var(--mu2)",marginBottom:".4rem",textTransform:"uppercase"}}>Descuentos</div>
+                      <div style={{background:"var(--s3)",borderRadius:8,overflow:"hidden",marginBottom:".85rem"}}>
+                        {[
+                          [`Comisión ventas ${vendedorForm.comVenta}%`, comVentaMonto],
+                          [`Comisión defensa ${vendedorForm.comDefensa}%`, comDefensaMonto],
+                          ["Avisos publicitarios", Number(vendedorForm.publicidad||0)],
+                          ["IVA 19% s/comisiones", iva],
+                        ].map(([k,v],i)=>(
+                          <div key={i} style={{display:"flex",justifyContent:"space-between",padding:".5rem .85rem",borderBottom:"1px solid var(--b1)"}}>
+                            <span style={{fontSize:".73rem",color:"var(--mu2)"}}>{k}</span>
+                            <span style={{fontFamily:"DM Mono,monospace",fontSize:".73rem",color:"var(--rd)",fontWeight:600}}>− {fmt(v)}</span>
+                          </div>
+                        ))}
+                        <div style={{display:"flex",justifyContent:"space-between",padding:".5rem .85rem",background:"rgba(245,101,101,.05)"}}>
+                          <span style={{fontSize:".72rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase"}}>Total descuentos</span>
+                          <span style={{fontFamily:"DM Mono,monospace",fontWeight:800,color:"var(--rd)"}}>− {fmt(totalDescuentos)}</span>
+                        </div>
+                      </div>
+
+                      {/* Líquido a pagar */}
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"1rem 1.1rem",background:"rgba(47,128,237,.07)",border:"1px solid rgba(47,128,237,.2)",borderRadius:9}}>
+                        <div>
+                          <div style={{fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".2rem"}}>Líquido a pagar al vendedor</div>
+                          <div style={{fontSize:".68rem",color:"var(--mu)"}}>Ventas − comisiones − IVA</div>
+                        </div>
+                        <div style={{fontFamily:"DM Mono,monospace",fontSize:"1.4rem",fontWeight:900,color:liquidoAPagar>=0?"var(--ac)":"var(--rd)"}}>
+                          {fmt(liquidoAPagar)}
+                        </div>
+                      </div>
+
+                      {/* Acciones */}
+                      <div style={{display:"flex",gap:".6rem",marginTop:"1rem"}}>
+                        <button className="btn-sec" style={{flex:1,fontSize:".75rem"}} onClick={()=>notify("Correo enviado al vendedor.","sold")}>
+                          Enviar correo
+                        </button>
+                        <button className="btn-primary" style={{flex:1,fontSize:".75rem"}} onClick={generarPDFVendedor}>
+                          Descargar PDF
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* ══ REPORTES ══ */}
         {page==="reportes" && (
           <div className="page">
@@ -2256,6 +3063,91 @@ function Dashboard({ session, onLogout }) {
                 </tbody>
               </table>
             </div>
+
+            {/* ── Panel admin: ranking por casa de remates ── */}
+            {session?.role==="admin" && (()=>{
+              // Calcular métricas por casa desde REMATES
+              const casas = [...new Set(REMATES.map(r=>r.casa))];
+              const stats = casas.map(casa => {
+                const rematesCasa = REMATES.filter(r=>r.casa===casa);
+                const cerrados    = rematesCasa.filter(r=>r.estado==="cerrado");
+                const totalVendido= cerrados.reduce((s,r)=>s+r.recaudado,0);
+                const totalLotes  = rematesCasa.reduce((s,r)=>s+r.lotes,0);
+                const lotesVend   = cerrados.reduce((s,r)=>s+r.lotes,0);
+                const promLote    = lotesVend > 0 ? Math.round(totalVendido/lotesVend) : 0;
+                const nRemates    = rematesCasa.length;
+                // Postores únicos: mock por casa
+                const postoresUnicos = casa==="Remates Ahumada" ? 38 : 14;
+                return { casa, totalVendido, totalLotes, promLote, nRemates, postoresUnicos, cerrados:cerrados.length };
+              }).sort((a,b)=>b.totalVendido-a.totalVendido);
+
+              const maxVendido = Math.max(...stats.map(s=>s.totalVendido),1);
+
+              return (
+                <div style={{marginTop:"1.5rem"}}>
+                  {/* Header */}
+                  <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:"1rem",paddingBottom:".7rem",borderBottom:"1px solid var(--b1)"}}>
+                    <div style={{width:28,height:28,borderRadius:7,background:"rgba(47,128,237,.12)",border:"1px solid rgba(47,128,237,.2)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><path d="M3 13V7M8 13V3M13 13V9"/></svg>
+                    </div>
+                    <div>
+                      <div style={{fontSize:".82rem",fontWeight:800,color:"var(--wh2)"}}>Ranking por casa de remates</div>
+                      <div style={{fontSize:".68rem",color:"var(--mu2)"}}>Solo visible para administrador GR — métricas por cliente</div>
+                    </div>
+                    <span style={{marginLeft:"auto",fontSize:".65rem",padding:".2rem .55rem",background:"rgba(47,128,237,.1)",border:"1px solid rgba(47,128,237,.2)",borderRadius:4,color:"var(--ac)",fontWeight:700,letterSpacing:".05em"}}>ADMIN</span>
+                  </div>
+
+                  {/* Cards por casa */}
+                  <div style={{display:"flex",flexDirection:"column",gap:".8rem"}}>
+                    {stats.map((s,i)=>(
+                      <div key={s.casa} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:11,padding:"1rem 1.2rem",position:"relative",overflow:"hidden"}}>
+                        {/* Barra de fondo proporcional */}
+                        <div style={{position:"absolute",top:0,left:0,height:"100%",width:`${Math.round(s.totalVendido/maxVendido*100)}%`,background:"rgba(47,128,237,.04)",borderRight:"1px solid rgba(47,128,237,.08)",pointerEvents:"none"}}/>
+
+                        <div style={{display:"flex",alignItems:"center",gap:"1rem",position:"relative"}}>
+                          {/* Posición ranking */}
+                          <div style={{width:32,height:32,borderRadius:8,background:i===0?"rgba(246,173,85,.15)":"rgba(255,255,255,.04)",border:`1px solid ${i===0?"rgba(246,173,85,.3)":"var(--b2)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                            <span style={{fontSize:".9rem",fontWeight:900,color:i===0?"var(--yl)":"var(--mu2)"}}>#{i+1}</span>
+                          </div>
+
+                          {/* Nombre */}
+                          <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontSize:".88rem",fontWeight:800,color:"var(--wh2)",marginBottom:".15rem"}}>{s.casa}</div>
+                            <div style={{fontSize:".68rem",color:"var(--mu)",display:"flex",gap:".5rem",flexWrap:"wrap"}}>
+                              <span>{s.nRemates} remates ({s.cerrados} cerrados)</span>
+                              <span>·</span>
+                              <span>{s.postoresUnicos} postores únicos</span>
+                            </div>
+                          </div>
+
+                          {/* Métricas */}
+                          <div style={{display:"flex",gap:"1.5rem",flexShrink:0}}>
+                            <div style={{textAlign:"right"}}>
+                              <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--ac)"}}>{fmt(s.totalVendido)}</div>
+                              <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Total vendido</div>
+                            </div>
+                            <div style={{textAlign:"right"}}>
+                              <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--gr)"}}>{fmt(s.promLote)}</div>
+                              <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Prom/lote</div>
+                            </div>
+                            <div style={{textAlign:"right"}}>
+                              <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--wh2)"}}>{s.totalLotes}</div>
+                              <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Lotes totales</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Nota */}
+                  <div style={{marginTop:".75rem",padding:".6rem .9rem",background:"rgba(47,128,237,.04)",border:"1px solid rgba(47,128,237,.1)",borderRadius:7,fontSize:".7rem",color:"var(--mu)",lineHeight:1.6}}>
+                    Datos basados en remates registrados en el sistema. El valor promedio por lote se calcula sobre remates cerrados.
+                    En producción con Supabase esto se calculará en tiempo real con todos los datos históricos.
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -2354,6 +3246,31 @@ function Dashboard({ session, onLogout }) {
         {/* ══ ADJUDICACIONES ══ */}
         {page==="adjudicac" && (
           <div className="page">
+            {/* Banner selector de remate */}
+            {(() => {
+              const cerrados = REMATES.filter(r => r.estado === "cerrado");
+              return (
+                <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
+                  <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
+                  <select
+                    value={selectedRemate||""}
+                    onChange={e => setSelectedRemate(e.target.value||null)}
+                    style={{flex:1,maxWidth:340,padding:".4rem .7rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:7,color:"var(--wh2)",fontSize:".8rem",fontFamily:"Inter,sans-serif",cursor:"pointer"}}>
+                    <option value="">— Todos los remates cerrados —</option>
+                    {cerrados.map(r => (
+                      <option key={r.id} value={r.id}>{r.name} · {r.fecha} · {r.casa}</option>
+                    ))}
+                  </select>
+                  {selectedRemate && (
+                    <button onClick={()=>setSelectedRemate(null)}
+                      style={{background:"transparent",border:"1px solid var(--b2)",borderRadius:6,color:"var(--mu2)",fontSize:".7rem",padding:".3rem .6rem",cursor:"pointer",whiteSpace:"nowrap"}}>
+                      Ver todos
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
             <div className="stat-grid" style={{gridTemplateColumns:"repeat(4,1fr)",marginBottom:"1.2rem"}}>
               {[
                 {label:"Total adjudicado",    val:fmt([...ADJUDICACIONES,...liquidaciones].reduce((s,a)=>s+a.monto,0)),       c:"var(--ac)"},
@@ -2401,14 +3318,61 @@ function Dashboard({ session, onLogout }) {
         {/* ══ LIQUIDACIONES ══ */}
         {page==="liquidac" && (
           <div className="page">
-            {/* Header */}
+            {/* Banner selector de remate */}
+            {(() => {
+              const cerrados = REMATES.filter(r => r.estado === "cerrado");
+              return (
+                <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
+                  <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
+                  <select
+                    value={selectedRemate||""}
+                    onChange={e => {
+                      const rid = e.target.value||null;
+                      setSelectedRemate(rid);
+                      if(rid) {
+                        const r = REMATES.find(x=>x.id===rid);
+                        if(r) {
+                          const todasLiq = [...ADJUDICACIONES.map(a=>({lote:a.lote,exp:"",monto:a.monto,comPct:3,motorizado:false,postor:a.postor,rut:a.rut||"—",email:""})),...liquidaciones];
+                          const byComprador = {};
+                          todasLiq.forEach(l=>{
+                            const pd = POSTORES.find(p=>p.name===l.postor||p.razonSocial===l.postor)||null;
+                            const key = pd?.nComprador??l.postor;
+                            if(!byComprador[key]) byComprador[key]={postorData:pd,lotes:[],key};
+                            byComprador[key].lotes.push(l);
+                          });
+                          const compradores = Object.values(byComprador).map(c=>({...c,liq:calcLiquidacion(c.lotes,c.postorData),enviado:false,facturado:false}));
+                          setLiqReview({compradores,fecha:r.fecha,remateNombre:r.name,remateId:r.id});
+                        }
+                      } else {
+                        setLiqReview(null);
+                      }
+                    }}
+                    style={{flex:1,maxWidth:340,padding:".4rem .7rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:7,color:"var(--wh2)",fontSize:".8rem",fontFamily:"Inter,sans-serif",cursor:"pointer"}}>
+                    <option value="">— Selecciona un remate —</option>
+                    {cerrados.map(r => (
+                      <option key={r.id} value={r.id}>{r.name} · {r.fecha} · {r.casa}</option>
+                    ))}
+                  </select>
+                  {selectedRemate && (
+                    <button onClick={()=>{setSelectedRemate(null);setLiqReview(null);}}
+                      style={{background:"transparent",border:"1px solid var(--b2)",borderRadius:6,color:"var(--mu2)",fontSize:".7rem",padding:".3rem .6rem",cursor:"pointer",whiteSpace:"nowrap"}}>
+                      Limpiar
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
             <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".85rem 1rem",background:"rgba(47,128,237,.07)",border:"1px solid rgba(47,128,237,.2)",borderRadius:8}}>
               <div style={{flex:1}}>
                 <div style={{fontSize:".82rem",fontWeight:700,color:"var(--wh2)",marginBottom:".2rem"}}>
-                  {liqReview ? `Revision post-remate — ${liqReview.fecha} — ${liqReview.compradores.length} compradores` : "Liquidaciones por comprador"}
+                  {liqReview
+                    ? <span>Liquidaciones — <span style={{color:"var(--ac)"}}>{liqReview.remateNombre||"Remate"}</span> &nbsp;·&nbsp; <span style={{fontFamily:"DM Mono,monospace",color:"var(--mu2)"}}>{liqReview.fecha}</span> &nbsp;·&nbsp; {liqReview.compradores.length} compradores</span>
+                    : "Liquidaciones por comprador"
+                  }
                 </div>
                 <div style={{fontSize:".73rem",color:"var(--mu2)"}}>
-                  Revisa cada liquidacion antes de enviar. Una vez confirmadas se envia el correo masivo a todos los adjudicatarios.
+                  Revisa cada liquidacion antes de enviar. Una vez confirmadas se envia el correo con PDF a cada adjudicatario.
                 </div>
               </div>
               {liqReview && (
@@ -2435,13 +3399,98 @@ function Dashboard({ session, onLogout }) {
               </div>
             )}
 
+            {/* ── Tabla resumen (estilo liquidar_compradores.php) ── */}
+            {liqReview && (
+              <div className="table-card" style={{marginBottom:"1.2rem"}}>
+                <div className="table-head">
+                  <div className="table-title">Resumen compradores — {liqReview.fecha}</div>
+                  <div style={{fontSize:".72rem",color:"var(--mu)"}}>
+                    {liqReview.compradores.length} compradores · Total bruto{" "}
+                    <strong style={{color:"var(--ac)"}}>
+                      {fmt(liqReview.compradores.reduce((s,c)=>s+c.liq.total,0))}
+                    </strong>
+                  </div>
+                </div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>N° Part.</th>
+                      <th>Nombre cliente</th>
+                      <th>Lotes</th>
+                      <th style={{textAlign:"right"}}>Garantía</th>
+                      <th style={{textAlign:"right"}}>Total bruto</th>
+                      <th style={{textAlign:"right"}}>Total a pagar</th>
+                      <th style={{textAlign:"center"}}>Estado</th>
+                      <th style={{textAlign:"center"}}>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {liqReview.compradores.map((c,ci)=>{
+                      const p = c.postorData;
+                      const l = c.liq;
+                      return (
+                        <tr key={ci} style={{cursor:"pointer"}} onClick={()=>setLiqExpanded(liqExpanded===ci?null:ci)}>
+                          <td>
+                            <div style={{width:30,height:30,borderRadius:6,background:"rgba(47,128,237,.1)",border:"1px solid rgba(47,128,237,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"DM Mono,monospace",fontSize:".78rem",fontWeight:800,color:"var(--ac)"}}>
+                              {String(c.key).padStart(2,"0")}
+                            </div>
+                          </td>
+                          <td style={{fontWeight:600,color:"var(--wh2)",textTransform:"uppercase"}}>
+                            {p?.razonSocial||c.lotes[0]?.postor||"—"}
+                          </td>
+                          <td style={{fontFamily:"DM Mono,monospace",fontSize:".78rem",color:"var(--mu2)",textAlign:"center"}}>
+                            {c.lotes.length}
+                          </td>
+                          <td style={{fontFamily:"DM Mono,monospace",fontSize:".78rem",textAlign:"right",color:l.garantia>0?"var(--yl)":"var(--mu)"}}>
+                            {fmt(l.garantia)}
+                          </td>
+                          <td style={{fontFamily:"DM Mono,monospace",fontWeight:700,textAlign:"right",color:"var(--wh2)"}}>
+                            {fmt(l.total)}
+                          </td>
+                          <td style={{fontFamily:"DM Mono,monospace",fontWeight:800,textAlign:"right",color:"var(--ac)",fontSize:".9rem"}}>
+                            {fmt(l.totalAPagar)}
+                          </td>
+                          <td style={{textAlign:"center"}}>
+                            {c.enviado
+                              ? <span className="sent-badge">Enviado</span>
+                              : <span className="pill p-saldo">Pendiente</span>}
+                          </td>
+                          <td style={{textAlign:"center"}}>
+                            <button
+                              className="btn-primary"
+                              style={{fontSize:".68rem",padding:".28rem .7rem"}}
+                              onClick={e=>{e.stopPropagation();setLiqExpanded(ci);setTimeout(()=>document.getElementById(`liq-card-${ci}`)?.scrollIntoView({behavior:"smooth",block:"start"}),50);}}
+                            >
+                              Ver liquidación
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{borderTop:"2px solid var(--b2)",background:"rgba(255,255,255,.02)"}}>
+                      <td colSpan={4} style={{padding:".6rem .75rem",textAlign:"right",fontSize:".7rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase"}}>Totales</td>
+                      <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--wh2)",fontSize:".82rem"}}>
+                        {fmt(liqReview.compradores.reduce((s,c)=>s+c.liq.total,0))}
+                      </td>
+                      <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontWeight:900,color:"var(--ac)",fontSize:".85rem"}}>
+                        {fmt(liqReview.compradores.reduce((s,c)=>s+c.liq.totalAPagar,0))}
+                      </td>
+                      <td colSpan={2}/>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
+
             {/* Lista de compradores */}
             {liqReview?.compradores.map((c,ci) => {
               const p = c.postorData;
               const l = c.liq;
               const isOpen = liqExpanded === ci;
               return (
-                <div key={ci} className="liq-card" style={{marginBottom:".8rem"}}>
+                <div key={ci} id={`liq-card-${ci}`} className="liq-card" style={{marginBottom:".8rem"}}>
                   {/* Header comprador */}
                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom: isOpen?".9rem":"0",cursor:"pointer"}} onClick={()=>setLiqExpanded(isOpen?null:ci)}>
                     <div style={{display:"flex",alignItems:"center",gap:".85rem"}}>
@@ -2560,16 +3609,44 @@ function Dashboard({ session, onLogout }) {
                       </div>
 
                       {/* Acciones */}
-                      <div className="liq-actions" style={{marginTop:"1rem",paddingTop:".8rem",borderTop:"1px solid var(--b1)"}}>
-                        <button className="btn-primary" style={{fontSize:".75rem"}} onClick={()=>{
-                          setLiqReview(r=>({...r,compradores:r.compradores.map((x,xi)=>xi===ci?{...x,enviado:true}:x)}));
-                          notify(`Liquidacion enviada a ${p?.email||"comprador"}.`,"sold");
-                        }}>
-                          {c.enviado?"Reenviar correo":"Enviar correo al comprador"}
-                        </button>
-                        <button className="btn-sec" style={{fontSize:".74rem"}} onClick={()=>notify("PDF generado listo para imprimir.","inf")}>
+                      <div className="liq-actions" style={{marginTop:"1rem",paddingTop:".8rem",borderTop:"1px solid var(--b1)",display:"flex",gap:".5rem",flexWrap:"wrap"}}>
+
+                        {/* Descargar PDF */}
+                        <button className="btn-sec" style={{fontSize:".73rem"}} onClick={()=>generarPDFLiquidacion(c, liqReview.fecha)}>
+                          <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{marginRight:".3rem"}}><path d="M2 13h10M7 1v8M4 6l3 3 3-3"/></svg>
                           Descargar PDF
                         </button>
+
+                        {/* Enviar por correo */}
+                        <button
+                          className="btn-primary"
+                          style={{fontSize:".73rem", background: c.enviado?"rgba(34,211,160,.12)":"var(--ac)", color: c.enviado?"var(--gr)":"#fff", border: c.enviado?"1px solid rgba(34,211,160,.3)":"none"}}
+                          onClick={()=>{
+                            generarPDFLiquidacion(c, liqReview.fecha);
+                            setLiqReview(r=>({...r,compradores:r.compradores.map((x,xi)=>xi===ci?{...x,enviado:true}:x)}));
+                            notify(`PDF generado — envía a ${p?.email||c.postorData?.email||"comprador"} manualmente.`,"sold");
+                          }}>
+                          <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{marginRight:".3rem"}}><path d="M1 1l12 6-12 6V9l8-2-8-2V1z"/></svg>
+                          {c.enviado ? "Reenviar correo" : "Enviar liquidación"}
+                        </button>
+
+                        {/* Facturar */}
+                        {!c.facturado
+                          ? <button
+                              className="btn-sec"
+                              style={{fontSize:".73rem", borderColor:"rgba(246,173,85,.4)", color:"#f6ad55"}}
+                              onClick={()=>{
+                                setLiqReview(r=>({...r,compradores:r.compradores.map((x,xi)=>xi===ci?{...x,facturado:true}:x)}));
+                                notify(`Factura marcada para ${p?.name||c.postorData?.name||"comprador"}.`,"sold");
+                              }}>
+                              <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{marginRight:".3rem"}}><rect x="2" y="1" width="10" height="12" rx="1"/><path d="M5 5h4M5 8h4M5 11h2"/></svg>
+                              Marcar como facturado
+                            </button>
+                          : <div style={{display:"flex",alignItems:"center",gap:".35rem",fontSize:".72rem",color:"var(--gr)",padding:".35rem .7rem",background:"rgba(34,211,160,.07)",border:"1px solid rgba(34,211,160,.2)",borderRadius:6}}>
+                              <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M2 7l4 4 6-7"/></svg>
+                              Facturado
+                            </div>
+                        }
                       </div>
                     </div>
                   )}
@@ -2582,7 +3659,22 @@ function Dashboard({ session, onLogout }) {
         {/* ══ DEVOLUCIONES ══ */}
         {page==="devoluciones" && (
           <div className="page">
-            <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".8rem 1rem",background:"rgba(246,173,85,.07)",border:"1px solid rgba(246,173,85,.2)",borderRadius:8}}>
+            {/* Banner selector de remate */}
+            {(() => {
+              const cerrados = REMATES.filter(r => r.estado === "cerrado");
+              return (
+                <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
+                  <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
+                  <select value={selectedRemate||""} onChange={e=>setSelectedRemate(e.target.value||null)}
+                    style={{flex:1,maxWidth:340,padding:".4rem .7rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:7,color:"var(--wh2)",fontSize:".8rem",fontFamily:"Inter,sans-serif",cursor:"pointer"}}>
+                    <option value="">— Todos los remates cerrados —</option>
+                    {cerrados.map(r=><option key={r.id} value={r.id}>{r.name} · {r.fecha} · {r.casa}</option>)}
+                  </select>
+                  {selectedRemate && <button onClick={()=>setSelectedRemate(null)} style={{background:"transparent",border:"1px solid var(--b2)",borderRadius:6,color:"var(--mu2)",fontSize:".7rem",padding:".3rem .6rem",cursor:"pointer"}}>Ver todos</button>}
+                </div>
+              );
+            })()}
               <div style={{flex:1,fontSize:".76rem",color:"var(--mu2)",lineHeight:1.5}}>
                 Postores que <strong style={{color:"var(--wh2)"}}>no compraron</strong> y tienen garantia a devolver. El sistema los identifica automaticamente al cerrar el remate. Plazo: <strong style={{color:"var(--wh2)"}}>5 dias habiles.</strong>
               </div>
@@ -2661,16 +3753,91 @@ function Dashboard({ session, onLogout }) {
 
               {/* Main */}
               <main className="sala-main">
-                <div className="pz">
-                  {item.img ? (
-                    <><img src={item.img} alt={item.name} className="pzimg"/>
-                      <div className="pzov"><label className="pzch" htmlFor={`ph${idx}`}>Cambiar foto</label><input id={`ph${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/></div></>
-                  ) : (
-                    <label className="pzph" htmlFor={`ph${idx}`}>
-                      <div className="pzpt">Subir foto del lote</div>
-                      <input id={`ph${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
-                    </label>
-                  )}
+
+                {/* ── Carrusel fotos + Video martillero ── */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 220px",gap:"1rem",alignItems:"stretch"}}>
+
+                  {/* Carrusel */}
+                  <div style={{position:"relative",background:"var(--s2)",borderRadius:10,overflow:"hidden",minHeight:240,border:"1px solid var(--b1)"}}>
+                    {(item.imgs||[]).length > 0 ? (
+                      <>
+                        <img
+                          src={item.imgs[photoIdx % item.imgs.length]}
+                          alt={item.name}
+                          style={{width:"100%",height:240,objectFit:"cover",display:"block",transition:"opacity .3s"}}
+                        />
+                        {/* Flechas */}
+                        {item.imgs.length > 1 && (
+                          <>
+                            <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p-1+item.imgs.length)%item.imgs.length); startCarousel(item.imgs); }}
+                              style={{position:"absolute",left:8,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M8 2L4 6l4 4"/></svg>
+                            </button>
+                            <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p+1)%item.imgs.length); startCarousel(item.imgs); }}
+                              style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 2l4 4-4 4"/></svg>
+                            </button>
+                            {/* Puntos indicadores */}
+                            <div style={{position:"absolute",bottom:8,left:"50%",transform:"translateX(-50%)",display:"flex",gap:5}}>
+                              {item.imgs.map((_,i)=>(
+                                <div key={i} onClick={()=>setPhotoIdx(i)}
+                                  style={{width:i===photoIdx%item.imgs.length?18:7,height:7,borderRadius:4,background:i===photoIdx%item.imgs.length?"var(--ac)":"rgba(255,255,255,.4)",cursor:"pointer",transition:"all .2s"}}/>
+                              ))}
+                            </div>
+                            {/* Contador */}
+                            <div style={{position:"absolute",top:8,right:8,background:"rgba(0,0,0,.6)",borderRadius:4,padding:".15rem .45rem",fontSize:".68rem",color:"#fff",fontFamily:"DM Mono,monospace"}}>
+                              {(photoIdx%item.imgs.length)+1}/{item.imgs.length}
+                            </div>
+                          </>
+                        )}
+                        {/* Botón quitar foto */}
+                        <button onClick={()=>removePhoto(idx, photoIdx%item.imgs.length)}
+                          style={{position:"absolute",top:8,left:8,background:"rgba(224,82,82,.7)",border:"none",borderRadius:4,padding:".15rem .4rem",fontSize:".65rem",color:"#fff",cursor:"pointer"}}>
+                          Quitar
+                        </button>
+                      </>
+                    ) : (
+                      <label htmlFor={`ph${idx}`} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:240,cursor:"pointer",gap:".5rem"}}>
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="var(--mu)" strokeWidth="1.5"><rect x="3" y="6" width="26" height="20" rx="3"/><circle cx="16" cy="16" r="5"/><path d="M12 6l2-3h4l2 3"/></svg>
+                        <div style={{fontSize:".75rem",color:"var(--mu2)"}}>Agregar fotos del lote</div>
+                        <input id={`ph${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
+                      </label>
+                    )}
+                    {/* Botón agregar más fotos */}
+                    {(item.imgs||[]).length > 0 && (
+                      <label htmlFor={`phadd${idx}`}
+                        style={{position:"absolute",bottom:8,right:8,background:"rgba(47,128,237,.85)",borderRadius:5,padding:".2rem .55rem",fontSize:".65rem",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:".25rem"}}>
+                        <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 1v8M1 5h8"/></svg>
+                        Agregar foto
+                        <input id={`phadd${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
+                      </label>
+                    )}
+                  </div>
+
+                  {/* Video martillero */}
+                  <div style={{background:"var(--s2)",borderRadius:10,border:"1px solid var(--b1)",overflow:"hidden",display:"flex",flexDirection:"column",minHeight:240}}>
+                    <div style={{padding:".5rem .75rem",borderBottom:"1px solid var(--b1)",display:"flex",alignItems:"center",gap:".4rem"}}>
+                      <div style={{width:7,height:7,borderRadius:"50%",background:camActiva?"var(--gr)":"var(--rd)",boxShadow:camActiva?"0 0 6px var(--gr)":undefined,flexShrink:0}}/>
+                      <span style={{fontSize:".68rem",fontWeight:700,color:"var(--wh2)"}}>Martillero en vivo</span>
+                    </div>
+                    <div style={{flex:1,position:"relative",background:"#000",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                      <video ref={videoRef} autoPlay muted playsInline
+                        style={{width:"100%",height:"100%",objectFit:"cover",display:camActiva?"block":"none"}}/>
+                      {!camActiva && (
+                        <div style={{textAlign:"center",padding:"1rem",display:"flex",flexDirection:"column",alignItems:"center",gap:".6rem"}}>
+                          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--mu)" strokeWidth="1.4"><path d="M4 6h14l4 4v10H4V6z"/><circle cx="11" cy="14" r="3"/></svg>
+                          <div style={{fontSize:".68rem",color:"var(--mu2)",lineHeight:1.4}}>Cámara inactiva</div>
+                          {camError && <div style={{fontSize:".63rem",color:"var(--rd)",lineHeight:1.3,maxWidth:160}}>{camError}</div>}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{padding:".5rem .6rem",borderTop:"1px solid var(--b1)",display:"flex",gap:".4rem"}}>
+                      {!camActiva
+                        ? <button onClick={activarCamara} style={{flex:1,padding:".35rem",background:"var(--ac)",border:"none",borderRadius:6,color:"#fff",fontSize:".68rem",fontWeight:700,cursor:"pointer"}}>Activar cámara</button>
+                        : <button onClick={detenerCamara} style={{flex:1,padding:".35rem",background:"rgba(224,82,82,.15)",border:"1px solid rgba(224,82,82,.3)",borderRadius:6,color:"var(--rd)",fontSize:".68rem",fontWeight:700,cursor:"pointer"}}>Detener cámara</button>
+                      }
+                    </div>
+                  </div>
                 </div>
 
                 <div>
