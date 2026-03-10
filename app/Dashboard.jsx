@@ -1360,6 +1360,7 @@ function Dashboard({ session, onLogout }) {
   const [liqReview,  setLiqReview]  = useState(null);  // null | { compradores: [...] }
   const [liqExpanded,setLiqExpanded]= useState(null);  // nComprador expandido
   const [selectedRemate, setSelectedRemate] = useState(null); // remate seleccionado en post-remate
+  const [adminClienteSel, setAdminClienteSel] = useState(null); // cliente seleccionado en panel admin
 
   // ── Auction state ──────────────────────────────────────────────
   const [lots,        setLots]        = useState(LOTES_SALA);
@@ -3064,87 +3065,141 @@ function Dashboard({ session, onLogout }) {
               </table>
             </div>
 
-            {/* ── Panel admin: ranking por casa de remates ── */}
+            {/* ── Panel admin: clientes ── */}
             {session?.role==="admin" && (()=>{
-              // Calcular métricas por casa desde REMATES
               const casas = [...new Set(REMATES.map(r=>r.casa))];
               const stats = casas.map(casa => {
-                const rematesCasa = REMATES.filter(r=>r.casa===casa);
-                const cerrados    = rematesCasa.filter(r=>r.estado==="cerrado");
-                const totalVendido= cerrados.reduce((s,r)=>s+r.recaudado,0);
-                const totalLotes  = rematesCasa.reduce((s,r)=>s+r.lotes,0);
-                const lotesVend   = cerrados.reduce((s,r)=>s+r.lotes,0);
-                const promLote    = lotesVend > 0 ? Math.round(totalVendido/lotesVend) : 0;
-                const nRemates    = rematesCasa.length;
-                // Postores únicos: mock por casa
+                const rematesCasa    = REMATES.filter(r=>r.casa===casa);
+                const cerrados       = rematesCasa.filter(r=>r.estado==="cerrado");
+                const totalVendido   = cerrados.reduce((s,r)=>s+r.recaudado,0);
+                const totalLotes     = rematesCasa.reduce((s,r)=>s+r.lotes,0);
+                const lotesVend      = cerrados.reduce((s,r)=>s+r.lotes,0);
+                const promLote       = lotesVend > 0 ? Math.round(totalVendido/lotesVend) : 0;
+                const nRemates       = rematesCasa.length;
                 const postoresUnicos = casa==="Remates Ahumada" ? 38 : 14;
-                return { casa, totalVendido, totalLotes, promLote, nRemates, postoresUnicos, cerrados:cerrados.length };
+                return { casa, totalVendido, totalLotes, promLote, nRemates, postoresUnicos, cerrados:cerrados.length, remates:rematesCasa };
               }).sort((a,b)=>b.totalVendido-a.totalVendido);
 
-              const maxVendido = Math.max(...stats.map(s=>s.totalVendido),1);
+              const maxVendido  = Math.max(...stats.map(s=>s.totalVendido),1);
+              const clienteActivo = adminClienteSel ? stats.find(s=>s.casa===adminClienteSel) : null;
 
               return (
                 <div style={{marginTop:"1.5rem"}}>
-                  {/* Header */}
-                  <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:"1rem",paddingBottom:".7rem",borderBottom:"1px solid var(--b1)"}}>
-                    <div style={{width:28,height:28,borderRadius:7,background:"rgba(47,128,237,.12)",border:"1px solid rgba(47,128,237,.2)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+
+                  {/* Header con selector */}
+                  <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",paddingBottom:".8rem",borderBottom:"1px solid var(--b1)"}}>
+                    <div style={{width:28,height:28,borderRadius:7,background:"rgba(47,128,237,.12)",border:"1px solid rgba(47,128,237,.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                       <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><path d="M3 13V7M8 13V3M13 13V9"/></svg>
                     </div>
-                    <div>
-                      <div style={{fontSize:".82rem",fontWeight:800,color:"var(--wh2)"}}>Ranking por casa de remates</div>
-                      <div style={{fontSize:".68rem",color:"var(--mu2)"}}>Solo visible para administrador GR — métricas por cliente</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:".82rem",fontWeight:800,color:"var(--wh2)"}}>Clientes GR Auction Software</div>
+                      <div style={{fontSize:".68rem",color:"var(--mu2)"}}>Solo visible para administrador — métricas por casa de remates</div>
                     </div>
-                    <span style={{marginLeft:"auto",fontSize:".65rem",padding:".2rem .55rem",background:"rgba(47,128,237,.1)",border:"1px solid rgba(47,128,237,.2)",borderRadius:4,color:"var(--ac)",fontWeight:700,letterSpacing:".05em"}}>ADMIN</span>
+                    {/* Selector de cliente */}
+                    <select
+                      value={adminClienteSel||""}
+                      onChange={e=>setAdminClienteSel(e.target.value||null)}
+                      style={{padding:".4rem .8rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:7,color:"var(--wh2)",fontSize:".78rem",fontFamily:"Inter,sans-serif",cursor:"pointer",minWidth:200}}>
+                      <option value="">— Vista general —</option>
+                      {stats.map(s=><option key={s.casa} value={s.casa}>{s.casa}</option>)}
+                    </select>
+                    <span style={{fontSize:".65rem",padding:".2rem .55rem",background:"rgba(47,128,237,.1)",border:"1px solid rgba(47,128,237,.2)",borderRadius:4,color:"var(--ac)",fontWeight:700,letterSpacing:".05em",flexShrink:0}}>ADMIN</span>
                   </div>
 
-                  {/* Cards por casa */}
-                  <div style={{display:"flex",flexDirection:"column",gap:".8rem"}}>
-                    {stats.map((s,i)=>(
-                      <div key={s.casa} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:11,padding:"1rem 1.2rem",position:"relative",overflow:"hidden"}}>
-                        {/* Barra de fondo proporcional */}
-                        <div style={{position:"absolute",top:0,left:0,height:"100%",width:`${Math.round(s.totalVendido/maxVendido*100)}%`,background:"rgba(47,128,237,.04)",borderRight:"1px solid rgba(47,128,237,.08)",pointerEvents:"none"}}/>
-
-                        <div style={{display:"flex",alignItems:"center",gap:"1rem",position:"relative"}}>
-                          {/* Posición ranking */}
-                          <div style={{width:32,height:32,borderRadius:8,background:i===0?"rgba(246,173,85,.15)":"rgba(255,255,255,.04)",border:`1px solid ${i===0?"rgba(246,173,85,.3)":"var(--b2)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                            <span style={{fontSize:".9rem",fontWeight:900,color:i===0?"var(--yl)":"var(--mu2)"}}>#{i+1}</span>
-                          </div>
-
-                          {/* Nombre */}
-                          <div style={{flex:1,minWidth:0}}>
-                            <div style={{fontSize:".88rem",fontWeight:800,color:"var(--wh2)",marginBottom:".15rem"}}>{s.casa}</div>
-                            <div style={{fontSize:".68rem",color:"var(--mu)",display:"flex",gap:".5rem",flexWrap:"wrap"}}>
-                              <span>{s.nRemates} remates ({s.cerrados} cerrados)</span>
-                              <span>·</span>
-                              <span>{s.postoresUnicos} postores únicos</span>
+                  {/* ── Vista general: ranking ── */}
+                  {!clienteActivo && (
+                    <div style={{display:"flex",flexDirection:"column",gap:".8rem"}}>
+                      {stats.map((s,i)=>(
+                        <div key={s.casa}
+                          onClick={()=>setAdminClienteSel(s.casa)}
+                          style={{background:"var(--s2)",border:`1px solid ${adminClienteSel===s.casa?"var(--ac)":"var(--b1)"}`,borderRadius:11,padding:"1rem 1.2rem",position:"relative",overflow:"hidden",cursor:"pointer",transition:"border .15s"}}>
+                          <div style={{position:"absolute",top:0,left:0,height:"100%",width:`${Math.round(s.totalVendido/maxVendido*100)}%`,background:"rgba(47,128,237,.04)",borderRight:"1px solid rgba(47,128,237,.08)",pointerEvents:"none"}}/>
+                          <div style={{display:"flex",alignItems:"center",gap:"1rem",position:"relative"}}>
+                            <div style={{width:32,height:32,borderRadius:8,background:i===0?"rgba(246,173,85,.15)":"rgba(255,255,255,.04)",border:`1px solid ${i===0?"rgba(246,173,85,.3)":"var(--b2)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                              <span style={{fontSize:".9rem",fontWeight:900,color:i===0?"var(--yl)":"var(--mu2)"}}>#{i+1}</span>
                             </div>
-                          </div>
-
-                          {/* Métricas */}
-                          <div style={{display:"flex",gap:"1.5rem",flexShrink:0}}>
-                            <div style={{textAlign:"right"}}>
-                              <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--ac)"}}>{fmt(s.totalVendido)}</div>
-                              <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Total vendido</div>
+                            <div style={{flex:1,minWidth:0}}>
+                              <div style={{fontSize:".88rem",fontWeight:800,color:"var(--wh2)",marginBottom:".15rem"}}>{s.casa}</div>
+                              <div style={{fontSize:".68rem",color:"var(--mu)",display:"flex",gap:".5rem",flexWrap:"wrap"}}>
+                                <span>{s.nRemates} remates ({s.cerrados} cerrados)</span>
+                                <span>·</span>
+                                <span>{s.postoresUnicos} postores únicos</span>
+                              </div>
                             </div>
-                            <div style={{textAlign:"right"}}>
-                              <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--gr)"}}>{fmt(s.promLote)}</div>
-                              <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Prom/lote</div>
+                            <div style={{display:"flex",gap:"1.5rem",flexShrink:0}}>
+                              <div style={{textAlign:"right"}}>
+                                <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--ac)"}}>{fmt(s.totalVendido)}</div>
+                                <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Total vendido</div>
+                              </div>
+                              <div style={{textAlign:"right"}}>
+                                <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--gr)"}}>{fmt(s.promLote)}</div>
+                                <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Prom/lote</div>
+                              </div>
+                              <div style={{textAlign:"right"}}>
+                                <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--wh2)"}}>{s.totalLotes}</div>
+                                <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Lotes totales</div>
+                              </div>
                             </div>
-                            <div style={{textAlign:"right"}}>
-                              <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--wh2)"}}>{s.totalLotes}</div>
-                              <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Lotes totales</div>
-                            </div>
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--mu)" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0}}><path d="M4 2l4 4-4 4"/></svg>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
 
-                  {/* Nota */}
-                  <div style={{marginTop:".75rem",padding:".6rem .9rem",background:"rgba(47,128,237,.04)",border:"1px solid rgba(47,128,237,.1)",borderRadius:7,fontSize:".7rem",color:"var(--mu)",lineHeight:1.6}}>
-                    Datos basados en remates registrados en el sistema. El valor promedio por lote se calcula sobre remates cerrados.
-                    En producción con Supabase esto se calculará en tiempo real con todos los datos históricos.
-                  </div>
+                  {/* ── Vista detalle cliente ── */}
+                  {clienteActivo && (
+                    <div>
+                      {/* Stat cards del cliente */}
+                      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:".7rem",marginBottom:"1.2rem"}}>
+                        {[
+                          {label:"Total vendido",      val:fmt(clienteActivo.totalVendido),          color:"var(--ac)"},
+                          {label:"Lotes rematados",    val:clienteActivo.totalLotes,                 color:"var(--gr)"},
+                          {label:"Valor prom/lote",    val:fmt(clienteActivo.promLote),              color:"#c084fc"},
+                          {label:"N° de remates",      val:clienteActivo.nRemates,                   color:"var(--yl)"},
+                          {label:"Postores únicos",    val:clienteActivo.postoresUnicos,             color:"var(--ac)"},
+                        ].map((c,i)=>(
+                          <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,padding:".85rem 1rem",borderTop:`3px solid ${c.color}`}}>
+                            <div style={{fontSize:".62rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".4rem"}}>{c.label}</div>
+                            <div style={{fontFamily:"DM Mono,monospace",fontSize:"1.1rem",fontWeight:800,color:c.color}}>{c.val}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Remates del cliente */}
+                      <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:11,overflow:"hidden"}}>
+                        <div style={{padding:".75rem 1rem",borderBottom:"1px solid var(--b1)",fontSize:".72rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em"}}>
+                          Remates de {clienteActivo.casa}
+                        </div>
+                        <table style={{width:"100%",borderCollapse:"collapse"}}>
+                          <thead>
+                            <tr style={{background:"rgba(255,255,255,.02)"}}>
+                              {["ID","Nombre","Fecha","Lotes","Modalidad","Recaudado","Estado"].map(h=>(
+                                <th key={h} style={{padding:".5rem .85rem",textAlign:"left",fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em",borderBottom:"1px solid var(--b1)"}}>{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {clienteActivo.remates.map(r=>(
+                              <tr key={r.id} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}>
+                                <td style={{padding:".55rem .85rem",fontFamily:"DM Mono,monospace",fontSize:".72rem",color:"var(--mu2)"}}>{r.id}</td>
+                                <td style={{padding:".55rem .85rem",fontSize:".78rem",fontWeight:600,color:"var(--wh2)"}}>{r.name}</td>
+                                <td style={{padding:".55rem .85rem",fontFamily:"DM Mono,monospace",fontSize:".72rem",color:"var(--mu2)"}}>{r.fecha}</td>
+                                <td style={{padding:".55rem .85rem",fontFamily:"DM Mono,monospace",fontSize:".78rem",color:"var(--wh2)"}}>{r.lotes}</td>
+                                <td style={{padding:".55rem .85rem",fontSize:".72rem",color:"var(--mu2)"}}>{r.modal}</td>
+                                <td style={{padding:".55rem .85rem",fontFamily:"DM Mono,monospace",fontSize:".78rem",fontWeight:700,color:"var(--ac)"}}>{fmt(r.recaudado)}</td>
+                                <td style={{padding:".55rem .85rem"}}><span className={`pill p-${r.estado}`}>{r.estado.charAt(0).toUpperCase()+r.estado.slice(1)}</span></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div style={{marginTop:".75rem",padding:".6rem .9rem",background:"rgba(47,128,237,.04)",border:"1px solid rgba(47,128,237,.1)",borderRadius:7,fontSize:".7rem",color:"var(--mu)",lineHeight:1.6}}>
+                        Datos basados en remates registrados. En producción con Supabase se calcularán en tiempo real con historial completo.
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })()}
