@@ -321,7 +321,7 @@ ${FONT}
   --rd:#f56565;
   --yl:#f6ad55;
 }
-html,body{height:100%;background:var(--bg);color:var(--wh2);font-family:'Inter',sans-serif;overflow:hidden;font-size:15px;}
+html,body{height:100%;background:var(--bg);color:var(--wh2);font-family:'Inter',sans-serif;overflow:hidden;font-size:16px;}
 button,input,select{font-family:'Inter',sans-serif;}
 
 /* ── APP SHELL ── */
@@ -1362,6 +1362,18 @@ function Dashboard({ session, onLogout }) {
   const [selectedRemate, setSelectedRemate] = useState(null); // remate seleccionado en post-remate
   const [adminClienteSel, setAdminClienteSel] = useState(null); // cliente seleccionado en panel admin
 
+  // ── Usuarios (solo admin GR) ──
+  const ROLES_DISPONIBLES = ["admin","martillero","postremate","garantias","solo lectura"];
+  const [usuarios, setUsuarios] = useState([
+    {id:1, nombre:"Maximiliano Ahumada", usuario:"mahumada",  email:"max@rematesahumada.cl",  roles:["admin","martillero"],     casa:"Remates Ahumada", activo:true},
+    {id:2, nombre:"Nicolás Pérez",       usuario:"nperez",    email:"nperez@rematesahumada.cl",roles:["martillero","postremate"],casa:"Remates Ahumada", activo:true},
+    {id:3, nombre:"Jorge Leiva",         usuario:"jleiva",    email:"jleiva@rematesahumada.cl",roles:["garantias"],             casa:"Remates Ahumada", activo:true},
+    {id:4, nombre:"Demo Usuario",        usuario:"demo",      email:"demo@casaderemates.cl",   roles:["martillero"],            casa:"Casa Demo S.A.",  activo:true},
+  ]);
+  const [usuarioForm, setUsuarioForm] = useState({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
+  const [usuarioModal, setUsuarioModal] = useState(false); // false | "crear" | "editar"
+  const resetUsuarioForm = () => setUsuarioForm({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
+
   // ── Auction state ──────────────────────────────────────────────
   const [lots,        setLots]        = useState(LOTES_SALA);
   const [idx,         setIdx]         = useState(0);
@@ -1401,6 +1413,23 @@ function Dashboard({ session, onLogout }) {
   const [vendedorForm,  setVendedorForm]  = useState({comVenta:5, comDefensa:2, publicidad:0});
   const [vendedorLiqGenerada, setVendedorLiqGenerada] = useState(null);
   const [devoluciones,  setDevoluciones]  = useState([]);
+
+  // Estado reactivo para devoluciones de garantía en panel post-remate
+  const [noCompradoresState, setNoCompradoresState] = useState([
+    {nPart:22, nombre:"MAXIMILIANO AHUMADA",                  garantia:0,      formaPago:"REMOTO",    devolucion:"N/A"},
+    {nPart:23, nombre:"MACARENA OLGUIN",                      garantia:0,      formaPago:"REMOTO",    devolucion:"N/A"},
+    {nPart:24, nombre:"VICENTE GERARDO RAMÍREZ URZÚA",        garantia:250000, formaPago:"PRESENCIAL",devolucion:"pendiente"},
+    {nPart:25, nombre:"MAURICIO ALEJANDRO ALBORNOZ MORENO",   garantia:250000, formaPago:"PRESENCIAL",devolucion:"pendiente"},
+    {nPart:27, nombre:"ISMAEL MORALES",                       garantia:250000, formaPago:"PRESENCIAL",devolucion:"pendiente"},
+    {nPart:32, nombre:"MARCIAL ALEJANDRO OLMOS BECERRA",      garantia:250000, formaPago:"PRESENCIAL",devolucion:"pendiente"},
+    {nPart:33, nombre:"ARNOLDO FLORES",                       garantia:250000, formaPago:"PRESENCIAL",devolucion:"cheque"},
+    {nPart:34, nombre:"JUAN CARLOS CARO JORQUERA",            garantia:0,      formaPago:"PRESENCIAL",devolucion:"N/A"},
+    {nPart:35, nombre:"LUIS ALARCON",                         garantia:250000, formaPago:"PRESENCIAL",devolucion:"efectivo"},
+    {nPart:36, nombre:"FELIPE ALEJANDRO AQUEVEQUE MUÑOZ",     garantia:0,      formaPago:"REMOTO",    devolucion:"N/A"},
+  ]);
+  const marcarDevolucion = (nPart, metodo) => {
+    setNoCompradoresState(prev => prev.map(c => c.nPart===nPart ? {...c, devolucion:metodo} : c));
+  };
   const [remateTerminado, setRemateTerminado] = useState(false);
 
   const timerRef    = useRef(null);
@@ -2105,6 +2134,13 @@ function Dashboard({ session, onLogout }) {
         <div className={`sb-item${page==="config"?" on":""}`} onClick={()=>setPage("config")}>
           <span className="sb-icon"><Icon name="config"/></span>Configuración
         </div>
+        {session?.role==="admin" && (
+          <div className={`sb-item${page==="usuarios"?" on":""}`} onClick={()=>setPage("usuarios")}>
+            <span className="sb-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2.2-5 5-5s5 2 5 5"/><path d="M13 7v4M11 9h4"/></svg>
+            </span>Usuarios
+          </div>
+        )}
         <div className="sb-footer">
           <div className="sb-user">
             <div className="sb-ava">{session?.name?.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()||"??"}</div>
@@ -3206,6 +3242,187 @@ function Dashboard({ session, onLogout }) {
           </div>
         )}
 
+        {/* ══ USUARIOS ══ */}
+        {page==="usuarios" && session?.role==="admin" && (()=>{
+          const CASAS_LISTA = [...new Set(REMATES.map(r=>r.casa))];
+          const toggleRol = (rol) => {
+            setUsuarioForm(f=>({...f, roles: f.roles.includes(rol) ? f.roles.filter(r=>r!==rol) : [...f.roles, rol]}));
+          };
+          const guardarUsuario = () => {
+            if(!usuarioForm.nombre||!usuarioForm.usuario||!usuarioForm.email) { notify("Completa nombre, usuario y email.","inf"); return; }
+            if(usuarioModal==="crear") {
+              setUsuarios(u=>[...u, {...usuarioForm, id:Date.now()}]);
+              notify(`Usuario ${usuarioForm.usuario} creado.`,"sold");
+            } else {
+              setUsuarios(u=>u.map(x=>x.id===usuarioForm.id?{...usuarioForm}:x));
+              notify(`Usuario ${usuarioForm.usuario} actualizado.`,"sold");
+            }
+            setUsuarioModal(false); resetUsuarioForm();
+          };
+          const editarUsuario = (u) => {
+            setUsuarioForm({...u, pass:""});
+            setUsuarioModal("editar");
+          };
+          const eliminarUsuario = (id) => {
+            setUsuarios(u=>u.filter(x=>x.id!==id));
+            notify("Usuario eliminado.","inf");
+          };
+          const toggleActivo = (id) => {
+            setUsuarios(u=>u.map(x=>x.id===id?{...x,activo:!x.activo}:x));
+          };
+
+          const ROLE_COLOR = {
+            "admin":        {bg:"rgba(224,82,82,.12)",  color:"#e05252", border:"rgba(224,82,82,.25)"},
+            "martillero":   {bg:"rgba(47,128,237,.12)", color:"#2F80ED", border:"rgba(47,128,237,.25)"},
+            "postremate":   {bg:"rgba(34,211,160,.1)",  color:"#22d3a0", border:"rgba(34,211,160,.25)"},
+            "garantias":    {bg:"rgba(246,173,85,.12)", color:"#f6ad55", border:"rgba(246,173,85,.25)"},
+            "solo lectura": {bg:"rgba(255,255,255,.06)",color:"#5a7fa8", border:"rgba(255,255,255,.1)"},
+          };
+
+          return (
+            <div className="page">
+              {/* Header */}
+              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.3rem"}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:"1rem",fontWeight:800,color:"var(--wh2)"}}>Gestión de Usuarios</div>
+                  <div style={{fontSize:".72rem",color:"var(--mu2)",marginTop:".15rem"}}>Solo visible para administrador GR — {usuarios.length} usuarios registrados</div>
+                </div>
+                <button className="btn-primary" onClick={()=>{resetUsuarioForm();setUsuarioModal("crear");}}>
+                  + Nuevo usuario
+                </button>
+              </div>
+
+              {/* Tabla usuarios */}
+              <div className="table-card">
+                <table style={{width:"100%",borderCollapse:"collapse"}}>
+                  <thead>
+                    <tr style={{background:"rgba(255,255,255,.02)"}}>
+                      {["Usuario","Nombre","Email","Casa","Roles","Estado","Acciones"].map(h=>(
+                        <th key={h} style={{padding:".55rem .9rem",textAlign:"left",fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em",borderBottom:"1px solid var(--b1)"}}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usuarios.map(u=>(
+                      <tr key={u.id} style={{borderBottom:"1px solid rgba(255,255,255,.03)",opacity:u.activo?1:.5,transition:"opacity .2s"}}>
+                        <td style={{padding:".65rem .9rem",fontFamily:"DM Mono,monospace",fontSize:".78rem",fontWeight:700,color:"var(--ac)"}}>{u.usuario}</td>
+                        <td style={{padding:".65rem .9rem",fontSize:".82rem",fontWeight:600,color:"var(--wh2)"}}>{u.nombre}</td>
+                        <td style={{padding:".65rem .9rem",fontSize:".73rem",color:"var(--mu2)"}}>{u.email}</td>
+                        <td style={{padding:".65rem .9rem",fontSize:".73rem",color:"var(--mu2)"}}>{u.casa}</td>
+                        <td style={{padding:".65rem .9rem"}}>
+                          <div style={{display:"flex",gap:".3rem",flexWrap:"wrap"}}>
+                            {u.roles.map(r=>(
+                              <span key={r} style={{fontSize:".6rem",fontWeight:700,padding:".1rem .4rem",borderRadius:4,background:ROLE_COLOR[r]?.bg,color:ROLE_COLOR[r]?.color,border:`1px solid ${ROLE_COLOR[r]?.border}`}}>
+                                {r}
+                              </span>
+                            ))}
+                            {u.roles.length===0 && <span style={{fontSize:".65rem",color:"var(--mu)"}}>Sin roles</span>}
+                          </div>
+                        </td>
+                        <td style={{padding:".65rem .9rem"}}>
+                          <div onClick={()=>toggleActivo(u.id)} style={{display:"inline-flex",alignItems:"center",gap:".35rem",cursor:"pointer",padding:".2rem .5rem",borderRadius:5,background:u.activo?"rgba(34,211,160,.08)":"rgba(255,255,255,.04)",border:`1px solid ${u.activo?"rgba(34,211,160,.2)":"var(--b2)"}`,transition:"all .15s"}}>
+                            <div style={{width:7,height:7,borderRadius:"50%",background:u.activo?"var(--gr)":"var(--mu)",transition:"background .15s"}}/>
+                            <span style={{fontSize:".65rem",fontWeight:700,color:u.activo?"var(--gr)":"var(--mu)"}}>{u.activo?"Activo":"Inactivo"}</span>
+                          </div>
+                        </td>
+                        <td style={{padding:".65rem .9rem"}}>
+                          <div style={{display:"flex",gap:".4rem"}}>
+                            <button className="btn-sec" style={{fontSize:".68rem",padding:".25rem .6rem"}} onClick={()=>editarUsuario(u)}>Editar</button>
+                            {u.id!==1 && (
+                              <button style={{fontSize:".68rem",padding:".25rem .6rem",background:"rgba(224,82,82,.08)",border:"1px solid rgba(224,82,82,.2)",borderRadius:6,color:"var(--rd)",cursor:"pointer"}}
+                                onClick={()=>eliminarUsuario(u.id)}>Eliminar</button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Leyenda de roles */}
+              <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:9}}>
+                <div style={{fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".5rem"}}>Permisos por rol</div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:".5rem"}}>
+                  {[
+                    {rol:"admin",       desc:"Acceso total al sistema y gestión de usuarios"},
+                    {rol:"martillero",  desc:"Sala en vivo, lotes, remates y postores"},
+                    {rol:"postremate",  desc:"Adjudicaciones, liquidaciones y devoluciones"},
+                    {rol:"garantias",   desc:"Solo módulo de garantías"},
+                    {rol:"solo lectura",desc:"Ve todo pero no puede modificar nada"},
+                  ].map(({rol,desc})=>(
+                    <div key={rol} style={{padding:".5rem .65rem",background:"rgba(255,255,255,.02)",border:`1px solid ${ROLE_COLOR[rol]?.border}`,borderRadius:7}}>
+                      <div style={{fontSize:".65rem",fontWeight:700,color:ROLE_COLOR[rol]?.color,marginBottom:".2rem"}}>{rol}</div>
+                      <div style={{fontSize:".6rem",color:"var(--mu)",lineHeight:1.4}}>{desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Modal crear/editar */}
+              {usuarioModal && (
+                <div className="ov" onClick={()=>{setUsuarioModal(false);resetUsuarioForm();}}>
+                  <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:460}}>
+                    <div className="modal-title">{usuarioModal==="crear"?"Nuevo usuario":"Editar usuario"}</div>
+
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".75rem",marginBottom:".75rem"}}>
+                      <div style={{gridColumn:"1/-1"}}>
+                        <label className="fl">Nombre completo</label>
+                        <input className="fi" placeholder="Juan Pérez" value={usuarioForm.nombre} onChange={e=>setUsuarioForm(f=>({...f,nombre:e.target.value}))}/>
+                      </div>
+                      <div>
+                        <label className="fl">Usuario</label>
+                        <input className="fi" placeholder="jperez" value={usuarioForm.usuario} onChange={e=>setUsuarioForm(f=>({...f,usuario:e.target.value.toLowerCase().replace(/\s/g,"")}))}/>
+                      </div>
+                      <div>
+                        <label className="fl">Email</label>
+                        <input className="fi" type="email" placeholder="correo@casa.cl" value={usuarioForm.email} onChange={e=>setUsuarioForm(f=>({...f,email:e.target.value}))}/>
+                      </div>
+                      <div>
+                        <label className="fl">{usuarioModal==="editar"?"Nueva contraseña (opcional)":"Contraseña"}</label>
+                        <input className="fi" type="password" placeholder="••••••••" value={usuarioForm.pass} onChange={e=>setUsuarioForm(f=>({...f,pass:e.target.value}))}/>
+                      </div>
+                      <div>
+                        <label className="fl">Casa de remates</label>
+                        <select className="fsel" value={usuarioForm.casa} onChange={e=>setUsuarioForm(f=>({...f,casa:e.target.value}))}>
+                          {CASAS_LISTA.map(c=><option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Roles */}
+                    <div style={{marginBottom:"1rem"}}>
+                      <label className="fl" style={{marginBottom:".5rem",display:"block"}}>Roles y accesos</label>
+                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".4rem"}}>
+                        {ROLES_DISPONIBLES.map(rol=>{
+                          const activo = usuarioForm.roles.includes(rol);
+                          const c = ROLE_COLOR[rol];
+                          return (
+                            <div key={rol} onClick={()=>toggleRol(rol)}
+                              style={{display:"flex",alignItems:"center",gap:".5rem",padding:".5rem .75rem",borderRadius:7,cursor:"pointer",background:activo?c.bg:"rgba(255,255,255,.02)",border:`1px solid ${activo?c.border:"var(--b2)"}`,transition:"all .15s"}}>
+                              <div style={{width:14,height:14,borderRadius:3,border:`1.5px solid ${activo?c.color:"var(--mu)"}`,background:activo?c.color:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s"}}>
+                                {activo && <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"><path d="M1.5 5l3 3 4-4.5"/></svg>}
+                              </div>
+                              <span style={{fontSize:".75rem",fontWeight:activo?700:500,color:activo?c.color:"var(--mu2)"}}>{rol}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="modal-actions">
+                      <button className="btn-sec" onClick={()=>{setUsuarioModal(false);resetUsuarioForm();}}>Cancelar</button>
+                      <button className="btn-confirm" onClick={guardarUsuario}>
+                        {usuarioModal==="crear"?"Crear usuario":"Guardar cambios"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {/* ══ CONFIG ══ */}
         {page==="config" && (
           <div className="page">
@@ -3299,76 +3516,193 @@ function Dashboard({ session, onLogout }) {
         )}
 
         {/* ══ ADJUDICACIONES ══ */}
-        {page==="adjudicac" && (
-          <div className="page">
-            {/* Banner selector de remate */}
-            {(() => {
-              const cerrados = REMATES.filter(r => r.estado === "cerrado");
-              return (
-                <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
-                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
-                  <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
-                  <select
-                    value={selectedRemate||""}
-                    onChange={e => setSelectedRemate(e.target.value||null)}
-                    style={{flex:1,maxWidth:340,padding:".4rem .7rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:7,color:"var(--wh2)",fontSize:".8rem",fontFamily:"Inter,sans-serif",cursor:"pointer"}}>
-                    <option value="">— Todos los remates cerrados —</option>
-                    {cerrados.map(r => (
-                      <option key={r.id} value={r.id}>{r.name} · {r.fecha} · {r.casa}</option>
-                    ))}
-                  </select>
-                  {selectedRemate && (
-                    <button onClick={()=>setSelectedRemate(null)}
-                      style={{background:"transparent",border:"1px solid var(--b2)",borderRadius:6,color:"var(--mu2)",fontSize:".7rem",padding:".3rem .6rem",cursor:"pointer",whiteSpace:"nowrap"}}>
-                      Ver todos
-                    </button>
-                  )}
-                </div>
-              );
-            })()}
-            <div className="stat-grid" style={{gridTemplateColumns:"repeat(4,1fr)",marginBottom:"1.2rem"}}>
-              {[
-                {label:"Total adjudicado",    val:fmt([...ADJUDICACIONES,...liquidaciones].reduce((s,a)=>s+a.monto,0)),       c:"var(--ac)"},
-                {label:"Saldo pendiente",     val:fmt([...ADJUDICACIONES,...liquidaciones].filter(a=>a.estado==="saldo pendiente").reduce((s,a)=>s+a.saldo,0)), c:"var(--yl)"},
-                {label:"Liquidaciones generadas", val:[...ADJUDICACIONES,...liquidaciones].length,                            c:"var(--gr)"},
-                {label:"Devoluciones pendientes", val:[...ADJUDICACIONES.map(()=>({estado:"pendiente"})),...devoluciones].filter(d=>d.estado==="pendiente").length, c:"var(--yl)"},
-              ].map((s,i)=>(
-                <div className="stat-card" key={i} style={{"--sc":s.c}}>
-                  <div className="stat-label">{s.label}</div>
-                  <div className="stat-val" style={{fontSize:"1.35rem"}}>{s.val}</div>
-                </div>
-              ))}
-            </div>
-            <div style={{display:"flex",gap:".7rem",marginBottom:"1.1rem"}}>
-              <button className="btn-primary" onClick={()=>setPage("liquidac")}>Ver liquidaciones ({[...ADJUDICACIONES,...liquidaciones].length})</button>
-              <button className="btn-sec" onClick={()=>setPage("devoluciones")}>Ver devoluciones de garantia ({devoluciones.length + ADJUDICACIONES.length})</button>
-              {remateTerminado && <span className="pill p-pagado" style={{padding:".3rem .8rem",alignSelf:"center"}}>Remate cerrado</span>}
-            </div>
-            <div style={{padding:".75rem 1rem",background:"rgba(47,128,237,.07)",border:"1px solid rgba(47,128,237,.2)",borderRadius:8,fontSize:".76rem",color:"var(--mu2)",lineHeight:1.55,marginBottom:"1.1rem"}}>
-              Al adjudicar cada lote, el sistema genera automaticamente la liquidacion para el comprador y prepara las devoluciones para los no adjudicados. <strong style={{color:"var(--wh2)"}}>La garantia se descuenta del total. El saldo restante debe ser transferido antes del retiro.</strong>
-            </div>
-            {[...ADJUDICACIONES,...liquidaciones].map((a,i)=>(
-              <div className="adj-card" key={i}>
-                <div>
-                  <div className="adj-lote">{a.lote}</div>
-                  <div className="adj-postor">{a.postor} · {a.rut||"—"}</div>
-                  <div className="adj-row">
-                    <div className="adj-item"><div className="adj-item-l">Monto adjudicado</div><div className="adj-item-v ac">{fmt(a.monto)}</div></div>
-                    <div className="adj-item"><div className="adj-item-l">Garantia descontada</div><div className="adj-item-v gr">{fmt(a.garantia||a.gar||300000)}</div></div>
-                    <div className="adj-item"><div className="adj-item-l">Saldo a pagar</div><div className={`adj-item-v${a.estado==="saldo pendiente"?" rd":""}`}>{a.estado==="pagado"?"Pagado":fmt(a.saldo)}</div></div>
-                    <div className="adj-item"><div className="adj-item-l">Comision (3%)</div><div className="adj-item-v">{fmt(a.com||Math.round(a.monto*0.03))}</div></div>
-                    <div className="adj-item"><div className="adj-item-l">Retiro</div><div className="adj-item-v">{a.retiro||"Sin coordinar"}</div></div>
+        {page==="adjudicac" && (()=>{
+          // Datos mock compradores de ese remate
+          const COMPRADORES_REMATE = [
+            {nPart:21, nombre:"NICOLAS PEREZ",                  garantia:0,      formaPago:"PRESENCIAL", liquidado:false, pagado:false},
+            {nPart:26, nombre:"EDUARDO MICHEL URRA BARRIOS",    garantia:250000, formaPago:"PRESENCIAL", liquidado:true,  pagado:false},
+            {nPart:28, nombre:"CAMILO MENA VENEGAS",            garantia:0,      formaPago:"PRESENCIAL", liquidado:false, pagado:true},
+            {nPart:29, nombre:"RODRIGO IBAÑEZ URIBE",           garantia:250000, formaPago:"PRESENCIAL", liquidado:true,  pagado:false},
+            {nPart:30, nombre:"ROBERTO PEÑAILILLO",             garantia:250000, formaPago:"PRESENCIAL", liquidado:true,  pagado:true},
+            {nPart:31, nombre:"LUIS CARREÑO",                   garantia:250000, formaPago:"PRESENCIAL", liquidado:false, pagado:false},
+          ];
+          const NO_COMPRADORES_REMATE = noCompradoresState;
+
+          const cerrados = REMATES.filter(r=>r.estado==="cerrado");
+          const remateActual = cerrados.find(r=>r.id===selectedRemate)||cerrados[0]||null;
+
+          const devBadge = (d) => {
+            if(d==="N/A")       return {label:"Sin garantía", bg:"rgba(255,255,255,.04)", color:"var(--mu)"};
+            if(d==="pendiente") return {label:"Pendiente",    bg:"rgba(246,173,85,.1)",   color:"var(--yl)"};
+            if(d==="cheque")    return {label:"Cheque",       bg:"rgba(34,211,160,.1)",   color:"var(--gr)"};
+            if(d==="efectivo")  return {label:"Efectivo",     bg:"rgba(34,211,160,.1)",   color:"var(--gr)"};
+            return                     {label:d,              bg:"rgba(255,255,255,.04)", color:"var(--mu)"};
+          };
+
+          // Descargar listado devoluciones .txt
+          const descargarTxt = () => {
+            const lineas = ["N° Part.\tNombre\tGarantía\tForma Pago\tDevolución"];
+            noCompradoresState.forEach(c=>{
+              lineas.push(`${c.nPart}\t${c.nombre}\t$${c.garantia.toLocaleString("es-CL")}\t${c.formaPago}\t${c.devolucion.toUpperCase()}`);
+            });
+            const blob = new Blob([lineas.join("\n")],{type:"text/plain"});
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `devoluciones-${remateActual?.id||"remate"}.txt`;
+            a.click();
+          };
+
+          return (
+            <div className="page">
+              {/* Banner selector remate */}
+              <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
+                <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
+                <select value={selectedRemate||""} onChange={e=>setSelectedRemate(e.target.value||null)}
+                  style={{flex:1,maxWidth:380,padding:".4rem .7rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:7,color:"var(--wh2)",fontSize:".8rem",fontFamily:"Inter,sans-serif",cursor:"pointer"}}>
+                  <option value="">— Selecciona un remate —</option>
+                  {cerrados.map(r=><option key={r.id} value={r.id}>{r.name} · {r.fecha} · {r.casa}</option>)}
+                </select>
+                {remateActual && (
+                  <span style={{fontSize:".72rem",color:"var(--mu2)",whiteSpace:"nowrap",fontFamily:"DM Mono,monospace"}}>{remateActual.name}</span>
+                )}
+              </div>
+
+              {/* Stat cards rápidas */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:".7rem",marginBottom:"1.3rem"}}>
+                {[
+                  {label:"Compradores",         val:COMPRADORES_REMATE.length,                                   color:"var(--ac)"},
+                  {label:"Liquidaciones pagas",  val:COMPRADORES_REMATE.filter(c=>c.pagado).length,              color:"var(--gr)"},
+                  {label:"Saldos pendientes",    val:COMPRADORES_REMATE.filter(c=>!c.pagado).length,             color:"var(--yl)"},
+                  {label:"Devoluciones pendientes",val:noCompradoresState.filter(c=>c.devolucion==="pendiente").length, color:"var(--rd)"},
+                ].map((s,i)=>(
+                  <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,padding:".8rem 1rem",borderTop:`3px solid ${s.color}`}}>
+                    <div style={{fontSize:".62rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".3rem"}}>{s.label}</div>
+                    <div style={{fontFamily:"DM Mono,monospace",fontSize:"1.4rem",fontWeight:800,color:s.color}}>{s.val}</div>
                   </div>
+                ))}
+              </div>
+
+              {/* ── 1. Listado Compradores ── */}
+              <div style={{marginBottom:"1.5rem"}}>
+                <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:".75rem"}}>
+                  <div style={{width:22,height:22,borderRadius:5,background:"rgba(47,128,237,.15)",border:"1px solid rgba(47,128,237,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:800,color:"var(--ac)"}}>1</div>
+                  <span style={{fontSize:".85rem",fontWeight:800,color:"var(--wh2)"}}>Listado Compradores</span>
+                  <span style={{fontSize:".7rem",color:"var(--mu2)",marginLeft:"auto"}}>{COMPRADORES_REMATE.length} compradores</span>
                 </div>
-                <div className="adj-actions">
-                  <span className={`pill ${a.estado==="pagado"?"p-pagado":"p-saldo"}`}>{a.estado==="pagado"?"Pagado":"Saldo pendiente"}</span>
-                  <button className="btn-primary" style={{fontSize:".68rem",padding:".28rem .7rem"}} onClick={()=>notify("Liquidacion enviada por correo.","sold")}>Enviar liquidacion</button>
-                  {a.estado==="saldo pendiente" && <button className="btn-sec" style={{fontSize:".68rem",padding:".26rem .7rem"}} onClick={()=>notify("Confirmado.","inf")}>Confirmar pago</button>}
+                <div className="table-card">
+                  <table style={{width:"100%",borderCollapse:"collapse"}}>
+                    <thead>
+                      <tr style={{background:"rgba(255,255,255,.02)"}}>
+                        {["N° Part.","Nombre Cliente","Garantía","Forma Pago","Estado","Acción"].map(h=>(
+                          <th key={h} style={{padding:".5rem .9rem",textAlign:"left",fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em",borderBottom:"1px solid var(--b1)"}}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {COMPRADORES_REMATE.map((c,i)=>(
+                        <tr key={i} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}>
+                          <td style={{padding:".6rem .9rem",fontFamily:"DM Mono,monospace",fontSize:".82rem",fontWeight:700,color:"var(--ac)"}}>{c.nPart}</td>
+                          <td style={{padding:".6rem .9rem",fontSize:".82rem",fontWeight:600,color:"var(--wh2)"}}>{c.nombre}</td>
+                          <td style={{padding:".6rem .9rem",fontFamily:"DM Mono,monospace",fontSize:".78rem",color:c.garantia>0?"var(--gr)":"var(--mu)"}}>{c.garantia>0?fmt(c.garantia):"Sin garantía"}</td>
+                          <td style={{padding:".6rem .9rem",fontSize:".72rem",color:"var(--mu2)"}}>{c.formaPago}</td>
+                          <td style={{padding:".6rem .9rem"}}>
+                            {c.pagado
+                              ? <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .45rem",borderRadius:4,background:"rgba(34,211,160,.1)",color:"var(--gr)",border:"1px solid rgba(34,211,160,.2)"}}>Pagado</span>
+                              : <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .45rem",borderRadius:4,background:"rgba(246,173,85,.1)",color:"var(--yl)",border:"1px solid rgba(246,173,85,.2)"}}>Saldo pendiente</span>
+                            }
+                          </td>
+                          <td style={{padding:".6rem .9rem"}}>
+                            <div style={{display:"flex",gap:".4rem"}}>
+                              <button className="btn-primary" style={{fontSize:".68rem",padding:".25rem .65rem"}}
+                                onClick={()=>{setPage("liquidac");notify(`Cargando liquidación de ${c.nombre}...`,"inf");}}>
+                                Ver liquidación
+                              </button>
+                              {!c.pagado && (
+                                <button className="btn-sec" style={{fontSize:".68rem",padding:".25rem .6rem"}}
+                                  onClick={()=>notify(`Pago confirmado para ${c.nombre}.`,"sold")}>
+                                  Confirmar pago
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+
+              {/* ── 2. Listado No Compradores (Devoluciones) ── */}
+              <div>
+                <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:".75rem"}}>
+                  <div style={{width:22,height:22,borderRadius:5,background:"rgba(246,173,85,.12)",border:"1px solid rgba(246,173,85,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:800,color:"var(--yl)"}}>2</div>
+                  <span style={{fontSize:".85rem",fontWeight:800,color:"var(--wh2)"}}>Listado No Compradores — Devoluciones</span>
+                  <span style={{fontSize:".7rem",color:"var(--mu2)",marginLeft:"auto"}}>{NO_COMPRADORES_REMATE.length} postores</span>
+                  <button className="btn-sec" style={{fontSize:".68rem",padding:".25rem .7rem"}} onClick={descargarTxt}>
+                    Descargar .txt
+                  </button>
+                </div>
+                <div className="table-card">
+                  <table style={{width:"100%",borderCollapse:"collapse"}}>
+                    <thead>
+                      <tr style={{background:"rgba(255,255,255,.02)"}}>
+                        {["N° Part.","Nombre Cliente","Garantía","Forma Pago","Devolver Garantía"].map(h=>(
+                          <th key={h} style={{padding:".5rem .9rem",textAlign:"left",fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em",borderBottom:"1px solid var(--b1)"}}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {NO_COMPRADORES_REMATE.map((c,i)=>{
+                        return (
+                          <tr key={i} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}>
+                            <td style={{padding:".6rem .9rem",fontFamily:"DM Mono,monospace",fontSize:".82rem",fontWeight:700,color:"var(--mu2)"}}>{c.nPart}</td>
+                            <td style={{padding:".6rem .9rem",fontSize:".82rem",fontWeight:600,color:"var(--wh2)"}}>{c.nombre}</td>
+                            <td style={{padding:".6rem .9rem",fontFamily:"DM Mono,monospace",fontSize:".78rem",color:c.garantia>0?"var(--yl)":"var(--mu)"}}>{c.garantia>0?fmt(c.garantia):"$0"}</td>
+                            <td style={{padding:".6rem .9rem",fontSize:".72rem",color:"var(--mu2)"}}>{c.formaPago}</td>
+                            <td style={{padding:".6rem .9rem"}}>
+                              {c.devolucion==="N/A" && (
+                                <span style={{fontSize:".72rem",color:"var(--mu)"}}>N/A</span>
+                              )}
+                              {c.devolucion==="pendiente" && (
+                                <div style={{display:"flex",alignItems:"center",gap:".4rem"}}>
+                                  <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .5rem",borderRadius:4,background:"rgba(246,173,85,.12)",color:"var(--yl)",border:"1px solid rgba(246,173,85,.25)"}}>Pendiente</span>
+                                  <select defaultValue=""
+                                    style={{fontSize:".68rem",padding:".2rem .45rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:5,color:"var(--wh2)",cursor:"pointer"}}
+                                    onChange={e=>{
+                                      if(!e.target.value) return;
+                                      marcarDevolucion(c.nPart, e.target.value);
+                                      notify(`Garantía de ${c.nombre} devuelta en ${e.target.value.toUpperCase()}.`,"sold");
+                                    }}>
+                                    <option value="">Marcar como...</option>
+                                    <option value="efectivo">EFECTIVO</option>
+                                    <option value="cheque">CHEQUE</option>
+                                    <option value="transferencia">TRANSFERENCIA</option>
+                                  </select>
+                                </div>
+                              )}
+                              {(c.devolucion==="cheque"||c.devolucion==="efectivo"||c.devolucion==="transferencia") && (
+                                <div style={{display:"flex",alignItems:"center",gap:".4rem"}}>
+                                  <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .5rem",borderRadius:4,background:"rgba(34,211,160,.1)",color:"var(--gr)",border:"1px solid rgba(34,211,160,.25)"}}>
+                                    ✓ {c.devolucion.toUpperCase()}
+                                  </span>
+                                  <button style={{fontSize:".6rem",padding:".1rem .35rem",background:"transparent",border:"1px solid var(--b2)",borderRadius:4,color:"var(--mu)",cursor:"pointer"}}
+                                    onClick={()=>marcarDevolucion(c.nPart,"pendiente")}>
+                                    Deshacer
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ══ LIQUIDACIONES ══ */}
         {page==="liquidac" && (
