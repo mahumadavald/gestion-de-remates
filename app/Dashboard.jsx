@@ -1,6 +1,12 @@
 'use client'
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { createClient } from "@supabase/supabase-js";
+
+// ── Supabase client ───────────────────────────────────────────────
+const SUPA_URL = "https://xqkfcqibukghtyfjcwfb.supabase.co";
+const SUPA_KEY = "sb_publishable_m2bABYE65JScB4oCJUBmFg_3eVzUuIR";
+const supabase = createClient(SUPA_URL, SUPA_KEY);
 
 const FONT = `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');`;
 
@@ -1029,20 +1035,37 @@ function AuthScreen({ onLogin }) {
     comprador:  { label:"Postor",     icon:<svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="13" height="9" rx="1.5"/><path d="M5 5V4a3.5 3.5 0 017 0v1"/><path d="M8.5 9v2"/></svg>,  title:"Acceso postor",          sub:"Entra con tu codigo de paleta asignado al inscribirte en la casa de remates." },
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError(""); setLoading(true);
-    setTimeout(() => {
+    try {
       if (role === "comprador") {
-        const paleta = PALETAS_ACTIVAS.find(p => p.token.toUpperCase() === token.trim().toUpperCase());
-        if (!paleta) { setError("Codigo de paleta no encontrado o no activo."); setLoading(false); return; }
-        onLogin({ role:"comprador", name:paleta.nombre, rut:paleta.rut, casa:paleta.casa, casaNombre:paleta.casaNombre, token:paleta.token });
+        // Postores: buscan su paleta en la tabla postores (sin contraseña)
+        const { data: postor, error: pErr } = await supabase
+          .from("postores")
+          .select("*, casas(slug, nombre)")
+          .ilike("paleta", token.trim())
+          .eq("estado", "verificado")
+          .single();
+        if (pErr || !postor) { setError("Código de paleta no encontrado o no activo."); setLoading(false); return; }
+        onLogin({ role:"comprador", name:postor.nombre, rut:postor.rut, casa:postor.casas?.slug, casaNombre:postor.casas?.nombre, token:postor.paleta });
       } else {
-        const user = USERS.find(u => u.email === email.trim() && u.password === password && u.role === role);
-        if (!user) { setError("Credenciales incorrectas. Verifica tu correo y contraseña."); setLoading(false); return; }
-        onLogin(user);
+        // Admin / Martillero: login real con Supabase Auth
+        const { data, error: authErr } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        if (authErr) { setError("Credenciales incorrectas. Verifica tu correo y contraseña."); setLoading(false); return; }
+        // El perfil lo levanta el onAuthStateChange en Root — solo esperamos
+        const { data: perfil } = await supabase
+          .from("usuarios")
+          .select("*, casas(slug, nombre)")
+          .eq("id", data.user.id)
+          .single();
+        if (!perfil) { setError("Usuario sin perfil asignado. Contacta al administrador."); setLoading(false); return; }
+        if (!perfil.activo) { setError("Usuario inactivo. Contacta al administrador."); await supabase.auth.signOut(); setLoading(false); return; }
+        onLogin({ id:data.user.id, email:data.user.email, name:perfil.nombre, role:perfil.role, casa:perfil.casas?.slug||null, casaNombre:perfil.casas?.nombre||"GR Auction Software", activo:perfil.activo });
       }
-      setLoading(false);
-    }, 700);
+    } catch(e) {
+      setError("Error de conexión. Intenta nuevamente.");
+    }
+    setLoading(false);
   };
 
   const cfg = roleConfig[role];
@@ -1330,11 +1353,53 @@ function BuyerView({ user, onLogout }) {
 
 // ── Root entry point ──────────────────────────────────────────────
 export default function Root() {
-  const [session, setSession] = useState(null); // null = not logged in
+  const [session,  setSession]  = useState(null);
+  const [loading,  setLoading]  = useState(true);  // espera chequeo de sesión
+
+  // Al cargar: restaurar sesión existente de Supabase
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session: s } }) => {
+      if (s) {
+        const perfil = await fetchPerfil(s.user.id);
+        setSession(perfil ? { ...perfil, email: s.user.email } : null);
+      }
+      setLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, s) => {
+      if (event === "SIGNED_OUT") { setSession(null); return; }
+      if (s) {
+        const perfil = await fetchPerfil(s.user.id);
+        if (perfil) setSession({ ...perfil, email: s.user.email });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchPerfil = async (uid) => {
+    const { data } = await supabase
+      .from("usuarios")
+      .select("*, casas(slug, nombre)")
+      .eq("id", uid)
+      .single();
+    if (!data) return null;
+    return {
+      id:         uid,
+      name:       data.nombre,
+      role:       data.role,
+      casa:       data.casas?.slug   || null,
+      casaNombre: data.casas?.nombre || "GR Auction Software",
+      activo:     data.activo,
+    };
+  };
 
   const handleLogin  = (user) => setSession(user);
-  const handleLogout = () => setSession(null);
+  const handleLogout = async () => { await supabase.auth.signOut(); setSession(null); };
 
+  if (loading) return (
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",background:"#070f1c",color:"#5a7fa8",fontFamily:"Inter,sans-serif",fontSize:".85rem"}}>
+      Cargando...
+    </div>
+  );
   if (!session) return <AuthScreen onLogin={handleLogin}/>;
   if (session.role === "comprador") return <BuyerView user={session} onLogout={handleLogout}/>;
   return <Dashboard session={session} onLogout={handleLogout}/>;
@@ -1373,6 +1438,146 @@ function Dashboard({ session, onLogout }) {
   const [usuarioForm, setUsuarioForm] = useState({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
   const [usuarioModal, setUsuarioModal] = useState(false); // false | "crear" | "editar"
   const resetUsuarioForm = () => setUsuarioForm({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
+
+  // ── Supabase: datos reales ──────────────────────────────────────
+  const [dbRemates,   setDbRemates]   = useState([]);
+  const [dbLotes,     setDbLotes]     = useState([]);
+  const [dbPostores,  setDbPostores]  = useState([]);
+  const [dbLoading,   setDbLoading]   = useState(true);
+
+  // Carga inicial desde Supabase
+  useEffect(() => {
+    let mounted = true;
+    const cargar = async () => {
+      setDbLoading(true);
+      try {
+        // Remates filtrados por casa si no es admin GR
+        const remQ = supabase.from("remates").select("*").order("created_at", {ascending:false});
+        if (session?.casa) remQ.eq("casa_id", session.casa);
+        const { data: remData } = await remQ;
+        if (mounted && remData) setDbRemates(remData);
+
+        // Lotes
+        const { data: lotData } = await supabase.from("lotes").select("*").order("orden");
+        if (mounted && lotData) setDbLotes(lotData);
+
+        // Postores
+        const { data: posData } = await supabase.from("postores").select("*").order("numero");
+        if (mounted && posData) setDbPostores(posData);
+
+      } catch(e) { console.warn("Supabase fetch error:", e); }
+      if (mounted) setDbLoading(false);
+    };
+    cargar();
+    return () => { mounted = false; };
+  }, [session]);
+
+  // Suscripción realtime a pujas
+  useEffect(() => {
+    if (!lots[idx]?.supabaseId) return;
+    const channel = supabase
+      .channel("pujas-live")
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "pujas",
+        filter: `lote_id=eq.${lots[idx].supabaseId}`
+      }, (payload) => {
+        const puja = payload.new;
+        setBids(prev => {
+          const next = [...prev];
+          const b = next[idx];
+          if (puja.monto > b.current) {
+            next[idx] = {
+              ...b,
+              current: puja.monto,
+              count: b.count + 1,
+              history: [{ postor: `Paleta ${puja.numero_postor}`, monto: puja.monto, time: new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}) }, ...b.history].slice(0,10),
+            };
+            setFlash(true); setTimeout(()=>setFlash(false), 600);
+            setLastBidder(`Paleta ${puja.numero_postor}`);
+          }
+          return next;
+        });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [lots, idx]);
+
+  // Helper: guardar puja en Supabase
+  const savePuja = async (monto, numeroPaleta) => {
+    const lote = lots[idx];
+    if (!lote?.supabaseId) return;
+    await supabase.from("pujas").insert({
+      lote_id: lote.supabaseId,
+      remate_id: lote.remateId || null,
+      numero_postor: numeroPaleta || 0,
+      monto,
+    });
+  };
+
+  // Helper: guardar remate en Supabase
+  const saveRemate = async (data) => {
+    const { data: r, error } = await supabase.from("remates").insert(data).select().single();
+    if (!error && r) setDbRemates(prev => [r, ...prev]);
+    return { data: r, error };
+  };
+
+  // Helper: guardar lote en Supabase
+  const saveLote = async (data) => {
+    const { data: l, error } = await supabase.from("lotes").insert(data).select().single();
+    if (!error && l) setDbLotes(prev => [...prev, l]);
+    return { data: l, error };
+  };
+
+  // Helper: guardar postor en Supabase
+  const savePostor = async (data) => {
+    const { data: p, error } = await supabase.from("postores").insert(data).select().single();
+    if (!error && p) setDbPostores(prev => [...prev, p]);
+    return { data: p, error };
+  };
+
+  // Helper: actualizar estado remate
+  const updateRemateEstado = async (id, estado) => {
+    const { error } = await supabase.from("remates").update({estado}).eq("id", id);
+    if (!error) setDbRemates(prev => prev.map(r => r.id===id ? {...r,estado} : r));
+  };
+
+  // Merge: usa datos de Supabase si hay, fallback a mock
+  const REMATES_MERGED = dbRemates.length > 0 ? dbRemates.map(r => ({
+    id:     r.codigo || r.id,
+    name:   r.nombre,
+    fecha:  new Date(r.fecha).toLocaleDateString("es-CL",{day:"2-digit",month:"short",year:"numeric"}),
+    lotes:  r.total_lotes || 0,
+    modal:  r.modalidad,
+    estado: r.estado,
+    recaudado: r.total_recaudado || 0,
+    casa:   r.casa_nombre || "",
+    supabaseId: r.id,
+  })) : REMATES;
+
+  const LOTES_MERGED = dbLotes.length > 0 ? dbLotes.map(l => ({
+    id:      l.codigo || l.id,
+    name:    l.nombre,
+    cat:     l.categoria,
+    base:    l.base,
+    min:     l.minimo,
+    com:     l.comision,
+    estado:  l.estado,
+    supabaseId: l.id,
+    remateId:   l.remate_id,
+  })) : LOTES;
+
+  const POSTORES_MERGED = dbPostores.length > 0 ? dbPostores.map(p => ({
+    id:          `P-${String(p.numero).padStart(4,"0")}`,
+    nComprador:  p.numero,
+    name:        p.nombre,
+    rut:         p.rut,
+    email:       p.email,
+    tel:         p.telefono,
+    estado:      p.estado,
+    supabaseId:  p.id,
+    pujas:       0,
+    remates:     1,
+  })) : POSTORES;
 
   // ── Auction state ──────────────────────────────────────────────
   const [lots,        setLots]        = useState(LOTES_SALA);
@@ -1587,7 +1792,7 @@ function Dashboard({ session, onLogout }) {
     // Buscar datos completos del postor en POSTORES
     const byComprador = {};
     todasLiq.forEach(l => {
-      const postorData = POSTORES.find(p=>p.name===l.postor||p.razonSocial===l.postor) || null;
+      const postorData = POSTORES_MERGED.find(p=>p.name===l.postor||p.razonSocial===l.postor) || null;
       const key = postorData?.nComprador ?? l.postor;
       if (!byComprador[key]) byComprador[key] = { postorData, lotes:[], key };
       byComprador[key].lotes.push(l);
@@ -2251,7 +2456,7 @@ function Dashboard({ session, onLogout }) {
               <table>
                 <thead><tr><th>ID</th><th>Nombre</th><th>Fecha</th><th>Lotes</th><th>Modalidad</th><th>Recaudado</th><th>Estado</th></tr></thead>
                 <tbody>
-                  {REMATES.slice(0,4).map(r => (
+                  {REMATES_MERGED.slice(0,4).map(r => (
                     <tr key={r.id}>
                       <td className="mono">{r.id}</td>
                       <td style={{fontWeight:600}}>{r.name}</td>
@@ -2288,11 +2493,11 @@ function Dashboard({ session, onLogout }) {
               ))}
             </div>
             <div className="table-card">
-              <div className="table-head"><div className="table-title">{REMATES.filter(r=>filterTab==="todos"||r.estado===filterTab).length} remates</div></div>
+              <div className="table-head"><div className="table-title">{REMATES_MERGED.filter(r=>filterTab==="todos"||r.estado===filterTab).length} remates</div></div>
               <table>
                 <thead><tr><th>ID</th><th>Nombre</th><th>Fecha</th><th>Lotes</th><th>Modalidad</th><th>Recaudado</th><th>Estado</th>{session?.role==="admin"&&<th>Casa</th>}<th></th></tr></thead>
                 <tbody>
-                  {REMATES.filter(r=>filterTab==="todos"||r.estado===filterTab).map(r => (
+                  {REMATES_MERGED.filter(r=>filterTab==="todos"||r.estado===filterTab).map(r => (
                     <tr key={r.id}>
                       <td className="mono">{r.id}</td>
                       <td style={{fontWeight:600}}>{r.name}</td>
@@ -2329,7 +2534,7 @@ function Dashboard({ session, onLogout }) {
                                   })),...liquidaciones];
                                   const byComprador = {};
                                   todasLiq.forEach(l=>{
-                                    const postorData = POSTORES.find(p=>p.name===l.postor||p.razonSocial===l.postor)||null;
+                                    const postorData = POSTORES_MERGED.find(p=>p.name===l.postor||p.razonSocial===l.postor)||null;
                                     const key = postorData?.nComprador??l.postor;
                                     if(!byComprador[key]) byComprador[key]={postorData,lotes:[],key};
                                     byComprador[key].lotes.push(l);
@@ -2408,11 +2613,11 @@ function Dashboard({ session, onLogout }) {
               ))}
             </div>
             <div className="table-card">
-              <div className="table-head"><div className="table-title">{POSTORES.filter(p=>filterTab==="todos"||p.estado===filterTab).length} postores</div></div>
+              <div className="table-head"><div className="table-title">{POSTORES_MERGED.filter(p=>filterTab==="todos"||p.estado===filterTab).length} postores</div></div>
               <table>
                 <thead><tr><th>N Postor</th><th>Nombre</th><th>RUT</th><th>Email</th><th>Telefono</th><th>Pujas</th><th>Remates</th><th>Estado</th></tr></thead>
                 <tbody>
-                  {POSTORES.filter(p=>filterTab==="todos"||p.estado===filterTab).map(p => (
+                  {POSTORES_MERGED.filter(p=>filterTab==="todos"||p.estado===filterTab).map(p => (
                     <tr key={p.id}>
                       <td><span style={{fontFamily:"DM Mono,monospace",fontSize:".8rem",fontWeight:700,color:"var(--ac)"}}>{p.id}</span></td>
                       <td style={{fontWeight:600}}>{p.name}</td>
@@ -2439,7 +2644,7 @@ function Dashboard({ session, onLogout }) {
                 <div style={{fontSize:"1.5rem",fontWeight:900,color:"var(--ac)",letterSpacing:"-.03em",textTransform:"uppercase",fontStyle:"italic",lineHeight:1}}>Balance Económico</div>
                 <div style={{fontSize:".76rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginTop:".3rem"}}>
                   <select className="fsel" style={{fontSize:".75rem",width:"auto",background:"transparent",border:"none",color:"var(--mu2)",fontWeight:700,padding:"0",cursor:"pointer"}}>
-                    {REMATES.map(r=><option key={r.id}>{r.name}</option>)}
+                    {REMATES_MERGED.map(r=><option key={r.id}>{r.name}</option>)}
                   </select>
                 </div>
               </div>
@@ -2586,7 +2791,7 @@ function Dashboard({ session, onLogout }) {
                   {[...ADJUDICACIONES,...liquidaciones].map((a,i)=>{
                     const com     = a.com||Math.round((a.monto||0)*(a.comPct??3)/100);
                     const gadm    = a.gastosAdm||0;
-                    const postorD = POSTORES.find(p=>p.name===a.postor||p.razonSocial===a.postor);
+                    const postorD = POSTORES_MERGED.find(p=>p.name===a.postor||p.razonSocial===a.postor);
                     const loteR   = LOTES_REALES.find(l=>l.name===a.lote);
                     return (
                       <tr key={i}>
@@ -2636,7 +2841,7 @@ function Dashboard({ session, onLogout }) {
           const vd = VENDEDORES_MOCK.find(v=>v.id===vendedorSel);
           // Banner selector remate (inline)
           const BannerRemate = () => {
-            const cerrados = REMATES.filter(r => r.estado === "cerrado");
+            const cerrados = REMATES_MERGED.filter(r => r.estado === "cerrado");
             return (
               <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
@@ -2684,7 +2889,7 @@ function Dashboard({ session, onLogout }) {
             doc.setFontSize(10); doc.setTextColor(50,50,50);
             doc.text(`Fecha: ${new Date().toLocaleDateString("es-CL")}`,W-14,y+4,{align:"right"});
             doc.setFontSize(9); doc.setTextColor(120,120,120);
-            doc.text(`Remate: ${REMATES[0]?.name||"—"}`,W-14,y+10,{align:"right"});
+            doc.text(`Remate: ${REMATES_MERGED[0]?.name||"—"}`,W-14,y+10,{align:"right"});
             y+=18;
 
             // Datos vendedor
@@ -2913,7 +3118,7 @@ function Dashboard({ session, onLogout }) {
               </div>
               <div style={{display:"flex",gap:".5rem",alignItems:"center"}}>
                 <select className="fsel" style={{fontSize:".76rem",width:"auto"}}>
-                  {REMATES.map(r=><option key={r.id}>{r.name}</option>)}
+                  {REMATES_MERGED.map(r=><option key={r.id}>{r.name}</option>)}
                 </select>
                 <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={()=>notify("Exportando balance PDF...","inf")}>Exportar PDF</button>
               </div>
@@ -2978,7 +3183,7 @@ function Dashboard({ session, onLogout }) {
                       {top3.length===0 && <div style={{fontSize:".75rem",color:"var(--mu)",textAlign:"center",padding:"1rem"}}>Sin adjudicaciones aún</div>}
                       {top3.map((t,i)=>{
                         const pct = Math.round(t.monto/maxMonto*100);
-                        const posData = POSTORES.find(p=>p.name===t.postor||p.razonSocial===t.postor);
+                        const posData = POSTORES_MERGED.find(p=>p.name===t.postor||p.razonSocial===t.postor);
                         return (
                           <div key={i}>
                             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:".3rem"}}>
@@ -3080,7 +3285,7 @@ function Dashboard({ session, onLogout }) {
               <table>
                 <thead><tr><th>ID</th><th>Nombre</th><th>Lotes vendidos</th><th>Sin vender</th><th>Recaudado</th><th>Comisiones</th><th>IVA</th><th>Bruto</th><th>Estado</th></tr></thead>
                 <tbody>
-                  {REMATES.map(r => {
+                  {REMATES_MERGED.map(r => {
                     const com = Math.round(r.recaudado*.03);
                     const iva = Math.round(com*.19);
                     return (
@@ -3103,9 +3308,9 @@ function Dashboard({ session, onLogout }) {
 
             {/* ── Panel admin: clientes ── */}
             {session?.role==="admin" && (()=>{
-              const casas = [...new Set(REMATES.map(r=>r.casa))];
+              const casas = [...new Set(REMATES_MERGED.map(r=>r.casa))];
               const stats = casas.map(casa => {
-                const rematesCasa    = REMATES.filter(r=>r.casa===casa);
+                const rematesCasa    = REMATES_MERGED.filter(r=>r.casa===casa);
                 const cerrados       = rematesCasa.filter(r=>r.estado==="cerrado");
                 const totalVendido   = cerrados.reduce((s,r)=>s+r.recaudado,0);
                 const totalLotes     = rematesCasa.reduce((s,r)=>s+r.lotes,0);
@@ -3244,7 +3449,7 @@ function Dashboard({ session, onLogout }) {
 
         {/* ══ USUARIOS ══ */}
         {page==="usuarios" && session?.role==="admin" && (()=>{
-          const CASAS_LISTA = [...new Set(REMATES.map(r=>r.casa))];
+          const CASAS_LISTA = [...new Set(REMATES_MERGED.map(r=>r.casa))];
           const toggleRol = (rol) => {
             setUsuarioForm(f=>({...f, roles: f.roles.includes(rol) ? f.roles.filter(r=>r!==rol) : [...f.roles, rol]}));
           };
@@ -3528,7 +3733,7 @@ function Dashboard({ session, onLogout }) {
           ];
           const NO_COMPRADORES_REMATE = noCompradoresState;
 
-          const cerrados = REMATES.filter(r=>r.estado==="cerrado");
+          const cerrados = REMATES_MERGED.filter(r=>r.estado==="cerrado");
           const remateActual = cerrados.find(r=>r.id===selectedRemate)||cerrados[0]||null;
 
           const devBadge = (d) => {
@@ -3709,7 +3914,7 @@ function Dashboard({ session, onLogout }) {
           <div className="page">
             {/* Banner selector de remate */}
             {(() => {
-              const cerrados = REMATES.filter(r => r.estado === "cerrado");
+              const cerrados = REMATES_MERGED.filter(r => r.estado === "cerrado");
               return (
                 <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
@@ -3720,12 +3925,12 @@ function Dashboard({ session, onLogout }) {
                       const rid = e.target.value||null;
                       setSelectedRemate(rid);
                       if(rid) {
-                        const r = REMATES.find(x=>x.id===rid);
+                        const r = REMATES_MERGED.find(x=>x.id===rid);
                         if(r) {
                           const todasLiq = [...ADJUDICACIONES.map(a=>({lote:a.lote,exp:"",monto:a.monto,comPct:3,motorizado:false,postor:a.postor,rut:a.rut||"—",email:""})),...liquidaciones];
                           const byComprador = {};
                           todasLiq.forEach(l=>{
-                            const pd = POSTORES.find(p=>p.name===l.postor||p.razonSocial===l.postor)||null;
+                            const pd = POSTORES_MERGED.find(p=>p.name===l.postor||p.razonSocial===l.postor)||null;
                             const key = pd?.nComprador??l.postor;
                             if(!byComprador[key]) byComprador[key]={postorData:pd,lotes:[],key};
                             byComprador[key].lotes.push(l);
@@ -4050,7 +4255,7 @@ function Dashboard({ session, onLogout }) {
           <div className="page">
             {/* Banner selector de remate */}
             {(() => {
-              const cerrados = REMATES.filter(r => r.estado === "cerrado");
+              const cerrados = REMATES_MERGED.filter(r => r.estado === "cerrado");
               return (
                 <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
