@@ -1358,13 +1358,15 @@ export default function Root() {
 
   // Al cargar: restaurar sesión existente de Supabase
   useEffect(() => {
+    const timeout = setTimeout(() => setLoading(false), 5000); // fallback anti-stuck
     supabase.auth.getSession().then(async ({ data: { session: s } }) => {
       if (s) {
         const perfil = await fetchPerfil(s.user.id);
         setSession(perfil ? { ...perfil, email: s.user.email } : null);
       }
+      clearTimeout(timeout);
       setLoading(false);
-    });
+    }).catch(() => { clearTimeout(timeout); setLoading(false); });
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, s) => {
       if (event === "SIGNED_OUT") { setSession(null); return; }
       if (s) {
@@ -1445,6 +1447,9 @@ function Dashboard({ session, onLogout }) {
   // ── Formulario nuevo remate ──
   const [remateForm, setRemateForm] = useState({nombre:"",fecha:"",modalidad:"Híbrido",tipo:"judicial",comCustom:""});
   const resetRemateForm = () => setRemateForm({nombre:"",fecha:"",modalidad:"Híbrido",tipo:"judicial",comCustom:""});
+
+  // ── Remate activo en sala en vivo ──
+  const [salaRemateId, setSalaRemateId] = useState(null);
 
   // ── Formulario nuevo postor (módulo Postores) ──
   const [postorForm, setPostorForm] = useState({nombre:"",rut:"",email:"",telefono:"",tipo:"natural",empresa:"",garantia:300000});
@@ -2087,6 +2092,15 @@ function Dashboard({ session, onLogout }) {
               {/* ── PASO 2: Datos ── */}
               {wizStep===2 && (
                 <div className="form-grid">
+                  <div className="fg full">
+                    <label className="fl">Remate al que pertenece</label>
+                    <select className="fsel" value={wizDatos.remateId||""} onChange={e=>setWizDatos(f=>({...f,remateId:e.target.value}))}>
+                      <option value="">— Sin asignar —</option>
+                      {REMATES_MERGED.filter(r=>r.estado==="activo").map(r=>(
+                        <option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="fg full"><label className="fl">Nombre del artículo</label><input className="fi" placeholder={wizTipo==="VEHICULOS"?"Toyota Hilux 2020 4x4":wizTipo==="INMUEBLES"?"Parcela 315 — Coinco VI Region":"Enseres varios — Hogar"} value={wizDatos.nombre} onChange={e=>setWizDatos(f=>({...f,nombre:e.target.value}))}/></div>
                   <div className="fg"><label className="fl">Expediente / N° causa</label><input className="fi" placeholder="E-61-2025" value={wizDatos.exp} onChange={e=>setWizDatos(f=>({...f,exp:e.target.value}))}/></div>
                   <div className="fg"><label className="fl">Mandante</label><input className="fi" placeholder="Tanner / Judicial / Particular" value={wizDatos.mandante} onChange={e=>setWizDatos(f=>({...f,mandante:e.target.value}))}/></div>
@@ -2293,19 +2307,20 @@ function Dashboard({ session, onLogout }) {
                         const {data:casaData} = await supabase.from("casas").select("id").eq("slug","rematesahumada").single();
                         const codigo = `L-${String(Date.now()).slice(-5)}`;
                         const {error} = await supabase.from("lotes").insert({
-                          casa_id:   casaData?.id||null,
+                          casa_id:     casaData?.id||null,
+                          remate_id:   wizDatos.remateId||null,
                           codigo,
-                          nombre:    wizDatos.nombre,
+                          nombre:      wizDatos.nombre,
                           descripcion: [wizDatos.descripcion, wizDatos.exp&&`Exp: ${wizDatos.exp}`, wizDatos.mandante&&`Mandante: ${wizDatos.mandante}`, wizDatos.patente&&`Patente: ${wizDatos.patente}`, wizDatos.year&&`Año: ${wizDatos.year}`, wizDatos.km&&`Km: ${wizDatos.km}`].filter(Boolean).join(" | "),
-                          categoria: wizTipo==="VEHICULOS"?"Vehículo":wizTipo==="INMUEBLES"?"Inmueble":"Muebles",
-                          base:      baseNum,
-                          minimo:    minNum,
-                          comision:  parseFloat(loteForm.comCustom)||COMISIONES[loteForm.tipoRemate]?.com||3,
-                          tipo_iva:  "AF",
-                          estado:    "publicado",
-                          orden:     dbLotes.length+1,
+                          categoria:   wizTipo==="VEHICULOS"?"Vehículo":wizTipo==="INMUEBLES"?"Inmueble":"Muebles",
+                          base:        baseNum,
+                          minimo:      minNum,
+                          comision:    parseFloat(loteForm.comCustom)||COMISIONES[loteForm.tipoRemate]?.com||3,
+                          tipo_iva:    "AF",
+                          estado:      "publicado",
+                          orden:       dbLotes.length+1,
                         });
-                        if(error){notify("Error al guardar lote.","inf");console.error(error);return;}
+                        if(error){notify("Error al guardar lote: "+error.message,"inf");console.error(error);return;}
                         const {data:lotData} = await supabase.from("lotes").select("*").order("orden");
                         if(lotData) setDbLotes(lotData);
                         setModal(null); resetWiz(); notify("Lote guardado correctamente.","sold");
@@ -2593,8 +2608,29 @@ function Dashboard({ session, onLogout }) {
                       <td>
                         <div style={{display:"flex",gap:".4rem",flexWrap:"nowrap"}}>
                           {r.estado==="activo"
-                            ? <button className="btn-primary" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={()=>{setPage("sala");notify("Abriendo sala...","inf");}}>Abrir sala</button>
-                            : <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={()=>{setPage("sala");notify("Abriendo sala...","inf");}}>Ver sala</button>
+                            ? <button className="btn-primary" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async ()=>{
+                                setSalaRemateId(r.supabaseId||r.id);
+                                if(r.supabaseId){
+                                  const {data:lotesRemate} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
+                                  if(lotesRemate&&lotesRemate.length>0){
+                                    const mapped = lotesRemate.map(l=>({
+                                      id:l.id, supabaseId:l.id, remateId:l.remate_id,
+                                      name:l.nombre, cat:l.categoria||"Muebles",
+                                      base:l.base||0, imgs:[], desc:l.descripcion||"",
+                                      inc:Math.round((l.base||0)*0.05)||100000,
+                                    }));
+                                    setLots(mapped);
+                                    setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
+                                  } else {
+                                    setLots(LOTES_SALA);
+                                    setBids(LOTES_SALA.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
+                                    notify("Este remate no tiene lotes asignados aún.","inf");
+                                  }
+                                }
+                                setIdx(0); setAState("waiting"); setTimeLeft(120); setBidTimer(null);
+                                setPage("sala"); notify("Sala abierta.","sold");
+                              }}>Abrir sala</button>
+                            : <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={()=>{setPage("sala");}}>Ver sala</button>
                           }
                           {r.estado==="cerrado" && (
                             <button
@@ -4422,7 +4458,7 @@ function Dashboard({ session, onLogout }) {
             <div className="topbar">
               <div className="topbar-left">
                 <button className="btn-sec" onClick={()=>setPage("remates")}>← Volver</button>
-                <div className="topbar-title">Sala en vivo — Remate Industrial Marzo</div>
+                <div className="topbar-title">Sala en vivo — {(salaRemateId && REMATES_MERGED.find(r=>r.supabaseId===salaRemateId||r.id===salaRemateId)?.name) || "Remate Industrial Marzo"}</div>
               </div>
               <div className="topbar-right">
                 {/* Modalidad selector */}
