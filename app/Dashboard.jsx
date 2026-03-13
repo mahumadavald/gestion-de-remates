@@ -1422,7 +1422,8 @@ function Dashboard({ session, onLogout }) {
   const [wizFotos,   setWizFotos]   = useState({frente:null,izq:null,der:null,trasera:null});
   const [wizItems,   setWizItems]   = useState([{id:1,nombre:"",foto:null}]);
   const [wizDocs,    setWizDocs]    = useState([]);
-  const resetWiz = () => { setWizStep(1); setWizTipo(null); setWizVehTipo(""); setWizFotos({frente:null,izq:null,der:null,trasera:null}); setWizItems([{id:1,nombre:"",foto:null}]); setWizDocs([]); setLoteForm({ tipoRemate:"judicial", motorizado:false, comCustom:"" }); };
+  const [wizDatos, setWizDatos] = useState({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",descripcion:"",ubicacion:""});
+  const resetWiz = () => { setWizStep(1); setWizTipo(null); setWizVehTipo(""); setWizFotos({frente:null,izq:null,der:null,trasera:null}); setWizItems([{id:1,nombre:"",foto:null}]); setWizDocs([]); setLoteForm({ tipoRemate:"judicial", motorizado:false, comCustom:"" }); setWizDatos({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",descripcion:"",ubicacion:""}); };
   // Liquidaciones agrupadas por comprador para revisión post-remate
   const [liqReview,  setLiqReview]  = useState(null);  // null | { compradores: [...] }
   const [liqExpanded,setLiqExpanded]= useState(null);  // nComprador expandido
@@ -1440,6 +1441,15 @@ function Dashboard({ session, onLogout }) {
   const [usuarioForm, setUsuarioForm] = useState({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
   const [usuarioModal, setUsuarioModal] = useState(false); // false | "crear" | "editar"
   const resetUsuarioForm = () => setUsuarioForm({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
+
+  // ── Formulario nuevo remate ──
+  const [remateForm, setRemateForm] = useState({nombre:"",fecha:"",modalidad:"Híbrido",tipo:"judicial",comCustom:""});
+  const resetRemateForm = () => setRemateForm({nombre:"",fecha:"",modalidad:"Híbrido",tipo:"judicial",comCustom:""});
+
+  // ── Formulario nuevo postor (módulo Postores) ──
+  const [postorForm, setPostorForm] = useState({nombre:"",rut:"",email:"",telefono:"",tipo:"natural",empresa:"",garantia:300000});
+  const resetPostorForm = () => setPostorForm({nombre:"",rut:"",email:"",telefono:"",tipo:"natural",empresa:"",garantia:300000});
+  const [postorModal, setPostorModal] = useState(false);
 
   // ── Supabase: datos reales ──────────────────────────────────────
   const [dbRemates,   setDbRemates]   = useState([]);
@@ -2007,26 +2017,33 @@ function Dashboard({ session, onLogout }) {
             {modal==="nuevo-remate" && <>
               <div className="modal-title">Crear nuevo remate</div>
               <div className="form-grid">
-                <div className="fg full"><label className="fl">Nombre del remate</label><input className="fi" placeholder="Remate Industrial Abril 2026"/></div>
-                <div className="fg"><label className="fl">Fecha</label><input className="fi" type="date"/></div>
-                <div className="fg"><label className="fl">Modalidad</label><select className="fsel"><option>Presencial</option><option>Online</option><option>Hibrido</option></select></div>
-                <div className="fg full"><label className="fl">Tipo de remate</label>
-                  <select className="fsel" value={loteForm.tipoRemate} onChange={e=>setLoteForm(f=>({...f,tipoRemate:e.target.value}))}>
-                    <option value="judicial">Judicial — 3% comision</option>
-                    <option value="concursal">Concursal — 2.5% comision</option>
-                    <option value="privado">Privado — comision personalizada</option>
+                <div className="fg full"><label className="fl">Nombre del remate</label>
+                  <input className="fi" placeholder="Remate Industrial Abril 2026" value={remateForm.nombre} onChange={e=>setRemateForm(f=>({...f,nombre:e.target.value}))}/>
+                </div>
+                <div className="fg"><label className="fl">Fecha</label>
+                  <input className="fi" type="date" value={remateForm.fecha} onChange={e=>setRemateForm(f=>({...f,fecha:e.target.value}))}/>
+                </div>
+                <div className="fg"><label className="fl">Modalidad</label>
+                  <select className="fsel" value={remateForm.modalidad} onChange={e=>setRemateForm(f=>({...f,modalidad:e.target.value}))}>
+                    <option>Presencial</option><option>Online</option><option>Híbrido</option>
                   </select>
                 </div>
-                {loteForm.tipoRemate==="privado" && (
+                <div className="fg full"><label className="fl">Tipo de remate</label>
+                  <select className="fsel" value={remateForm.tipo} onChange={e=>setRemateForm(f=>({...f,tipo:e.target.value}))}>
+                    <option value="judicial">Judicial — 3% comisión</option>
+                    <option value="concursal">Concursal — 2.5% comisión</option>
+                    <option value="privado">Privado — comisión personalizada</option>
+                  </select>
+                </div>
+                {remateForm.tipo==="privado" && (
                   <div className="fg full">
-                    <label className="fl">Comision personalizada (%)</label>
-                    <input className="fi" type="number" step="0.5" min="0" max="20" placeholder="Ej: 5" value={loteForm.comCustom} onChange={e=>setLoteForm(f=>({...f,comCustom:e.target.value}))}/>
+                    <label className="fl">Comisión personalizada (%)</label>
+                    <input className="fi" type="number" step="0.5" min="0" max="20" placeholder="Ej: 5" value={remateForm.comCustom} onChange={e=>setRemateForm(f=>({...f,comCustom:e.target.value}))}/>
                   </div>
                 )}
-                <div className="fg full" style={{padding:".65rem .85rem",background:`rgba(${loteForm.tipoRemate==="judicial"?"47,128,237":loteForm.tipoRemate==="concursal"?"246,173,85":"34,211,160"},.07)`,border:`1px solid rgba(${loteForm.tipoRemate==="judicial"?"47,128,237":loteForm.tipoRemate==="concursal"?"246,173,85":"34,211,160"},.2)`,borderRadius:7,fontSize:".75rem",color:"var(--mu2)"}}>
-                  {COMISIONES[loteForm.tipoRemate]?.desc}{loteForm.tipoRemate==="privado"&&loteForm.comCustom?` Comision configurada: ${loteForm.comCustom}%.`:""}
+                <div className="fg full" style={{padding:".65rem .85rem",background:`rgba(${remateForm.tipo==="judicial"?"47,128,237":remateForm.tipo==="concursal"?"246,173,85":"34,211,160"},.07)`,border:`1px solid rgba(${remateForm.tipo==="judicial"?"47,128,237":remateForm.tipo==="concursal"?"246,173,85":"34,211,160"},.2)`,borderRadius:7,fontSize:".75rem",color:"var(--mu2)"}}>
+                  {COMISIONES[remateForm.tipo]?.desc}{remateForm.tipo==="privado"&&remateForm.comCustom?` Comisión configurada: ${remateForm.comCustom}%.`:""}
                 </div>
-                <div className="fg full"><label className="fl">Descripcion</label><input className="fi" placeholder="Descripcion breve"/></div>
               </div>
             </>}
             {modal==="nuevo-lote" && <>
@@ -2070,19 +2087,19 @@ function Dashboard({ session, onLogout }) {
               {/* ── PASO 2: Datos ── */}
               {wizStep===2 && (
                 <div className="form-grid">
-                  <div className="fg full"><label className="fl">Nombre del artículo</label><input className="fi" placeholder={wizTipo==="VEHICULOS"?"Toyota Hilux 2020 4x4":wizTipo==="INMUEBLES"?"Parcela 315 — Coinco VI Region":"Enseres varios — Hogar"}/></div>
-                  <div className="fg"><label className="fl">Expediente / N° causa</label><input className="fi" placeholder="E-61-2025"/></div>
-                  <div className="fg"><label className="fl">Mandante</label><input className="fi" placeholder="Tanner / Judicial / Particular"/></div>
-                  <div className="fg"><label className="fl">Propietario</label><input className="fi" placeholder="Apellido del propietario"/></div>
+                  <div className="fg full"><label className="fl">Nombre del artículo</label><input className="fi" placeholder={wizTipo==="VEHICULOS"?"Toyota Hilux 2020 4x4":wizTipo==="INMUEBLES"?"Parcela 315 — Coinco VI Region":"Enseres varios — Hogar"} value={wizDatos.nombre} onChange={e=>setWizDatos(f=>({...f,nombre:e.target.value}))}/></div>
+                  <div className="fg"><label className="fl">Expediente / N° causa</label><input className="fi" placeholder="E-61-2025" value={wizDatos.exp} onChange={e=>setWizDatos(f=>({...f,exp:e.target.value}))}/></div>
+                  <div className="fg"><label className="fl">Mandante</label><input className="fi" placeholder="Tanner / Judicial / Particular" value={wizDatos.mandante} onChange={e=>setWizDatos(f=>({...f,mandante:e.target.value}))}/></div>
+                  <div className="fg"><label className="fl">Propietario</label><input className="fi" placeholder="Apellido del propietario" value={wizDatos.propietario} onChange={e=>setWizDatos(f=>({...f,propietario:e.target.value}))}/></div>
                   {wizTipo==="VEHICULOS" && <>
-                    <div className="fg"><label className="fl">Patente</label><input className="fi" placeholder="ABCD-12" style={{fontFamily:"DM Mono,monospace",fontWeight:700}}/></div>
-                    <div className="fg"><label className="fl">Año</label><input className="fi" placeholder="2020"/></div>
-                    <div className="fg"><label className="fl">Kilometraje</label><input className="fi" placeholder="85.000 km"/></div>
-                    <div className="fg"><label className="fl">Color</label><input className="fi" placeholder="Blanco"/></div>
+                    <div className="fg"><label className="fl">Patente</label><input className="fi" placeholder="ABCD-12" style={{fontFamily:"DM Mono,monospace",fontWeight:700}} value={wizDatos.patente} onChange={e=>setWizDatos(f=>({...f,patente:e.target.value}))}/></div>
+                    <div className="fg"><label className="fl">Año</label><input className="fi" placeholder="2020" value={wizDatos.year} onChange={e=>setWizDatos(f=>({...f,year:e.target.value}))}/></div>
+                    <div className="fg"><label className="fl">Kilometraje</label><input className="fi" placeholder="85.000 km" value={wizDatos.km} onChange={e=>setWizDatos(f=>({...f,km:e.target.value}))}/></div>
+                    <div className="fg"><label className="fl">Color</label><input className="fi" placeholder="Blanco" value={wizDatos.color} onChange={e=>setWizDatos(f=>({...f,color:e.target.value}))}/></div>
                   </>}
                   {wizTipo==="INMUEBLES" && <>
-                    <div className="fg"><label className="fl">Rol SII</label><input className="fi" placeholder="332-15"/></div>
-                    <div className="fg"><label className="fl">Superficie</label><input className="fi" placeholder="12 Hec. / 850 m²"/></div>
+                    <div className="fg"><label className="fl">Rol SII</label><input className="fi" placeholder="332-15" value={wizDatos.rolSII} onChange={e=>setWizDatos(f=>({...f,rolSII:e.target.value}))}/></div>
+                    <div className="fg"><label className="fl">Superficie</label><input className="fi" placeholder="12 Hec. / 850 m²" value={wizDatos.superficie} onChange={e=>setWizDatos(f=>({...f,superficie:e.target.value}))}/></div>
                   </>}
                   <div className="fg">
                     <label className="fl">Tipo de remate</label>
@@ -2097,10 +2114,10 @@ function Dashboard({ session, onLogout }) {
                     <input className="fi" type="number" step="0.5" min="0" max="50" placeholder={`Ej: ${COMISIONES[loteForm.tipoRemate]?.com??3}`} value={loteForm.comCustom} onChange={e=>setLoteForm(f=>({...f,comCustom:e.target.value}))} style={{fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--ac)"}}/>
                   </div>
                   {wizTipo==="VEHICULOS" && <div className="fg full" style={{padding:".55rem .8rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:7,fontSize:".72rem",color:"var(--yl)"}}>Vehículo motorizado — se agregarán <strong>$50.000 gastos administrativos</strong> en la liquidación.</div>}
-                  <div className="fg"><label className="fl">Precio base</label><input className="fi" placeholder="$8.000.000"/></div>
-                  <div className="fg"><label className="fl">Precio mínimo</label><input className="fi" placeholder="$7.000.000"/></div>
-                  <div className="fg full"><label className="fl">Descripción</label><textarea className="fi" rows={3} placeholder="Estado general, condición, observaciones..." style={{resize:"none"}}/></div>
-                  <div className="fg full"><label className="fl">Ubicación</label><input className="fi" placeholder="Rancagua, VI Región"/></div>
+                  <div className="fg"><label className="fl">Precio base</label><input className="fi" placeholder="$8.000.000" value={wizDatos.base} onChange={e=>setWizDatos(f=>({...f,base:e.target.value}))}/></div>
+                  <div className="fg"><label className="fl">Precio mínimo</label><input className="fi" placeholder="$7.000.000" value={wizDatos.minimo} onChange={e=>setWizDatos(f=>({...f,minimo:e.target.value}))}/></div>
+                  <div className="fg full"><label className="fl">Descripción</label><textarea className="fi" rows={3} placeholder="Estado general, condición, observaciones..." style={{resize:"none"}} value={wizDatos.descripcion} onChange={e=>setWizDatos(f=>({...f,descripcion:e.target.value}))}/></div>
+                  <div className="fg full"><label className="fl">Ubicación</label><input className="fi" placeholder="Rancagua, VI Región" value={wizDatos.ubicacion} onChange={e=>setWizDatos(f=>({...f,ubicacion:e.target.value}))}/></div>
                 </div>
               )}
               {/* ── PASO 3: Fotos ── */}
@@ -2218,19 +2235,30 @@ function Dashboard({ session, onLogout }) {
             {modal==="nuevo-postor" && <>
               <div className="modal-title">Registrar postor</div>
               <div style={{padding:".55rem .85rem",background:"rgba(47,128,237,.07)",border:"1px solid rgba(47,128,237,.2)",borderRadius:7,fontSize:".74rem",color:"var(--mu2)",marginBottom:".9rem",lineHeight:1.55}}>
-                Al registrarse se asignara un <strong style={{color:"var(--wh2)"}}>N° de comprador</strong> automaticamente. Este numero mantiene la confidencialidad del postor durante el remate y aparecera en su liquidacion.
+                Al registrarse se asignará un <strong style={{color:"var(--wh2)"}}>N° de comprador</strong> automáticamente.
               </div>
               <div className="form-grid">
-                <div className="fg full"><label className="fl">Razon social o nombre completo</label><input className="fi" placeholder="Empresa Transporte Pasajero Jose Luis Nova EIRL"/></div>
-                <div className="fg"><label className="fl">RUT</label><input className="fi" placeholder="77.922.655-7"/></div>
-                <div className="fg"><label className="fl">Giro</label><input className="fi" placeholder="Transporte de Pasajeros"/></div>
-                <div className="fg"><label className="fl">Telefono</label><input className="fi" placeholder="+56 9 1234 5678"/></div>
-                <div className="fg"><label className="fl">Email</label><input className="fi" placeholder="contacto@empresa.cl"/></div>
-                <div className="fg full"><label className="fl">Direccion</label><input className="fi" placeholder="Los Veleros Casa 11"/></div>
-                <div className="fg"><label className="fl">Comuna</label><input className="fi" placeholder="Rancagua"/></div>
-                <div className="fg"><label className="fl">N° comprador asignado</label>
+                <div className="fg full"><label className="fl">Razón social o nombre completo</label>
+                  <input className="fi" placeholder="Empresa Transporte José Luis Nova EIRL" value={postorForm.nombre} onChange={e=>setPostorForm(f=>({...f,nombre:e.target.value}))}/>
+                </div>
+                <div className="fg"><label className="fl">RUT</label>
+                  <input className="fi" placeholder="77.922.655-7" value={postorForm.rut} onChange={e=>setPostorForm(f=>({...f,rut:e.target.value}))}/>
+                </div>
+                <div className="fg"><label className="fl">Teléfono</label>
+                  <input className="fi" placeholder="+56 9 1234 5678" value={postorForm.telefono} onChange={e=>setPostorForm(f=>({...f,telefono:e.target.value}))}/>
+                </div>
+                <div className="fg"><label className="fl">Email</label>
+                  <input className="fi" placeholder="contacto@empresa.cl" value={postorForm.email} onChange={e=>setPostorForm(f=>({...f,email:e.target.value}))}/>
+                </div>
+                <div className="fg"><label className="fl">Tipo</label>
+                  <select className="fsel" value={postorForm.tipo} onChange={e=>setPostorForm(f=>({...f,tipo:e.target.value}))}>
+                    <option value="natural">Persona natural</option>
+                    <option value="empresa">Empresa</option>
+                  </select>
+                </div>
+                <div className="fg full"><label className="fl">N° comprador asignado</label>
                   <div className="fi" style={{fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--ac)",background:"rgba(47,128,237,.07)",border:"1px solid rgba(47,128,237,.25)",display:"flex",alignItems:"center"}}>
-                    #{String(POSTORES.length+1).padStart(2,"0")} — asignado automaticamente
+                    #{String((dbPostores.length||POSTORES_MERGED.length)+1).padStart(2,"0")} — asignado automáticamente
                   </div>
                 </div>
               </div>
@@ -2258,10 +2286,73 @@ function Dashboard({ session, onLogout }) {
                   {wizStep>1 && <button className="btn-sec" style={{marginRight:"auto"}} onClick={()=>setWizStep(s=>s-1)}>← Atrás</button>}
                   {wizStep<4
                     ? <button className="btn-confirm" onClick={()=>{if(wizStep===1&&!wizTipo){notify("Selecciona el tipo de bien.","inf");return;}setWizStep(s=>s+1);}}>Siguiente →</button>
-                    : <button className="btn-confirm" onClick={()=>{setModal(null);resetWiz();notify("Lote guardado correctamente.","sold");}}>Guardar lote</button>}
+                    : <button className="btn-confirm" onClick={async ()=>{
+                        if(!wizDatos.nombre){notify("Ingresa el nombre del artículo.","inf");return;}
+                        const baseNum = parseInt(wizDatos.base.replace(/\D/g,""))||0;
+                        const minNum  = parseInt(wizDatos.minimo.replace(/\D/g,""))||0;
+                        const {data:casaData} = await supabase.from("casas").select("id").eq("slug","rematesahumada").single();
+                        const codigo = `L-${String(Date.now()).slice(-5)}`;
+                        const {error} = await supabase.from("lotes").insert({
+                          casa_id:   casaData?.id||null,
+                          codigo,
+                          nombre:    wizDatos.nombre,
+                          descripcion: [wizDatos.descripcion, wizDatos.exp&&`Exp: ${wizDatos.exp}`, wizDatos.mandante&&`Mandante: ${wizDatos.mandante}`, wizDatos.patente&&`Patente: ${wizDatos.patente}`, wizDatos.year&&`Año: ${wizDatos.year}`, wizDatos.km&&`Km: ${wizDatos.km}`].filter(Boolean).join(" | "),
+                          categoria: wizTipo==="VEHICULOS"?"Vehículo":wizTipo==="INMUEBLES"?"Inmueble":"Muebles",
+                          base:      baseNum,
+                          minimo:    minNum,
+                          comision:  parseFloat(loteForm.comCustom)||COMISIONES[loteForm.tipoRemate]?.com||3,
+                          tipo_iva:  "AF",
+                          estado:    "publicado",
+                          orden:     dbLotes.length+1,
+                        });
+                        if(error){notify("Error al guardar lote.","inf");console.error(error);return;}
+                        const {data:lotData} = await supabase.from("lotes").select("*").order("orden");
+                        if(lotData) setDbLotes(lotData);
+                        setModal(null); resetWiz(); notify("Lote guardado correctamente.","sold");
+                      }}>Guardar lote</button>}
                 </>
               ) : (
-                <button className="btn-confirm" onClick={()=>{setModal(null);notify("Guardado correctamente.");}}>Guardar</button>
+                <button className="btn-confirm" onClick={async ()=>{
+                  if(modal==="nuevo-remate"){
+                    if(!remateForm.nombre||!remateForm.fecha){notify("Completa nombre y fecha.","inf");return;}
+                    const {data:casaData} = await supabase.from("casas").select("id").eq("slug","rematesahumada").single();
+                    const codigo = `R-${String(Date.now()).slice(-4)}`;
+                    const {error} = await supabase.from("remates").insert({
+                      casa_id:   casaData?.id||null,
+                      codigo,
+                      nombre:    remateForm.nombre,
+                      fecha:     remateForm.fecha,
+                      modalidad: remateForm.modalidad,
+                      tipo:      remateForm.tipo,
+                      estado:    "activo",
+                    });
+                    if(error){notify("Error al guardar remate.","inf");console.error(error);return;}
+                    const {data:remData} = await supabase.from("remates").select("*").order("created_at",{ascending:false});
+                    if(remData) setDbRemates(remData);
+                    setModal(null); resetRemateForm(); notify("Remate creado correctamente.","sold");
+                  } else if(modal==="nuevo-postor"){
+                    if(!postorForm.nombre){notify("Ingresa el nombre del postor.","inf");return;}
+                    const {data:casaData} = await supabase.from("casas").select("id").eq("slug","rematesahumada").single();
+                    const numero = (dbPostores.length||POSTORES_MERGED.length) + 1;
+                    const {error} = await supabase.from("postores").insert({
+                      casa_id:  casaData?.id||null,
+                      numero,
+                      nombre:   postorForm.nombre,
+                      rut:      postorForm.rut,
+                      email:    postorForm.email,
+                      telefono: postorForm.telefono,
+                      tipo:     postorForm.tipo,
+                      garantia: postorForm.garantia,
+                      estado:   "pendiente",
+                    });
+                    if(error){notify("Error al guardar postor.","inf");console.error(error);return;}
+                    const {data:posData} = await supabase.from("postores").select("*").order("numero");
+                    if(posData) setDbPostores(posData);
+                    setModal(null); resetPostorForm(); notify(`Postor #${String(numero).padStart(2,"0")} registrado.`,"sold");
+                  } else {
+                    setModal(null); notify("Guardado correctamente.");
+                  }
+                }}>Guardar</button>
               )}
             </div>
           </div>
@@ -3439,14 +3530,47 @@ function Dashboard({ session, onLogout }) {
           const toggleRol = (rol) => {
             setUsuarioForm(f=>({...f, roles: f.roles.includes(rol) ? f.roles.filter(r=>r!==rol) : [...f.roles, rol]}));
           };
-          const guardarUsuario = () => {
-            if(!usuarioForm.nombre||!usuarioForm.usuario||!usuarioForm.email) { notify("Completa nombre, usuario y email.","inf"); return; }
+          const guardarUsuario = async () => {
+            if(!usuarioForm.nombre||!usuarioForm.email) { notify("Completa nombre y email.","inf"); return; }
             if(usuarioModal==="crear") {
-              setUsuarios(u=>[...u, {...usuarioForm, id:Date.now()}]);
-              notify(`Usuario ${usuarioForm.usuario} creado.`,"sold");
+              if(!usuarioForm.pass||usuarioForm.pass.length<6){ notify("La contraseña debe tener al menos 6 caracteres.","inf"); return; }
+              // Crear en Supabase Auth
+              const {data:authData, error:authErr} = await supabase.auth.admin?.createUser?.({
+                email: usuarioForm.email,
+                password: usuarioForm.pass,
+                email_confirm: true,
+              }) || {};
+              // Si no hay admin API, usar signUp normal
+              let userId = authData?.user?.id;
+              if(!userId) {
+                // Guardamos solo en tabla usuarios (el usuario deberá hacer signUp por su cuenta)
+                const {data:newU, error:uErr} = await supabase.from("usuarios").insert({
+                  nombre: usuarioForm.nombre,
+                  email: usuarioForm.email,
+                  roles: usuarioForm.roles,
+                  activo: usuarioForm.activo,
+                }).select().single();
+                if(uErr){notify("Error al crear usuario.","inf");return;}
+                setUsuarios(u=>[...u, {...usuarioForm, id:newU.id}]);
+              } else {
+                await supabase.from("usuarios").insert({
+                  id: userId,
+                  nombre: usuarioForm.nombre,
+                  email: usuarioForm.email,
+                  roles: usuarioForm.roles,
+                  activo: usuarioForm.activo,
+                });
+                setUsuarios(u=>[...u, {...usuarioForm, id:userId}]);
+              }
+              notify(`Usuario ${usuarioForm.email} creado.`,"sold");
             } else {
+              await supabase.from("usuarios").update({
+                nombre: usuarioForm.nombre,
+                roles: usuarioForm.roles,
+                activo: usuarioForm.activo,
+              }).eq("id", usuarioForm.id);
               setUsuarios(u=>u.map(x=>x.id===usuarioForm.id?{...usuarioForm}:x));
-              notify(`Usuario ${usuarioForm.usuario} actualizado.`,"sold");
+              notify(`Usuario actualizado.`,"sold");
             }
             setUsuarioModal(false); resetUsuarioForm();
           };
