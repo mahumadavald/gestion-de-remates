@@ -1445,102 +1445,6 @@ function Dashboard({ session, onLogout }) {
   const [dbPostores,  setDbPostores]  = useState([]);
   const [dbLoading,   setDbLoading]   = useState(true);
 
-  // Carga inicial desde Supabase
-  useEffect(() => {
-    let mounted = true;
-    const cargar = async () => {
-      setDbLoading(true);
-      try {
-        // Remates filtrados por casa si no es admin GR
-        const remQ = supabase.from("remates").select("*").order("created_at", {ascending:false});
-        if (session?.casa) remQ.eq("casa_id", session.casa);
-        const { data: remData } = await remQ;
-        if (mounted && remData) setDbRemates(remData);
-
-        // Lotes
-        const { data: lotData } = await supabase.from("lotes").select("*").order("orden");
-        if (mounted && lotData) setDbLotes(lotData);
-
-        // Postores
-        const { data: posData } = await supabase.from("postores").select("*").order("numero");
-        if (mounted && posData) setDbPostores(posData);
-
-      } catch(e) { console.warn("Supabase fetch error:", e); }
-      if (mounted) setDbLoading(false);
-    };
-    cargar();
-    return () => { mounted = false; };
-  }, [session]);
-
-  // Suscripción realtime a pujas
-  useEffect(() => {
-    if (!lots[idx]?.supabaseId) return;
-    const channel = supabase
-      .channel("pujas-live")
-      .on("postgres_changes", {
-        event: "INSERT", schema: "public", table: "pujas",
-        filter: `lote_id=eq.${lots[idx].supabaseId}`
-      }, (payload) => {
-        const puja = payload.new;
-        setBids(prev => {
-          const next = [...prev];
-          const b = next[idx];
-          if (puja.monto > b.current) {
-            next[idx] = {
-              ...b,
-              current: puja.monto,
-              count: b.count + 1,
-              history: [{ postor: `Paleta ${puja.numero_postor}`, monto: puja.monto, time: new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}) }, ...b.history].slice(0,10),
-            };
-            setFlash(true); setTimeout(()=>setFlash(false), 600);
-            setLastBidder(`Paleta ${puja.numero_postor}`);
-          }
-          return next;
-        });
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [lots, idx]);
-
-  // Helper: guardar puja en Supabase
-  const savePuja = async (monto, numeroPaleta) => {
-    const lote = lots[idx];
-    if (!lote?.supabaseId) return;
-    await supabase.from("pujas").insert({
-      lote_id: lote.supabaseId,
-      remate_id: lote.remateId || null,
-      numero_postor: numeroPaleta || 0,
-      monto,
-    });
-  };
-
-  // Helper: guardar remate en Supabase
-  const saveRemate = async (data) => {
-    const { data: r, error } = await supabase.from("remates").insert(data).select().single();
-    if (!error && r) setDbRemates(prev => [r, ...prev]);
-    return { data: r, error };
-  };
-
-  // Helper: guardar lote en Supabase
-  const saveLote = async (data) => {
-    const { data: l, error } = await supabase.from("lotes").insert(data).select().single();
-    if (!error && l) setDbLotes(prev => [...prev, l]);
-    return { data: l, error };
-  };
-
-  // Helper: guardar postor en Supabase
-  const savePostor = async (data) => {
-    const { data: p, error } = await supabase.from("postores").insert(data).select().single();
-    if (!error && p) setDbPostores(prev => [...prev, p]);
-    return { data: p, error };
-  };
-
-  // Helper: actualizar estado remate
-  const updateRemateEstado = async (id, estado) => {
-    const { error } = await supabase.from("remates").update({estado}).eq("id", id);
-    if (!error) setDbRemates(prev => prev.map(r => r.id===id ? {...r,estado} : r));
-  };
-
   // Merge: usa datos de Supabase si hay, fallback a mock
   const REMATES_MERGED = dbRemates.length > 0 ? dbRemates.map(r => ({
     id:     r.codigo || r.id,
@@ -1655,6 +1559,79 @@ function Dashboard({ session, onLogout }) {
     bidTimerRef.current = setTimeout(()=>setBidTimer(t=>t-1),1000);
     return () => clearTimeout(bidTimerRef.current);
   }, [bidTimer, aState]);
+
+  // ── Supabase: carga inicial ──────────────────────────────────────
+  useEffect(() => {
+    let mounted = true;
+    const cargar = async () => {
+      setDbLoading(true);
+      try {
+        const remQ = supabase.from("remates").select("*").order("created_at", {ascending:false});
+        const { data: remData } = await remQ;
+        if (mounted && remData) setDbRemates(remData);
+        const { data: lotData } = await supabase.from("lotes").select("*").order("orden");
+        if (mounted && lotData) setDbLotes(lotData);
+        const { data: posData } = await supabase.from("postores").select("*").order("numero");
+        if (mounted && posData) setDbPostores(posData);
+      } catch(e) { console.warn("Supabase fetch error:", e); }
+      if (mounted) setDbLoading(false);
+    };
+    cargar();
+    return () => { mounted = false; };
+  }, [session]);
+
+  // ── Supabase: realtime pujas ─────────────────────────────────────
+  useEffect(() => {
+    if (!lots[idx]?.supabaseId) return;
+    const channel = supabase
+      .channel("pujas-live")
+      .on("postgres_changes", {
+        event:"INSERT", schema:"public", table:"pujas",
+        filter:`lote_id=eq.${lots[idx].supabaseId}`
+      }, (payload) => {
+        const puja = payload.new;
+        setBids(prev => {
+          const next = [...prev];
+          const b = next[idx];
+          if (puja.monto > b.current) {
+            next[idx] = { ...b, current:puja.monto, count:b.count+1,
+              history:[{postor:`Paleta ${puja.numero_postor}`,monto:puja.monto,
+                time:new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"})
+              },...b.history].slice(0,10) };
+            setFlash(true); setTimeout(()=>setFlash(false),600);
+            setLastBidder(`Paleta ${puja.numero_postor}`);
+          }
+          return next;
+        });
+      }).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [lots, idx]);
+
+  // ── Supabase helpers ─────────────────────────────────────────────
+  const savePuja = async (monto, numeroPaleta) => {
+    const lote = lots[idx];
+    if (!lote?.supabaseId) return;
+    await supabase.from("pujas").insert({ lote_id:lote.supabaseId, remate_id:lote.remateId||null, numero_postor:numeroPaleta||0, monto });
+  };
+  const saveRemate = async (data) => {
+    const { data:r, error } = await supabase.from("remates").insert(data).select().single();
+    if (!error && r) setDbRemates(prev=>[r,...prev]);
+    return { data:r, error };
+  };
+  const saveLote = async (data) => {
+    const { data:l, error } = await supabase.from("lotes").insert(data).select().single();
+    if (!error && l) setDbLotes(prev=>[...prev,l]);
+    return { data:l, error };
+  };
+  const savePostor = async (data) => {
+    const { data:p, error } = await supabase.from("postores").insert(data).select().single();
+    if (!error && p) setDbPostores(prev=>[...prev,p]);
+    return { data:p, error };
+  };
+  const updateRemateEstado = async (id, estado) => {
+    const { error } = await supabase.from("remates").update({estado}).eq("id",id);
+    if (!error) setDbRemates(prev=>prev.map(r=>r.id===id?{...r,estado}:r));
+  };
 
   // Simulated bids from online participants
   useEffect(() => {
