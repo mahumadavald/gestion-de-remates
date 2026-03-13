@@ -5,6 +5,7 @@
     "react-dom": "^19.0.0",
     "recharts": "^2.15.0",
     "jspdf": "^2.5.1",
-    "jspdf-autotable": "^3.8.2"
+    "jspdf-autotable": "^3.8.2",
+    "@supabase/supabase-js": "^2.49.0"
   }
 }
