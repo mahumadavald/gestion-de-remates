@@ -1347,15 +1347,9 @@ export default function Root() {
   const [session,  setSession]  = useState(null);
   const [loading,  setLoading]  = useState(true);  // espera chequeo de sesión
 
-  // Al cargar: restaurar sesión existente de Supabase
+  // Siempre pedir login al cargar — cerrar cualquier sesión previa
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session: s } }) => {
-      if (s) {
-        const perfil = await fetchPerfil(s.user.id);
-        if (perfil) setSession({ ...perfil, email: s.user.email });
-      }
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    supabase.auth.signOut().then(() => setLoading(false));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       if (event === "SIGNED_OUT") setSession(null);
     });
@@ -3571,43 +3565,38 @@ function Dashboard({ session, onLogout }) {
             if(!usuarioForm.nombre||!usuarioForm.email) { notify("Completa nombre y email.","inf"); return; }
             if(usuarioModal==="crear") {
               if(!usuarioForm.pass||usuarioForm.pass.length<6){ notify("La contraseña debe tener al menos 6 caracteres.","inf"); return; }
-              // Crear en Supabase Auth
-              const {data:authData, error:authErr} = await supabase.auth.admin?.createUser?.({
+              // Usar signUp — crea el usuario en Supabase Auth
+              const {data:signData, error:signErr} = await supabase.auth.signUp({
                 email: usuarioForm.email,
                 password: usuarioForm.pass,
-                email_confirm: true,
-              }) || {};
-              // Si no hay admin API, usar signUp normal
-              let userId = authData?.user?.id;
-              if(!userId) {
-                // Guardamos solo en tabla usuarios (el usuario deberá hacer signUp por su cuenta)
-                const {data:newU, error:uErr} = await supabase.from("usuarios").insert({
-                  nombre: usuarioForm.nombre,
-                  email: usuarioForm.email,
-                  roles: usuarioForm.roles,
-                  activo: usuarioForm.activo,
-                }).select().single();
-                if(uErr){notify("Error al crear usuario.","inf");return;}
-                setUsuarios(u=>[...u, {...usuarioForm, id:newU.id}]);
-              } else {
-                await supabase.from("usuarios").insert({
-                  id: userId,
-                  nombre: usuarioForm.nombre,
-                  email: usuarioForm.email,
-                  roles: usuarioForm.roles,
-                  activo: usuarioForm.activo,
-                });
-                setUsuarios(u=>[...u, {...usuarioForm, id:userId}]);
-              }
-              notify(`Usuario ${usuarioForm.email} creado.`,"sold");
+                options: { data: { nombre: usuarioForm.nombre } }
+              });
+              if(signErr){ notify("Error: "+signErr.message,"inf"); return; }
+              const userId = signData?.user?.id;
+              if(!userId){ notify("No se pudo crear el usuario.","inf"); return; }
+              // Guardar perfil en tabla usuarios
+              const {data:casaData} = await supabase.from("casas").select("id").eq("nombre",usuarioForm.casa).single();
+              const {error:uErr} = await supabase.from("usuarios").insert({
+                id: userId,
+                casa_id: casaData?.id||null,
+                nombre: usuarioForm.nombre,
+                email: usuarioForm.email,
+                roles: usuarioForm.roles,
+                activo: usuarioForm.activo,
+              });
+              if(uErr){ notify("Usuario Auth creado pero error en perfil: "+uErr.message,"inf"); return; }
+              setUsuarios(u=>[...u, {...usuarioForm, id:userId}]);
+              notify(`Usuario ${usuarioForm.email} creado. Debe confirmar su email para activarse.`,"sold");
             } else {
+              const {data:casaData} = await supabase.from("casas").select("id").eq("nombre",usuarioForm.casa).single();
               await supabase.from("usuarios").update({
                 nombre: usuarioForm.nombre,
+                casa_id: casaData?.id||null,
                 roles: usuarioForm.roles,
                 activo: usuarioForm.activo,
               }).eq("id", usuarioForm.id);
               setUsuarios(u=>u.map(x=>x.id===usuarioForm.id?{...usuarioForm}:x));
-              notify(`Usuario actualizado.`,"sold");
+              notify("Usuario actualizado.","sold");
             }
             setUsuarioModal(false); resetUsuarioForm();
           };
@@ -3881,7 +3870,18 @@ function Dashboard({ session, onLogout }) {
           const NO_COMPRADORES_REMATE = noCompradoresState;
 
           const cerrados = REMATES_MERGED.filter(r=>r.estado==="cerrado");
-          const remateActual = cerrados.find(r=>r.id===selectedRemate)||cerrados[0]||null;
+          const remateActual = cerrados.find(r=>r.id===selectedRemate||r.supabaseId===selectedRemate)||cerrados[0]||null;
+
+          if(cerrados.length===0) return (
+            <div className="page">
+              <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"60vh",gap:"1rem",color:"var(--mu)"}}>
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="6" y="6" width="36" height="36" rx="6"/><path d="M16 24h16M16 16h16M16 32h8"/></svg>
+                <div style={{fontSize:".95rem",fontWeight:600,color:"var(--wh2)"}}>No hay remates cerrados aún</div>
+                <div style={{fontSize:".78rem",textAlign:"center",maxWidth:320}}>Las adjudicaciones aparecen aquí cuando cierras un remate desde la Sala en vivo usando el botón "Cerrar remate".</div>
+                <button className="btn-primary" style={{marginTop:".5rem"}} onClick={()=>setPage("sala")}>Ir a Sala en vivo</button>
+              </div>
+            </div>
+          );
 
           const devBadge = (d) => {
             if(d==="N/A")       return {label:"Sin garantía", bg:"rgba(255,255,255,.04)", color:"var(--mu)"};
@@ -4062,6 +4062,14 @@ function Dashboard({ session, onLogout }) {
             {/* Banner selector de remate */}
             {(() => {
               const cerrados = REMATES_MERGED.filter(r => r.estado === "cerrado");
+              if(cerrados.length===0) return (
+                <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"60vh",gap:"1rem",color:"var(--mu)"}}>
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M8 40V16l16-8 16 8v24"/><path d="M20 40v-8h8v8"/><path d="M16 24h4M28 24h4M16 32h4M28 32h4"/></svg>
+                  <div style={{fontSize:".95rem",fontWeight:600,color:"var(--wh2)"}}>No hay remates cerrados aún</div>
+                  <div style={{fontSize:".78rem",textAlign:"center",maxWidth:320}}>Las liquidaciones se generan automáticamente al cerrar un remate desde la Sala en vivo.</div>
+                  <button className="btn-primary" style={{marginTop:".5rem"}} onClick={()=>setPage("sala")}>Ir a Sala en vivo</button>
+                </div>
+              );
               return (
                 <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
