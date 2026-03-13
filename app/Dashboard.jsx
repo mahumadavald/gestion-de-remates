@@ -1351,15 +1351,13 @@ export default function Root() {
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session: s } }) => {
       if (s) {
-        // Login inmediato, perfil en background
-        setSession({ id:s.user.id, email:s.user.email, name:s.user.email.split("@")[0], role:"admin", roles:["admin"], casa:null, casaNombre:"GR Auction Software", activo:true });
-        // Intentar cargar perfil real en background
-        fetchPerfil(s.user.id).then(perfil => { if(perfil) setSession(p => ({...p, ...perfil, email:s.user.email})); });
+        const perfil = await fetchPerfil(s.user.id);
+        if (perfil) setSession({ ...perfil, email: s.user.email });
       }
       setLoading(false);
     }).catch(() => setLoading(false));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, s) => {
-      if (event === "SIGNED_OUT") { setSession(null); return; }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      if (event === "SIGNED_OUT") setSession(null);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -1442,6 +1440,8 @@ function Dashboard({ session, onLogout }) {
 
   // ── Remate activo en sala en vivo ──
   const [salaRemateId, setSalaRemateId] = useState(null);
+  // ── Filtro de remate en módulo lotes ──
+  const [lotesFiltroRemate, setLotesFiltroRemate] = useState(null);
 
   // ── Formulario nuevo postor (módulo Postores) ──
   const [postorForm, setPostorForm] = useState({nombre:"",rut:"",email:"",telefono:"",tipo:"natural",empresa:"",garantia:300000});
@@ -2665,49 +2665,58 @@ function Dashboard({ session, onLogout }) {
         )}
 
         {/* ══ LOTES ══ */}
-        {page==="lotes" && (
+        {page==="lotes" && (()=>{
+          const lotesDelRemate = lotesFiltroRemate
+            ? LOTES_MERGED.filter(l => l.remateId === lotesFiltroRemate || l.remate_id === lotesFiltroRemate)
+            : LOTES_MERGED;
+          const lotesMostrar = filterTab==="todos" ? lotesDelRemate : lotesDelRemate.filter(l=>l.estado===filterTab);
+          return (
           <div className="page">
+            {/* Selector de remate */}
+            <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".65rem 1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:9}}>
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="13" height="11" rx="2"/><path d="M1 6h13M5 2v4M10 2v4"/></svg>
+              <span style={{fontSize:".75rem",fontWeight:600,color:"var(--mu2)",whiteSpace:"nowrap"}}>Filtrar por remate:</span>
+              <select className="fsel" style={{flex:1,maxWidth:320}} value={lotesFiltroRemate||""} onChange={e=>setLotesFiltroRemate(e.target.value||null)}>
+                <option value="">Todos los lotes</option>
+                {REMATES_MERGED.map(r=>(
+                  <option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name} — {r.fecha}</option>
+                ))}
+              </select>
+              {lotesFiltroRemate && <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>setLotesFiltroRemate(null)}>× Limpiar</button>}
+            </div>
             <div className="filter-row" style={{marginBottom:"1rem"}}>
               {["todos","publicado","vendido","sin vender"].map(f => (
                 <button key={f} className={`filter-btn${filterTab===f?" on":""}`} onClick={()=>setFilterTab(f)}>{f}</button>
               ))}
             </div>
             <div className="table-card">
-              <div className="table-head"><div className="table-title">{LOTES_REALES.length} lotes — Remate Industrial Marzo</div>
+              <div className="table-head">
+                <div className="table-title">{lotesMostrar.length} lotes{lotesFiltroRemate ? ` — ${REMATES_MERGED.find(r=>(r.supabaseId||r.id)===lotesFiltroRemate)?.name||""}` : ""}</div>
                 <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>notify("Exportando listado...","inf")}>Exportar PDF</button>
               </div>
               <table>
-                <thead><tr><th>Expediente</th><th>Articulo</th><th>Mandante</th><th>Tipo remate</th><th>Cat.</th><th>Año</th><th>Base</th><th>Com.</th><th>Gastos adm.</th><th>Estado</th></tr></thead>
+                <thead><tr><th>Código</th><th>Artículo</th><th>Categoría</th><th>Base</th><th>Com.</th><th>Estado</th></tr></thead>
                 <tbody>
-                  {LOTES_REALES.map(l => (
+                  {lotesMostrar.length === 0 ? (
+                    <tr><td colSpan={6} style={{textAlign:"center",color:"var(--mu)",padding:"2rem",fontSize:".8rem"}}>
+                      {lotesFiltroRemate ? "Este remate no tiene lotes aún. Usa + Agregar lote." : "No hay lotes registrados."}
+                    </td></tr>
+                  ) : lotesMostrar.map(l => (
                     <tr key={l.id}>
-                      <td><span className="exp-badge">{l.exp}</span></td>
-                      <td style={{fontWeight:600}}>{l.name}{l.patente&&<span className="mono" style={{color:"var(--mu)",marginLeft:".4rem",fontSize:".65rem"}}>{l.patente}</span>}</td>
-                      <td style={{fontSize:".73rem",color:"var(--mu2)"}}>{l.mandante}</td>
-                      <td>
-                        <span className="pill" style={{
-                          background: l.tipoRemate==="judicial"?"rgba(47,128,237,.1)":l.tipoRemate==="concursal"?"rgba(246,173,85,.1)":"rgba(34,211,160,.1)",
-                          color:      l.tipoRemate==="judicial"?"var(--ac)":l.tipoRemate==="concursal"?"var(--yl)":"var(--gr)",
-                          border:     `1px solid ${l.tipoRemate==="judicial"?"rgba(47,128,237,.25)":l.tipoRemate==="concursal"?"rgba(246,173,85,.25)":"rgba(34,211,160,.25)"}`,
-                        }}>{COMISIONES[l.tipoRemate]?.label||l.tipoRemate}</span>
-                      </td>
+                      <td><span className="exp-badge">{l.id}</span></td>
+                      <td style={{fontWeight:600}}>{l.name}</td>
                       <td className="mono">{l.cat}</td>
-                      <td className="mono">{l.year||"—"}</td>
                       <td className="gt">{fmt(l.base)}</td>
                       <td className="mono" style={{color:"var(--ac)",fontWeight:600}}>{l.com}%</td>
-                      <td className="mono">
-                        {l.motorizado
-                          ? <span style={{color:"var(--yl)",fontWeight:600,fontSize:".72rem"}}>+{fmt(GASTO_ADMIN_MOTORIZADO)}</span>
-                          : <span style={{color:"var(--mu)"}}>—</span>}
-                      </td>
-                      <td><span className="pill p-publicado">Publicado</span></td>
+                      <td><span className={`pill p-${l.estado?.replace(" ","-")||"publicado"}`}>{l.estado||"publicado"}</span></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* ══ POSTORES ══ */}
         {page==="postores" && (
@@ -4450,7 +4459,30 @@ function Dashboard({ session, onLogout }) {
             <div className="topbar">
               <div className="topbar-left">
                 <button className="btn-sec" onClick={()=>setPage("remates")}>← Volver</button>
-                <div className="topbar-title">Sala en vivo — {(salaRemateId && REMATES_MERGED.find(r=>r.supabaseId===salaRemateId||r.id===salaRemateId)?.name) || "Remate Industrial Marzo"}</div>
+                <div className="topbar-title">Sala en vivo</div>
+                {/* Selector de remate en sala */}
+                <select className="fsel" style={{maxWidth:260,fontSize:".75rem"}}
+                  value={salaRemateId||""}
+                  onChange={async e=>{
+                    const rid = e.target.value;
+                    setSalaRemateId(rid);
+                    if(rid){
+                      const {data:lr} = await supabase.from("lotes").select("*").eq("remate_id",rid).order("orden");
+                      if(lr&&lr.length>0){
+                        const mapped = lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:[],desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
+                        setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
+                      } else {
+                        setLots(LOTES_SALA); setBids(LOTES_SALA.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
+                        notify("Este remate no tiene lotes aún.","inf");
+                      }
+                      setIdx(0); setAState("waiting"); setTimeLeft(120); setBidTimer(null);
+                    }
+                  }}>
+                  <option value="">— Seleccionar remate —</option>
+                  {REMATES_MERGED.map(r=>(
+                    <option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="topbar-right">
                 {/* Modalidad selector */}
