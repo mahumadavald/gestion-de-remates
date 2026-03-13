@@ -1381,11 +1381,13 @@ export default function Root() {
       .select("*, casas(slug, nombre)")
       .eq("id", uid)
       .single();
-    if (!data) return null;
+    if (!data) return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"GR Auction Software", activo:true };
+    const role = Array.isArray(data.roles) && data.roles.length > 0 ? data.roles[0] : "martillero";
     return {
       id:         uid,
       name:       data.nombre,
-      role:       data.role,
+      role:       role,
+      roles:      data.roles || [],
       casa:       data.casas?.slug   || null,
       casaNombre: data.casas?.nombre || "GR Auction Software",
       activo:     data.activo,
@@ -1443,7 +1445,7 @@ function Dashboard({ session, onLogout }) {
   const [dbRemates,   setDbRemates]   = useState([]);
   const [dbLotes,     setDbLotes]     = useState([]);
   const [dbPostores,  setDbPostores]  = useState([]);
-  const [dbLoading,   setDbLoading]   = useState(true);
+  const [dbLoading,   setDbLoading]   = useState(false);
 
   // Merge: usa datos de Supabase si hay, fallback a mock
   const REMATES_MERGED = dbRemates.length > 0 ? dbRemates.map(r => ({
@@ -1566,14 +1568,21 @@ function Dashboard({ session, onLogout }) {
     const cargar = async () => {
       setDbLoading(true);
       try {
-        const remQ = supabase.from("remates").select("*").order("created_at", {ascending:false});
-        const { data: remData } = await remQ;
-        if (mounted && remData) setDbRemates(remData);
-        const { data: lotData } = await supabase.from("lotes").select("*").order("orden");
-        if (mounted && lotData) setDbLotes(lotData);
-        const { data: posData } = await supabase.from("postores").select("*").order("numero");
-        if (mounted && posData) setDbPostores(posData);
-      } catch(e) { console.warn("Supabase fetch error:", e); }
+        const timeout = new Promise((_,rej) => setTimeout(()=>rej(new Error("timeout")), 5000));
+        const fetches = Promise.all([
+          supabase.from("remates").select("*").order("created_at", {ascending:false}),
+          supabase.from("lotes").select("*").order("orden"),
+          supabase.from("postores").select("*").order("numero"),
+        ]);
+        const [remRes, lotRes, posRes] = await Promise.race([fetches, timeout]);
+        if (mounted) {
+          if (remRes?.data) setDbRemates(remRes.data);
+          if (lotRes?.data) setDbLotes(lotRes.data);
+          if (posRes?.data) setDbPostores(posRes.data);
+        }
+      } catch(e) {
+        console.warn("Supabase no disponible, usando mock:", e.message);
+      }
       if (mounted) setDbLoading(false);
     };
     cargar();
