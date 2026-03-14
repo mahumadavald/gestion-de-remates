@@ -1050,8 +1050,43 @@ function AuthScreen({ onLogin }) {
       } else {
         const { data, error: authErr } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (authErr) { setError("Credenciales incorrectas."); setLoading(false); return; }
-        // Login inmediato con datos básicos — perfil se carga después en background
-        onLogin({ id:data.user.id, email:data.user.email, name:data.user.email.split("@")[0], role:"admin", roles:["admin"], casa:null, casaNombre:"GR Auction Software", activo:true });
+        // Buscar perfil — con fallback si no existe en tabla usuarios
+        let sessionData = { id:data.user.id, email:data.user.email, name:"Admin", role:"admin", roles:["admin"], casa:null, casaNombre:"GR Auction Software", activo:true };
+        try {
+          const { data: perfil } = await supabase
+            .from("usuarios")
+            .select("*, casas(slug, nombre, licencia_estado, licencia_vence, licencia_plan)")
+            .eq("id", data.user.id)
+            .single();
+          if (perfil) {
+            const r = Array.isArray(perfil.roles) && perfil.roles.length > 0 ? perfil.roles[0] : "admin";
+            if (!perfil.activo) { setError("Usuario inactivo. Contacta al administrador."); await supabase.auth.signOut(); setLoading(false); return; }
+            // ── Verificar licencia (solo para no-admin GR) ──
+            if (perfil.casas && r !== "admin") {
+              const lic = perfil.casas.licencia_estado;
+              const vence = perfil.casas.licencia_vence ? new Date(perfil.casas.licencia_vence) : null;
+              const vencida = vence && vence < new Date();
+              if (lic === "bloqueado") {
+                setError("Acceso bloqueado. Contacta a GR Auction Software: contacto@gestionderemates.cl");
+                await supabase.auth.signOut(); setLoading(false); return;
+              }
+              if (lic === "suspendido" || vencida) {
+                setError("Tu licencia está suspendida o venció. Contacta a GR Auction Software para renovar.");
+                await supabase.auth.signOut(); setLoading(false); return;
+              }
+            }
+            sessionData = {
+              id: data.user.id, email: data.user.email, name: perfil.nombre, role: r,
+              roles: perfil.roles||[r], casa: perfil.casas?.slug||null,
+              casaNombre: perfil.casas?.nombre||"GR Auction Software",
+              licencia: perfil.casas?.licencia_estado||"activo",
+              licenciaPlan: perfil.casas?.licencia_plan||"trial",
+              licenciaVence: perfil.casas?.licencia_vence||null,
+              activo: perfil.activo
+            };
+          }
+        } catch(e) { /* usar fallback */ }
+        onLogin(sessionData);
       }
     } catch(e) {
       setError("Error de conexión. Intenta nuevamente.");
@@ -1442,7 +1477,41 @@ function Dashboard({ session, onLogout }) {
   const resetPostorForm = () => setPostorForm({nombre:"",rut:"",email:"",telefono:"",tipo:"natural",empresa:"",garantia:300000});
   const [postorModal, setPostorModal] = useState(false);
 
-  // ── Supabase: datos reales ──────────────────────────────────────
+  // ── Licencias (solo admin GR) ──
+  const [dbLicencias, setDbLicencias] = useState([]);
+
+  useEffect(() => {
+    if (session?.role !== "admin") return;
+    supabase.from("casas").select("*").order("nombre").then(({data}) => {
+      if (data) setDbLicencias(data);
+    });
+  }, [session]);
+
+  const actualizarLicencia = async (casaId, estado) => {
+    const {error} = await supabase.from("casas").update({licencia_estado: estado}).eq("id", casaId);
+    if (!error) {
+      setDbLicencias(prev => prev.map(c => c.id===casaId ? {...c, licencia_estado:estado} : c));
+      notify(`Licencia ${estado === "activo" ? "activada" : estado === "suspendido" ? "suspendida" : "bloqueada"}.`, estado==="activo"?"sold":"inf");
+    }
+  };
+
+  const renovarLicencia = async (casaId, fecha) => {
+    if (!fecha) return;
+    const {error} = await supabase.from("casas").update({licencia_vence: fecha}).eq("id", casaId);
+    if (!error) {
+      setDbLicencias(prev => prev.map(c => c.id===casaId ? {...c, licencia_vence:fecha} : c));
+      notify("Fecha de vencimiento actualizada.","sold");
+    }
+  };
+
+  const cambiarPlan = async (casaId, plan) => {
+    const {error} = await supabase.from("casas").update({licencia_plan: plan}).eq("id", casaId);
+    if (!error) setDbLicencias(prev => prev.map(c => c.id===casaId ? {...c, licencia_plan:plan} : c));
+  };
+
+  const guardarNota = async (casaId, nota) => {
+    await supabase.from("casas").update({notas_admin: nota}).eq("id", casaId);
+  };
   const [dbRemates,   setDbRemates]   = useState([]);
   const [dbLotes,     setDbLotes]     = useState([]);
   const [dbPostores,  setDbPostores]  = useState([]);
@@ -2428,6 +2497,13 @@ function Dashboard({ session, onLogout }) {
             <span className="sb-icon">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2.2-5 5-5s5 2 5 5"/><path d="M13 7v4M11 9h4"/></svg>
             </span>Usuarios
+          </div>
+        )}
+        {session?.role==="admin" && (
+          <div className={`sb-item${page==="licencias"?" on":""}`} onClick={()=>setPage("licencias")}>
+            <span className="sb-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="2" y="4" width="12" height="9" rx="2"/><path d="M5 4V3a3 3 0 016 0v1"/><circle cx="8" cy="9" r="1.2"/></svg>
+            </span>Licencias
           </div>
         )}
         <div className="sb-footer">
@@ -3764,6 +3840,144 @@ function Dashboard({ session, onLogout }) {
                   </div>
                 </div>
               )}
+            </div>
+          );
+        })()}
+
+        {/* ══ LICENCIAS ══ */}
+        {page==="licencias" && session?.role==="admin" && (()=>{
+          const PLANES = {
+            trial:      {label:"Trial",       color:"#f6ad55", bg:"rgba(246,173,85,.1)",   dias:30,  precio:"Gratis"},
+            basico:     {label:"Básico",      color:"#2F80ED", bg:"rgba(47,128,237,.1)",   dias:365, precio:"$29.990/mes"},
+            profesional:{label:"Profesional", color:"#22d3a0", bg:"rgba(34,211,160,.1)",   dias:365, precio:"$59.990/mes"},
+            enterprise: {label:"Enterprise",  color:"#a78bfa", bg:"rgba(167,139,250,.1)",  dias:365, precio:"A convenir"},
+          };
+          const ESTADOS = {
+            activo:     {label:"Activo",      color:"var(--gr)", bg:"rgba(34,211,160,.1)"},
+            suspendido: {label:"Suspendido",  color:"var(--yl)", bg:"rgba(246,173,85,.1)"},
+            bloqueado:  {label:"Bloqueado",   color:"var(--rd)", bg:"rgba(224,82,82,.1)"},
+          };
+
+          const diasRestantes = (fecha) => {
+            if (!fecha) return null;
+            const diff = Math.ceil((new Date(fecha) - new Date()) / (1000*60*60*24));
+            return diff;
+          };
+
+          return (
+            <div className="page">
+              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.5rem"}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:"1rem",fontWeight:800,color:"var(--wh2)"}}>Control de Licencias</div>
+                  <div style={{fontSize:".72rem",color:"var(--mu2)",marginTop:".15rem"}}>Gestiona el acceso de cada casa de remates — solo visible para admin GR</div>
+                </div>
+              </div>
+
+              {/* Cards por casa */}
+              <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
+                {dbLicencias.map(casa => {
+                  const plan   = PLANES[casa.licencia_plan]  || PLANES.trial;
+                  const estado = ESTADOS[casa.licencia_estado] || ESTADOS.activo;
+                  const dias   = diasRestantes(casa.licencia_vence);
+                  const vencida = dias !== null && dias < 0;
+                  const porVencer = dias !== null && dias >= 0 && dias <= 7;
+
+                  return (
+                    <div key={casa.id} style={{background:"var(--s2)",border:`1px solid ${vencida?"rgba(224,82,82,.3)":porVencer?"rgba(246,173,85,.3)":"var(--b1)"}`,borderRadius:12,overflow:"hidden"}}>
+                      {/* Header */}
+                      <div style={{display:"flex",alignItems:"center",gap:"1rem",padding:"1rem 1.2rem",borderBottom:"1px solid var(--b1)"}}>
+                        <div style={{width:40,height:40,borderRadius:10,background:plan.bg,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke={plan.color} strokeWidth="1.6" strokeLinecap="round"><rect x="2" y="4" width="14" height="11" rx="2"/><path d="M6 4V3a3 3 0 016 0v1"/></svg>
+                        </div>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontWeight:800,fontSize:".9rem",color:"var(--wh2)"}}>{casa.nombre}</div>
+                          <div style={{fontSize:".7rem",color:"var(--mu2)",marginTop:".1rem"}}>{casa.email||"sin email"}</div>
+                        </div>
+                        {/* Badge estado */}
+                        <span style={{fontSize:".68rem",fontWeight:700,padding:".25rem .65rem",borderRadius:20,background:estado.bg,color:estado.color}}>
+                          {estado.label}
+                        </span>
+                        {/* Badge plan */}
+                        <span style={{fontSize:".68rem",fontWeight:700,padding:".25rem .65rem",borderRadius:20,background:plan.bg,color:plan.color}}>
+                          {plan.label}
+                        </span>
+                      </div>
+
+                      {/* Info + controles */}
+                      <div style={{padding:"1rem 1.2rem",display:"grid",gridTemplateColumns:"1fr 1fr 1fr auto",gap:"1rem",alignItems:"center"}}>
+                        {/* Vencimiento */}
+                        <div>
+                          <div style={{fontSize:".65rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".25rem"}}>Vence</div>
+                          <div style={{fontSize:".82rem",fontWeight:700,color:vencida?"var(--rd)":porVencer?"var(--yl)":"var(--wh2)"}}>
+                            {casa.licencia_vence ? new Date(casa.licencia_vence).toLocaleDateString("es-CL") : "—"}
+                          </div>
+                          <div style={{fontSize:".65rem",color:vencida?"var(--rd)":porVencer?"var(--yl)":"var(--mu)"}}>
+                            {dias===null?"—":vencida?`Venció hace ${Math.abs(dias)} días`:dias===0?"Vence hoy":`${dias} días restantes`}
+                          </div>
+                        </div>
+                        {/* Plan precio */}
+                        <div>
+                          <div style={{fontSize:".65rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".25rem"}}>Plan</div>
+                          <div style={{fontSize:".82rem",fontWeight:700,color:"var(--wh2)"}}>{plan.precio}</div>
+                          <div style={{fontSize:".65rem",color:"var(--mu)"}}>{plan.label}</div>
+                        </div>
+                        {/* Límites */}
+                        <div>
+                          <div style={{fontSize:".65rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".25rem"}}>Límites</div>
+                          <div style={{fontSize:".75rem",color:"var(--wh2)"}}>{casa.max_usuarios||3} usuarios · {casa.max_remates||5} remates</div>
+                          <div style={{fontSize:".65rem",color:"var(--mu)"}}>activos simultáneos</div>
+                        </div>
+
+                        {/* Botones de control */}
+                        <div style={{display:"flex",gap:".4rem",flexWrap:"wrap",justifyContent:"flex-end"}}>
+                          {casa.licencia_estado !== "activo" && (
+                            <button className="btn-confirm" style={{fontSize:".68rem",padding:".3rem .7rem",background:"rgba(34,211,160,.12)",color:"var(--gr)",border:"1px solid rgba(34,211,160,.3)"}}
+                              onClick={()=>actualizarLicencia(casa.id,"activo")}>
+                              ✓ Activar
+                            </button>
+                          )}
+                          {casa.licencia_estado === "activo" && (
+                            <button className="btn-sec" style={{fontSize:".68rem",padding:".3rem .7rem",color:"var(--yl)",border:"1px solid rgba(246,173,85,.3)"}}
+                              onClick={()=>actualizarLicencia(casa.id,"suspendido")}>
+                              ⏸ Suspender
+                            </button>
+                          )}
+                          {casa.licencia_estado !== "bloqueado" && (
+                            <button style={{fontSize:".68rem",padding:".3rem .7rem",background:"rgba(224,82,82,.08)",border:"1px solid rgba(224,82,82,.25)",borderRadius:6,color:"var(--rd)",cursor:"pointer"}}
+                              onClick={()=>{if(window.confirm(`¿Bloquear acceso a ${casa.nombre}? No podrán iniciar sesión.`))actualizarLicencia(casa.id,"bloqueado");}}>
+                              🔒 Bloquear
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Renovar / cambiar plan */}
+                      <div style={{padding:".75rem 1.2rem",background:"rgba(255,255,255,.01)",borderTop:"1px solid var(--b1)",display:"flex",alignItems:"center",gap:"1rem",flexWrap:"wrap"}}>
+                        <span style={{fontSize:".7rem",color:"var(--mu)"}}>Renovar hasta:</span>
+                        <input type="date" defaultValue={casa.licencia_vence||""}
+                          style={{padding:".3rem .6rem",background:"var(--s3)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".73rem",fontFamily:"Inter,sans-serif"}}
+                          onChange={e=>renovarLicencia(casa.id, e.target.value)}/>
+                        <span style={{fontSize:".7rem",color:"var(--mu)"}}>Plan:</span>
+                        <select defaultValue={casa.licencia_plan||"trial"}
+                          style={{padding:".3rem .6rem",background:"var(--s3)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".73rem",fontFamily:"Inter,sans-serif",cursor:"pointer"}}
+                          onChange={e=>cambiarPlan(casa.id, e.target.value)}>
+                          {Object.entries(PLANES).map(([k,v])=><option key={k} value={k}>{v.label} — {v.precio}</option>)}
+                        </select>
+                        {casa.notas_admin!==undefined && (
+                          <input placeholder="Notas internas..." defaultValue={casa.notas_admin||""}
+                            style={{flex:1,minWidth:160,padding:".3rem .6rem",background:"var(--s3)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".73rem",fontFamily:"Inter,sans-serif"}}
+                            onBlur={e=>guardarNota(casa.id, e.target.value)}/>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                {dbLicencias.length === 0 && (
+                  <div style={{textAlign:"center",padding:"3rem",color:"var(--mu)",fontSize:".8rem"}}>
+                    No hay casas de remates registradas aún.
+                  </div>
+                )}
+              </div>
             </div>
           );
         })()}
