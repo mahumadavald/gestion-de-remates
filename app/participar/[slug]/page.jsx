@@ -64,7 +64,7 @@ const CSS = `
   html, body { min-height: 100vh; background: var(--bg); color: var(--wh2); font-family: var(--font); font-size: 15px; line-height: 1.6; }
 
   /* ── Layout ── */
-  .page-wrap { min-height: 100vh; display: grid; grid-template-columns: 1fr 520px 1fr; grid-template-rows: auto 1fr; }
+  .page-wrap { min-height: 100vh; display: grid; grid-template-columns: 380px 1fr; grid-template-rows: auto 1fr; }
   @media (max-width: 800px) {
     .page-wrap { grid-template-columns: 1fr; }
     .form-col { grid-column: 1 !important; padding: 1.5rem 1rem 3rem; }
@@ -88,8 +88,7 @@ const CSS = `
   }
 
   .form-col {
-    grid-column: 2; padding: 3rem 2rem 4rem;
-    border-left: 1px solid var(--b1); border-right: 1px solid var(--b1);
+    grid-column: 2; padding: 3rem 3rem 4rem; max-width: 680px; width: 100%;
   }
 
   /* ── Typography ── */
