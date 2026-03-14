@@ -334,7 +334,7 @@ button,input,select{font-family:'Inter',sans-serif;}
 .app{display:flex;height:100vh;overflow:hidden;}
 
 /* ── SIDEBAR ── */
-.sidebar{width:224px;background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar{width:224px;background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
 .sb-logo{padding:1.1rem 1.2rem 1rem;border-bottom:1px solid var(--b1);display:flex;align-items:center;}
 .sb-section{padding:.75rem 1.2rem .3rem;font-size:.65rem;font-weight:600;letter-spacing:.09em;color:var(--mu);text-transform:uppercase;}
 .sb-item{display:flex;align-items:center;gap:.65rem;padding:.5rem 1rem;margin:.05rem .6rem;border-radius:7px;cursor:pointer;transition:all .15s;color:var(--mu2);font-size:.82rem;font-weight:500;}
