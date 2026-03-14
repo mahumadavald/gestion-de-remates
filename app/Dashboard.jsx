@@ -1764,6 +1764,10 @@ function Dashboard({ session, onLogout }) {
 
   // ── Licencias (solo admin GR) ──
   const [dbLicencias, setDbLicencias] = useState([]);
+  // ── Casas (solo admin GR) ──
+  const [casaForm, setCasaForm] = useState({nombre:"",email:"",telefono:"",direccion:""});
+  const [casaModal, setCasaModal] = useState(false);
+  const resetCasaForm = () => setCasaForm({nombre:"",email:"",telefono:"",direccion:""});
 
   useEffect(() => {
     if (session?.role !== "admin") return;
@@ -2369,7 +2373,7 @@ function Dashboard({ session, onLogout }) {
     { id:"config",       icon:"config",    label:"Configuracion" },
   ];
 
-  const PAGE_TITLE = {dashboard:"Dashboard",remates:"Remates",lotes:"Lotes",sala:"Sala en vivo",postores:"Postores",garantias:"Garantias",adjudicac:"Adjudicaciones",liquidac:"Liquidaciones",devoluciones:"Devoluciones de Garantía",retiro:"Retiro de Bienes",factura:"Balance Económico",vendedores:"Liquidación de Vendedores",reportes:"Estadísticas",config:"Configuracion",usuarios:"Usuarios",licencias:"Licencias"};
+  const PAGE_TITLE = {dashboard:"Dashboard",remates:"Remates",lotes:"Lotes",sala:"Sala en vivo",postores:"Postores",garantias:"Garantias",adjudicac:"Adjudicaciones",liquidac:"Liquidaciones",devoluciones:"Devoluciones de Garantía",retiro:"Retiro de Bienes",factura:"Balance Económico",vendedores:"Liquidación de Vendedores",reportes:"Estadísticas",config:"Configuracion",usuarios:"Usuarios",licencias:"Licencias",casas:"Casas de Remates"};
 
   return (
     <div className="app">
@@ -2825,6 +2829,13 @@ function Dashboard({ session, onLogout }) {
             <span className="sb-icon">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="2" y="4" width="12" height="9" rx="2"/><path d="M5 4V3a3 3 0 016 0v1"/><circle cx="8" cy="9" r="1.2"/></svg>
             </span>Licencias
+          </div>
+        )}
+        {session?.role==="admin" && (
+          <div className={`sb-item${page==="casas"?" on":""}`} onClick={()=>setPage("casas")}>
+            <span className="sb-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M2 14V7l6-5 6 5v7"/><path d="M6 14v-4h4v4"/></svg>
+            </span>Casas de remates
           </div>
         )}
         <div className="sb-footer">
@@ -4603,13 +4614,200 @@ function Dashboard({ session, onLogout }) {
           );
         })()}
 
+        {/* ══ CASAS DE REMATES ══ */}
+        {page==="casas" && session?.role==="admin" && (()=>{
+          const BASE_URL = "https://gestionderemates.cl";
+
+          const toSlug = (nombre) => nombre.toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+            .replace(/\s+/g,"").replace(/[^a-z0-9]/g,"");
+
+          const crearCasa = async () => {
+            if(!casaForm.nombre.trim()){ notify("Ingresa el nombre de la casa.","inf"); return; }
+            const slug = toSlug(casaForm.nombre);
+            const {data, error} = await supabase.from("casas").insert({
+              nombre:    casaForm.nombre.trim(),
+              slug,
+              email:     casaForm.email.trim()||null,
+              telefono:  casaForm.telefono.trim()||null,
+              direccion: casaForm.direccion.trim()||null,
+              licencia_estado: "trial",
+              licencia_plan:   "trial",
+              licencia_vence:  new Date(Date.now()+30*24*60*60*1000).toISOString().split("T")[0],
+            }).select().single();
+            if(error){ notify("Error: "+error.message,"inf"); return; }
+            setDbLicencias(prev=>[...prev, data]);
+            setCasaModal(false); resetCasaForm();
+            notify(`Casa "${casaForm.nombre}" creada. Slug: ${slug}`,"sold");
+          };
+
+          const copiar = (txt) => { navigator.clipboard.writeText(txt); notify("Link copiado.","sold"); };
+
+          return (
+            <div className="page">
+              {/* Header */}
+              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.5rem"}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:"1rem",fontWeight:800,color:"var(--wh2)"}}>Casas de Remates</div>
+                  <div style={{fontSize:".72rem",color:"var(--mu2)",marginTop:".15rem"}}>Cada casa tiene su propia URL de participación y display — generadas automáticamente</div>
+                </div>
+                <button className="btn-primary" onClick={()=>setCasaModal(true)}>+ Nueva casa</button>
+              </div>
+
+              {/* Lista de casas */}
+              <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
+                {dbLicencias.map(casa=>(
+                  <div key={casa.id} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,overflow:"hidden"}}>
+                    {/* Header casa */}
+                    <div style={{display:"flex",alignItems:"center",gap:"1rem",padding:"1rem 1.2rem",borderBottom:"1px solid var(--b1)"}}>
+                      <div style={{width:40,height:40,borderRadius:10,background:"rgba(47,128,237,.1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><path d="M2 16V8l7-6 7 6v8"/><path d="M7 16v-5h4v5"/></svg>
+                      </div>
+                      <div style={{flex:1}}>
+                        <div style={{fontWeight:800,fontSize:".92rem",color:"var(--wh2)"}}>{casa.nombre}</div>
+                        <div style={{fontSize:".7rem",color:"var(--mu2)",marginTop:".1rem",fontFamily:"DM Mono,monospace"}}>slug: {casa.slug}</div>
+                      </div>
+                      <span style={{fontSize:".65rem",fontWeight:700,padding:".2rem .55rem",borderRadius:20,
+                        background:casa.licencia_estado==="activo"?"rgba(34,211,160,.1)":casa.licencia_estado==="suspendido"?"rgba(246,173,85,.1)":"rgba(255,255,255,.04)",
+                        color:casa.licencia_estado==="activo"?"var(--gr)":casa.licencia_estado==="suspendido"?"var(--yl)":"var(--mu)"}}>
+                        {casa.licencia_estado||"trial"}
+                      </span>
+                    </div>
+
+                    {/* Links */}
+                    <div style={{padding:"1rem 1.2rem",display:"flex",flexDirection:"column",gap:".65rem"}}>
+                      {/* Link inscripción */}
+                      <div style={{display:"flex",alignItems:"center",gap:".75rem",padding:".65rem .9rem",background:"rgba(47,128,237,.05)",border:"1px solid rgba(47,128,237,.15)",borderRadius:8}}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M4 7h6M7 4l3 3-3 3"/></svg>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".15rem"}}>Página de inscripción pública</div>
+                          <code style={{fontSize:".73rem",color:"var(--ac)",fontFamily:"DM Mono,monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block"}}>
+                            {BASE_URL}/participar/{casa.slug}
+                          </code>
+                        </div>
+                        <button className="btn-sec" style={{fontSize:".65rem",whiteSpace:"nowrap",flexShrink:0}}
+                          onClick={()=>copiar(`${BASE_URL}/participar/${casa.slug}`)}>Copiar</button>
+                        <a href={`${BASE_URL}/participar/${casa.slug}`} target="_blank" rel="noreferrer"
+                          style={{fontSize:".65rem",color:"var(--mu2)",textDecoration:"none",whiteSpace:"nowrap",flexShrink:0,padding:".28rem .55rem",border:"1px solid var(--b2)",borderRadius:6}}>
+                          Abrir →
+                        </a>
+                      </div>
+
+                      {/* Link display */}
+                      <div style={{display:"flex",alignItems:"center",gap:".75rem",padding:".65rem .9rem",background:"rgba(34,211,160,.04)",border:"1px solid rgba(34,211,160,.15)",borderRadius:8}}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--gr)" strokeWidth="1.8" strokeLinecap="round"><rect x="1" y="2" width="12" height="9" rx="2"/><path d="M5 13h4M7 11v2"/></svg>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".15rem"}}>Pantalla sala / display</div>
+                          <code style={{fontSize:".73rem",color:"var(--gr)",fontFamily:"DM Mono,monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block"}}>
+                            {BASE_URL}/display/{casa.slug}
+                          </code>
+                        </div>
+                        <button className="btn-sec" style={{fontSize:".65rem",whiteSpace:"nowrap",flexShrink:0}}
+                          onClick={()=>copiar(`${BASE_URL}/display/${casa.slug}`)}>Copiar</button>
+                        <a href={`${BASE_URL}/display/${casa.slug}`} target="_blank" rel="noreferrer"
+                          style={{fontSize:".65rem",color:"var(--mu2)",textDecoration:"none",whiteSpace:"nowrap",flexShrink:0,padding:".28rem .55rem",border:"1px solid var(--b2)",borderRadius:6}}>
+                          Abrir →
+                        </a>
+                      </div>
+
+                      {/* Datos de contacto */}
+                      {(casa.email||casa.telefono) && (
+                        <div style={{display:"flex",gap:"1.5rem",fontSize:".72rem",color:"var(--mu2)",paddingTop:".3rem"}}>
+                          {casa.email    && <span>✉ {casa.email}</span>}
+                          {casa.telefono && <span>☎ {casa.telefono}</span>}
+                          {casa.direccion && <span>📍 {casa.direccion}</span>}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {dbLicencias.length===0 && (
+                  <div style={{textAlign:"center",padding:"3rem",color:"var(--mu)",fontSize:".82rem",background:"var(--s2)",borderRadius:12,border:"1px dashed var(--b2)"}}>
+                    No hay casas registradas. Crea la primera con el botón de arriba.
+                  </div>
+                )}
+              </div>
+
+              {/* Modal nueva casa */}
+              {casaModal && (
+                <div className="ov" onClick={()=>{setCasaModal(false);resetCasaForm();}}>
+                  <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:440}}>
+                    <div className="modal-title">Nueva casa de remates</div>
+                    <div className="form-grid">
+                      <div className="fg full">
+                        <label className="fl">Nombre de la casa *</label>
+                        <input className="fi" placeholder="Remates García Ltda." value={casaForm.nombre}
+                          onChange={e=>setCasaForm(f=>({...f,nombre:e.target.value}))}/>
+                        {casaForm.nombre && (
+                          <div style={{marginTop:".4rem",fontSize:".7rem",color:"var(--mu2)",fontFamily:"DM Mono,monospace"}}>
+                            Slug: <span style={{color:"var(--ac)"}}>{toSlug(casaForm.nombre)}</span>
+                            <span style={{color:"var(--mu)",marginLeft:".5rem"}}>→ gestionderemates.cl/participar/{toSlug(casaForm.nombre)}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="fg">
+                        <label className="fl">Email de contacto</label>
+                        <input className="fi" type="email" placeholder="contacto@casa.cl" value={casaForm.email}
+                          onChange={e=>setCasaForm(f=>({...f,email:e.target.value}))}/>
+                      </div>
+                      <div className="fg">
+                        <label className="fl">Teléfono</label>
+                        <input className="fi" placeholder="+56 9 1234 5678" value={casaForm.telefono}
+                          onChange={e=>setCasaForm(f=>({...f,telefono:e.target.value}))}/>
+                      </div>
+                      <div className="fg full">
+                        <label className="fl">Dirección</label>
+                        <input className="fi" placeholder="Av. Principal 123, Rancagua" value={casaForm.direccion}
+                          onChange={e=>setCasaForm(f=>({...f,direccion:e.target.value}))}/>
+                      </div>
+                    </div>
+                    <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"rgba(47,128,237,.05)",border:"1px solid rgba(47,128,237,.15)",borderRadius:9,fontSize:".73rem",color:"var(--mu2)",lineHeight:1.6}}>
+                      Al crear la casa se generan automáticamente los links de <strong style={{color:"var(--wh2)"}}>inscripción pública</strong> y <strong style={{color:"var(--wh2)"}}>pantalla de sala</strong>. La licencia parte en modo <strong style={{color:"var(--yl)"}}>Trial (30 días)</strong>.
+                    </div>
+                    <div className="modal-actions">
+                      <button className="btn-cancel" onClick={()=>{setCasaModal(false);resetCasaForm();}}>Cancelar</button>
+                      <button className="btn-confirm" onClick={crearCasa}>Crear casa</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {/* ══ CONFIG ══ */}
         {page==="config" && (
           <div className="page">
+            {/* Links de esta casa — visible para todos */}
+            <div style={{marginBottom:"1.5rem",padding:"1rem 1.2rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12}}>
+              <div style={{fontSize:".75rem",fontWeight:700,color:"var(--wh2)",marginBottom:"1rem"}}>
+                Links de {session?.casaNombre||"tu casa de remates"}
+              </div>
+              {[
+                {label:"Inscripción pública de postores", url:`https://gestionderemates.cl/participar/${session?.casa||"rematesahumada"}`, color:"var(--ac)", icon:<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M4 7h6M7 4l3 3-3 3"/></svg>},
+                {label:"Pantalla de sala (proyector)", url:`https://gestionderemates.cl/display/${session?.casa||"rematesahumada"}`, color:"var(--gr)", icon:<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="1" y="2" width="12" height="9" rx="2"/><path d="M5 13h4M7 11v2"/></svg>},
+              ].map((l,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:".75rem",padding:".65rem .9rem",background:i===0?"rgba(47,128,237,.05)":"rgba(34,211,160,.04)",border:`1px solid ${i===0?"rgba(47,128,237,.15)":"rgba(34,211,160,.15)"}`,borderRadius:8,marginBottom:".6rem"}}>
+                  <span style={{color:l.color,flexShrink:0}}>{l.icon}</span>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".15rem"}}>{l.label}</div>
+                    <code style={{fontSize:".73rem",color:l.color,fontFamily:"DM Mono,monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block"}}>{l.url}</code>
+                  </div>
+                  <button className="btn-sec" style={{fontSize:".65rem",flexShrink:0}}
+                    onClick={()=>{navigator.clipboard.writeText(l.url);notify("Link copiado.","sold");}}>Copiar</button>
+                  <a href={l.url} target="_blank" rel="noreferrer"
+                    style={{fontSize:".65rem",color:"var(--mu2)",textDecoration:"none",flexShrink:0,padding:".28rem .55rem",border:"1px solid var(--b2)",borderRadius:6}}>
+                    Abrir →
+                  </a>
+                </div>
+              ))}
+            </div>
+
             <div className="config-grid">
               {[
                 {title:"Casa de remates",fields:[["Nombre","Remates Ahumada"],["RUT","76.123.456-7"],["Direccion","Av. O'Higgins 456, Rancagua"],["Telefono","+56 72 234 5678"]]},
-                {title:"Configuracion de pujas",fields:[["Incremento por defecto","$500.000"],["Timer entre pujas","12 segundos"],["Tiempo maximo por lote","120 segundos"],["Comision por defecto","3%"]]},
+                {title:"Configuracion de pujas",fields:[["Incremento por defecto","$500.000"],["Timer entre pujas","15 segundos"],["Tiempo maximo por lote","120 segundos"],["Comision por defecto","3%"]]},
               ].map((s,i) => (
                 <div className="config-card" key={i}>
                   <div className="config-title">{s.title}</div>
