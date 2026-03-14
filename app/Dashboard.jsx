@@ -2040,197 +2040,189 @@ function Dashboard({ session, onLogout }) {
             {modal==="nuevo-lote" && <>
               {/* ── WIZARD HEADER ── */}
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1rem"}}>
-                <div className="modal-title" style={{margin:0}}>Ingresar lote</div>
-                <div style={{fontSize:".7rem",color:"var(--mu)"}}>Paso {wizStep} de 4</div>
+                <div className="modal-title" style={{margin:0}}>Agregar lote</div>
+                <div style={{fontSize:".7rem",color:"var(--mu)"}}>Paso {wizStep} de 3</div>
               </div>
-              {/* Steps bar */}
+              {/* Steps bar — 3 pasos */}
               <div className="wiz-steps">
-                {[["1","Tipo"],["2","Datos"],["3","Fotos"],["4","Documentos"]].map(([n,l])=>(
+                {[["1","Tipo y datos"],["2","Fotos"],["3","Documentos"]].map(([n,l])=>(
                   <div key={n} className={`wiz-step${wizStep===+n?" on":wizStep>+n?" done":""}`}>
                     <div className="wiz-num">{wizStep>+n?"✓":n}</div>{l}
                   </div>
                 ))}
               </div>
-              {/* ── PASO 1: Tipo ── */}
+              {/* ── PASO 1: Tipo + Datos (fusionados) ── */}
               {wizStep===1 && (
                 <div>
-                  <div style={{fontSize:".78rem",color:"var(--mu2)",marginBottom:"1rem"}}>¿Qué tipo de bien es este lote?</div>
-                  <div className="tipo-sel">
-                    {[{k:"MUEBLES",icon:"📦",label:"Muebles",sub:"Enseres, maquinaria, equipos"},{k:"VEHICULOS",icon:"🚗",label:"Vehículos",sub:"Autos, camiones, maquinaria"},{k:"INMUEBLES",icon:"🏠",label:"Inmuebles",sub:"Propiedades, terrenos"}].map(o=>(
-                      <div key={o.k} className={`tipo-opt${wizTipo===o.k?" on":""}`} onClick={()=>{setWizTipo(o.k);setLoteForm(f=>({...f,motorizado:o.k==="VEHICULOS"}));}}>
-                        <span className="tipo-opt-icon">{o.icon}</span>
-                        <div style={{fontWeight:700,marginBottom:".15rem"}}>{o.label}</div>
-                        <div style={{fontSize:".62rem",opacity:.7}}>{o.sub}</div>
+                  {/* Selector tipo inline */}
+                  <div style={{display:"flex",gap:".5rem",marginBottom:"1rem"}}>
+                    {[{k:"MUEBLES",icon:"📦",label:"Muebles"},{k:"VEHICULOS",icon:"🚗",label:"Vehículo"},{k:"INMUEBLES",icon:"🏠",label:"Inmueble"}].map(o=>(
+                      <div key={o.k} onClick={()=>{setWizTipo(o.k);setLoteForm(f=>({...f,motorizado:o.k==="VEHICULOS"}));}}
+                        style={{flex:1,padding:".6rem .5rem",textAlign:"center",cursor:"pointer",borderRadius:8,border:`2px solid ${wizTipo===o.k?"var(--ac)":"var(--b2)"}`,background:wizTipo===o.k?"rgba(47,128,237,.1)":"var(--s2)",transition:"all .15s"}}>
+                        <div style={{fontSize:"1.1rem",marginBottom:".2rem"}}>{o.icon}</div>
+                        <div style={{fontSize:".72rem",fontWeight:wizTipo===o.k?700:500,color:wizTipo===o.k?"var(--ac)":"var(--mu2)"}}>{o.label}</div>
                       </div>
                     ))}
                   </div>
-                  {wizTipo==="VEHICULOS" && (
-                    <div style={{marginTop:".8rem"}}>
-                      <label className="fl">Tipo de vehículo</label>
-                      <select className="fsel" value={wizVehTipo} onChange={e=>setWizVehTipo(e.target.value)}>
-                        <option value="">Seleccione tipo...</option>
-                        {["Automóvil","Station Wagon","Jeep","Camioneta","Camión","Camión Tractor","Remolque","Semirremolque","Bus","Minibús","Taxibús","Taxi","Motocicleta","Carro de Arrastre","Casa Rodante","Maquinaria Agrícola","Maquinaria Industrial"].map(t=><option key={t}>{t}</option>)}
+                  <div className="form-grid">
+                    <div className="fg full">
+                      <label className="fl">Remate al que pertenece</label>
+                      <select className="fsel" value={wizDatos.remateId||""} onChange={e=>setWizDatos(f=>({...f,remateId:e.target.value}))}>
+                        <option value="">— Sin asignar —</option>
+                        {REMATES_MERGED.filter(r=>r.estado==="activo").map(r=>(
+                          <option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>
+                        ))}
                       </select>
                     </div>
-                  )}
+                    <div className="fg full"><label className="fl">Nombre del artículo</label>
+                      <input className="fi" placeholder={wizTipo==="VEHICULOS"?"Toyota Hilux 2020 4x4":wizTipo==="INMUEBLES"?"Parcela 315 — Coinco VI Region":"Enseres varios — Hogar"} value={wizDatos.nombre} onChange={e=>setWizDatos(f=>({...f,nombre:e.target.value}))}/>
+                    </div>
+                    <div className="fg"><label className="fl">Expediente / N° causa</label>
+                      <input className="fi" placeholder="E-61-2025" value={wizDatos.exp} onChange={e=>setWizDatos(f=>({...f,exp:e.target.value}))}/>
+                    </div>
+                    <div className="fg"><label className="fl">Mandante</label>
+                      <input className="fi" placeholder="Tanner / Judicial / Particular" value={wizDatos.mandante} onChange={e=>setWizDatos(f=>({...f,mandante:e.target.value}))}/>
+                    </div>
+                    {wizTipo==="VEHICULOS" && <>
+                      <div className="fg"><label className="fl">Patente</label>
+                        <input className="fi" placeholder="ABCD-12" style={{fontFamily:"DM Mono,monospace",fontWeight:700}} value={wizDatos.patente} onChange={e=>setWizDatos(f=>({...f,patente:e.target.value}))}/>
+                      </div>
+                      <div className="fg"><label className="fl">Año</label>
+                        <input className="fi" placeholder="2020" value={wizDatos.year} onChange={e=>setWizDatos(f=>({...f,year:e.target.value}))}/>
+                      </div>
+                    </>}
+                    <div className="fg">
+                      <label className="fl">Tipo de remate</label>
+                      <select className="fsel" value={loteForm.tipoRemate} onChange={e=>setLoteForm(f=>({...f,tipoRemate:e.target.value}))}>
+                        <option value="judicial">Judicial (3%)</option>
+                        <option value="concursal">Concursal (2.5%)</option>
+                        <option value="privado">Privado</option>
+                      </select>
+                    </div>
+                    <div className="fg">
+                      <label className="fl">Comisión (%)</label>
+                      <input className="fi" type="number" step="0.5" min="0" max="50" placeholder={`${COMISIONES[loteForm.tipoRemate]?.com??3}`} value={loteForm.comCustom} onChange={e=>setLoteForm(f=>({...f,comCustom:e.target.value}))} style={{fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--ac)"}}/>
+                    </div>
+                    {wizTipo==="VEHICULOS" && <div className="fg full" style={{padding:".5rem .75rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:7,fontSize:".72rem",color:"var(--yl)"}}>Vehículo motorizado — se agregarán $50.000 gastos administrativos en la liquidación.</div>}
+                    <div className="fg"><label className="fl">Precio base</label>
+                      <input className="fi" placeholder="$8.000.000" value={wizDatos.base} onChange={e=>setWizDatos(f=>({...f,base:e.target.value}))}/>
+                    </div>
+                    <div className="fg"><label className="fl">Precio mínimo</label>
+                      <input className="fi" placeholder="$7.000.000" value={wizDatos.minimo} onChange={e=>setWizDatos(f=>({...f,minimo:e.target.value}))}/>
+                    </div>
+                    <div className="fg full"><label className="fl">Descripción <span style={{color:"var(--mu)",fontWeight:400}}>(opcional)</span></label>
+                      <textarea className="fi" rows={2} placeholder="Estado general, observaciones..." style={{resize:"none"}} value={wizDatos.descripcion} onChange={e=>setWizDatos(f=>({...f,descripcion:e.target.value}))}/>
+                    </div>
+                  </div>
                 </div>
               )}
-              {/* ── PASO 2: Datos ── */}
+              {/* ── PASO 2: Fotos OBLIGATORIAS ── */}
               {wizStep===2 && (
-                <div className="form-grid">
-                  <div className="fg full">
-                    <label className="fl">Remate al que pertenece</label>
-                    <select className="fsel" value={wizDatos.remateId||""} onChange={e=>setWizDatos(f=>({...f,remateId:e.target.value}))}>
-                      <option value="">— Sin asignar —</option>
-                      {REMATES_MERGED.filter(r=>r.estado==="activo").map(r=>(
-                        <option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="fg full"><label className="fl">Nombre del artículo</label><input className="fi" placeholder={wizTipo==="VEHICULOS"?"Toyota Hilux 2020 4x4":wizTipo==="INMUEBLES"?"Parcela 315 — Coinco VI Region":"Enseres varios — Hogar"} value={wizDatos.nombre} onChange={e=>setWizDatos(f=>({...f,nombre:e.target.value}))}/></div>
-                  <div className="fg"><label className="fl">Expediente / N° causa</label><input className="fi" placeholder="E-61-2025" value={wizDatos.exp} onChange={e=>setWizDatos(f=>({...f,exp:e.target.value}))}/></div>
-                  <div className="fg"><label className="fl">Mandante</label><input className="fi" placeholder="Tanner / Judicial / Particular" value={wizDatos.mandante} onChange={e=>setWizDatos(f=>({...f,mandante:e.target.value}))}/></div>
-                  <div className="fg"><label className="fl">Propietario</label><input className="fi" placeholder="Apellido del propietario" value={wizDatos.propietario} onChange={e=>setWizDatos(f=>({...f,propietario:e.target.value}))}/></div>
-                  {wizTipo==="VEHICULOS" && <>
-                    <div className="fg"><label className="fl">Patente</label><input className="fi" placeholder="ABCD-12" style={{fontFamily:"DM Mono,monospace",fontWeight:700}} value={wizDatos.patente} onChange={e=>setWizDatos(f=>({...f,patente:e.target.value}))}/></div>
-                    <div className="fg"><label className="fl">Año</label><input className="fi" placeholder="2020" value={wizDatos.year} onChange={e=>setWizDatos(f=>({...f,year:e.target.value}))}/></div>
-                    <div className="fg"><label className="fl">Kilometraje</label><input className="fi" placeholder="85.000 km" value={wizDatos.km} onChange={e=>setWizDatos(f=>({...f,km:e.target.value}))}/></div>
-                    <div className="fg"><label className="fl">Color</label><input className="fi" placeholder="Blanco" value={wizDatos.color} onChange={e=>setWizDatos(f=>({...f,color:e.target.value}))}/></div>
-                  </>}
-                  {wizTipo==="INMUEBLES" && <>
-                    <div className="fg"><label className="fl">Rol SII</label><input className="fi" placeholder="332-15" value={wizDatos.rolSII} onChange={e=>setWizDatos(f=>({...f,rolSII:e.target.value}))}/></div>
-                    <div className="fg"><label className="fl">Superficie</label><input className="fi" placeholder="12 Hec. / 850 m²" value={wizDatos.superficie} onChange={e=>setWizDatos(f=>({...f,superficie:e.target.value}))}/></div>
-                  </>}
-                  <div className="fg">
-                    <label className="fl">Tipo de remate</label>
-                    <select className="fsel" value={loteForm.tipoRemate} onChange={e=>setLoteForm(f=>({...f,tipoRemate:e.target.value}))}>
-                      <option value="judicial">Judicial</option><option value="concursal">Concursal</option><option value="privado">Privado</option>
-                    </select>
-                  </div>
-                  <div className="fg">
-                    <label className="fl" style={{display:"flex",alignItems:"center",gap:".35rem"}}>
-                      Comisión (%) <span style={{padding:".06rem .3rem",background:"rgba(47,128,237,.12)",color:"var(--ac)",borderRadius:3,fontSize:".58rem",fontWeight:700}}>REQUERIDO</span>
-                    </label>
-                    <input className="fi" type="number" step="0.5" min="0" max="50" placeholder={`Ej: ${COMISIONES[loteForm.tipoRemate]?.com??3}`} value={loteForm.comCustom} onChange={e=>setLoteForm(f=>({...f,comCustom:e.target.value}))} style={{fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--ac)"}}/>
-                  </div>
-                  {wizTipo==="VEHICULOS" && <div className="fg full" style={{padding:".55rem .8rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:7,fontSize:".72rem",color:"var(--yl)"}}>Vehículo motorizado — se agregarán <strong>$50.000 gastos administrativos</strong> en la liquidación.</div>}
-                  <div className="fg"><label className="fl">Precio base</label><input className="fi" placeholder="$8.000.000" value={wizDatos.base} onChange={e=>setWizDatos(f=>({...f,base:e.target.value}))}/></div>
-                  <div className="fg"><label className="fl">Precio mínimo</label><input className="fi" placeholder="$7.000.000" value={wizDatos.minimo} onChange={e=>setWizDatos(f=>({...f,minimo:e.target.value}))}/></div>
-                  <div className="fg full"><label className="fl">Descripción</label><textarea className="fi" rows={3} placeholder="Estado general, condición, observaciones..." style={{resize:"none"}} value={wizDatos.descripcion} onChange={e=>setWizDatos(f=>({...f,descripcion:e.target.value}))}/></div>
-                  <div className="fg full"><label className="fl">Ubicación</label><input className="fi" placeholder="Rancagua, VI Región" value={wizDatos.ubicacion} onChange={e=>setWizDatos(f=>({...f,ubicacion:e.target.value}))}/></div>
-                </div>
-              )}
-              {/* ── PASO 3: Fotos ── */}
-              {wizStep===3 && (
                 <div>
-                  {wizTipo==="VEHICULOS" ? <>
-                    <div style={{fontSize:".76rem",color:"var(--mu2)",marginBottom:".85rem"}}>Sube las 4 fotos requeridas del vehículo.</div>
+                  <div style={{display:"flex",alignItems:"center",gap:".5rem",marginBottom:"1rem",padding:".6rem .85rem",background:"rgba(224,82,82,.06)",border:"1px solid rgba(224,82,82,.2)",borderRadius:8}}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#e05252" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M7 4v3.5M7 9.5v.5"/></svg>
+                    <span style={{fontSize:".73rem",color:"#e07272",fontWeight:600}}>Las fotos son obligatorias — se usan como evidencia del lote.</span>
+                  </div>
+                  {wizTipo==="VEHICULOS" ? (
                     <div className="foto-grid">
-                      {[["frente","Frente"],["izq","Izquierdo"],["der","Derecho"],["trasera","Trasera"]].map(([k,lbl])=>(
-                        <label key={k} className={`foto-slot${wizFotos[k]?" filled":""}`}>
-                          {wizFotos[k]?<><img src={URL.createObjectURL(wizFotos[k])} alt={lbl}/><div className="foto-label">{lbl}</div></>:<><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="1" y="4" width="18" height="13" rx="2"/><circle cx="10" cy="10.5" r="3"/><path d="M6.5 4V3a1 1 0 011-1h5a1 1 0 011 1v1"/></svg><span>{lbl}</span></>}
+                      {[["frente","Frente"],["izq","Lado izquierdo"],["der","Lado derecho"],["trasera","Trasera"]].map(([k,lbl])=>(
+                        <label key={k} className={`foto-slot${wizFotos[k]?" filled":""}`} style={{border:`2px ${wizFotos[k]?"solid rgba(34,211,160,.4)":"dashed rgba(224,82,82,.35)"}`}}>
+                          {wizFotos[k]
+                            ? <><img src={URL.createObjectURL(wizFotos[k])} alt={lbl}/><div className="foto-label">✓ {lbl}</div></>
+                            : <><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="var(--mu)" strokeWidth="1.4"><rect x="1" y="4" width="18" height="13" rx="2"/><circle cx="10" cy="10.5" r="3"/><path d="M6.5 4V3a1 1 0 011-1h5a1 1 0 011 1v1"/></svg><span style={{fontSize:".7rem",marginTop:".3rem"}}>{lbl}</span><span style={{fontSize:".6rem",color:"var(--rd)"}}>Requerida</span></>}
                           <input type="file" accept="image/*" style={{display:"none"}} onChange={e=>e.target.files[0]&&setWizFotos(f=>({...f,[k]:e.target.files[0]}))}/>
                         </label>
                       ))}
                     </div>
-                  </> : <>
-                    <div style={{fontSize:".76rem",color:"var(--mu2)",marginBottom:".85rem"}}>Inventario de fotos / ítems del lote.</div>
-                    {wizItems.map((it,i)=>(
-                      <div key={it.id} className="item-card">
-                        <label style={{width:52,height:52,borderRadius:8,border:"1px dashed var(--b2)",background:"rgba(255,255,255,.02)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0,overflow:"hidden",position:"relative"}}>
-                          {it.foto?<img src={URL.createObjectURL(it.foto)} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:7}}/>:<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="var(--mu)" strokeWidth="1.5"><rect x="1" y="4" width="18" height="13" rx="2"/><circle cx="10" cy="10.5" r="3"/></svg>}
-                          <input type="file" accept="image/*" style={{display:"none"}} onChange={e=>e.target.files[0]&&setWizItems(items=>items.map((x,xi)=>xi===i?{...x,foto:e.target.files[0]}:x))}/>
-                        </label>
-                        <input className="fi" style={{flex:1,fontSize:".78rem"}} placeholder="Nombre del bien / ítem..." value={it.nombre} onChange={e=>setWizItems(items=>items.map((x,xi)=>xi===i?{...x,nombre:e.target.value}:x))}/>
-                        <button onClick={()=>setWizItems(items=>items.filter((_,xi)=>xi!==i))} style={{background:"transparent",border:"none",cursor:"pointer",color:"var(--mu)",padding:".2rem",borderRadius:4,flexShrink:0}}><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+                  ) : (
+                    <>
+                      <div style={{fontSize:".73rem",color:"var(--mu2)",marginBottom:".75rem"}}>Agrega al menos una foto del artículo.</div>
+                      {wizItems.map((it,i)=>(
+                        <div key={it.id} className="item-card">
+                          <label style={{width:56,height:56,borderRadius:8,border:`2px dashed ${it.foto?"rgba(34,211,160,.4)":"rgba(224,82,82,.35)"}`,background:"rgba(255,255,255,.02)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0,overflow:"hidden"}}>
+                            {it.foto?<img src={URL.createObjectURL(it.foto)} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:6}}/>
+                              :<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="var(--mu)" strokeWidth="1.4"><rect x="1" y="4" width="18" height="13" rx="2"/><circle cx="10" cy="10.5" r="3"/></svg>}
+                            <input type="file" accept="image/*" style={{display:"none"}} onChange={e=>e.target.files[0]&&setWizItems(items=>items.map((x,xi)=>xi===i?{...x,foto:e.target.files[0]}:x))}/>
+                          </label>
+                          <input className="fi" style={{flex:1}} placeholder="Descripción del ítem..." value={it.nombre} onChange={e=>setWizItems(items=>items.map((x,xi)=>xi===i?{...x,nombre:e.target.value}:x))}/>
+                          {wizItems.length>1 && <button onClick={()=>setWizItems(items=>items.filter((_,xi)=>xi!==i))} style={{background:"transparent",border:"none",cursor:"pointer",color:"var(--mu)",padding:".2rem"}}><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M2 2l10 10M12 2L2 12"/></svg></button>}
+                        </div>
+                      ))}
+                      <div className="add-btn-row" onClick={()=>setWizItems(items=>[...items,{id:Date.now(),nombre:"",foto:null}])}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M7 1v12M1 7h12"/></svg> Agregar otra foto
                       </div>
-                    ))}
-                    <div className="add-btn-row" onClick={()=>setWizItems(items=>[...items,{id:Date.now(),nombre:"",foto:null}])}>
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M7 1v12M1 7h12"/></svg> Agregar foto de bien
-                    </div>
-                  </>}
+                    </>
+                  )}
+                  {/* Contador de fotos */}
+                  <div style={{marginTop:".85rem",fontSize:".72rem",color:"var(--mu2)",display:"flex",alignItems:"center",gap:".4rem"}}>
+                    {wizTipo==="VEHICULOS"
+                      ? <>{Object.values(wizFotos).filter(Boolean).length===4
+                          ? <span style={{color:"var(--gr)",fontWeight:600}}>✓ 4/4 fotos cargadas — listo para guardar</span>
+                          : <span style={{color:"var(--yl)"}}>⚠ {Object.values(wizFotos).filter(Boolean).length}/4 fotos — se requieren las 4</span>}</>
+                      : <>{wizItems.some(x=>x.foto)
+                          ? <span style={{color:"var(--gr)",fontWeight:600}}>✓ {wizItems.filter(x=>x.foto).length} foto{wizItems.filter(x=>x.foto).length!==1?"s":""} cargada{wizItems.filter(x=>x.foto).length!==1?"s":""}</span>
+                          : <span style={{color:"var(--rd)"}}>⚠ Debes agregar al menos una foto</span>}</>}
+                  </div>
                 </div>
               )}
-              {/* ── PASO 4: Documentos ── */}
-              {wizStep===4 && (()=>{
-                const DOCS_VEHICULO = [
-                  {key:"anotaciones", label:"Certificado de Anotaciones Vigentes", desc:"Registro Civil — acredita que el vehículo no tiene prendas, prohibiciones ni alzamientos pendientes.", req:false},
-                  {key:"multas",      label:"Certificado de Multas",               desc:"RNVM — acredita que el vehículo no tiene multas impagas ante el SII o municipios.",                  req:false},
-                  {key:"revision",    label:"Revisión Técnica vigente",            desc:"Certificado de revisión técnica al día. Aumenta la confianza del comprador.",                         req:false},
-                  {key:"permiso",     label:"Permiso de Circulación vigente",      desc:"Comprobante del permiso de circulación pagado.",                                                       req:false},
-                ];
-                return (
-                  <div>
-                    {/* Bloque documentos específicos de vehículo */}
-                    {wizTipo==="VEHICULOS" && (
-                      <div style={{marginBottom:"1.1rem"}}>
-                        <div style={{display:"flex",alignItems:"center",gap:".5rem",marginBottom:".7rem"}}>
-                          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="2" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M7 4.5v.5M7 7v3"/></svg>
-                          <span style={{fontSize:".71rem",fontWeight:700,color:"var(--wh2)",textTransform:"uppercase",letterSpacing:".05em"}}>Documentos del vehículo</span>
-                        </div>
-                        {DOCS_VEHICULO.map(doc=>{
-                          const adj = wizDocs.find(d=>d.key===doc.key);
-                          const ok  = adj?.archivo;
-                          return (
-                            <div key={doc.key} style={{display:"flex",alignItems:"flex-start",gap:".7rem",padding:".7rem .85rem",background:ok?"rgba(34,211,160,.03)":"rgba(255,255,255,.02)",border:`1px solid ${ok?"rgba(34,211,160,.2)":"var(--b1)"}`,borderRadius:9,marginBottom:".4rem",transition:"border .2s"}}>
-                              {/* ícono estado */}
-                              <div style={{width:30,height:30,borderRadius:7,flexShrink:0,marginTop:".05rem",display:"flex",alignItems:"center",justifyContent:"center",background:ok?"rgba(34,211,160,.1)":"rgba(255,255,255,.04)",border:`1px solid ${ok?"rgba(34,211,160,.25)":"var(--b2)"}`}}>
-                                {ok
-                                  ? <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="var(--gr)" strokeWidth="2.2" strokeLinecap="round"><path d="M2 7l4 4 6-7"/></svg>
-                                  : <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--mu)" strokeWidth="1.5" strokeLinecap="round"><path d="M4 2h6l3 3v9H4V2z"/><path d="M10 2v3h3"/><path d="M6 8h4M6 11h3"/></svg>}
-                              </div>
-                              <div style={{flex:1,minWidth:0}}>
-                                <div style={{display:"flex",alignItems:"center",gap:".4rem",marginBottom:".15rem",flexWrap:"wrap"}}>
-                                  <span style={{fontSize:".75rem",fontWeight:700,color:"var(--wh2)"}}>{doc.label}</span>
-                                  <span style={{fontSize:".57rem",padding:".05rem .3rem",borderRadius:3,fontWeight:700,background:"rgba(47,128,237,.08)",color:"var(--ac)",border:"1px solid rgba(47,128,237,.2)"}}>{doc.req?"RECOMENDADO":"RECOMENDADO"}</span>
-                                </div>
-                                <div style={{fontSize:".64rem",color:"var(--mu)",lineHeight:1.4,marginBottom:".4rem"}}>{doc.desc}</div>
-                                {ok
-                                  ? <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
-                                      <span style={{fontSize:".68rem",color:"var(--gr)",fontWeight:600}}>✓ {adj.archivo.name}</span>
-                                      <label style={{fontSize:".62rem",color:"var(--mu)",cursor:"pointer",textDecoration:"underline"}}>Cambiar<input type="file" accept=".pdf,.jpg,.png" style={{display:"none"}} onChange={e=>e.target.files[0]&&setWizDocs(docs=>docs.map(d=>d.key===doc.key?{...d,archivo:e.target.files[0]}:d))}/></label>
-                                    </div>
-                                  : <label style={{display:"inline-flex",alignItems:"center",gap:".3rem",cursor:"pointer",fontSize:".69rem",fontWeight:600,color:"var(--ac)",padding:".28rem .55rem",border:"1px solid rgba(47,128,237,.25)",borderRadius:6,background:"rgba(47,128,237,.06)"}}>
-                                      <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M7 1v12M1 7h12"/></svg>
-                                      Adjuntar PDF / imagen
-                                      <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{display:"none"}} onChange={e=>{if(!e.target.files[0])return; setWizDocs(docs=>{const ex=docs.find(d=>d.key===doc.key); return ex?docs.map(d=>d.key===doc.key?{...d,archivo:e.target.files[0]}:d):[...docs,{id:Date.now(),key:doc.key,nombre:doc.label,archivo:e.target.files[0]}];});}}/>
-                                    </label>}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {/* Documentos adicionales libres */}
-                    <div style={{fontSize:".71rem",fontWeight:700,color:"var(--mu2)",marginBottom:".55rem",textTransform:"uppercase",letterSpacing:".05em"}}>
-                      {wizTipo==="VEHICULOS"?"Otros documentos (actas, resoluciones…)":"Documentos del lote (actas, resoluciones, etc.)"}
-                    </div>
-                    {wizDocs.filter(d=>!d.key).map((d,i)=>(
-                      <div key={d.id} className="doc-card">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--yl)" strokeWidth="1.5" strokeLinecap="round" style={{flexShrink:0}}><path d="M4 2h6l3 3v9H4V2z"/><path d="M10 2v3h3"/><path d="M6 8h4M6 11h3"/></svg>
-                        <div style={{flex:1}}>
-                          <input className="fi" style={{marginBottom:".25rem",fontSize:".76rem"}} placeholder="Nombre del documento / acta" value={d.nombre} onChange={e=>setWizDocs(docs=>docs.map(x=>x.id===d.id?{...x,nombre:e.target.value}:x))}/>
-                          <div style={{fontSize:".65rem",color:"var(--mu)"}}>{d.archivo?<span style={{color:"var(--gr)",fontWeight:600}}>✓ {d.archivo.name}</span>:<label style={{cursor:"pointer",color:"var(--ac)"}}>+ Adjuntar archivo<input type="file" style={{display:"none"}} onChange={e=>e.target.files[0]&&setWizDocs(docs=>docs.map(x=>x.id===d.id?{...x,archivo:e.target.files[0]}:x))}/></label>}</div>
-                        </div>
-                        <button onClick={()=>setWizDocs(docs=>docs.filter(x=>x.id!==d.id))} style={{background:"transparent",border:"none",cursor:"pointer",color:"var(--mu)",padding:".2rem",flexShrink:0}}><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
-                      </div>
-                    ))}
-                    <div className="add-btn-row" onClick={()=>setWizDocs(docs=>[...docs,{id:Date.now(),key:null,nombre:"",archivo:null}])}>
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M7 1v12M1 7h12"/></svg> Adjuntar documento / acta
-                    </div>
-
-                    {/* Resumen / alerta faltantes */}
-                    <div style={{marginTop:"1rem",padding:".7rem .9rem",background:"rgba(47,128,237,.05)",border:"1px solid rgba(47,128,237,.15)",borderRadius:8,fontSize:".72rem",color:"var(--mu2)",lineHeight:1.6}}>
-                      <strong style={{color:"var(--wh2)"}}>Resumen: </strong>
-                      <strong style={{color:"var(--wh2)"}}>{wizTipo||"—"}</strong>{wizTipo==="VEHICULOS"&&wizVehTipo?` — ${wizVehTipo}`:""} · Com. <strong style={{color:"var(--ac)"}}>{loteForm.comCustom||"?"}%</strong> · {COMISIONES[loteForm.tipoRemate]?.label}
-                      {wizTipo==="VEHICULOS"?<> · <span style={{color:"var(--yl)"}}>+$50.000 adm.</span></>:""}
-                      {" · "}{wizDocs.filter(d=>d.archivo).length} doc{wizDocs.filter(d=>d.archivo).length!==1?"s":""} adjunto{wizDocs.filter(d=>d.archivo).length!==1?"s":""}
-                      {" · "}{wizTipo==="VEHICULOS"?`${Object.values(wizFotos).filter(Boolean).length}/4 fotos`:`${wizItems.filter(x=>x.nombre).length} ítems`}
-                    </div>
+              {/* ── PASO 3: Documentos ── */}
+              {wizStep===3 && (
+                <div>
+                  <div style={{fontSize:".76rem",color:"var(--mu2)",marginBottom:".85rem"}}>
+                    Adjunta los documentos del lote. <span style={{color:"var(--mu)"}}>Opcional pero recomendado.</span>
                   </div>
-                );
-              })()}
+                  {wizTipo==="VEHICULOS" && (
+                    <div style={{marginBottom:"1rem"}}>
+                      <div style={{fontSize:".7rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".55rem"}}>Documentos del vehículo</div>
+                      {[
+                        {key:"anotaciones", label:"Certificado de Anotaciones Vigentes", desc:"Acredita que no tiene prendas ni prohibiciones"},
+                        {key:"multas",      label:"Certificado de Multas",               desc:"Sin multas impagas ante SII o municipios"},
+                        {key:"revision",    label:"Revisión Técnica vigente",            desc:"Certificado al día"},
+                        {key:"permiso",     label:"Permiso de Circulación",              desc:"Comprobante vigente"},
+                      ].map(doc=>{
+                        const adj = wizDocs.find(d=>d.key===doc.key);
+                        return (
+                          <div key={doc.key} style={{display:"flex",alignItems:"center",gap:".75rem",padding:".6rem .85rem",background:adj?.archivo?"rgba(34,211,160,.04)":"rgba(255,255,255,.02)",border:`1px solid ${adj?.archivo?"rgba(34,211,160,.2)":"var(--b1)"}`,borderRadius:8,marginBottom:".4rem"}}>
+                            <div style={{width:28,height:28,borderRadius:6,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:adj?.archivo?"rgba(34,211,160,.1)":"var(--s3)"}}>
+                              {adj?.archivo
+                                ? <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="var(--gr)" strokeWidth="2.2" strokeLinecap="round"><path d="M2 7l4 4 6-7"/></svg>
+                                : <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--mu)" strokeWidth="1.5" strokeLinecap="round"><path d="M4 2h6l3 3v9H4V2z"/><path d="M10 2v3h3"/></svg>}
+                            </div>
+                            <div style={{flex:1,minWidth:0}}>
+                              <div style={{fontSize:".76rem",fontWeight:600,color:"var(--wh2)"}}>{doc.label}</div>
+                              <div style={{fontSize:".63rem",color:"var(--mu)"}}>{adj?.archivo?<span style={{color:"var(--gr)"}}>✓ {adj.archivo.name}</span>:doc.desc}</div>
+                            </div>
+                            <label style={{fontSize:".68rem",fontWeight:600,color:adj?.archivo?"var(--mu)":"var(--ac)",cursor:"pointer",whiteSpace:"nowrap",padding:".25rem .55rem",border:`1px solid ${adj?.archivo?"var(--b2)":"rgba(47,128,237,.3)"}`,borderRadius:6,background:adj?.archivo?"transparent":"rgba(47,128,237,.06)"}}>
+                              {adj?.archivo?"Cambiar":"+ Adjuntar"}
+                              <input type="file" accept=".pdf,.jpg,.png" style={{display:"none"}} onChange={e=>e.target.files[0]&&setWizDocs(docs=>{const ex=docs.find(d=>d.key===doc.key);return ex?docs.map(d=>d.key===doc.key?{...d,archivo:e.target.files[0]}:d):[...docs,{id:Date.now(),key:doc.key,nombre:doc.label,archivo:e.target.files[0]}];})}/>
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <div style={{fontSize:".7rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".55rem"}}>
+                    {wizTipo==="VEHICULOS"?"Otros documentos":"Documentos del lote"}
+                  </div>
+                  {wizDocs.filter(d=>!d.key).map((d)=>(
+                    <div key={d.id} className="doc-card">
+                      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--yl)" strokeWidth="1.5" strokeLinecap="round" style={{flexShrink:0}}><path d="M4 2h6l3 3v9H4V2z"/><path d="M10 2v3h3"/></svg>
+                      <input className="fi" style={{flex:1,fontSize:".76rem"}} placeholder="Nombre del documento..." value={d.nombre} onChange={e=>setWizDocs(docs=>docs.map(x=>x.id===d.id?{...x,nombre:e.target.value}:x))}/>
+                      <span style={{fontSize:".65rem",color:d.archivo?"var(--gr)":"var(--mu)"}}>{d.archivo?`✓ ${d.archivo.name}`:<label style={{cursor:"pointer",color:"var(--ac)"}}>+ Adjuntar<input type="file" style={{display:"none"}} onChange={e=>e.target.files[0]&&setWizDocs(docs=>docs.map(x=>x.id===d.id?{...x,archivo:e.target.files[0]}:x))}/></label>}</span>
+                      <button onClick={()=>setWizDocs(docs=>docs.filter(x=>x.id!==d.id))} style={{background:"transparent",border:"none",cursor:"pointer",color:"var(--mu)",padding:".2rem"}}><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+                    </div>
+                  ))}
+                  <div className="add-btn-row" onClick={()=>setWizDocs(docs=>[...docs,{id:Date.now(),key:null,nombre:"",archivo:null}])}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M7 1v12M1 7h12"/></svg> Agregar documento / acta
+                  </div>
+                  {/* Resumen final */}
+                  <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"rgba(47,128,237,.05)",border:"1px solid rgba(47,128,237,.15)",borderRadius:9,fontSize:".73rem",color:"var(--mu2)",lineHeight:1.7}}>
+                    <div style={{fontWeight:700,color:"var(--wh2)",marginBottom:".3rem"}}>Resumen del lote</div>
+                    <div>📦 <strong style={{color:"var(--wh2)"}}>{wizDatos.nombre||"—"}</strong> · {wizTipo||"—"} · Com. <strong style={{color:"var(--ac)"}}>{loteForm.comCustom||COMISIONES[loteForm.tipoRemate]?.com||"?"}%</strong></div>
+                    <div>📸 {wizTipo==="VEHICULOS"?`${Object.values(wizFotos).filter(Boolean).length}/4 fotos`:`${wizItems.filter(x=>x.foto).length} foto(s)`} · 📄 {wizDocs.filter(d=>d.archivo).length} doc(s) adjunto(s)</div>
+                  </div>
+                </div>
+              )}
             </>}
             {modal==="nuevo-postor" && <>
               <div className="modal-title">Registrar postor</div>
@@ -2284,9 +2276,21 @@ function Dashboard({ session, onLogout }) {
               {modal==="nuevo-lote" ? (
                 <>
                   {wizStep>1 && <button className="btn-sec" style={{marginRight:"auto"}} onClick={()=>setWizStep(s=>s-1)}>← Atrás</button>}
-                  {wizStep<4
-                    ? <button className="btn-confirm" onClick={()=>{if(wizStep===1&&!wizTipo){notify("Selecciona el tipo de bien.","inf");return;}setWizStep(s=>s+1);}}>Siguiente →</button>
-                    : <button className="btn-confirm" onClick={async ()=>{
+                  {wizStep===1 && <button className="btn-confirm" onClick={()=>{
+                    if(!wizTipo){notify("Selecciona el tipo de bien.","inf");return;}
+                    if(!wizDatos.nombre){notify("Ingresa el nombre del artículo.","inf");return;}
+                    setWizStep(2);
+                  }}>Siguiente → Fotos</button>}
+                  {wizStep===2 && <button className="btn-confirm" onClick={()=>{
+                    if(wizTipo==="VEHICULOS"){
+                      const faltantes = ["frente","izq","der","trasera"].filter(k=>!wizFotos[k]);
+                      if(faltantes.length>0){notify(`Faltan fotos: ${faltantes.join(", ")}. Las 4 fotos son obligatorias.`,"inf");return;}
+                    } else {
+                      if(!wizItems.some(x=>x.foto)){notify("Debes agregar al menos una foto del artículo.","inf");return;}
+                    }
+                    setWizStep(3);
+                  }}>Siguiente → Documentos</button>}
+                  {wizStep===3 && <button className="btn-confirm" onClick={async ()=>{
                         if(!wizDatos.nombre){notify("Ingresa el nombre del artículo.","inf");return;}
                         const baseNum = parseInt(wizDatos.base.replace(/\D/g,""))||0;
                         const minNum  = parseInt(wizDatos.minimo.replace(/\D/g,""))||0;
@@ -2402,15 +2406,17 @@ function Dashboard({ session, onLogout }) {
         ))}
 
         {/* FINANZAS */}
-        <div className="sb-section">Finanzas</div>
-        {[
-          {id:"factura",  icon:"factura",  label:"Balance Económico"},
-          {id:"reportes", icon:"reportes", label:"Estadísticas"},
-        ].map(n => (
-          <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>setPage(n.id)}>
-            <span className="sb-icon"><Icon name={n.icon}/></span>{n.label}
-          </div>
-        ))}
+        {session?.role==="admin" && <>
+          <div className="sb-section">Finanzas</div>
+          {[
+            {id:"factura",  icon:"factura",  label:"Balance"},
+            {id:"reportes", icon:"reportes", label:"Estadísticas"},
+          ].map(n => (
+            <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>setPage(n.id)}>
+              <span className="sb-icon"><Icon name={n.icon}/></span>{n.label}
+            </div>
+          ))}
+        </>}
 
         {/* SISTEMA */}
         <div className="sb-section">Sistema</div>
@@ -2466,87 +2472,85 @@ function Dashboard({ session, onLogout }) {
         {/* ══ DASHBOARD ══ */}
         {page==="dashboard" && (
           <div className="page">
-            <div className="stat-grid">
+            {/* Saludo contextual */}
+            <div style={{marginBottom:"1.5rem"}}>
+              <div style={{fontSize:"1.1rem",fontWeight:800,color:"var(--wh2)"}}>
+                Bienvenido, {session?.name?.split(" ")[0]||"Usuario"} 👋
+              </div>
+              <div style={{fontSize:".78rem",color:"var(--mu2)",marginTop:".2rem"}}>
+                {session?.casaNombre||"GR Auction Software"} · {new Date().toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long"})}
+              </div>
+            </div>
+
+            {/* Acciones rápidas */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"1rem",marginBottom:"1.5rem"}}>
               {[
-                {label:"Remates activos",   val:"3",     delta:"↑ 1 este mes",   c:"var(--ac)"},
-                {label:"Lotes publicados",  val:"248",   delta:"↑ 31 este mes",  c:"var(--gr)"},
-                {label:"Postores",          val:"1.420", delta:"↑ 87 este mes",  c:"var(--yl)"},
-                {label:"Ventas del mes",    val:"$185M", delta:"↑ 14.9% vs Feb", c:"var(--gr)"},
-              ].map((s,i) => (
-                <div className="stat-card" key={i} style={{"--sc":s.c}}>
-                  <div className="stat-label">{s.label}</div>
-                  <div className="stat-val">{s.val}</div>
-                  <div className="stat-delta"><span className="delta-up">{s.delta}</span></div>
+                {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#2F80ED" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="3" width="18" height="16" rx="3"/><path d="M7 3v3M15 3v3M2 9h18"/><path d="M11 13v4M9 15h4"/></svg>,
+                 label:"Nuevo remate", sub:"Crear y configurar", action:()=>setModal("nuevo-remate"), color:"rgba(47,128,237,.1)", border:"rgba(47,128,237,.2)"},
+                {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#22d3a0" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="2" width="16" height="18" rx="2"/><path d="M7 7h8M7 11h8M7 15h4"/><path d="M17 15v4M15 17h4"/></svg>,
+                 label:"Agregar lote", sub:"Ingresar artículo", action:()=>setModal("nuevo-lote"), color:"rgba(34,211,160,.08)", border:"rgba(34,211,160,.2)"},
+                {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#f6ad55" strokeWidth="1.8" strokeLinecap="round"><circle cx="9" cy="7" r="4"/><path d="M2 19c0-4 3-6 7-6s7 2 7 6"/><path d="M17 10v4M15 12h4"/></svg>,
+                 label:"Registrar postor", sub:"Inscribir comprador", action:()=>setModal("nuevo-postor"), color:"rgba(246,173,85,.08)", border:"rgba(246,173,85,.2)"},
+              ].map((a,i)=>(
+                <div key={i} onClick={a.action} style={{padding:"1.2rem",background:a.color,border:`1px solid ${a.border}`,borderRadius:12,cursor:"pointer",transition:"all .15s"}}
+                  onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 4px 20px rgba(0,0,0,.2)"}}
+                  onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none"}}>
+                  <div style={{marginBottom:".6rem"}}>{a.icon}</div>
+                  <div style={{fontWeight:700,fontSize:".88rem",color:"var(--wh2)",marginBottom:".15rem"}}>{a.label}</div>
+                  <div style={{fontSize:".7rem",color:"var(--mu2)"}}>{a.sub}</div>
                 </div>
               ))}
             </div>
-            <div className="charts-row">
-              <div className="chart-card">
-                <div className="chart-title">Evolucion de ventas</div>
-                <div className="chart-sub">Ultimos 7 meses — millones CLP</div>
-                <ResponsiveContainer width="100%" height={135}>
-                  <LineChart data={VENTAS_MES}>
-                    <XAxis dataKey="mes" tick={{fontFamily:"Inter",fontSize:10,fill:"#5a7fa8"}} axisLine={false} tickLine={false}/>
-                    <YAxis hide/>
-                    <Tooltip content={<CustomTooltip/>}/>
-                    <Line type="monotone" dataKey="v" stroke="#2F80ED" strokeWidth={2.5} dot={{r:3,fill:"#2F80ED",strokeWidth:0}} activeDot={{r:5}}/>
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="chart-card">
-                <div className="chart-title">Lotes por categoria</div>
-                <div className="chart-sub">Volumen vendido este mes</div>
-                <ResponsiveContainer width="100%" height={135}>
-                  <BarChart data={TOP_LOTES} barSize={20}>
-                    <XAxis dataKey="name" tick={{fontFamily:"Inter",fontSize:9,fill:"#5a7fa8"}} axisLine={false} tickLine={false}/>
-                    <YAxis hide/>
-                    <Tooltip content={<CustomTooltip/>}/>
-                    <Bar dataKey="v" fill="#2F80ED" radius={[4,4,0,0]}/>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="chart-card">
-                <div className="chart-title">Modalidad</div>
-                <div className="chart-sub">Participacion de postores</div>
-                <ResponsiveContainer width="100%" height={96}>
-                  <PieChart>
-                    <Pie data={PIE_DATA} dataKey="v" cx="50%" cy="50%" outerRadius={40} innerRadius={22}>
-                      {PIE_DATA.map((_,i) => <Cell key={i} fill={PIE_COLORS[i]}/>)}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip/>}/>
-                  </PieChart>
-                </ResponsiveContainer>
-                <div style={{display:"flex",justifyContent:"center",gap:".75rem",marginTop:".35rem"}}>
-                  {PIE_DATA.map((d,i) => (
-                    <div key={i} style={{display:"flex",alignItems:"center",gap:".28rem"}}>
-                      <div style={{width:7,height:7,borderRadius:"50%",background:PIE_COLORS[i]}}/>
-                      <span style={{fontSize:".6rem",color:"var(--mu)",fontWeight:500}}>{d.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+
+            {/* Remates activos — lo más importante */}
+            <div style={{marginBottom:"1rem",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <div style={{fontSize:".78rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em"}}>Remates activos</div>
+              <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>setPage("remates")}>Ver todos</button>
             </div>
-            <div className="table-card">
-              <div className="table-head">
-                <div className="table-title">Remates recientes</div>
-                <button className="btn-sec" onClick={()=>setPage("remates")}>Ver todos</button>
-              </div>
-              <table>
-                <thead><tr><th>ID</th><th>Nombre</th><th>Fecha</th><th>Lotes</th><th>Modalidad</th><th>Recaudado</th><th>Estado</th></tr></thead>
-                <tbody>
-                  {REMATES_MERGED.slice(0,4).map(r => (
-                    <tr key={r.id}>
-                      <td className="mono">{r.id}</td>
-                      <td style={{fontWeight:600}}>{r.name}</td>
-                      <td className="mono">{r.fecha}</td>
-                      <td className="mono">{r.lotes}</td>
-                      <td className="mono">{r.modal}</td>
-                      <td className="gt">{fmtS(r.recaudado)}</td>
-                      <td><span className={`pill p-${r.estado}`}>{r.estado==="activo"?"● ":""}{r.estado.charAt(0).toUpperCase()+r.estado.slice(1)}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div style={{display:"flex",flexDirection:"column",gap:".6rem",marginBottom:"1.5rem"}}>
+              {REMATES_MERGED.filter(r=>r.estado==="activo").length===0 ? (
+                <div style={{padding:"1.5rem",textAlign:"center",color:"var(--mu)",fontSize:".8rem",background:"var(--s2)",borderRadius:10,border:"1px solid var(--b1)"}}>
+                  No hay remates activos. <span style={{color:"var(--ac)",cursor:"pointer"}} onClick={()=>setModal("nuevo-remate")}>Crear uno →</span>
+                </div>
+              ) : REMATES_MERGED.filter(r=>r.estado==="activo").map(r=>(
+                <div key={r.id} style={{display:"flex",alignItems:"center",gap:"1rem",padding:".85rem 1.1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,cursor:"pointer",transition:"border-color .15s"}}
+                  onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(47,128,237,.3)"}
+                  onMouseLeave={e=>e.currentTarget.style.borderColor="var(--b1)"}>
+                  <div style={{width:8,height:8,borderRadius:"50%",background:"var(--gr)",flexShrink:0,boxShadow:"0 0 6px var(--gr)"}}/>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontWeight:700,fontSize:".85rem",color:"var(--wh2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</div>
+                    <div style={{fontSize:".7rem",color:"var(--mu2)",marginTop:".1rem"}}>{r.fecha} · {r.modal}</div>
+                  </div>
+                  <button className="btn-primary" style={{fontSize:".7rem",whiteSpace:"nowrap",flexShrink:0}} onClick={async(e)=>{
+                    e.stopPropagation();
+                    setSalaRemateId(r.supabaseId||r.id);
+                    if(r.supabaseId){
+                      const {data:lr} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
+                      if(lr&&lr.length>0){
+                        const mapped=lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:[],desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
+                        setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
+                      }
+                    }
+                    setIdx(0); setAState("waiting"); setTimeLeft(120); setBidTimer(null);
+                    setPage("sala");
+                  }}>Abrir sala →</button>
+                </div>
+              ))}
+            </div>
+
+            {/* Stats simples — solo números, sin gráficos */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:".7rem"}}>
+              {[
+                {label:"Remates activos",  val:REMATES_MERGED.filter(r=>r.estado==="activo").length,  color:"var(--ac)"},
+                {label:"Lotes publicados", val:LOTES_MERGED.filter(l=>l.estado==="publicado").length, color:"var(--gr)"},
+                {label:"Postores inscritos",val:POSTORES_MERGED.length,                               color:"var(--yl)"},
+                {label:"Remates cerrados", val:REMATES_MERGED.filter(r=>r.estado==="cerrado").length, color:"var(--mu)"},
+              ].map((s,i)=>(
+                <div key={i} style={{padding:".85rem 1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderTop:`3px solid ${s.color}`,borderRadius:10}}>
+                  <div style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",lineHeight:1}}>{s.val}</div>
+                  <div style={{fontSize:".68rem",color:"var(--mu2)",marginTop:".3rem"}}>{s.label}</div>
+                </div>
+              ))}
             </div>
           </div>
         )}
