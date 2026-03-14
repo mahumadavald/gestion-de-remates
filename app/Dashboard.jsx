@@ -1227,38 +1227,60 @@ function AuthScreen({ onLogin }) {
 
 // Buyer-facing view — sala pública simplificada para postores
 function BuyerView({ user, onLogout }) {
-  const [photoIdx, setPhotoIdx] = React.useState(0);
+  const [photoIdx,  setPhotoIdx]  = React.useState(0);
+  const [watchlist, setWatchlist] = React.useState([]); // lote IDs favoritos
+  const [tabView,   setTabView]   = React.useState("live"); // "live" | "catalogo"
+  const [catFilter, setCatFilter] = React.useState("todos");
+  const [searchQ,   setSearchQ]   = React.useState("");
   const intervalRef = React.useRef(null);
 
-  // Mock lote activo — en producción viene de Supabase Realtime
-  const loteActivo = {
-    nombre: "Tractor John Deere 6130B",
-    cat: "Maquinaria · 2018",
-    lote: "Lote 01 de 5",
-    desc: "3.200 hrs, cabina climatizada, doble tracción.",
-    base: 18500000,
-    puja: 22500000,
-    tiempo: "01:24",
-    estado: "live", // "waiting" | "live" | "sold"
-    imgs: [], // en producción llegan las URLs de Supabase Storage
-  };
+  // Estado en vivo sincronizado con Supabase Realtime
+  const [loteActivo, setLoteActivo] = React.useState(null);
+  const [historial,  setHistorial]  = React.useState([]);
+  const [lotsCat,    setLotsCat]    = React.useState([]); // catálogo completo
 
-  const historial = [
-    { num:"P-0318", monto:22500000, tiempo:"11:42:05" },
-    { num:"P-0112", monto:22000000, tiempo:"11:41:52" },
-    { num:"P-0044", monto:21500000, tiempo:"11:41:38" },
-    { num:"P-0318", monto:21000000, tiempo:"11:41:20" },
-  ];
+  React.useEffect(() => {
+    // Cargar catálogo de lotes
+    supabase.from("lotes").select("*").eq("estado","disponible").order("orden")
+      .then(({data}) => { if(data) setLotsCat(data); });
+
+    // Suscribirse a la tabla de pujas en tiempo real
+    const ch = supabase.channel("buyer-live")
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"pujas"},(payload)=>{
+        const p = payload.new;
+        setHistorial(prev=>[{
+          num: `P-${String(p.numero_postor).padStart(4,"0")}`,
+          monto: p.monto,
+          tiempo: new Date(p.hora||Date.now()).toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),
+        },...prev].slice(0,20));
+      })
+      .on("postgres_changes",{event:"UPDATE",schema:"public",table:"lotes"},(payload)=>{
+        const l = payload.new;
+        if(l.estado==="en_subasta") setLoteActivo(l);
+      })
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+  },[]);
 
   // Auto-avance carrusel
+  const imgs = loteActivo?.fotos || [];
   React.useEffect(() => {
-    if (loteActivo.imgs.length > 1) {
-      intervalRef.current = setInterval(() => setPhotoIdx(p => (p+1) % loteActivo.imgs.length), 4000);
+    if(imgs.length>1){
+      intervalRef.current = setInterval(()=>setPhotoIdx(p=>(p+1)%imgs.length),4000);
     }
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, []);
+    return ()=>{ if(intervalRef.current) clearInterval(intervalRef.current); };
+  },[imgs.length]);
 
   const fmt = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n);
+  const toggleWatch = (id) => setWatchlist(w=>w.includes(id)?w.filter(x=>x!==id):[...w,id]);
+
+  // Categorías del catálogo
+  const categorias = ["todos",...new Set(lotsCat.map(l=>l.categoria).filter(Boolean))];
+  const lotesFiltrados = lotsCat.filter(l=>{
+    if(catFilter!=="todos"&&l.categoria!==catFilter) return false;
+    if(searchQ&&!l.nombre.toLowerCase().includes(searchQ.toLowerCase())) return false;
+    return true;
+  });
 
   const BUYER_CSS = `
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1268,7 +1290,10 @@ function BuyerView({ user, onLogout }) {
     .bv-casa { font-size: .82rem; font-weight: 700; color: #e0eaf4; }
     .bv-paleta { font-family: 'DM Mono', monospace; font-size: .75rem; background: rgba(47,128,237,.15); color: #2F80ED; border: 1px solid rgba(47,128,237,.3); padding: .18rem .55rem; border-radius: 4px; }
     .bv-logout { background: transparent; border: 1px solid rgba(255,255,255,.1); color: #4a6a8a; font-size: .72rem; padding: .3rem .7rem; border-radius: 5px; cursor: pointer; }
-    .bv-body { max-width: 760px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .bv-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,.07); background: #0b1f38; padding: 0 1.5rem; }
+    .bv-tab { padding: .75rem 1.2rem; font-size: .78rem; font-weight: 600; color: #4a6a8a; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; display: flex; align-items: center; gap: .4rem; }
+    .bv-tab.on { color: #2F80ED; border-bottom-color: #2F80ED; }
+    .bv-body { max-width: 820px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
     .bv-card { background: #0b1f38; border: 1px solid rgba(255,255,255,.07); border-radius: 12px; overflow: hidden; }
     .bv-card-header { padding: .7rem 1.1rem; border-bottom: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; justify-content: space-between; }
     .bv-card-title { font-size: .7rem; font-weight: 700; color: #2F80ED; letter-spacing: .06em; text-transform: uppercase; }
@@ -1290,6 +1315,28 @@ function BuyerView({ user, onLogout }) {
     .bv-hist-monto { font-size: .8rem; font-weight: 700; color: #e0eaf4; font-family: 'DM Mono', monospace; }
     .bv-hist-time { font-size: .68rem; color: #2a4a6a; font-family: 'DM Mono', monospace; }
     .bv-info { padding: .85rem 1.1rem; background: rgba(47,128,237,.05); border: 1px solid rgba(47,128,237,.12); border-radius: 10px; font-size: .76rem; color: #4a6a8a; line-height: 1.7; }
+    /* Catálogo */
+    .bv-search { width:100%; padding:.65rem .9rem; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:9px; color:#e0eaf4; font-family:'Inter',sans-serif; font-size:.85rem; outline:none; }
+    .bv-search:focus { border-color:#2F80ED; }
+    .bv-cat-pills { display:flex; gap:.5rem; flex-wrap:wrap; margin:.75rem 0; }
+    .bv-cat-pill { padding:.3rem .75rem; border-radius:20px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); font-size:.72rem; font-weight:600; color:#4a6a8a; cursor:pointer; transition:all .15s; }
+    .bv-cat-pill.on { background:rgba(47,128,237,.15); border-color:rgba(47,128,237,.4); color:#2F80ED; }
+    .bv-lote-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; }
+    @media(max-width:500px){ .bv-lote-grid{grid-template-columns:1fr;} }
+    .bv-lote-card { background:#0b1f38; border:1px solid rgba(255,255,255,.07); border-radius:11px; overflow:hidden; transition:border .15s; }
+    .bv-lote-card:hover { border-color:rgba(47,128,237,.3); }
+    .bv-lote-card.watched { border-color:rgba(246,173,85,.35); }
+    .bv-lote-img { width:100%; height:140px; object-fit:cover; background:rgba(255,255,255,.03); display:flex; align-items:center; justify-content:center; }
+    .bv-lote-info { padding:.75rem; }
+    .bv-lote-card-name { font-size:.83rem; font-weight:700; color:#e0eaf4; margin-bottom:.3rem; line-height:1.3; }
+    .bv-lote-card-base { font-size:.72rem; color:#4a6a8a; }
+    .bv-lote-card-price { font-family:'DM Mono',monospace; font-size:.9rem; font-weight:700; color:#22d3a0; }
+    .bv-watch-btn { background:transparent; border:none; cursor:pointer; padding:.2rem; color:#4a6a8a; transition:color .15s; }
+    .bv-watch-btn.on { color:#f6ad55; }
+    .bv-empty { text-align:center; padding:2rem; color:#4a6a8a; font-size:.82rem; }
+    /* Esperando */
+    .bv-waiting { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 1.5rem; text-align:center; gap:1rem; }
+    .bv-waiting-icon { width:64px; height:64px; border-radius:50%; background:rgba(47,128,237,.08); border:1px solid rgba(47,128,237,.2); display:flex; align-items:center; justify-content:center; }
   `;
 
   return (
@@ -1303,7 +1350,7 @@ function BuyerView({ user, onLogout }) {
           <GRLogo/>
           <div style={{width:1,height:24,background:"rgba(255,255,255,.1)"}}/>
           <div className="bv-casa">{user.casaNombre}</div>
-          <div className="bv-paleta">Paleta {user.token}</div>
+          <div className="bv-paleta">Paleta {user.token||user.numero||"—"}</div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
           <span style={{fontSize:".72rem",color:"#22d3a0"}}><span className="bv-dot-live"/>En vivo</span>
@@ -1311,91 +1358,300 @@ function BuyerView({ user, onLogout }) {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="bv-tabs">
+        <div className={`bv-tab${tabView==="live"?" on":""}`} onClick={()=>setTabView("live")}>
+          <span className="bv-dot-live" style={{width:6,height:6}}/>Subasta en vivo
+        </div>
+        <div className={`bv-tab${tabView==="catalogo"?" on":""}`} onClick={()=>setTabView("catalogo")}>
+          Catálogo
+          {watchlist.length>0&&<span style={{background:"rgba(246,173,85,.2)",color:"#f6ad55",fontSize:".6rem",fontWeight:700,padding:".05rem .35rem",borderRadius:10}}>★ {watchlist.length}</span>}
+        </div>
+      </div>
+
       <div className="bv-body">
 
-        {/* Fotos del lote — carrusel */}
-        <div className="bv-card">
-          <div className="bv-card-header">
-            <span className="bv-card-title">Lote en subasta</span>
-            <span style={{fontSize:".68rem",color:"#4a6a8a",fontFamily:"DM Mono,monospace"}}>{loteActivo.lote}</span>
-          </div>
-          {/* Imagen */}
-          <div style={{position:"relative",background:"#050c18",height:260,display:"flex",alignItems:"center",justifyContent:"center"}}>
-            {loteActivo.imgs.length > 0 ? (
-              <>
-                <img src={loteActivo.imgs[photoIdx]} alt={loteActivo.nombre}
-                  style={{width:"100%",height:260,objectFit:"cover",display:"block"}}/>
-                {loteActivo.imgs.length > 1 && (
-                  <>
-                    <button onClick={()=>setPhotoIdx(p=>(p-1+loteActivo.imgs.length)%loteActivo.imgs.length)}
+        {/* ── TAB: EN VIVO ── */}
+        {tabView==="live" && (<>
+          <div className="bv-card">
+            <div className="bv-card-header">
+              <span className="bv-card-title">Lote en subasta</span>
+              <span style={{fontSize:".68rem",color:"#4a6a8a",fontFamily:"DM Mono,monospace"}}>
+                {loteActivo ? `Lote ${loteActivo.orden||"—"}` : "Esperando..."}
+              </span>
+            </div>
+            {loteActivo ? (<>
+              {/* Imagen */}
+              <div style={{position:"relative",background:"#050c18",height:260,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                {imgs.length>0 ? (<>
+                  <img src={imgs[photoIdx]} alt={loteActivo.nombre} style={{width:"100%",height:260,objectFit:"cover",display:"block"}}/>
+                  {imgs.length>1&&(<>
+                    <button onClick={()=>setPhotoIdx(p=>(p-1+imgs.length)%imgs.length)}
                       style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.6)",border:"none",borderRadius:"50%",width:34,height:34,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
                       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M8 2L4 6l4 4"/></svg>
                     </button>
-                    <button onClick={()=>setPhotoIdx(p=>(p+1)%loteActivo.imgs.length)}
+                    <button onClick={()=>setPhotoIdx(p=>(p+1)%imgs.length)}
                       style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.6)",border:"none",borderRadius:"50%",width:34,height:34,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
                       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 2l4 4-4 4"/></svg>
                     </button>
                     <div style={{position:"absolute",bottom:10,left:"50%",transform:"translateX(-50%)",display:"flex",gap:5}}>
-                      {loteActivo.imgs.map((_,i)=>(
-                        <div key={i} onClick={()=>setPhotoIdx(i)}
-                          style={{width:i===photoIdx?18:7,height:7,borderRadius:4,background:i===photoIdx?"#2F80ED":"rgba(255,255,255,.35)",cursor:"pointer",transition:"all .2s"}}/>
-                      ))}
+                      {imgs.map((_,i)=><div key={i} onClick={()=>setPhotoIdx(i)} style={{width:i===photoIdx?18:7,height:7,borderRadius:4,background:i===photoIdx?"#2F80ED":"rgba(255,255,255,.35)",cursor:"pointer",transition:"all .2s"}}/>)}
                     </div>
-                  </>
+                  </>)}
+                </>) : (
+                  <div style={{textAlign:"center",color:"#2a4a6a"}}>
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="4" y="8" width="32" height="24" rx="3"/><circle cx="20" cy="20" r="6"/><path d="M15 8l2.5-4h5L25 8"/></svg>
+                    <div style={{fontSize:".75rem",marginTop:".5rem"}}>Sin fotos disponibles</div>
+                  </div>
                 )}
-              </>
-            ) : (
-              <div style={{textAlign:"center",color:"#2a4a6a"}}>
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="4" y="8" width="32" height="24" rx="3"/><circle cx="20" cy="20" r="6"/><path d="M15 8l2.5-4h5L25 8"/></svg>
-                <div style={{fontSize:".75rem",marginTop:".5rem"}}>El martillero cargará las fotos del lote</div>
+              </div>
+              <div className="bv-card-body">
+                <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between"}}>
+                  <div style={{flex:1}}>
+                    <div className="bv-lote-nombre">{loteActivo.nombre}</div>
+                    <div className="bv-lote-cat">{loteActivo.categoria} {loteActivo.year?`· ${loteActivo.year}`:""}</div>
+                    <div className="bv-lote-desc">{loteActivo.descripcion}</div>
+                  </div>
+                  <button className={`bv-watch-btn${watchlist.includes(loteActivo.id)?" on":""}`}
+                    onClick={()=>toggleWatch(loteActivo.id)} title="Agregar a favoritos">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill={watchlist.includes(loteActivo.id)?"#f6ad55":"none"} stroke={watchlist.includes(loteActivo.id)?"#f6ad55":"#4a6a8a"} strokeWidth="1.8"><path d="M10 2l2.3 4.7L18 7.6l-4 3.9 1 5.5L10 14.5l-5 2.5 1-5.5-4-3.9 5.7-.9z"/></svg>
+                  </button>
+                </div>
+                <div className="bv-stats">
+                  <div className="bv-stat">
+                    <div className="bv-stat-v gr">{fmt(historial[0]?.monto||loteActivo.base||0)}</div>
+                    <div className="bv-stat-l">Puja actual</div>
+                  </div>
+                  <div className="bv-stat">
+                    <div className="bv-stat-v yl">{historial.length}</div>
+                    <div className="bv-stat-l">Pujas totales</div>
+                  </div>
+                  <div className="bv-stat">
+                    <div className="bv-stat-v">{fmt(loteActivo.base||0)}</div>
+                    <div className="bv-stat-l">Precio base</div>
+                  </div>
+                </div>
+              </div>
+            </>) : (
+              <div className="bv-waiting">
+                <div className="bv-waiting-icon">
+                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#2F80ED" strokeWidth="1.6" strokeLinecap="round"><circle cx="14" cy="14" r="11"/><path d="M14 8v6l4 3"/></svg>
+                </div>
+                <div style={{fontWeight:700,color:"#e0eaf4"}}>Esperando inicio del remate</div>
+                <div style={{fontSize:".78rem",color:"#4a6a8a"}}>El martillero iniciará en breve. Puedes revisar el catálogo mientras tanto.</div>
+                <button style={{padding:".5rem 1rem",background:"rgba(47,128,237,.1)",border:"1px solid rgba(47,128,237,.25)",borderRadius:8,color:"#2F80ED",fontSize:".78rem",fontWeight:600,cursor:"pointer"}}
+                  onClick={()=>setTabView("catalogo")}>Ver catálogo →</button>
               </div>
             )}
           </div>
-          {/* Info lote */}
-          <div className="bv-card-body">
-            <div className="bv-lote-nombre">{loteActivo.nombre}</div>
-            <div className="bv-lote-cat">{loteActivo.cat}</div>
-            <div className="bv-lote-desc">{loteActivo.desc}</div>
-            {/* Stats */}
-            <div className="bv-stats">
-              <div className="bv-stat">
-                <div className="bv-stat-v gr">{fmt(loteActivo.puja)}</div>
-                <div className="bv-stat-l">Puja actual</div>
+
+          {/* Historial de pujas */}
+          {historial.length>0&&(
+            <div className="bv-card">
+              <div className="bv-card-header">
+                <span className="bv-card-title">Historial de pujas</span>
+                <span style={{fontSize:".68rem",color:"#22d3a0"}}>{historial.length} pujas</span>
               </div>
-              <div className="bv-stat">
-                <div className="bv-stat-v yl">{loteActivo.tiempo}</div>
-                <div className="bv-stat-l">Tiempo</div>
-              </div>
-              <div className="bv-stat">
-                <div className="bv-stat-v">{fmt(loteActivo.base)}</div>
-                <div className="bv-stat-l">Precio base</div>
+              <div className="bv-card-body">
+                {historial.map((h,i)=>(
+                  <div key={i} className="bv-hist-row">
+                    <span className="bv-hist-num">{h.num}</span>
+                    <span className="bv-hist-monto">{fmt(h.monto)}</span>
+                    <span className="bv-hist-time">{h.tiempo}</span>
+                  </div>
+                ))}
               </div>
             </div>
+          )}
+
+          <div className="bv-info">
+            Para pujar, levanta tu paleta en la sala presencial o comunícate con el martillero. Las liquidaciones serán enviadas a tu correo al finalizar el remate.
           </div>
+        </>)}
+
+        {/* ── TAB: CATÁLOGO ── */}
+        {tabView==="catalogo" && (<>
+          <input className="bv-search" placeholder="Buscar por nombre..." value={searchQ} onChange={e=>setSearchQ(e.target.value)}/>
+          <div className="bv-cat-pills">
+            {categorias.map(c=>(
+              <div key={c} className={`bv-cat-pill${catFilter===c?" on":""}`} onClick={()=>setCatFilter(c)}>
+                {c==="todos"?"Todos":c}
+                {c!=="todos"&&watchlist.filter(id=>lotsCat.find(l=>l.id===id&&l.categoria===c)).length>0&&
+                  <span style={{marginLeft:".3rem",color:"#f6ad55"}}>★</span>}
+              </div>
+            ))}
+            {watchlist.length>0&&(
+              <div className={`bv-cat-pill${catFilter==="favoritos"?" on":""}`} onClick={()=>setCatFilter(catFilter==="favoritos"?"todos":"favoritos")}
+                style={{borderColor:"rgba(246,173,85,.3)",color:"#f6ad55"}}>
+                ★ Mis favoritos ({watchlist.length})
+              </div>
+            )}
+          </div>
+
+          {lotesFiltrados.length===0&&catFilter==="favoritos"&&watchlist.length===0 ? (
+            <div className="bv-empty">No tienes lotes marcados como favoritos.<br/>Haz click en ★ en cualquier lote para agregarlo.</div>
+          ) : lotesFiltrados.length===0 ? (
+            <div className="bv-empty">No hay lotes que coincidan con tu búsqueda.</div>
+          ) : (
+            <div className="bv-lote-grid">
+              {(catFilter==="favoritos"?lotesFiltrados.filter(l=>watchlist.includes(l.id)):lotesFiltrados).map(lote=>(
+                <div key={lote.id} className={`bv-lote-card${watchlist.includes(lote.id)?" watched":""}`}>
+                  <div className="bv-lote-img">
+                    {lote.fotos?.[0]
+                      ? <img src={lote.fotos[0]} alt={lote.nombre} style={{width:"100%",height:140,objectFit:"cover"}}/>
+                      : <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#2a4a6a" strokeWidth="1.3"><rect x="3" y="6" width="26" height="20" rx="3"/><circle cx="16" cy="16" r="5"/></svg>}
+                  </div>
+                  <div className="bv-lote-info">
+                    <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:".5rem"}}>
+                      <div className="bv-lote-card-name">{lote.nombre}</div>
+                      <button className={`bv-watch-btn${watchlist.includes(lote.id)?" on":""}`} onClick={()=>toggleWatch(lote.id)}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill={watchlist.includes(lote.id)?"#f6ad55":"none"} stroke={watchlist.includes(lote.id)?"#f6ad55":"#4a6a8a"} strokeWidth="1.8"><path d="M10 2l2.3 4.7L18 7.6l-4 3.9 1 5.5L10 14.5l-5 2.5 1-5.5-4-3.9 5.7-.9z"/></svg>
+                      </button>
+                    </div>
+                    <div className="bv-lote-card-base">{lote.categoria} {lote.year?`· ${lote.year}`:""}</div>
+                    <div style={{marginTop:".5rem",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                      <div>
+                        <div style={{fontSize:".6rem",color:"#4a6a8a",marginBottom:".1rem"}}>Base</div>
+                        <div className="bv-lote-card-price">{fmt(lote.base||0)}</div>
+                      </div>
+                      <span style={{fontSize:".62rem",padding:".15rem .45rem",borderRadius:5,background:"rgba(47,128,237,.1)",color:"#2F80ED",fontWeight:700,border:"1px solid rgba(47,128,237,.2)"}}>
+                        {lote.estado||"disponible"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>)}
+
+      </div>
+    </div>
+  );
+}
+
+// ── Spotter View (digitador en sala) ─────────────────────────────
+function SpotterView({ user, onLogout }) {
+  const [loteIdx,  setLoteIdx]  = React.useState(0);
+  const [lots,     setLots]     = React.useState([]);
+  const [monto,    setMonto]    = React.useState("");
+  const [paleta,   setPaleta]   = React.useState("");
+  const [ultPujas, setUltPujas] = React.useState([]);
+  const [notif,    setNotif]    = React.useState(null);
+  const fmt = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n);
+  const notify = (msg) => { setNotif(msg); setTimeout(()=>setNotif(null),3000); };
+
+  React.useEffect(()=>{
+    supabase.from("lotes").select("*").eq("estado","en_subasta").order("orden")
+      .then(({data})=>{ if(data&&data.length) setLots(data); });
+    // Realtime: nuevo lote en subasta
+    const ch = supabase.channel("spotter")
+      .on("postgres_changes",{event:"UPDATE",schema:"public",table:"lotes"},(p)=>{
+        if(p.new.estado==="en_subasta") setLots(prev=>{
+          const ex = prev.find(l=>l.id===p.new.id);
+          return ex?prev.map(l=>l.id===p.new.id?p.new:l):[...prev,p.new];
+        });
+      }).subscribe();
+    return ()=>supabase.removeChannel(ch);
+  },[]);
+
+  const lote = lots[loteIdx];
+
+  const registrarPuja = async () => {
+    if(!monto||!paleta){ notify("Ingresa paleta y monto"); return; }
+    const montoNum = parseInt(monto.replace(/\D/g,""));
+    if(!montoNum){ notify("Monto inválido"); return; }
+    await supabase.from("pujas").insert({
+      lote_id: lote?.id||null,
+      remate_id: lote?.remate_id||null,
+      numero_postor: parseInt(paleta)||0,
+      monto: montoNum,
+      tipo: "presencial",
+    });
+    setUltPujas(p=>[{paleta,monto:fmt(montoNum),hora:new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",second:"2-digit"})},...p].slice(0,10));
+    notify(`✓ Puja registrada — Paleta ${paleta} · ${fmt(montoNum)}`);
+    setMonto(""); setPaleta("");
+  };
+
+  const SP_CSS = `
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#060d18;}
+    .sp-root{min-height:100vh;background:#060d18;font-family:'Inter',sans-serif;color:#e0eaf4;display:flex;flex-direction:column;}
+    .sp-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;background:#0b1f38;border-bottom:1px solid rgba(255,255,255,.07);}
+    .sp-body{flex:1;max-width:600px;width:100%;margin:0 auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;}
+    .sp-lote-sel{display:flex;flex-direction:column;gap:.4rem;}
+    .sp-input{width:100%;padding:.85rem 1rem;background:#0b1f38;border:2px solid rgba(255,255,255,.1);border-radius:10px;color:#e0eaf4;font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;outline:none;text-align:center;letter-spacing:.05em;}
+    .sp-input:focus{border-color:#2F80ED;}
+    .sp-input.big{font-size:1.5rem;padding:1.1rem 1rem;}
+    .sp-label{font-size:.68rem;font-weight:700;color:#4a6a8a;text-transform:uppercase;letter-spacing:.07em;text-align:center;}
+    .sp-btn{width:100%;padding:1rem;background:#2F80ED;border:none;border-radius:11px;color:#fff;font-size:1rem;font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:.02em;}
+    .sp-btn:hover{background:#1d6fd8;transform:translateY(-1px);}
+    .sp-btn:active{transform:none;}
+    .sp-hist-row{display:flex;align-items:center;justify-content:space-between;padding:.55rem .75rem;background:rgba(255,255,255,.02);border-radius:7px;margin-bottom:.35rem;}
+    .sp-notif{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#22d3a0;color:#0b1f38;font-weight:700;padding:.65rem 1.3rem;border-radius:8px;font-size:.85rem;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+  `;
+
+  return (
+    <div className="sp-root">
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=DM+Mono:wght@400;500;700&display=swap');`}</style>
+      <style>{SP_CSS}</style>
+      {notif&&<div className="sp-notif">{notif}</div>}
+
+      <div className="sp-header">
+        <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
+          <GRLogo/>
+          <span style={{fontSize:".78rem",fontWeight:700,color:"#7a9ab8"}}>Digitador de sala</span>
+        </div>
+        <button style={{background:"transparent",border:"1px solid rgba(255,255,255,.1)",color:"#4a6a8a",fontSize:".72rem",padding:".3rem .7rem",borderRadius:5,cursor:"pointer"}} onClick={onLogout}>Salir</button>
+      </div>
+
+      <div className="sp-body">
+        {/* Selector de lote */}
+        <div style={{background:"#0b1f38",border:"1px solid rgba(255,255,255,.07)",borderRadius:12,padding:"1rem"}}>
+          <div style={{fontSize:".65rem",fontWeight:700,color:"#4a6a8a",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".5rem"}}>Lote en subasta</div>
+          {lots.length>0 ? (
+            <select style={{width:"100%",padding:".65rem .9rem",background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,color:"#e0eaf4",fontSize:".85rem",fontFamily:"'Inter',sans-serif"}}
+              value={loteIdx} onChange={e=>setLoteIdx(Number(e.target.value))}>
+              {lots.map((l,i)=><option key={l.id} value={i}>{l.codigo||`Lote ${i+1}`} — {l.nombre}</option>)}
+            </select>
+          ) : (
+            <div style={{textAlign:"center",color:"#4a6a8a",fontSize:".82rem",padding:".5rem"}}>Esperando que el martillero inicie el remate...</div>
+          )}
+          {lote&&<div style={{marginTop:".6rem",fontSize:".75rem",color:"#2F80ED",fontFamily:"'DM Mono',monospace",textAlign:"center",fontWeight:700}}>Base: {fmt(lote.base||0)}</div>}
         </div>
 
-        {/* Historial de pujas */}
-        <div className="bv-card">
-          <div className="bv-card-header">
-            <span className="bv-card-title">Historial de pujas</span>
-            <span style={{fontSize:".68rem",color:"#22d3a0"}}>{historial.length} pujas</span>
+        {/* Registro de puja */}
+        <div style={{background:"#0b1f38",border:"1px solid rgba(255,255,255,.07)",borderRadius:12,padding:"1.2rem",display:"flex",flexDirection:"column",gap:".85rem"}}>
+          <div className="sp-lote-sel">
+            <label className="sp-label">N° Paleta</label>
+            <input className="sp-input big" placeholder="045" value={paleta}
+              onChange={e=>setPaleta(e.target.value.replace(/\D/g,""))}
+              onKeyDown={e=>e.key==="Enter"&&document.getElementById("sp-monto")?.focus()}/>
           </div>
-          <div className="bv-card-body">
-            {historial.map((h,i) => (
-              <div key={i} className="bv-hist-row">
-                <span className="bv-hist-num">{h.num}</span>
-                <span className="bv-hist-monto">{fmt(h.monto)}</span>
-                <span className="bv-hist-time">{h.tiempo}</span>
+          <div className="sp-lote-sel">
+            <label className="sp-label">Monto ofertado</label>
+            <input id="sp-monto" className="sp-input big" placeholder="$0" value={monto}
+              onChange={e=>setMonto(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&registrarPuja()}/>
+          </div>
+          <button className="sp-btn" onClick={registrarPuja} disabled={!lote}>
+            ✓ Registrar puja
+          </button>
+        </div>
+
+        {/* Últimas pujas registradas */}
+        {ultPujas.length>0&&(
+          <div style={{background:"#0b1f38",border:"1px solid rgba(255,255,255,.07)",borderRadius:12,padding:"1rem"}}>
+            <div style={{fontSize:".65rem",fontWeight:700,color:"#4a6a8a",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".65rem"}}>Últimas pujas registradas</div>
+            {ultPujas.map((p,i)=>(
+              <div key={i} className="sp-hist-row">
+                <span style={{fontFamily:"'DM Mono',monospace",fontWeight:700,color:"#2F80ED",fontSize:".8rem"}}>Paleta {p.paleta}</span>
+                <span style={{fontFamily:"'DM Mono',monospace",fontWeight:700,color:"#e0eaf4",fontSize:".85rem"}}>{p.monto}</span>
+                <span style={{fontSize:".68rem",color:"#4a6a8a"}}>{p.hora}</span>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Info */}
-        <div className="bv-info">
-          Para pujar, levanta tu paleta en la sala presencial o comunícate con el martillero a través del chat en vivo. Las adjudicaciones y liquidaciones serán enviadas a tu correo al finalizar el remate.
-        </div>
-
+        )}
       </div>
     </div>
   );
@@ -1449,6 +1705,7 @@ export default function Root() {
   );
   if (!session) return <AuthScreen onLogin={handleLogin}/>;
   if (session.role === "comprador") return <BuyerView user={session} onLogout={handleLogout}/>;
+  if (session.role === "spotter")   return <SpotterView user={session} onLogout={handleLogout}/>;
   return <Dashboard session={session} onLogout={handleLogout}/>;
 }
 
@@ -1480,7 +1737,7 @@ function Dashboard({ session, onLogout }) {
   const [adminClienteSel, setAdminClienteSel] = useState(null); // cliente seleccionado en panel admin
 
   // ── Usuarios (solo admin GR) ──
-  const ROLES_DISPONIBLES = ["admin","martillero","postremate","garantias","solo lectura"];
+  const ROLES_DISPONIBLES = ["admin","martillero","spotter","postremate","garantias","solo lectura"];
   const [usuarios, setUsuarios] = useState([
     {id:1, nombre:"Maximiliano Ahumada", usuario:"mahumada",  email:"max@rematesahumada.cl",  roles:["admin","martillero"],     casa:"Remates Ahumada", activo:true},
     {id:2, nombre:"Nicolás Pérez",       usuario:"nperez",    email:"nperez@rematesahumada.cl",roles:["martillero","postremate"],casa:"Remates Ahumada", activo:true},
@@ -2603,6 +2860,52 @@ function Dashboard({ session, onLogout }) {
               {aState==="live" && <div className="tb-live"><div className="ldot"/>En vivo — Remate Industrial Marzo</div>}
               {page==="remates"   && <button className="btn-primary" onClick={()=>setModal("nuevo-remate")}>+ Nuevo remate</button>}
               {page==="lotes"     && <>
+                <button className="btn-sec" style={{fontSize:".7rem"}} onClick={async()=>{
+                  // Generar Bid Sheets PDF — hoja imprimible por lote
+                  const {jsPDF} = await import("jspdf");
+                  const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+                  const W = doc.internal.pageSize.getWidth();
+                  const H = doc.internal.pageSize.getHeight();
+                  const lotesParaSheet = LOTES_MERGED.slice(0,20);
+                  // 4 lotes por hoja (2x2)
+                  const perPage = 4;
+                  lotesParaSheet.forEach((l,i)=>{
+                    if(i>0&&i%perPage===0) doc.addPage();
+                    const col = i%2; const row = Math.floor((i%perPage)/2);
+                    const x = 10 + col*95; const y = 15 + row*130;
+                    // Box
+                    doc.setFillColor(7,15,28); doc.roundedRect(x,y,90,125,3,3,"F");
+                    doc.setDrawColor(47,128,237); doc.setLineWidth(.3); doc.roundedRect(x,y,90,125,3,3,"S");
+                    // Header
+                    doc.setFillColor(11,31,56); doc.rect(x,y,90,18,"F");
+                    doc.setTextColor(47,128,237); doc.setFontSize(7); doc.setFont("helvetica","bold");
+                    doc.text(`LOTE ${i+1}`,x+4,y+7);
+                    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont("helvetica","bold");
+                    doc.text(l.name?.substring(0,28)||"—",x+4,y+14);
+                    // Categoría
+                    doc.setTextColor(90,127,168); doc.setFontSize(7); doc.setFont("helvetica","normal");
+                    doc.text(l.cat||"",x+4,y+23);
+                    // Precio base
+                    doc.setTextColor(34,211,160); doc.setFontSize(11); doc.setFont("helvetica","bold");
+                    doc.text(`Base: $${(l.base||0).toLocaleString("es-CL")}`,x+4,y+33);
+                    // Líneas para pujas
+                    doc.setTextColor(90,127,168); doc.setFontSize(6); doc.setFont("helvetica","normal");
+                    doc.text("REGISTRO DE PUJAS",x+4,y+42);
+                    doc.setDrawColor(47,128,237,0.3); doc.setLineWidth(.15);
+                    for(let li=0;li<8;li++){
+                      const ly = y+48+(li*8);
+                      doc.text(`${li+1}.`,x+4,ly); doc.line(x+10,ly,x+86,ly);
+                      doc.text("Paleta:",x+4,ly+4); doc.text("Monto: $",x+35,ly+4);
+                    }
+                    // Adjudicado box
+                    doc.setDrawColor(34,211,160); doc.setLineWidth(.3);
+                    doc.rect(x+4,y+114,82,8,"S");
+                    doc.setTextColor(34,211,160); doc.setFontSize(7);
+                    doc.text("ADJUDICADO — Paleta: _____ Monto: $___________",x+6,y+119);
+                  });
+                  doc.save("bid-sheets.pdf");
+                  notify("Bid sheets generados.","sold");
+                }}>🖨 Bid Sheets PDF</button>
                 <label className="btn-sec" style={{fontSize:".7rem",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:".3rem"}}>
                   ↑ Importar Excel
                   <input type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={async e=>{
@@ -5036,6 +5339,10 @@ function Dashboard({ session, onLogout }) {
                   ))}
                 </div>
                 {aState==="live" && <div className="tb-live"><div className="ldot"/>Transmitiendo</div>}
+                <button className="btn-sec" style={{fontSize:".7rem"}} title="Abrir pantalla para proyección en sala"
+                  onClick={()=>window.open(`/display/${session?.casa||"rematesahumada"}`,"_blank","width=1280,height=720")}>
+                  📺 Pantalla sala
+                </button>
                 {bids.every(b=>b.status==="sold"||bids[idx].count>0) && (
                   <button className="btn-primary" style={{fontSize:".7rem"}} onClick={cerrarRemateCompleto}>Cerrar remate</button>
                 )}
