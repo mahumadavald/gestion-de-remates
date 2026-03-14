@@ -412,8 +412,17 @@ tr:hover td{background:rgba(47,128,237,.04);}
 .mono{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--mu2);}
 .gt{color:var(--ac);font-family:'DM Mono',monospace;font-size:.75rem;font-weight:500;}
 .pill{display:inline-flex;align-items:center;gap:.22rem;padding:.12rem .52rem;border-radius:12px;font-size:.66rem;font-weight:600;white-space:nowrap;}
-.p-activo   {background:rgba(47,128,237,.12);color:var(--ac);border:1px solid rgba(47,128,237,.28);}
-.p-cerrado  {background:rgba(90,127,168,.1); color:var(--mu2);border:1px solid var(--b1);}
+.p-activo      {background:rgba(47,128,237,.12);color:var(--ac);border:1px solid rgba(47,128,237,.28);}
+.p-cerrado     {background:rgba(90,127,168,.1); color:var(--mu2);border:1px solid var(--b1);}
+.p-borrador    {background:rgba(255,255,255,.04);color:var(--mu);border:1px solid var(--b2);}
+.p-publicado   {background:rgba(47,128,237,.1); color:var(--ac);border:1px solid rgba(47,128,237,.25);}
+.p-en_vivo     {background:rgba(34,211,160,.12);color:var(--gr);border:1px solid rgba(34,211,160,.3);}
+.p-finalizado  {background:rgba(90,127,168,.1); color:var(--mu2);border:1px solid var(--b1);}
+.p-disponible  {background:rgba(47,128,237,.1); color:var(--ac);border:1px solid rgba(47,128,237,.25);}
+.p-en-subasta  {background:rgba(34,211,160,.12);color:var(--gr);border:1px solid rgba(34,211,160,.3);}
+.p-vendido     {background:rgba(34,211,160,.1); color:var(--gr);border:1px solid rgba(34,211,160,.25);}
+.p-sin-vender  {background:rgba(224,82,82,.08); color:var(--rd);border:1px solid rgba(224,82,82,.2);}
+.p-retirado    {background:rgba(255,255,255,.04);color:var(--mu);border:1px solid var(--b2);}
 .p-publicado{background:rgba(34,211,160,.1); color:var(--gr);border:1px solid rgba(34,211,160,.25);}
 .p-vendido  {background:rgba(47,128,237,.12);color:var(--ac);border:1px solid rgba(47,128,237,.28);}
 .p-sinvender{background:rgba(245,101,101,.1);color:var(--rd);border:1px solid rgba(245,101,101,.28);}
@@ -1443,8 +1452,12 @@ function Dashboard({ session, onLogout }) {
   const [wizFotos,   setWizFotos]   = useState({frente:null,izq:null,der:null,trasera:null});
   const [wizItems,   setWizItems]   = useState([{id:1,nombre:"",foto:null}]);
   const [wizDocs,    setWizDocs]    = useState([]);
-  const [wizDatos, setWizDatos] = useState({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",descripcion:"",ubicacion:""});
-  const resetWiz = () => { setWizStep(1); setWizTipo(null); setWizVehTipo(""); setWizFotos({frente:null,izq:null,der:null,trasera:null}); setWizItems([{id:1,nombre:"",foto:null}]); setWizDocs([]); setLoteForm({ tipoRemate:"judicial", motorizado:false, comCustom:"" }); setWizDatos({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",descripcion:"",ubicacion:""}); };
+  const [wizDatos, setWizDatos] = useState({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",incremento:"",descripcion:"",ubicacion:"",remateId:""});
+  const resetWiz = () => { setWizStep(1); setWizTipo(null); setWizVehTipo(""); setWizFotos({frente:null,izq:null,der:null,trasera:null}); setWizItems([{id:1,nombre:"",foto:null}]); setWizDocs([]); setLoteForm({ tipoRemate:"judicial", motorizado:false, comCustom:"" }); setWizDatos({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",incremento:"",descripcion:"",ubicacion:"",remateId:""}); };
+
+  // ── Retiro de bienes ──
+  const [dbRetiros, setDbRetiros] = useState([]);
+  const [retiroFiltroRemate, setRetiroFiltroRemate] = useState(null);
   // Liquidaciones agrupadas por comprador para revisión post-remate
   const [liqReview,  setLiqReview]  = useState(null);  // null | { compradores: [...] }
   const [liqExpanded,setLiqExpanded]= useState(null);  // nComprador expandido
@@ -1464,8 +1477,8 @@ function Dashboard({ session, onLogout }) {
   const resetUsuarioForm = () => setUsuarioForm({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
 
   // ── Formulario nuevo remate ──
-  const [remateForm, setRemateForm] = useState({nombre:"",fecha:"",modalidad:"Híbrido",tipo:"judicial",comCustom:""});
-  const resetRemateForm = () => setRemateForm({nombre:"",fecha:"",modalidad:"Híbrido",tipo:"judicial",comCustom:""});
+  const [remateForm, setRemateForm] = useState({nombre:"",fecha:"",hora:"10:00",modalidad:"Híbrido",tipo:"judicial",comCustom:"",estado:"borrador"});
+  const resetRemateForm = () => setRemateForm({nombre:"",fecha:"",hora:"10:00",modalidad:"Híbrido",tipo:"judicial",comCustom:"",estado:"borrador"});
 
   // ── Remate activo en sala en vivo ──
   const [salaRemateId, setSalaRemateId] = useState(null);
@@ -1519,14 +1532,15 @@ function Dashboard({ session, onLogout }) {
 
   // Merge: usa datos de Supabase si hay, fallback a mock
   const REMATES_MERGED = dbRemates.length > 0 ? dbRemates.map(r => ({
-    id:     r.codigo || r.id,
-    name:   r.nombre,
-    fecha:  new Date(r.fecha).toLocaleDateString("es-CL",{day:"2-digit",month:"short",year:"numeric"}),
-    lotes:  r.total_lotes || 0,
-    modal:  r.modalidad,
-    estado: r.estado,
-    recaudado: r.total_recaudado || 0,
-    casa:   r.casa_nombre || "",
+    id:         r.codigo || r.id,
+    name:       r.nombre,
+    fecha:      new Date(r.fecha).toLocaleDateString("es-CL",{day:"2-digit",month:"short",year:"numeric"}),
+    hora:       r.hora||"",
+    lotes:      r.total_lotes || 0,
+    modal:      r.modalidad,
+    estado:     r.estado,
+    recaudado:  r.total_recaudado || 0,
+    casa:       r.casa_nombre || "",
     supabaseId: r.id,
   })) : REMATES;
 
@@ -1869,6 +1883,19 @@ function Dashboard({ session, onLogout }) {
   const startAuction  = () => { setAState("live"); setTimeLeft(120); setBidTimer(null); setLastBidder(null); };
   const pauseAuction  = () => { setAState("paused"); setBidTimer(null); };
   const adjudicar     = () => doAdjudicar(true);
+  const pasarLote     = () => {
+    if(idx < lots.length-1){
+      const next = idx+1;
+      setIdx(next); setAState("waiting"); setTimeLeft(120); setBidTimer(null); setLastBidder(null);
+      setCurInc(lots[next]?.inc||500000); setPhotoIdx(0);
+      notify(`Lote ${next+1} — ${lots[next]?.name}`,"inf");
+    } else { notify("Este es el último lote.","inf"); }
+  };
+  const repetirLote   = () => {
+    setAState("waiting"); setTimeLeft(120); setBidTimer(null); setLastBidder(null);
+    setBids(prev => { const n=[...prev]; n[idx]={current:lots[idx]?.base||0,count:0,history:[],status:"waiting",winner:null}; return n; });
+    notify(`Lote repetido — ${lots[idx]?.name}`,"inf");
+  };
   const resetAuction  = () => { setAState("waiting"); setTimeLeft(120); setBidTimer(null); setLastBidder(null); setBids(lots.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null}))); };
   const handlePhoto   = (i,e) => { const f=e.target.files[0]; if(!f) return; setLots(p=>{const n=[...p];const imgs=[...(n[i].imgs||[]),URL.createObjectURL(f)];n[i]={...n[i],imgs};return n;}); notify("Foto agregada.","inf"); };
   const removePhoto   = (loteI, photoI) => { setLots(p=>{const n=[...p];const imgs=n[loteI].imgs.filter((_,j)=>j!==photoI);n[loteI]={...n[loteI],imgs};return n;}); setPhotoIdx(0); };
@@ -2063,7 +2090,7 @@ function Dashboard({ session, onLogout }) {
     { id:"config",       icon:"config",    label:"Configuracion" },
   ];
 
-  const PAGE_TITLE = {dashboard:"Dashboard",remates:"Remates",lotes:"Lotes",sala:"Sala en vivo",postores:"Postores",garantias:"Garantias",adjudicac:"Adjudicaciones",liquidac:"Liquidaciones",devoluciones:"Devoluciones de Garantia",factura:"Balance Económico",vendedores:"Liquidación de Vendedores",reportes:"Estadísticas",config:"Configuracion"};
+  const PAGE_TITLE = {dashboard:"Dashboard",remates:"Remates",lotes:"Lotes",sala:"Sala en vivo",postores:"Postores",garantias:"Garantias",adjudicac:"Adjudicaciones",liquidac:"Liquidaciones",devoluciones:"Devoluciones de Garantía",retiro:"Retiro de Bienes",factura:"Balance Económico",vendedores:"Liquidación de Vendedores",reportes:"Estadísticas",config:"Configuracion",usuarios:"Usuarios",licencias:"Licencias"};
 
   return (
     <div className="app">
@@ -2083,9 +2110,18 @@ function Dashboard({ session, onLogout }) {
                 <div className="fg"><label className="fl">Fecha</label>
                   <input className="fi" type="date" value={remateForm.fecha} onChange={e=>setRemateForm(f=>({...f,fecha:e.target.value}))}/>
                 </div>
+                <div className="fg"><label className="fl">Hora de inicio</label>
+                  <input className="fi" type="time" value={remateForm.hora} onChange={e=>setRemateForm(f=>({...f,hora:e.target.value}))}/>
+                </div>
                 <div className="fg"><label className="fl">Modalidad</label>
                   <select className="fsel" value={remateForm.modalidad} onChange={e=>setRemateForm(f=>({...f,modalidad:e.target.value}))}>
                     <option>Presencial</option><option>Online</option><option>Híbrido</option>
+                  </select>
+                </div>
+                <div className="fg"><label className="fl">Estado inicial</label>
+                  <select className="fsel" value={remateForm.estado} onChange={e=>setRemateForm(f=>({...f,estado:e.target.value}))}>
+                    <option value="borrador">Borrador — no visible</option>
+                    <option value="publicado">Publicado — visible al público</option>
                   </select>
                 </div>
                 <div className="fg full"><label className="fl">Tipo de remate</label>
@@ -2178,6 +2214,9 @@ function Dashboard({ session, onLogout }) {
                     </div>
                     <div className="fg"><label className="fl">Precio mínimo</label>
                       <input className="fi" placeholder="$7.000.000" value={wizDatos.minimo} onChange={e=>setWizDatos(f=>({...f,minimo:e.target.value}))}/>
+                    </div>
+                    <div className="fg"><label className="fl">Incremento mínimo de puja</label>
+                      <input className="fi" placeholder="$100.000" value={wizDatos.incremento} onChange={e=>setWizDatos(f=>({...f,incremento:e.target.value}))}/>
                     </div>
                     <div className="fg full"><label className="fl">Descripción <span style={{color:"var(--mu)",fontWeight:400}}>(opcional)</span></label>
                       <textarea className="fi" rows={2} placeholder="Estado general, observaciones..." style={{resize:"none"}} value={wizDatos.descripcion} onChange={e=>setWizDatos(f=>({...f,descripcion:e.target.value}))}/>
@@ -2360,9 +2399,9 @@ function Dashboard({ session, onLogout }) {
                     setWizStep(3);
                   }}>Siguiente → Documentos</button>}
                   {wizStep===3 && <button className="btn-confirm" onClick={async ()=>{
-                        if(!wizDatos.nombre){notify("Ingresa el nombre del artículo.","inf");return;}
                         const baseNum = parseInt(wizDatos.base.replace(/\D/g,""))||0;
                         const minNum  = parseInt(wizDatos.minimo.replace(/\D/g,""))||0;
+                        const incNum  = parseInt(wizDatos.incremento.replace(/\D/g,""))||Math.round(baseNum*0.05)||100000;
                         const {data:casaData} = await supabase.from("casas").select("id").eq("slug","rematesahumada").single();
                         const codigo = `L-${String(Date.now()).slice(-5)}`;
                         const {error} = await supabase.from("lotes").insert({
@@ -2374,9 +2413,10 @@ function Dashboard({ session, onLogout }) {
                           categoria:   wizTipo==="VEHICULOS"?"Vehículo":wizTipo==="INMUEBLES"?"Inmueble":"Muebles",
                           base:        baseNum,
                           minimo:      minNum,
+                          incremento:  incNum,
                           comision:    parseFloat(loteForm.comCustom)||COMISIONES[loteForm.tipoRemate]?.com||3,
                           tipo_iva:    "AF",
-                          estado:      "publicado",
+                          estado:      "disponible",
                           orden:       dbLotes.length+1,
                         });
                         if(error){notify("Error al guardar lote: "+error.message,"inf");console.error(error);return;}
@@ -2396,9 +2436,10 @@ function Dashboard({ session, onLogout }) {
                       codigo,
                       nombre:    remateForm.nombre,
                       fecha:     remateForm.fecha,
+                      hora:      remateForm.hora||"10:00",
                       modalidad: remateForm.modalidad,
                       tipo:      remateForm.tipo,
-                      estado:    "activo",
+                      estado:    remateForm.estado||"borrador",
                     });
                     if(error){notify("Error al guardar remate.","inf");console.error(error);return;}
                     const {data:remData} = await supabase.from("remates").select("*").order("created_at",{ascending:false});
@@ -2466,6 +2507,7 @@ function Dashboard({ session, onLogout }) {
           {id:"adjudicac",    icon:"adjudic",  label:"Adjudicaciones"},
           {id:"liquidac",     icon:"liq",      label:"Liquidaciones", badge:liquidaciones.filter(l=>!l.enviado).length||undefined},
           {id:"devoluciones", icon:"dev",      label:"Devoluciones",  badge:devoluciones.filter(d=>d.estado==="pendiente").length||undefined},
+          {id:"retiro",       icon:"vendedor", label:"Retiro de bienes", badge:dbRetiros.filter(r=>r.estado==="pendiente").length||undefined},
           {id:"vendedores",   icon:"vendedor", label:"Vendedores"},
         ].map(n => (
           <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>setPage(n.id)}>
@@ -2538,7 +2580,40 @@ function Dashboard({ session, onLogout }) {
             <div className="topbar-right">
               {aState==="live" && <div className="tb-live"><div className="ldot"/>En vivo — Remate Industrial Marzo</div>}
               {page==="remates"   && <button className="btn-primary" onClick={()=>setModal("nuevo-remate")}>+ Nuevo remate</button>}
-              {page==="lotes"     && <button className="btn-primary" onClick={()=>setModal("nuevo-lote")}>+ Agregar lote</button>}
+              {page==="lotes"     && <>
+                <label className="btn-sec" style={{fontSize:".7rem",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:".3rem"}}>
+                  ↑ Importar Excel
+                  <input type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={async e=>{
+                    const file = e.target.files[0]; if(!file) return;
+                    const text = await file.text();
+                    const rows = text.split("\n").slice(1).filter(r=>r.trim());
+                    let ok=0;
+                    const {data:casaData} = await supabase.from("casas").select("id").eq("slug","rematesahumada").single();
+                    for(const row of rows){
+                      const cols = row.split(",").map(c=>c.replace(/"/g,"").trim());
+                      if(!cols[0]) continue;
+                      const {error} = await supabase.from("lotes").insert({
+                        casa_id: casaData?.id||null,
+                        codigo:  `L-${String(Date.now()+ok).slice(-5)}`,
+                        nombre:  cols[0]||"Sin nombre",
+                        descripcion: cols[1]||"",
+                        base:    parseInt(cols[2])||0,
+                        minimo:  parseInt(cols[3])||0,
+                        incremento: parseInt(cols[4])||0,
+                        comision: parseFloat(cols[5])||3,
+                        estado:  "disponible",
+                        orden:   dbLotes.length+ok+1,
+                      });
+                      if(!error) ok++;
+                    }
+                    const {data:lotData} = await supabase.from("lotes").select("*").order("orden");
+                    if(lotData) setDbLotes(lotData);
+                    notify(`${ok} lotes importados desde Excel.`,"sold");
+                    e.target.value="";
+                  }}/>
+                </label>
+                <button className="btn-primary" onClick={()=>setModal("nuevo-lote")}>+ Agregar lote</button>
+              </>}
               {page==="postores"  && <button className="btn-primary" onClick={()=>setModal("nuevo-postor")}>+ Registrar postor</button>}
               {page==="garantias" && <button className="btn-primary" onClick={()=>setModal("nueva-garantia")}>+ Registrar garantia</button>}
             </div>
@@ -2646,92 +2721,69 @@ function Dashboard({ session, onLogout }) {
                 </div>
             }
             <div className="filter-row" style={{marginBottom:"1rem"}}>
-              {["todos","activo","cerrado"].map(f => (
-                <button key={f} className={`filter-btn${filterTab===f?" on":""}`} onClick={()=>setFilterTab(f)}>{f}</button>
+              {["todos","borrador","publicado","en_vivo","finalizado"].map(f => (
+                <button key={f} className={`filter-btn${filterTab===f?" on":""}`} onClick={()=>setFilterTab(f)}>
+                  {f==="todos"?"Todos":f==="borrador"?"Borrador":f==="publicado"?"Publicado":f==="en_vivo"?"En vivo":"Finalizado"}
+                </button>
               ))}
             </div>
             <div className="table-card">
               <div className="table-head"><div className="table-title">{REMATES_MERGED.filter(r=>filterTab==="todos"||r.estado===filterTab).length} remates</div></div>
               <table>
-                <thead><tr><th>ID</th><th>Nombre</th><th>Fecha</th><th>Lotes</th><th>Modalidad</th><th>Recaudado</th><th>Estado</th>{session?.role==="admin"&&<th>Casa</th>}<th></th></tr></thead>
+                <thead><tr><th>Código</th><th>Nombre</th><th>Fecha y hora</th><th>Modalidad</th><th>Estado</th>{session?.role==="admin"&&<th>Casa</th>}<th></th></tr></thead>
                 <tbody>
-                  {REMATES_MERGED.filter(r=>filterTab==="todos"||r.estado===filterTab).map(r => (
+                  {REMATES_MERGED.filter(r=>filterTab==="todos"||r.estado===filterTab).map(r => {
+                    const ESTADO_LABELS = {borrador:"Borrador",publicado:"Publicado",en_vivo:"● En vivo",finalizado:"Finalizado",activo:"Publicado",cerrado:"Finalizado"};
+                    const nextEstado = {borrador:"publicado",publicado:"en_vivo",en_vivo:"finalizado"};
+                    const nextLabel  = {borrador:"→ Publicar",publicado:"→ Activar",en_vivo:"→ Finalizar"};
+                    return (
                     <tr key={r.id}>
-                      <td className="mono">{r.id}</td>
+                      <td className="mono" style={{fontSize:".7rem"}}>{r.id}</td>
                       <td style={{fontWeight:600}}>{r.name}</td>
-                      <td className="mono">{r.fecha}</td>
-                      <td className="mono">{r.lotes}</td>
+                      <td className="mono" style={{fontSize:".75rem"}}>{r.fecha}{r.hora&&<span style={{color:"var(--mu)",marginLeft:".4rem"}}>{r.hora}</span>}</td>
                       <td className="mono">{r.modal}</td>
-                      <td className="gt">{fmt(r.recaudado)}</td>
-                      <td><span className={`pill p-${r.estado}`}>{r.estado==="activo"?"● ":""}{r.estado.charAt(0).toUpperCase()+r.estado.slice(1)}</span></td>
+                      <td><span className={`pill p-${r.estado}`}>{ESTADO_LABELS[r.estado]||r.estado}</span></td>
                       {session?.role==="admin" && (
-                        <td>
-                          <span style={{fontSize:".68rem",fontWeight:600,color:"var(--mu2)",background:"var(--s3)",border:"1px solid var(--b1)",borderRadius:5,padding:".1rem .45rem",whiteSpace:"nowrap"}}>
-                            {r.casa||"Remates Ahumada"}
-                          </span>
-                        </td>
+                        <td><span style={{fontSize:".68rem",fontWeight:600,color:"var(--mu2)",background:"var(--s3)",border:"1px solid var(--b1)",borderRadius:5,padding:".1rem .45rem",whiteSpace:"nowrap"}}>{r.casa||"Remates Ahumada"}</span></td>
                       )}
                       <td>
-                        <div style={{display:"flex",gap:".4rem",flexWrap:"nowrap"}}>
-                          {r.estado==="activo"
-                            ? <button className="btn-primary" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async ()=>{
-                                setSalaRemateId(r.supabaseId||r.id);
-                                if(r.supabaseId){
-                                  const {data:lotesRemate} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
-                                  if(lotesRemate&&lotesRemate.length>0){
-                                    const mapped = lotesRemate.map(l=>({
-                                      id:l.id, supabaseId:l.id, remateId:l.remate_id,
-                                      name:l.nombre, cat:l.categoria||"Muebles",
-                                      base:l.base||0, imgs:[], desc:l.descripcion||"",
-                                      inc:Math.round((l.base||0)*0.05)||100000,
-                                    }));
-                                    setLots(mapped);
-                                    setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
-                                  } else {
-                                    setLots(LOTES_SALA);
-                                    setBids(LOTES_SALA.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
-                                    notify("Este remate no tiene lotes asignados aún.","inf");
-                                  }
-                                }
-                                setIdx(0); setAState("waiting"); setTimeLeft(120); setBidTimer(null);
-                                setPage("sala"); notify("Sala abierta.","sold");
-                              }}>Abrir sala</button>
-                            : <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={()=>{setPage("sala");}}>Ver sala</button>
-                          }
-                          {r.estado==="cerrado" && (
-                            <button
-                              className="btn-primary"
-                              style={{fontSize:".7rem",whiteSpace:"nowrap",background:"rgba(34,211,160,.12)",color:"var(--gr)",border:"1px solid rgba(34,211,160,.25)"}}
-                              onClick={()=>{
-                                // Si ya hay liquidaciones generadas las carga, si no avisa
-                                if(liqReview){
-                                  setPage("liquidac");
-                                } else {
-                                  // Genera liquidaciones para este remate cerrado
-                                  const todasLiq = [...ADJUDICACIONES.map(a=>({
-                                    lote:a.lote, exp:"", monto:a.monto, comPct:3, motorizado:false, postor:a.postor, rut:a.rut||"—", email:"",
-                                  })),...liquidaciones];
-                                  const byComprador = {};
-                                  todasLiq.forEach(l=>{
-                                    const postorData = POSTORES_MERGED.find(p=>p.name===l.postor||p.razonSocial===l.postor)||null;
-                                    const key = postorData?.nComprador??l.postor;
-                                    if(!byComprador[key]) byComprador[key]={postorData,lotes:[],key};
-                                    byComprador[key].lotes.push(l);
-                                  });
-                                  const compradores = Object.values(byComprador).map(c=>({...c,liq:calcLiquidacion(c.lotes,c.postorData),enviado:false,facturado:false}));
-                                  setLiqReview({compradores, fecha:r.fecha, remateNombre:r.name, remateId:r.id});
-                                  setPage("liquidac");
-                                  notify(`Liquidaciones del remate ${r.name} cargadas.`,"sold");
-                                }
-                              }}
-                            >
+                        <div style={{display:"flex",gap:".35rem",flexWrap:"nowrap",alignItems:"center"}}>
+                          {/* Cambiar estado */}
+                          {nextEstado[r.estado] && r.supabaseId && (
+                            <button className="btn-sec" style={{fontSize:".66rem",whiteSpace:"nowrap",color:r.estado==="publicado"?"var(--gr)":r.estado==="en_vivo"?"var(--mu)":"var(--ac)"}}
+                              onClick={async()=>{
+                                await updateRemateEstado(r.supabaseId, nextEstado[r.estado]);
+                                notify(`Remate ${nextLabel[r.estado].replace("→ ","").toLowerCase()}.`,"sold");
+                              }}>
+                              {nextLabel[r.estado]}
+                            </button>
+                          )}
+                          {/* Abrir sala */}
+                          {(r.estado==="publicado"||r.estado==="en_vivo"||r.estado==="activo") && (
+                            <button className="btn-primary" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async()=>{
+                              setSalaRemateId(r.supabaseId||r.id);
+                              if(r.supabaseId){
+                                const {data:lotesRemate} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
+                                if(lotesRemate&&lotesRemate.length>0){
+                                  const mapped = lotesRemate.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:[],desc:l.descripcion||"",inc:l.incremento||Math.round((l.base||0)*0.05)||100000}));
+                                  setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
+                                } else { setLots(LOTES_SALA); setBids(LOTES_SALA.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null}))); notify("Sin lotes asignados aún.","inf"); }
+                              }
+                              setIdx(0); setAState("waiting"); setTimeLeft(120); setBidTimer(null);
+                              setPage("sala"); notify("Sala abierta.","sold");
+                            }}>Abrir sala</button>
+                          )}
+                          {(r.estado==="finalizado"||r.estado==="cerrado") && (
+                            <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap",color:"var(--gr)",border:"1px solid rgba(34,211,160,.25)"}}
+                              onClick={()=>{ setSelectedRemate(r.id||r.supabaseId); setPage("liquidac"); }}>
                               Ver liquidaciones
                             </button>
                           )}
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -3024,6 +3076,133 @@ function Dashboard({ session, onLogout }) {
           </div>
         )}
 
+        {/* ══ RETIRO DE BIENES ══ */}
+        {page==="retiro" && (()=>{
+          // Construir lista de retiros desde liquidaciones generadas
+          const retirosCombinados = [
+            ...liquidaciones.map(liq=>({
+              id: liq.id,
+              postor: liq.postor,
+              rut: liq.rut||"—",
+              lote: liq.lote,
+              monto: liq.monto,
+              estado: liq.retiro?"retirado":"pendiente",
+              fechaRetiro: liq.retiro||null,
+              pagado: liq.estado==="pagado",
+              supabaseId: null,
+            })),
+            ...dbRetiros,
+          ];
+
+          const cerrados = REMATES_MERGED.filter(r=>r.estado==="finalizado"||r.estado==="cerrado");
+          const pendientes = retirosCombinados.filter(r=>r.estado==="pendiente").length;
+          const retirados  = retirosCombinados.filter(r=>r.estado==="retirado").length;
+
+          return (
+            <div className="page">
+              {/* Selector de remate */}
+              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".7rem 1rem",background:"rgba(47,128,237,.05)",border:"1px solid rgba(47,128,237,.15)",borderRadius:9}}>
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="13" height="11" rx="2"/><path d="M1 6h13M5 2v4M10 2v4"/></svg>
+                <span style={{fontSize:".75rem",fontWeight:600,color:"var(--mu2)",whiteSpace:"nowrap"}}>Remate:</span>
+                <select className="fsel" style={{flex:1,maxWidth:340}} value={retiroFiltroRemate||""} onChange={e=>setRetiroFiltroRemate(e.target.value||null)}>
+                  <option value="">— Seleccionar remate —</option>
+                  {cerrados.map(r=><option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name} · {r.fecha}</option>)}
+                </select>
+              </div>
+
+              {/* Stats */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:".75rem",marginBottom:"1.3rem"}}>
+                {[
+                  {label:"Total adjudicados", val:retirosCombinados.length, color:"var(--ac)"},
+                  {label:"Pendientes de retiro", val:pendientes, color:"var(--yl)"},
+                  {label:"Ya retirados", val:retirados, color:"var(--gr)"},
+                ].map((s,i)=>(
+                  <div key={i} style={{padding:".85rem 1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderTop:`3px solid ${s.color}`,borderRadius:10}}>
+                    <div style={{fontSize:"1.5rem",fontWeight:800,color:"var(--wh2)",lineHeight:1}}>{s.val}</div>
+                    <div style={{fontSize:".68rem",color:"var(--mu2)",marginTop:".3rem"}}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {retirosCombinados.length === 0 ? (
+                <div style={{textAlign:"center",padding:"3rem",color:"var(--mu)",fontSize:".8rem",background:"var(--s2)",borderRadius:10,border:"1px solid var(--b1)"}}>
+                  No hay adjudicaciones registradas. Los retiros aparecen aquí al cerrar un remate.
+                </div>
+              ) : (
+                <div className="table-card">
+                  <div className="table-head">
+                    <div className="table-title">Lista de retiros — {pendientes} pendientes</div>
+                    <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>{
+                      const csv = ["Postor,RUT,Lote,Monto,Estado,Fecha retiro",
+                        ...retirosCombinados.map(r=>`${r.postor},${r.rut},"${r.lote}",${r.monto},${r.estado},${r.fechaRetiro||""}`)
+                      ].join("\n");
+                      const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+                      a.download = "retiros.csv"; a.click();
+                    }}>Exportar CSV</button>
+                  </div>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>N° Postor</th><th>Nombre</th><th>RUT</th><th>Lote adjudicado</th><th>Monto</th><th>Pago</th><th>Retiro</th><th>Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {retirosCombinados.map((r,i)=>(
+                        <tr key={r.id||i} style={{opacity:r.estado==="retirado"?.6:1}}>
+                          <td className="mono" style={{fontWeight:700,color:"var(--ac)"}}>
+                            {POSTORES_MERGED.find(p=>p.name===r.postor)?.nComprador ? `#${String(POSTORES_MERGED.find(p=>p.name===r.postor).nComprador).padStart(2,"0")}` : "—"}
+                          </td>
+                          <td style={{fontWeight:600}}>{r.postor}</td>
+                          <td className="mono" style={{fontSize:".72rem"}}>{r.rut}</td>
+                          <td style={{maxWidth:200,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.lote}</td>
+                          <td className="gt">{fmt(r.monto||0)}</td>
+                          <td>
+                            <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .45rem",borderRadius:5,background:r.pagado?"rgba(34,211,160,.1)":"rgba(246,173,85,.1)",color:r.pagado?"var(--gr)":"var(--yl)"}}>
+                              {r.pagado?"✓ Pagado":"Pendiente"}
+                            </span>
+                          </td>
+                          <td>
+                            {r.estado==="retirado"
+                              ? <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .45rem",borderRadius:5,background:"rgba(34,211,160,.1)",color:"var(--gr)"}}>
+                                  ✓ Retirado {r.fechaRetiro&&<span style={{color:"var(--mu)",fontWeight:400}}>· {r.fechaRetiro}</span>}
+                                </span>
+                              : <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .45rem",borderRadius:5,background:"rgba(246,173,85,.1)",color:"var(--yl)"}}>
+                                  ⏳ Pendiente
+                                </span>
+                            }
+                          </td>
+                          <td>
+                            {r.estado==="pendiente" ? (
+                              <button className="btn-confirm" style={{fontSize:".68rem",padding:".28rem .65rem",background:"rgba(34,211,160,.12)",color:"var(--gr)",border:"1px solid rgba(34,211,160,.3)"}}
+                                onClick={()=>{
+                                  const fecha = new Date().toLocaleDateString("es-CL");
+                                  setLiquidaciones(prev=>prev.map(l=>l.id===r.id?{...l,retiro:fecha}:l));
+                                  setDbRetiros(prev=>prev.map(x=>x.id===r.id?{...x,estado:"retirado",fechaRetiro:fecha}:x));
+                                  notify(`${r.postor} marcado como retirado.`,"sold");
+                                }}>
+                                ✓ Marcar retirado
+                              </button>
+                            ) : (
+                              <button className="btn-sec" style={{fontSize:".68rem",padding:".28rem .65rem"}}
+                                onClick={()=>{
+                                  setLiquidaciones(prev=>prev.map(l=>l.id===r.id?{...l,retiro:null}:l));
+                                  setDbRetiros(prev=>prev.map(x=>x.id===r.id?{...x,estado:"pendiente",fechaRetiro:null}:x));
+                                  notify("Retiro desmarcado.","inf");
+                                }}>
+                                Deshacer
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {/* ══ VENDEDORES / CONSIGNATARIOS ══ */}
         {page==="vendedores" && (()=>{
           const vd = VENDEDORES_MOCK.find(v=>v.id===vendedorSel);
@@ -3308,7 +3487,44 @@ function Dashboard({ session, onLogout }) {
                 <select className="fsel" style={{fontSize:".76rem",width:"auto"}}>
                   {REMATES_MERGED.map(r=><option key={r.id}>{r.name}</option>)}
                 </select>
-                <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={()=>notify("Exportando balance PDF...","inf")}>Exportar PDF</button>
+                <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async ()=>{
+                  // Exportar ventas CSV
+                  const adjAll = [...ADJUDICACIONES, ...liquidaciones];
+                  const csv = ["Postor,Lote,Monto,Comisión,IVA,Total,Estado",
+                    ...adjAll.map(a=>{
+                      const com = a.com||Math.round((a.monto||0)*0.03);
+                      const iva = Math.round(com*0.19);
+                      return `"${a.postor}","${a.lote||a.lote}",${a.monto||0},${com},${iva},${(a.monto||0)+com+iva},${a.estado||"adjudicado"}`;
+                    })
+                  ].join("\n");
+                  const a = document.createElement("a");
+                  a.href = "data:text/csv;charset=utf-8,\uFEFF"+encodeURIComponent(csv);
+                  a.download = "ventas-remate.csv"; a.click();
+                  notify("CSV exportado.","sold");
+                }}>↓ Exportar CSV</button>
+                <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async ()=>{
+                  // Catálogo PDF de lotes
+                  const {jsPDF} = await import("jspdf");
+                  const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+                  const W = doc.internal.pageSize.getWidth();
+                  doc.setFillColor(7,15,28); doc.rect(0,0,W,30,"F");
+                  doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont("helvetica","bold");
+                  doc.text("CATÁLOGO DE LOTES",W/2,14,{align:"center"});
+                  doc.setFontSize(9); doc.setFont("helvetica","normal");
+                  doc.text(`Generado: ${new Date().toLocaleDateString("es-CL")}`,W/2,22,{align:"center"});
+                  let y = 38;
+                  LOTES_MERGED.forEach((l,i)=>{
+                    if(y>260){doc.addPage();y=20;}
+                    doc.setFillColor(11,31,56); doc.roundedRect(10,y,W-20,22,2,2,"F");
+                    doc.setTextColor(255,255,255); doc.setFontSize(10); doc.setFont("helvetica","bold");
+                    doc.text(`Lote ${i+1} — ${l.name}`,15,y+8);
+                    doc.setFontSize(8); doc.setFont("helvetica","normal"); doc.setTextColor(90,127,168);
+                    doc.text(`Base: ${fmt(l.base||0)}   Comisión: ${l.com||3}%   Estado: ${l.estado||"disponible"}`,15,y+16);
+                    y+=26;
+                  });
+                  doc.save("catalogo-lotes.pdf");
+                  notify("Catálogo PDF generado.","sold");
+                }}>↓ Catálogo PDF</button>
               </div>
             </div>
 
@@ -4862,10 +5078,12 @@ function Dashboard({ session, onLogout }) {
                         </div>
                       </div>
                       <div className="ab-list">
-                        <button className="ab g"  onClick={startAuction} disabled={aState==="live"}>Iniciar remate</button>
-                        <button className="ab y"  onClick={pauseAuction} disabled={aState!=="live"}>Pausar</button>
-                        <button className="ab bl" onClick={adjudicar}    disabled={aState==="sold"}>Adjudicar ahora</button>
-                        <button className="ab r"  onClick={resetAuction}>Reiniciar lote</button>
+                        <button className="ab g"  onClick={startAuction} disabled={aState==="live"}>▶ Iniciar</button>
+                        <button className="ab y"  onClick={pauseAuction} disabled={aState!=="live"}>⏸ Pausar</button>
+                        <button className="ab bl" onClick={adjudicar}    disabled={aState==="sold"}>✓ Adjudicar</button>
+                        <button className="ab"    onClick={repetirLote}  style={{background:"rgba(167,139,250,.1)",color:"#a78bfa",border:"1px solid rgba(167,139,250,.25)"}}>↺ Repetir lote</button>
+                        <button className="ab"    onClick={pasarLote}    style={{background:"rgba(255,255,255,.04)",color:"var(--mu2)",border:"1px solid var(--b2)"}} disabled={idx>=lots.length-1}>→ Pasar lote</button>
+                        <button className="ab r"  onClick={resetAuction}>⟳ Reiniciar todo</button>
                       </div>
                     </div>
                     <div className="ctrl-card">
