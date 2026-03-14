@@ -123,7 +123,7 @@ const LOTES_SALA = [
 ];
 
 const INC_OPTIONS = [100000,200000,300000,500000,750000,1000000,1500000,2000000,3000000,5000000];
-const BID_TIMER   = 12;
+const BID_TIMER   = 15;
 const fmt  = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n);
 const fmtS = n => n>=1000000?`$${(n/1000000).toFixed(1)}M`:n>=1000?`$${(n/1000).toFixed(0)}K`:`$${n}`;
 
@@ -620,7 +620,9 @@ tr:hover td{background:rgba(47,128,237,.04);}
 .ls-card{background:rgba(255,255,255,.025);border:1px solid var(--b1);border-radius:7px;padding:.65rem;text-align:center;}
 .ls-v{font-size:1rem;font-weight:800;color:var(--wh);line-height:1;}
 .ls-l{font-size:.58rem;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-top:.1rem;}
-.bid-ticker{margin-top:.65rem;background:rgba(47,128,237,.06);border:1px solid rgba(47,128,237,.18);border-radius:7px;padding:.6rem;display:flex;align-items:center;gap:.55rem;}
+.bid-ticker{margin-top:.65rem;background:rgba(47,128,237,.06);border:1px solid rgba(47,128,237,.18);border-radius:7px;padding:.6rem;display:flex;align-items:center;gap:.55rem;transition:background .3s,border .3s;}
+.bid-ticker.urgent{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);}
+.bid-ticker.critical{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.35);animation:losepulse .5s infinite;}
 .bt-num{font-size:1.35rem;font-weight:800;min-width:24px;text-align:center;transition:color .5s;}
 .bt-info{font-size:.66rem;color:var(--mu);}
 .bt-leader{font-size:.72rem;font-weight:600;color:var(--wh2);}
@@ -719,20 +721,33 @@ const CustomTooltip = ({ active, payload, label }) => {
 // ── BID RING ──────────────────────────────────────────────────────
 const BidRing = ({ seconds, total, nextAmount, increment }) => {
   const r = 20, circ = 2 * Math.PI * r, offset = circ * (1 - seconds / total);
-  const color = seconds > 6 ? "#22d3a0" : seconds > 3 ? "#f6ad55" : "#f56565";
+  const color = seconds > 8 ? "#22d3a0" : seconds > 4 ? "#f6ad55" : "#f56565";
+  const urgent = seconds <= 5;
+  const adjudicando = seconds <= 1;
   return (
-    <div className="bid-ring-wrap">
+    <div className="bid-ring-wrap" style={{
+      background: urgent ? `rgba(${adjudicando?"239,68,68":"245,158,11"},.1)` : "rgba(47,128,237,.06)",
+      border: `1px solid rgba(${adjudicando?"239,68,68":"245,158,11"},.${urgent?".3":"18"})`,
+      animation: urgent ? "losepulse 0.6s infinite" : "none",
+    }}>
       <div className="bid-ring-outer">
         <svg className="bid-ring-svg" width="52" height="52" viewBox="0 0 52 52">
           <circle className="bid-ring-bg" cx="26" cy="26" r={r}/>
           <circle className="bid-ring-fill" cx="26" cy="26" r={r} stroke={color} strokeDasharray={circ} strokeDashoffset={offset}/>
         </svg>
-        <div className="bid-ring-num" style={{color}}>{seconds}</div>
+        <div className="bid-ring-num" style={{color, fontSize: seconds <= 9 ? "1.4rem" : "1.2rem"}}>{seconds}</div>
       </div>
       <div style={{flex:1}}>
-        <div className="bid-ring-label">Proxima puja en</div>
-        <div className="bid-ring-next">{fmt(nextAmount)}</div>
-        <div className="bid-ring-inc">Incremento: +{fmtS(increment)}</div>
+        {adjudicando
+          ? <div style={{fontWeight:900,fontSize:"1rem",color:"#f56565",letterSpacing:".03em"}}>¡ADJUDICANDO!</div>
+          : urgent
+            ? <><div className="bid-ring-label" style={{color:"#f6ad55"}}>⚠ Última oportunidad</div>
+                <div className="bid-ring-next">{fmt(nextAmount)}</div>
+                <div className="bid-ring-inc">Incremento: +{fmtS(increment)}</div></>
+            : <><div className="bid-ring-label">Próxima puja en</div>
+                <div className="bid-ring-next">{fmt(nextAmount)}</div>
+                <div className="bid-ring-inc">Incremento: +{fmtS(increment)}</div></>
+        }
       </div>
     </div>
   );
@@ -1557,16 +1572,22 @@ function Dashboard({ session, onLogout }) {
   })) : LOTES;
 
   const POSTORES_MERGED = dbPostores.length > 0 ? dbPostores.map(p => ({
-    id:          `P-${String(p.numero).padStart(4,"0")}`,
-    nComprador:  p.numero,
-    name:        p.nombre,
-    rut:         p.rut,
-    email:       p.email,
-    tel:         p.telefono,
-    estado:      p.estado,
-    supabaseId:  p.id,
-    pujas:       0,
-    remates:     1,
+    id:             `P-${String(p.numero).padStart(4,"0")}`,
+    nComprador:     p.numero,
+    name:           p.nombre,
+    rut:            p.rut,
+    email:          p.email,
+    tel:            p.telefono,
+    estado:         p.estado,
+    modalidad:      p.modalidad,
+    comprobante_url:p.comprobante_url,
+    banco:          p.banco,
+    suscrito:       p.suscrito,
+    supabaseId:     p.id,
+    remateId:       p.remate_id,
+    remate_id:      p.remate_id,
+    pujas:          0,
+    remates:        1,
   })) : POSTORES;
 
   // ── Auction state ──────────────────────────────────────────────
@@ -1641,7 +1662,8 @@ function Dashboard({ session, onLogout }) {
   }, [aState, timeLeft]);
 
   useEffect(() => {
-    if (bidTimer===null||bidTimer<=0||aState!=="live") return;
+    if (bidTimer===null||aState!=="live") return;
+    if (bidTimer<=0) { doAdjudicar(); return; }
     bidTimerRef.current = setTimeout(()=>setBidTimer(t=>t-1),1000);
     return () => clearTimeout(bidTimerRef.current);
   }, [bidTimer, aState]);
@@ -2845,35 +2867,115 @@ function Dashboard({ session, onLogout }) {
         })()}
 
         {/* ══ POSTORES ══ */}
-        {page==="postores" && (
+        {page==="postores" && (()=>{
+          const pendientes = POSTORES_MERGED.filter(p=>p.estado==="pendiente");
+          return (
           <div className="page">
+            {/* Selector de remate para filtrar */}
+            <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".65rem 1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:9}}>
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="13" height="11" rx="2"/><path d="M1 6h13M5 2v4M10 2v4"/></svg>
+              <span style={{fontSize:".75rem",fontWeight:600,color:"var(--mu2)",whiteSpace:"nowrap"}}>Remate:</span>
+              <select className="fsel" style={{flex:1,maxWidth:320}} value={lotesFiltroRemate||""} onChange={e=>setLotesFiltroRemate(e.target.value||null)}>
+                <option value="">Todos los remates</option>
+                {REMATES_MERGED.map(r=><option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>)}
+              </select>
+              {lotesFiltroRemate && <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>setLotesFiltroRemate(null)}>× Todos</button>}
+            </div>
+
+            {/* Alerta pendientes */}
+            {pendientes.length > 0 && (
+              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".7rem 1rem",background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",borderRadius:9}}>
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--yl)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7.5" cy="7.5" r="6.5"/><path d="M7.5 4v4M7.5 10.5v.5"/></svg>
+                <span style={{fontSize:".76rem",color:"var(--mu2)"}}>
+                  <strong style={{color:"var(--yl)"}}>{pendientes.length} postores pendientes</strong> de verificación — revisa el comprobante y valídalos para que puedan participar.
+                </span>
+              </div>
+            )}
+
             <div className="filter-row" style={{marginBottom:"1rem"}}>
               {["todos","verificado","pendiente"].map(f => (
-                <button key={f} className={`filter-btn${filterTab===f?" on":""}`} onClick={()=>setFilterTab(f)}>{f}</button>
+                <button key={f} className={`filter-btn${filterTab===f?" on":""}`} onClick={()=>setFilterTab(f)}>
+                  {f==="todos"?"Todos":f==="verificado"?"Verificados":f==="pendiente"?`Pendientes ${pendientes.length>0?`(${pendientes.length})`:""}` : f}
+                </button>
               ))}
             </div>
+
             <div className="table-card">
-              <div className="table-head"><div className="table-title">{POSTORES_MERGED.filter(p=>filterTab==="todos"||p.estado===filterTab).length} postores</div></div>
+              <div className="table-head">
+                <div className="table-title">
+                  {POSTORES_MERGED.filter(p=>(filterTab==="todos"||p.estado===filterTab)&&(!lotesFiltroRemate||(p.remateId===lotesFiltroRemate||p.remate_id===lotesFiltroRemate))).length} postores
+                </div>
+              </div>
               <table>
-                <thead><tr><th>N Postor</th><th>Nombre</th><th>RUT</th><th>Email</th><th>Telefono</th><th>Pujas</th><th>Remates</th><th>Estado</th></tr></thead>
+                <thead>
+                  <tr><th>N°</th><th>Nombre</th><th>RUT</th><th>Email</th><th>Teléfono</th><th>Modalidad</th><th>Comprobante</th><th>Estado</th><th>Acción</th></tr>
+                </thead>
                 <tbody>
-                  {POSTORES_MERGED.filter(p=>filterTab==="todos"||p.estado===filterTab).map(p => (
+                  {POSTORES_MERGED
+                    .filter(p=>(filterTab==="todos"||p.estado===filterTab)&&(!lotesFiltroRemate||(p.remateId===lotesFiltroRemate||p.remate_id===lotesFiltroRemate)))
+                    .map(p => (
                     <tr key={p.id}>
-                      <td><span style={{fontFamily:"DM Mono,monospace",fontSize:".8rem",fontWeight:700,color:"var(--ac)"}}>{p.id}</span></td>
+                      <td><span style={{fontFamily:"DM Mono,monospace",fontSize:".8rem",fontWeight:700,color:"var(--ac)"}}>#{String(p.nComprador).padStart(2,"0")}</span></td>
                       <td style={{fontWeight:600}}>{p.name}</td>
-                      <td className="mono">{p.rut}</td>
-                      <td className="mono">{p.email}</td>
-                      <td className="mono">{p.tel}</td>
-                      <td className="mono" style={{textAlign:"center"}}>{p.pujas}</td>
-                      <td className="mono" style={{textAlign:"center"}}>{p.remates}</td>
-                      <td><span className={`pill p-${p.estado}`}>{p.estado==="verificado"?"✓ ":""}{p.estado.charAt(0).toUpperCase()+p.estado.slice(1)}</span></td>
+                      <td className="mono" style={{fontSize:".73rem"}}>{p.rut}</td>
+                      <td style={{fontSize:".73rem",color:"var(--mu2)"}}>{p.email}</td>
+                      <td style={{fontSize:".73rem",color:"var(--mu2)"}}>{p.tel}</td>
+                      <td>
+                        <span style={{fontSize:".65rem",fontWeight:600,color:"var(--mu2)"}}>{p.modalidad||"PRESENCIAL"}</span>
+                      </td>
+                      <td>
+                        {p.comprobante_url
+                          ? <a href={p.comprobante_url} target="_blank" rel="noreferrer"
+                              style={{fontSize:".68rem",color:"var(--ac)",fontWeight:600,textDecoration:"none",display:"flex",alignItems:"center",gap:".3rem"}}>
+                              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 2h6l3 3v7H4V2z"/><path d="M10 2v3h3"/></svg>
+                              Ver archivo
+                            </a>
+                          : <span style={{fontSize:".65rem",color:"var(--mu)"}}>—</span>}
+                      </td>
+                      <td>
+                        <span className={`pill p-${p.estado}`}>
+                          {p.estado==="verificado"?"✓ Verificado":p.estado==="pendiente"?"⏳ Pendiente":p.estado}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{display:"flex",gap:".35rem"}}>
+                          {p.estado==="pendiente" && p.supabaseId && (
+                            <button className="btn-confirm" style={{fontSize:".65rem",padding:".22rem .55rem",background:"rgba(34,211,160,.1)",color:"var(--gr)",border:"1px solid rgba(34,211,160,.25)"}}
+                              onClick={async()=>{
+                                const {error} = await supabase.from("postores").update({estado:"verificado"}).eq("id",p.supabaseId);
+                                if(!error){ const {data} = await supabase.from("postores").select("*").order("numero"); if(data) setDbPostores(data); notify(`${p.name} verificado.`,"sold"); }
+                              }}>✓ Verificar</button>
+                          )}
+                          {p.estado==="verificado" && p.supabaseId && (
+                            <button className="btn-sec" style={{fontSize:".65rem",padding:".22rem .55rem"}}
+                              onClick={async()=>{
+                                const {error} = await supabase.from("postores").update({estado:"pendiente"}).eq("id",p.supabaseId);
+                                if(!error){ const {data} = await supabase.from("postores").select("*").order("numero"); if(data) setDbPostores(data); notify("Postor marcado como pendiente.","inf"); }
+                              }}>Deshacer</button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
+            {/* Link de inscripción pública */}
+            <div style={{marginTop:"1.2rem",padding:".85rem 1rem",background:"rgba(37,99,235,.05)",border:"1px solid rgba(37,99,235,.15)",borderRadius:10,display:"flex",alignItems:"center",gap:".75rem",flexWrap:"wrap"}}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M4 7h6M7 4l3 3-3 3"/></svg>
+              <span style={{fontSize:".75rem",color:"var(--mu2)"}}>Link de inscripción pública:</span>
+              <code style={{fontSize:".73rem",color:"var(--ac)",fontFamily:"DM Mono,monospace",flex:1}}>
+                gestionderemates.cl/participar/{session?.casa||"rematesahumada"}
+              </code>
+              <button className="btn-sec" style={{fontSize:".68rem"}} onClick={()=>{
+                navigator.clipboard.writeText(`https://gestionderemates.cl/participar/${session?.casa||"rematesahumada"}`);
+                notify("Link copiado al portapapeles.","sold");
+              }}>Copiar link</button>
+            </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* ══ FACTURACION ══ */}
         {page==="factura" && (
@@ -5095,9 +5197,12 @@ function Dashboard({ session, onLogout }) {
                         <div className="ls-card"><div className="ls-v">{bid.count}</div><div className="ls-l">Pujas</div></div>
                       </div>
                       {bidTimer!==null&&bidTimer>0&&aState==="live" && (
-                        <div className="bid-ticker">
-                          <div className="bt-num" style={{color:bidTimer>6?"var(--gr)":bidTimer>3?"var(--yl)":"var(--rd)"}}>{bidTimer}</div>
-                          <div><div className="bt-info">Proxima puja en</div><div className="bt-leader">{lastBidder||"—"} lidera</div></div>
+                        <div className={`bid-ticker${bidTimer<=5?" urgent":""}${bidTimer<=2?" critical":""}`}>
+                          <div className="bt-num" style={{color:bidTimer>8?"var(--gr)":bidTimer>4?"var(--yl)":"var(--rd)",fontSize:bidTimer<=3?"1.7rem":"1.35rem"}}>{bidTimer}</div>
+                          <div>
+                            <div className="bt-info">{bidTimer<=2?"¡ADJUDICANDO AHORA!":bidTimer<=5?"⚠ Última oportunidad":"Adjudica en"}</div>
+                            <div className="bt-leader">{lastBidder||"—"} lidera · {fmt((bids[idx]?.current||0))}</div>
+                          </div>
                         </div>
                       )}
                     </div>
