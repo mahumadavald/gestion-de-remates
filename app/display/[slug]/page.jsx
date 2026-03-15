@@ -226,10 +226,37 @@ export default function DisplayPage({ params }) {
 
       {/* Header */}
       <div className="disp-header">
-        <div>
-          <div className="disp-logo">GR Auction Software</div>
-          <div className="disp-casa">{casa?.nombre||slug}</div>
+        {/* Lado izquierdo: logo GR + separador + logo casa */}
+        <div style={{display:"flex",alignItems:"center",gap:"1.25rem"}}>
+          {/* Logo GR Auction Software */}
+          <div style={{display:"flex",alignItems:"center",gap:".65rem",flexShrink:0}}>
+            <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
+              <rect width="36" height="36" rx="8" fill="rgba(56,178,246,.15)" stroke="rgba(56,178,246,.3)" strokeWidth="1"/>
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3.2" strokeLinecap="round" fill="none"/>
+            </svg>
+            <div>
+              <div style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:".9rem",color:"#fff",letterSpacing:"-.01em",lineHeight:1}}>GR</div>
+              <div style={{fontFamily:"'Inter',sans-serif",fontWeight:400,fontSize:".55rem",color:"#7aaec8",letterSpacing:".08em",textTransform:"uppercase",marginTop:1}}>Auction Software</div>
+            </div>
+          </div>
+
+          {/* Separador */}
+          {casa?.logo_url && <div style={{width:1,height:32,background:"rgba(255,255,255,.12)"}}/>}
+
+          {/* Logo de la casa de remates */}
+          {casa?.logo_url ? (
+            <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
+              <img src={casa.logo_url} alt={casa.nombre}
+                style={{height:36,maxWidth:160,objectFit:"contain"}}/>
+              <div className="disp-casa" style={{fontSize:".78rem"}}>{casa?.nombre||slug}</div>
+            </div>
+          ) : (
+            <div className="disp-casa">{casa?.nombre||slug}</div>
+          )}
         </div>
+
+        {/* Lado derecho: estado en vivo */}
         <div className="disp-live">
           <div className="disp-dot"/>
           {estado==="live"?"EN VIVO":estado==="sold"?"ADJUDICADO":"PRÓXIMAMENTE"}
