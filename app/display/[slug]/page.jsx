@@ -13,11 +13,11 @@ const fmt = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; overflow: hidden; background: #040b14; }
+  html, body { height: 100%; overflow: hidden; background: #0d1117; }
 
   .disp-root {
     width: 100vw; height: 100vh;
-    background: #040b14;
+    background: #0d1117;
     font-family: 'Inter', sans-serif;
     color: #e0eaf4;
     display: grid;
@@ -29,13 +29,13 @@ const CSS = `
   .disp-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1rem 2.5rem;
-    background: #0a1928;
-    border-bottom: 2px solid #0f2a45;
+    background: #1F2937;
+    border-bottom: 2px solid #2d4060;
   }
-  .disp-logo { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: #2F80ED; letter-spacing: .05em; text-transform: uppercase; }
+  .disp-logo { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: #38B2F6; letter-spacing: .05em; text-transform: uppercase; }
   .disp-casa { font-size: .9rem; font-weight: 600; color: #7a9ab8; }
-  .disp-live  { display: flex; align-items: center; gap: .6rem; font-size: .85rem; font-weight: 700; color: #22d3a0; }
-  .disp-dot   { width: 10px; height: 10px; border-radius: 50%; background: #22d3a0; animation: pulse 1.5s infinite; }
+  .disp-live  { display: flex; align-items: center; gap: .6rem; font-size: .85rem; font-weight: 700; color: #14B8A6; }
+  .disp-dot   { width: 10px; height: 10px; border-radius: 50%; background: #14B8A6; animation: pulse 1.5s infinite; }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
 
   /* ── Main body ── */
@@ -49,17 +49,17 @@ const CSS = `
   /* ── Foto / imagen ── */
   .disp-foto {
     position: relative;
-    background: #020810;
+    background: #0d1117;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
   .disp-foto img { width: 100%; height: 100%; object-fit: contain; }
-  .disp-foto-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: #1a3050; }
+  .disp-foto-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: #2a3d52; }
 
   /* ── Panel derecho ── */
   .disp-panel {
-    background: #060f1c;
-    border-left: 2px solid #0f2a45;
+    background: #0d1117;
+    border-left: 2px solid #2d4060;
     display: flex; flex-direction: column;
     overflow: hidden;
   }
@@ -67,32 +67,32 @@ const CSS = `
   /* Lote info */
   .disp-lote-info {
     padding: 1.5rem 1.75rem;
-    border-bottom: 1px solid #0f2a45;
+    border-bottom: 1px solid #2d4060;
     flex-shrink: 0;
   }
-  .disp-lote-num { font-family: 'DM Mono', monospace; font-size: .75rem; font-weight: 700; color: #2F80ED; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .4rem; }
+  .disp-lote-num { font-family: 'DM Mono', monospace; font-size: .75rem; font-weight: 700; color: #38B2F6; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .4rem; }
   .disp-lote-name { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: .4rem; }
   .disp-lote-cat  { font-size: .82rem; color: #4a6a8a; }
 
   /* Oferta actual — grande */
   .disp-oferta-wrap {
     padding: 1.5rem 1.75rem;
-    border-bottom: 1px solid #0f2a45;
+    border-bottom: 1px solid #2d4060;
     flex-shrink: 0;
   }
   .disp-oferta-label { font-size: .7rem; font-weight: 700; color: #4a6a8a; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .5rem; }
-  .disp-oferta-val   { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; color: #22d3a0; line-height: 1; transition: color .3s; }
+  .disp-oferta-val   { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; color: #14B8A6; line-height: 1; transition: color .3s; }
   .disp-oferta-val.flash { color: #f59e0b; }
   .disp-paleta       { font-family: 'DM Mono', monospace; font-size: .95rem; font-weight: 700; color: #7a9ab8; margin-top: .5rem; }
 
   /* Timer */
   .disp-timer-wrap {
     padding: 1rem 1.75rem;
-    border-bottom: 1px solid #0f2a45;
+    border-bottom: 1px solid #2d4060;
     flex-shrink: 0;
   }
   .disp-timer-label { font-size: .7rem; font-weight: 700; color: #4a6a8a; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .4rem; }
-  .disp-timer-bar   { height: 8px; background: #0f2a45; border-radius: 4px; overflow: hidden; }
+  .disp-timer-bar   { height: 8px; background: #2d4060; border-radius: 4px; overflow: hidden; }
   .disp-timer-fill  { height: 100%; border-radius: 4px; transition: width 1s linear, background .5s; }
   .disp-timer-num   { font-family: 'DM Mono', monospace; font-size: 1.5rem; font-weight: 700; margin-top: .4rem; }
 
@@ -106,17 +106,17 @@ const CSS = `
   .disp-hist-row:last-child { border-bottom: none; }
   .disp-hist-pal   { font-family: 'DM Mono', monospace; font-size: .82rem; color: #4a6a8a; }
   .disp-hist-monto { font-family: 'DM Mono', monospace; font-size: .9rem; font-weight: 700; color: #e0eaf4; }
-  .disp-hist-row.top .disp-hist-monto { color: #22d3a0; }
+  .disp-hist-row.top .disp-hist-monto { color: #14B8A6; }
 
   /* ── Footer ── */
   .disp-footer {
     padding: .65rem 2.5rem;
-    background: #0a1928;
-    border-top: 2px solid #0f2a45;
+    background: #1F2937;
+    border-top: 2px solid #2d4060;
     display: flex; align-items: center; justify-content: space-between;
   }
   .disp-footer-txt { font-size: .72rem; color: #2a4a6a; }
-  .disp-footer-url { font-family: 'DM Mono', monospace; font-size: .72rem; color: #2F80ED; }
+  .disp-footer-url { font-family: 'DM Mono', monospace; font-size: .72rem; color: #38B2F6; }
 
   /* ── Waiting screen ── */
   .disp-waiting {
@@ -124,8 +124,8 @@ const CSS = `
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 1.5rem; text-align: center;
   }
-  .disp-waiting-title { font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800; color: #0f2a45; }
-  .disp-waiting-sub   { font-size: 1rem; color: #1a3050; }
+  .disp-waiting-title { font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800; color: #2d4060; }
+  .disp-waiting-sub   { font-size: 1rem; color: #2a3d52; }
 
   /* ── Adjudicado overlay ── */
   .disp-sold-overlay {
@@ -136,14 +136,14 @@ const CSS = `
     animation: fadeIn .3s ease;
   }
   @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-  .disp-sold-badge { font-family: 'Syne', sans-serif; font-size: 3.5rem; font-weight: 800; color: #22d3a0; }
+  .disp-sold-badge { font-family: 'Syne', sans-serif; font-size: 3.5rem; font-weight: 800; color: #14B8A6; }
   .disp-sold-paleta { font-family: 'DM Mono', monospace; font-size: 1.5rem; color: #7a9ab8; }
   .disp-sold-monto  { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; }
 
   /* ── Dots ── */
   .disp-foto-dots { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
   .disp-foto-dot  { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.3); cursor: pointer; transition: all .2s; }
-  .disp-foto-dot.on { width: 22px; border-radius: 4px; background: #2F80ED; }
+  .disp-foto-dot.on { width: 22px; border-radius: 4px; background: #38B2F6; }
 `;
 
 export default function DisplayPage({ params }) {
@@ -217,7 +217,7 @@ export default function DisplayPage({ params }) {
     return ()=>clearInterval(iv);
   },[imgs.length]);
 
-  const timerColor = timer>8?"#22d3a0":timer>4?"#f59e0b":"#ef4444";
+  const timerColor = timer>8?"#14B8A6":timer>4?"#f59e0b":"#ef4444";
   const timerPct   = (timer/15)*100;
 
   return (
@@ -240,7 +240,7 @@ export default function DisplayPage({ params }) {
       <div className="disp-body">
         {!loteActivo ? (
           <div className="disp-waiting">
-            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="#0f2a45" strokeWidth="2" strokeLinecap="round">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="#2d4060" strokeWidth="2" strokeLinecap="round">
               <circle cx="40" cy="40" r="35"/><path d="M40 22v18l12 8"/>
             </svg>
             <div className="disp-waiting-title">Esperando inicio del remate</div>
@@ -263,7 +263,7 @@ export default function DisplayPage({ params }) {
             ) : (
               <div className="disp-foto-empty">
                 <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="8" y="16" width="64" height="48" rx="6"/><circle cx="40" cy="40" r="12"/><path d="M28 16l5-10h14l5 10"/></svg>
-                <div style={{fontSize:"1rem",color:"#1a3050"}}>Sin fotos disponibles</div>
+                <div style={{fontSize:"1rem",color:"#2a3d52"}}>Sin fotos disponibles</div>
               </div>
             )}
             {/* Overlay adjudicado */}
@@ -317,7 +317,7 @@ export default function DisplayPage({ params }) {
             <div className="disp-hist">
               <div className="disp-hist-title">Historial de pujas</div>
               {historial.length===0 ? (
-                <div style={{color:"#1a3050",fontSize:".8rem"}}>Sin pujas aún</div>
+                <div style={{color:"#2a3d52",fontSize:".8rem"}}>Sin pujas aún</div>
               ) : historial.map((h,i)=>(
                 <div key={i} className={`disp-hist-row${i===0?" top":""}`}>
                   <span className="disp-hist-pal">{h.pal}</span>
