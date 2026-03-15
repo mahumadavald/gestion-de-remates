@@ -4501,7 +4501,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         {/* Avatar + nombre */}
                         <td style={{padding:".65rem .9rem"}}>
                           <div style={{display:"flex",alignItems:"center",gap:".6rem"}}>
-                            <div style={{width:30,height:30,borderRadius:"50%",background:"linear-gradient(135deg,var(--ac),var(--teal)||"#14B8A6")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".68rem",fontWeight:800,color:"#fff",flexShrink:0}}>
+                            <div style={{width:30,height:30,borderRadius:"50%",background:"linear-gradient(135deg,#38B2F6,#14B8A6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".68rem",fontWeight:800,color:"#fff",flexShrink:0}}>
                               {u.nombre?.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()||"??"}
                             </div>
                             <div>
