@@ -43,18 +43,18 @@ const CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:   #060d18;
-    --s1:   #0b1827;
-    --s2:   #0f2035;
+    --bg:   #0d1117;
+    --s1:   #1F2937;
+    --s2:   #243447;
     --b1:   rgba(255,255,255,.07);
     --b2:   rgba(255,255,255,.12);
-    --ac:   #2563eb;
-    --acL:  #3b82f6;
+    --ac:   #38B2F6;
+    --acL:  #5ec4f8;
     --wh:   #ffffff;
-    --wh2:  #e2eaf4;
+    --wh2:  #e8f4fe;
     --mu:   #4a6a8a;
     --mu2:  #7a9ab8;
-    --gr:   #22c55e;
+    --gr:   #14B8A6;
     --rd:   #ef4444;
     --yl:   #f59e0b;
     --font: 'Inter', sans-serif;
@@ -81,7 +81,7 @@ const CSS = `
   /* ── Hero col — scrollable ── */
   .hero-col {
     grid-column: 1;
-    background: linear-gradient(160deg, #0b1827 0%, #060d18 60%);
+    background: linear-gradient(160deg, #1F2937 0%, #0d1117 60%);
     border-right: 1px solid var(--b1);
     padding: 2.5rem 2.5rem 3rem;
     display: flex; flex-direction: column; gap: 0;
@@ -114,17 +114,17 @@ const CSS = `
 
   .hero-steps { margin-top: 2rem; }
   .step-item  { display: flex; align-items: flex-start; gap: .9rem; margin-bottom: 1.25rem; }
-  .step-num   { width: 28px; height: 28px; border-radius: 50%; background: rgba(37,99,235,.15); border: 1px solid rgba(37,99,235,.3); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: .72rem; font-weight: 700; color: var(--acL); flex-shrink: 0; margin-top: .15rem; }
+  .step-num   { width: 28px; height: 28px; border-radius: 50%; background: rgba(56,178,246,.15); border: 1px solid rgba(56,178,246,.3); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: .72rem; font-weight: 700; color: var(--acL); flex-shrink: 0; margin-top: .15rem; }
   .step-txt   { font-size: .88rem; color: var(--mu2); }
   .step-ttl   { font-weight: 700; color: var(--wh2); margin-bottom: .1rem; font-size: .92rem; }
 
-  .hero-note  { background: rgba(37,99,235,.06); border: 1px solid rgba(37,99,235,.15); border-radius: 10px; padding: .9rem 1rem; margin-top: 2rem; }
+  .hero-note  { background: rgba(56,178,246,.06); border: 1px solid rgba(56,178,246,.15); border-radius: 10px; padding: .9rem 1rem; margin-top: 2rem; }
   .hero-note-t{ font-size: .75rem; font-weight: 700; color: var(--acL); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .3rem; }
   .hero-note-b{ font-size: .84rem; color: var(--mu2); line-height: 1.6; }
 
   /* ── Form header ── */
   .form-header { margin-bottom: 1.75rem; }
-  .form-badge  { display: inline-flex; align-items: center; gap: .4rem; background: rgba(37,99,235,.08); border: 1px solid rgba(37,99,235,.2); border-radius: 20px; padding: .28rem .8rem; font-size: .72rem; font-weight: 700; color: var(--acL); letter-spacing: .05em; text-transform: uppercase; margin-bottom: .9rem; }
+  .form-badge  { display: inline-flex; align-items: center; gap: .4rem; background: rgba(56,178,246,.08); border: 1px solid rgba(56,178,246,.2); border-radius: 20px; padding: .28rem .8rem; font-size: .72rem; font-weight: 700; color: var(--acL); letter-spacing: .05em; text-transform: uppercase; margin-bottom: .9rem; }
   .form-title  { font-family: var(--head); font-size: 1.65rem; font-weight: 800; color: var(--wh); line-height: 1.2; }
   .form-sub    { font-size: .9rem; color: var(--mu2); margin-top: .45rem; }
 
@@ -158,8 +158,8 @@ const CSS = `
   /* ── Remate card selector ── */
   .remate-grid { display: flex; flex-direction: column; gap: .65rem; }
   .remate-card { display: flex; align-items: center; gap: 1rem; padding: .9rem 1rem; background: var(--s1); border: 2px solid var(--b1); border-radius: 11px; cursor: pointer; transition: all .15s; }
-  .remate-card:hover { border-color: rgba(37,99,235,.35); background: rgba(37,99,235,.05); }
-  .remate-card.sel   { border-color: var(--acL); background: rgba(37,99,235,.08); }
+  .remate-card:hover { border-color: rgba(56,178,246,.35); background: rgba(56,178,246,.05); }
+  .remate-card.sel   { border-color: var(--acL); background: rgba(56,178,246,.08); }
   .remate-card-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--mu); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; }
   .remate-card.sel .remate-card-radio { border-color: var(--acL); background: var(--acL); }
   .remate-card-dot   { width: 8px; height: 8px; border-radius: 50%; background: var(--wh); opacity: 0; transition: opacity .15s; }
@@ -168,19 +168,19 @@ const CSS = `
   .remate-card-name  { font-weight: 700; font-size: .92rem; color: var(--wh2); }
   .remate-card-meta  { font-size: .76rem; color: var(--mu2); margin-top: .1rem; }
   .remate-card-badge { font-size: .64rem; font-weight: 700; padding: .15rem .5rem; border-radius: 5px; white-space: nowrap; }
-  .rb-activo   { background: rgba(34,197,94,.1);  color: var(--gr); }
-  .rb-publicado{ background: rgba(37,99,235,.1);  color: var(--acL); }
+  .rb-activo   { background: rgba(20,184,166,.1);  color: var(--gr); }
+  .rb-publicado{ background: rgba(56,178,246,.1);  color: var(--acL); }
 
   /* ── Modalidad pills ── */
   .modal-pills { display: flex; gap: .6rem; }
   .mpill { flex: 1; padding: .7rem; text-align: center; border-radius: 9px; border: 2px solid var(--b1); background: var(--s1); font-size: .84rem; font-weight: 600; color: var(--mu2); cursor: pointer; transition: all .15s; }
   .mpill:hover { border-color: var(--b2); }
-  .mpill.sel  { border-color: var(--acL); background: rgba(37,99,235,.1); color: var(--acL); }
+  .mpill.sel  { border-color: var(--acL); background: rgba(56,178,246,.1); color: var(--acL); }
 
   /* ── File upload ── */
   .file-zone { border: 2px dashed var(--b2); border-radius: 11px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all .15s; background: var(--s1); }
-  .file-zone:hover { border-color: rgba(37,99,235,.4); background: rgba(37,99,235,.04); }
-  .file-zone.filled { border-color: var(--gr); border-style: solid; background: rgba(34,197,94,.04); }
+  .file-zone:hover { border-color: rgba(56,178,246,.4); background: rgba(56,178,246,.04); }
+  .file-zone.filled { border-color: var(--gr); border-style: solid; background: rgba(20,184,166,.04); }
   .file-zone input  { display: none; }
   .file-icon { margin-bottom: .6rem; }
   .file-text { font-size: .84rem; color: var(--mu2); }
@@ -195,7 +195,7 @@ const CSS = `
 
   /* ── Submit ── */
   .submit-btn { width: 100%; padding: 1rem; background: var(--acL); border: none; border-radius: 11px; color: #fff; font-family: var(--font); font-size: 1rem; font-weight: 700; cursor: pointer; letter-spacing: .02em; transition: all .2s; margin-top: 1.5rem; }
-  .submit-btn:hover:not(:disabled) { background: var(--ac); transform: translateY(-1px); box-shadow: 0 8px 25px rgba(37,99,235,.3); }
+  .submit-btn:hover:not(:disabled) { background: var(--ac); transform: translateY(-1px); box-shadow: 0 8px 25px rgba(56,178,246,.3); }
   .submit-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 
   /* ── Monto garantía ── */
@@ -206,7 +206,7 @@ const CSS = `
   /* ── Error / Success ── */
   .err-msg  { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25); border-radius: 9px; padding: .8rem 1rem; font-size: .84rem; color: #fca5a5; margin-top: .75rem; }
   .success-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3rem 1.5rem; min-height: 60vh; }
-  .success-icon { width: 72px; height: 72px; border-radius: 50%; background: rgba(34,197,94,.1); border: 2px solid rgba(34,197,94,.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+  .success-icon { width: 72px; height: 72px; border-radius: 50%; background: rgba(20,184,166,.1); border: 2px solid rgba(20,184,166,.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
   .success-title { font-family: var(--head); font-size: 1.5rem; font-weight: 800; color: var(--wh); margin-bottom: .75rem; }
   .success-sub   { font-size: .92rem; color: var(--mu2); max-width: 340px; line-height: 1.7; }
   .success-num   { font-family: var(--mono); font-size: 2rem; font-weight: 700; color: var(--acL); margin: 1.2rem 0 .4rem; }
@@ -452,7 +452,7 @@ export default function ParticiparPage({ params }) {
         {success ? (
           <div className="success-wrap fade-up">
             <div className="success-icon">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round"><path d="M6 16l8 8 12-14"/></svg>
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#14B8A6" strokeWidth="2.5" strokeLinecap="round"><path d="M6 16l8 8 12-14"/></svg>
             </div>
             <div className="success-title">¡Pre-inscripción enviada!</div>
             <div className="success-num">#{success.numero}</div>
@@ -462,7 +462,7 @@ export default function ParticiparPage({ params }) {
               <br/><br/>
               Tu participación será <strong style={{color:"#e2eaf4"}}>confirmada por {casa?.nombre}</strong> una vez que verifiquen tu comprobante de pago. Te notificaremos por correo a <strong style={{color:"#e2eaf4"}}>{email}</strong>.
             </div>
-            <div style={{marginTop:"2rem",padding:"1rem 1.5rem",background:"rgba(37,99,235,.06)",border:"1px solid rgba(37,99,235,.15)",borderRadius:10,maxWidth:320,width:"100%",fontSize:".78rem",color:"#7a9ab8",lineHeight:1.7}}>
+            <div style={{marginTop:"2rem",padding:"1rem 1.5rem",background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.15)",borderRadius:10,maxWidth:320,width:"100%",fontSize:".78rem",color:"#7a9ab8",lineHeight:1.7}}>
               <div style={{fontWeight:700,color:"#e2eaf4",marginBottom:".3rem"}}>¿Dudas?</div>
               Contacta a {casa?.nombre}<br/>
               {casa?.email && <>{casa.email}<br/></>}
@@ -473,7 +473,7 @@ export default function ParticiparPage({ params }) {
           <>
             <div className="form-header fade-up">
               <div className="form-badge">
-                <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><circle cx="4" cy="4" r="3" fill="#3b82f6"/></svg>
+                <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><circle cx="4" cy="4" r="3" fill="#5ec4f8"/></svg>
                 {casa?.nombre}
               </div>
               <div className="form-title">Inscripción de postor</div>
@@ -484,7 +484,7 @@ export default function ParticiparPage({ params }) {
             <div className="rut-wrap fade-up fade-up-1">
               <div className="rut-label">Paso 1 — Valida tu RUT</div>
               <div className="rut-input-w">
-                <svg className="rut-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke={rutStatus==="ok"?"#22c55e":rutStatus==="err"?"#ef4444":"#4a6a8a"} strokeWidth="1.6" strokeLinecap="round">
+                <svg className="rut-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke={rutStatus==="ok"?"#14B8A6":rutStatus==="err"?"#ef4444":"#4a6a8a"} strokeWidth="1.6" strokeLinecap="round">
                   <rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h4M5 10.5h2"/>
                 </svg>
                 <input
@@ -612,14 +612,14 @@ export default function ParticiparPage({ params }) {
                   <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={e=>setComprobante(e.target.files[0]||null)}/>
                   {comprobante ? (
                     <>
-                      <div className="file-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round"><path d="M6 3h11l5 5v17H6V3z"/><path d="M17 3v5h5"/><path d="M9 13l4 4 6-7"/></svg></div>
+                      <div className="file-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#14B8A6" strokeWidth="1.8" strokeLinecap="round"><path d="M6 3h11l5 5v17H6V3z"/><path d="M17 3v5h5"/><path d="M9 13l4 4 6-7"/></svg></div>
                       <div className="file-name">{comprobante.name}</div>
                       <div className="file-hint">Click para cambiar el archivo</div>
                     </>
                   ) : (
                     <>
                       <div className="file-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#4a6a8a" strokeWidth="1.6" strokeLinecap="round"><path d="M14 3v14M10 7l4-4 4 4"/><path d="M4 20v3a2 2 0 002 2h16a2 2 0 002-2v-3"/></svg></div>
-                      <div className="file-text">Arrastra tu comprobante aquí o <strong style={{color:"#3b82f6"}}>haz click para seleccionar</strong></div>
+                      <div className="file-text">Arrastra tu comprobante aquí o <strong style={{color:"#5ec4f8"}}>haz click para seleccionar</strong></div>
                       <div className="file-hint">PDF, JPG o PNG — máx. 5MB</div>
                     </>
                   )}
