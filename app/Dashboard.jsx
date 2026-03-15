@@ -15,13 +15,13 @@ const GRLogo = ({ collapsed = false }) => (
   <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
     <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
       <path d="M18 3C9.716 3 3 9.716 3 18s6.716 15 15 15 15-6.716 15-15S26.284 3 18 3z" fill="none"/>
-      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#2F80ED" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
       <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
     </svg>
     {!collapsed && (
       <div>
         <div style={{ fontFamily:"Inter,sans-serif", fontWeight:800, fontSize:"1.1rem", color:"#fff", letterSpacing:"-.01em", lineHeight:1 }}>GR</div>
-        <div style={{ fontFamily:"Inter,sans-serif", fontWeight:400, fontSize:".6rem", color:"#5a7fa8", letterSpacing:".04em", marginTop:1 }}>Auction Software</div>
+        <div style={{ fontFamily:"Inter,sans-serif", fontWeight:400, fontSize:".6rem", color:"#7aaec8", letterSpacing:".04em", marginTop:1 }}>Auction Software</div>
       </div>
     )}
   </div>
@@ -38,7 +38,7 @@ const TOP_LOTES = [
 const PIE_DATA = [
   {name:"Online",v:58},{name:"Presencial",v:28},{name:"Híbrido",v:14},
 ];
-const PIE_COLORS = ["#2F80ED","#34d399","#f6ad55"];
+const PIE_COLORS = ["#38B2F6","#34d399","#f6ad55"];
 
 const REMATES = [
   {id:"R-044",name:"Remate Industrial Marzo", fecha:"06 Mar 2026",lotes:190,modal:"Híbrido",   estado:"activo", recaudado:47500000, casa:"Remates Ahumada"},
@@ -163,13 +163,13 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Inter',sans-serif;font-size:11pt;color:#111;background:#fff;padding:2cm;}
-  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:3px solid #2F80ED;}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:3px solid #38B2F6;}
   .logo-area{display:flex;align-items:center;gap:12px;}
   .logo-text{font-size:10pt;font-weight:400;color:#5a7fa8;letter-spacing:.1em;text-transform:uppercase;}
   .doc-title{text-align:right;}
-  .doc-title h1{font-size:18pt;font-weight:800;color:#2F80ED;text-transform:uppercase;letter-spacing:-.02em;}
+  .doc-title h1{font-size:18pt;font-weight:800;color:#38B2F6;text-transform:uppercase;letter-spacing:-.02em;}
   .doc-title p{font-size:9pt;color:#666;margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
-  .remate-banner{background:#f0f7ff;border:1px solid #c0d8f8;border-radius:6px;padding:.5rem 1rem;margin-bottom:1.2rem;font-size:9.5pt;color:#1a5fb8;font-weight:600;}
+  .remate-banner{background:#f0f7ff;border:1px solid #c0d8f8;border-radius:6px;padding:.5rem 1rem;margin-bottom:1.2rem;font-size:9.5pt;color:#1a8fd4;font-weight:600;}
   .datos-grid{display:grid;grid-template-columns:1fr 1fr;gap:.25rem .8rem;margin-bottom:1.2rem;padding:.8rem 1rem;background:#f8f9fa;border-radius:6px;border:1px solid #e5e7eb;font-size:9.5pt;}
   .dato{display:flex;gap:.4rem;}
   .dato-key{color:#666;min-width:90px;flex-shrink:0;}
@@ -183,20 +183,20 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
   td{padding:.4rem .6rem;color:#333;}
   td.r{text-align:right;font-family:monospace;}
   td.ex{text-align:center;font-size:8pt;font-weight:700;color:#059669;background:#ecfdf5;border-radius:3px;padding:.1rem .3rem;}
-  td.af{text-align:center;font-size:8pt;font-weight:700;color:#2F80ED;background:#eff6ff;border-radius:3px;padding:.1rem .3rem;}
+  td.af{text-align:center;font-size:8pt;font-weight:700;color:#38B2F6;background:#eff6ff;border-radius:3px;padding:.1rem .3rem;}
   td.lote-name{font-weight:600;color:#111;}
   td.com{color:#666;font-style:italic;}
   td.gadm{color:#d97706;}
   .totales-row{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;align-items:start;}
   .totales-tabla{font-size:9.5pt;}
   .totales-tabla div{display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid #e5e7eb;}
-  .totales-tabla .total-final{font-size:11pt;font-weight:800;border-top:2px solid #2F80ED;border-bottom:none;margin-top:.3rem;padding-top:.4rem;color:#111;}
-  .totales-tabla .total-final span:last-child{color:#2F80ED;}
+  .totales-tabla .total-final{font-size:11pt;font-weight:800;border-top:2px solid #38B2F6;border-bottom:none;margin-top:.3rem;padding-top:.4rem;color:#111;}
+  .totales-tabla .total-final span:last-child{color:#38B2F6;}
   .garantia-box{background:#eff6ff;border:1.5px solid #93c5fd;border-radius:8px;padding:.8rem 1rem;font-size:9.5pt;}
   .garantia-box .g-row{display:flex;justify-content:space-between;margin-bottom:.35rem;color:#444;}
   .garantia-box .total-pagar{display:flex;justify-content:space-between;padding-top:.4rem;border-top:1.5px solid #93c5fd;margin-top:.35rem;}
   .garantia-box .total-pagar span:first-child{font-weight:700;font-size:11pt;}
-  .garantia-box .total-pagar span:last-child{font-weight:800;font-size:13pt;color:#2F80ED;font-family:monospace;}
+  .garantia-box .total-pagar span:last-child{font-weight:800;font-size:13pt;color:#38B2F6;font-family:monospace;}
   .footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid #e5e7eb;font-size:8pt;color:#999;text-align:center;}
   @media print{body{padding:1cm;}@page{size:letter;margin:1cm;}}
 </style>
@@ -206,7 +206,7 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
   <div class="logo-area">
     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="36" height="36" rx="8" fill="#EBF4FF" stroke="#93C5FD" stroke-width="1"/>
-      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#2F80ED" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1e3a5f" stroke-width="3.5" stroke-linecap="round" fill="none"/>
     </svg>
     <span class="logo-text">Auction Software</span>
@@ -310,20 +310,20 @@ const CSS = `
 ${FONT}
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:#070f1c;
-  --s1:#0b1f38;
-  --s2:#0f2847;
-  --s3:#122e52;
-  --b1:#1a3a5c;
-  --b2:#1e4570;
-  --ac:#2F80ED;
-  --acH:#4a94f5;
-  --acD:#1a5fb8;
+  --bg:#0d1117;
+  --s1:#1F2937;
+  --s2:#243447;
+  --s3:#2a3d52;
+  --b1:#2d4060;
+  --b2:#364d70;
+  --ac:#38B2F6;
+  --acH:#5ec4f8;
+  --acD:#1a8fd4;
   --wh:#ffffff;
-  --wh2:#e8f0fe;
+  --wh2:#e8f4fe;
   --mu:#5a7fa8;
-  --mu2:#7a9fc8;
-  --gr:#22d3a0;
+  --mu2:#7aaec8;
+  --gr:#14B8A6;
   --rd:#f56565;
   --yl:#f6ad55;
 }
@@ -338,8 +338,8 @@ button,input,select{font-family:'Inter',sans-serif;}
 .sb-logo{padding:1.1rem 1.2rem 1rem;border-bottom:1px solid var(--b1);display:flex;align-items:center;}
 .sb-section{padding:.75rem 1.2rem .3rem;font-size:.65rem;font-weight:600;letter-spacing:.09em;color:var(--mu);text-transform:uppercase;}
 .sb-item{display:flex;align-items:center;gap:.65rem;padding:.5rem 1rem;margin:.05rem .6rem;border-radius:7px;cursor:pointer;transition:all .15s;color:var(--mu2);font-size:.82rem;font-weight:500;}
-.sb-item:hover{background:rgba(47,128,237,.08);color:var(--wh2);}
-.sb-item.on{background:rgba(47,128,237,.15);color:var(--ac);}
+.sb-item:hover{background:rgba(56,178,246,.08);color:var(--wh2);}
+.sb-item.on{background:rgba(56,178,246,.15);color:var(--ac);}
 .sb-icon{width:17px;text-align:center;flex-shrink:0;opacity:.7;}
 .sb-item.on .sb-icon{opacity:1;}
 .sb-badge{margin-left:auto;background:var(--ac);color:#fff;font-size:.6rem;padding:.1rem .42rem;border-radius:10px;font-weight:700;}
@@ -355,7 +355,7 @@ button,input,select{font-family:'Inter',sans-serif;}
 .topbar-left{display:flex;align-items:center;gap:.8rem;}
 .topbar-title{font-size:.95rem;font-weight:700;color:var(--wh);}
 .topbar-right{display:flex;align-items:center;gap:.75rem;}
-.tb-live{display:flex;align-items:center;gap:.4rem;padding:.25rem .7rem;border-radius:5px;background:rgba(34,211,160,.1);border:1px solid rgba(34,211,160,.25);font-size:.7rem;font-weight:600;color:var(--gr);}
+.tb-live{display:flex;align-items:center;gap:.4rem;padding:.25rem .7rem;border-radius:5px;background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.25);font-size:.7rem;font-weight:600;color:var(--gr);}
 .ldot{width:6px;height:6px;border-radius:50%;background:var(--gr);box-shadow:0 0 6px var(--gr);animation:pu 1.8s infinite;}
 @keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
 
@@ -374,9 +374,9 @@ button,input,select{font-family:'Inter',sans-serif;}
 
 /* NOTIF */
 .notif{position:fixed;top:62px;right:1.4rem;z-index:999;padding:.55rem 1.2rem;border-radius:7px;font-size:.75rem;font-weight:600;animation:si .2s ease;}
-.notif.ok  {background:rgba(34,211,160,.12);border:1px solid rgba(34,211,160,.35);color:var(--gr);}
-.notif.sold{background:rgba(47,128,237,.14);border:1px solid rgba(47,128,237,.38);color:var(--ac);}
-.notif.inf {background:rgba(47,128,237,.12);border:1px solid rgba(47,128,237,.3);color:var(--acH);}
+.notif.ok  {background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.35);color:var(--gr);}
+.notif.sold{background:rgba(56,178,246,.14);border:1px solid rgba(56,178,246,.38);color:var(--ac);}
+.notif.inf {background:rgba(56,178,246,.12);border:1px solid rgba(56,178,246,.3);color:var(--acH);}
 @keyframes si{from{transform:translateX(10px);opacity:0}to{transform:none;opacity:1}}
 
 /* STAT CARDS */
@@ -402,34 +402,34 @@ button,input,select{font-family:'Inter',sans-serif;}
 .table-title{font-size:.76rem;font-weight:700;color:var(--wh);}
 .filter-row{display:flex;gap:.35rem;}
 .filter-btn{padding:.2rem .6rem;background:transparent;border:1px solid var(--b1);border-radius:5px;font-size:.68rem;font-weight:500;color:var(--mu);cursor:pointer;transition:all .15s;text-transform:capitalize;}
-.filter-btn.on{border-color:var(--ac);color:var(--ac);background:rgba(47,128,237,.08);}
+.filter-btn.on{border-color:var(--ac);color:var(--ac);background:rgba(56,178,246,.08);}
 .filter-btn:hover:not(.on){border-color:var(--b2);color:var(--mu2);}
 table{width:100%;border-collapse:collapse;}
 th{padding:.5rem 1.2rem;text-align:left;font-size:.67rem;font-weight:600;letter-spacing:.04em;color:var(--mu);text-transform:uppercase;border-bottom:1px solid var(--b1);background:rgba(255,255,255,.01);}
 td{padding:.7rem 1.2rem;font-size:.78rem;border-bottom:1px solid rgba(26,58,92,.5);vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(47,128,237,.04);}
+tr:hover td{background:rgba(56,178,246,.04);}
 .mono{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--mu2);}
 .gt{color:var(--ac);font-family:'DM Mono',monospace;font-size:.75rem;font-weight:500;}
 .pill{display:inline-flex;align-items:center;gap:.22rem;padding:.12rem .52rem;border-radius:12px;font-size:.66rem;font-weight:600;white-space:nowrap;}
-.p-activo      {background:rgba(47,128,237,.12);color:var(--ac);border:1px solid rgba(47,128,237,.28);}
+.p-activo      {background:rgba(56,178,246,.12);color:var(--ac);border:1px solid rgba(56,178,246,.28);}
 .p-cerrado     {background:rgba(90,127,168,.1); color:var(--mu2);border:1px solid var(--b1);}
 .p-borrador    {background:rgba(255,255,255,.04);color:var(--mu);border:1px solid var(--b2);}
-.p-publicado   {background:rgba(47,128,237,.1); color:var(--ac);border:1px solid rgba(47,128,237,.25);}
-.p-en_vivo     {background:rgba(34,211,160,.12);color:var(--gr);border:1px solid rgba(34,211,160,.3);}
+.p-publicado   {background:rgba(56,178,246,.1); color:var(--ac);border:1px solid rgba(56,178,246,.25);}
+.p-en_vivo     {background:rgba(20,184,166,.12);color:var(--gr);border:1px solid rgba(20,184,166,.3);}
 .p-finalizado  {background:rgba(90,127,168,.1); color:var(--mu2);border:1px solid var(--b1);}
-.p-disponible  {background:rgba(47,128,237,.1); color:var(--ac);border:1px solid rgba(47,128,237,.25);}
-.p-en-subasta  {background:rgba(34,211,160,.12);color:var(--gr);border:1px solid rgba(34,211,160,.3);}
-.p-vendido     {background:rgba(34,211,160,.1); color:var(--gr);border:1px solid rgba(34,211,160,.25);}
+.p-disponible  {background:rgba(56,178,246,.1); color:var(--ac);border:1px solid rgba(56,178,246,.25);}
+.p-en-subasta  {background:rgba(20,184,166,.12);color:var(--gr);border:1px solid rgba(20,184,166,.3);}
+.p-vendido     {background:rgba(20,184,166,.1); color:var(--gr);border:1px solid rgba(20,184,166,.25);}
 .p-sin-vender  {background:rgba(224,82,82,.08); color:var(--rd);border:1px solid rgba(224,82,82,.2);}
 .p-retirado    {background:rgba(255,255,255,.04);color:var(--mu);border:1px solid var(--b2);}
-.p-publicado{background:rgba(34,211,160,.1); color:var(--gr);border:1px solid rgba(34,211,160,.25);}
-.p-vendido  {background:rgba(47,128,237,.12);color:var(--ac);border:1px solid rgba(47,128,237,.28);}
+.p-publicado{background:rgba(20,184,166,.1); color:var(--gr);border:1px solid rgba(20,184,166,.25);}
+.p-vendido  {background:rgba(56,178,246,.12);color:var(--ac);border:1px solid rgba(56,178,246,.28);}
 .p-sinvender{background:rgba(245,101,101,.1);color:var(--rd);border:1px solid rgba(245,101,101,.28);}
-.p-pagado   {background:rgba(34,211,160,.1); color:var(--gr);border:1px solid rgba(34,211,160,.25);}
+.p-pagado   {background:rgba(20,184,166,.1); color:var(--gr);border:1px solid rgba(20,184,166,.25);}
 .p-pendiente{background:rgba(246,173,85,.1); color:var(--yl);border:1px solid rgba(246,173,85,.25);}
 .p-vencido  {background:rgba(245,101,101,.1);color:var(--rd);border:1px solid rgba(245,101,101,.28);}
-.p-verificado{background:rgba(34,211,160,.1);color:var(--gr);border:1px solid rgba(34,211,160,.25);}
+.p-verificado{background:rgba(20,184,166,.1);color:var(--gr);border:1px solid rgba(20,184,166,.25);}
 
 /* MODAL */
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:300;display:flex;align-items:center;justify-content:center;padding:1rem;}
@@ -441,29 +441,29 @@ tr:hover td{background:rgba(47,128,237,.04);}
 .fg.full{grid-column:1/-1;}
 .fl{display:block;font-size:.68rem;font-weight:600;color:var(--mu2);margin-bottom:.26rem;letter-spacing:.01em;}
 .fi{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--b2);border-radius:7px;color:var(--wh2);font-size:.82rem;padding:.55rem .78rem;transition:border-color .15s;}
-.fi:focus{outline:none;border-color:var(--ac);background:rgba(47,128,237,.05);}
+.fi:focus{outline:none;border-color:var(--ac);background:rgba(56,178,246,.05);}
 .fi::placeholder{color:var(--mu);}
-.fsel{width:100%;background:#0b1f38;border:1px solid var(--b2);border-radius:7px;color:var(--wh2);font-size:.82rem;padding:.55rem .78rem;cursor:pointer;}
+.fsel{width:100%;background:#1F2937;border:1px solid var(--b2);border-radius:7px;color:var(--wh2);font-size:.82rem;padding:.55rem .78rem;cursor:pointer;}
 .fsel:focus{outline:none;border-color:var(--ac);}
 .modal-actions{display:flex;gap:.6rem;margin-top:1.2rem;}
 /* Lote wizard steps */
 .wiz-steps{display:flex;gap:0;margin-bottom:1.4rem;border-bottom:1px solid var(--b1);padding-bottom:1rem;}
 .wiz-step{display:flex;align-items:center;gap:.45rem;font-size:.7rem;font-weight:600;color:var(--mu);padding:.25rem .5rem;border-radius:6px;cursor:default;transition:all .15s;flex:1;justify-content:center;}
-.wiz-step.on{color:var(--ac);background:rgba(47,128,237,.08);}
+.wiz-step.on{color:var(--ac);background:rgba(56,178,246,.08);}
 .wiz-step.done{color:var(--gr);}
 .wiz-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;background:var(--b1);color:var(--mu);flex-shrink:0;}
 .wiz-step.on .wiz-num{background:var(--ac);color:#fff;}
-.wiz-step.done .wiz-num{background:var(--gr);color:#0b1f38;}
+.wiz-step.done .wiz-num{background:var(--gr);color:#1F2937;}
 /* Tipo selector grande */
 .tipo-sel{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem;}
 .tipo-opt{padding:.75rem .5rem;border-radius:9px;border:1px solid var(--b1);background:transparent;cursor:pointer;text-align:center;transition:all .15s;color:var(--mu);font-size:.72rem;font-weight:600;}
 .tipo-opt:hover{border-color:var(--b2);color:var(--mu2);}
-.tipo-opt.on{border-color:var(--ac);background:rgba(47,128,237,.1);color:var(--ac);}
+.tipo-opt.on{border-color:var(--ac);background:rgba(56,178,246,.1);color:var(--ac);}
 .tipo-opt-icon{font-size:1.3rem;margin-bottom:.3rem;display:block;}
 /* Foto upload grid */
 .foto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.8rem;}
 .foto-slot{aspect-ratio:1;border-radius:9px;border:1px dashed var(--b2);background:rgba(255,255,255,.02);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;font-size:.62rem;color:var(--mu);font-weight:600;text-align:center;}
-.foto-slot:hover{border-color:var(--ac);background:rgba(47,128,237,.05);color:var(--ac);}
+.foto-slot:hover{border-color:var(--ac);background:rgba(56,178,246,.05);color:var(--ac);}
 .foto-slot.filled{border-color:var(--ac);border-style:solid;}
 .foto-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px;}
 .foto-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);font-size:.6rem;padding:.2rem;text-align:center;color:#fff;}
@@ -471,7 +471,7 @@ tr:hover td{background:rgba(47,128,237,.04);}
 .item-card{background:rgba(255,255,255,.025);border:1px solid var(--b1);border-radius:8px;padding:.7rem .85rem;display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;}
 .doc-card{background:rgba(246,173,85,.04);border:1px solid rgba(246,173,85,.15);border-radius:8px;padding:.6rem .85rem;display:flex;align-items:center;gap:.6rem;margin-bottom:.35rem;}
 .add-btn-row{border:1px dashed var(--b2);border-radius:8px;padding:.5rem;display:flex;align-items:center;justify-content:center;gap:.4rem;cursor:pointer;color:var(--mu);font-size:.72rem;font-weight:600;transition:all .15s;margin-top:.3rem;}
-.add-btn-row:hover{border-color:var(--ac);color:var(--ac);background:rgba(47,128,237,.04);}
+.add-btn-row:hover{border-color:var(--ac);color:var(--ac);background:rgba(56,178,246,.04);}
 
 /* REPORTES */
 .rep-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;margin-bottom:1.2rem;}
@@ -493,22 +493,22 @@ tr:hover td{background:rgba(47,128,237,.04);}
 .sala-sb{background:var(--s1);border-right:1px solid var(--b1);overflow-y:auto;display:flex;flex-direction:column;}
 .sala-sbh{padding:.7rem 1rem;font-size:.68rem;font-weight:700;color:var(--wh2);border-bottom:1px solid var(--b1);letter-spacing:.02em;}
 .lc{padding:.65rem .9rem;border-bottom:1px solid rgba(26,58,92,.4);cursor:pointer;transition:background .15s;}
-.lc:hover{background:rgba(47,128,237,.06);}
-.lc.on{background:rgba(47,128,237,.1);border-left:3px solid var(--ac);}
+.lc:hover{background:rgba(56,178,246,.06);}
+.lc.on{background:rgba(56,178,246,.1);border-left:3px solid var(--ac);}
 .lth{width:100%;height:74px;border-radius:6px;object-fit:cover;margin-bottom:.38rem;border:1px solid var(--b2);}
 .lph{width:100%;height:74px;border-radius:6px;background:var(--s3);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;margin-bottom:.38rem;font-size:.7rem;font-weight:500;color:var(--mu);}
 .ln{font-size:.62rem;font-weight:600;color:var(--mu);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.12rem;}
 .lnm{font-size:.78rem;font-weight:600;color:var(--wh2);line-height:1.3;margin-bottom:.25rem;}
 .lpr{font-family:'DM Mono',monospace;font-size:.74rem;color:var(--ac);font-weight:500;}
 .lbdg{display:inline-block;padding:.07rem .36rem;border-radius:4px;font-size:.6rem;font-weight:600;margin-top:.2rem;}
-.blv{background:rgba(34,211,160,.1);color:var(--gr);}
-.bsd{background:rgba(47,128,237,.12);color:var(--ac);}
+.blv{background:rgba(20,184,166,.1);color:var(--gr);}
+.bsd{background:rgba(56,178,246,.12);color:var(--ac);}
 .bwt{background:rgba(90,127,168,.07);color:var(--mu);}
 .sala-main{padding:1.2rem 1.5rem;display:flex;flex-direction:column;gap:.95rem;overflow-y:auto;}
 .pz{position:relative;width:100%;height:215px;border-radius:10px;overflow:hidden;background:var(--s3);border:1px solid var(--b2);}
 .pzimg{width:100%;height:100%;object-fit:cover;}
 .pzph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;cursor:pointer;transition:background .2s;}
-.pzph:hover{background:rgba(47,128,237,.05);}
+.pzph:hover{background:rgba(56,178,246,.05);}
 .pzpt{font-size:.72rem;font-weight:500;color:var(--mu);}
 .pzov{position:absolute;bottom:0;left:0;right:0;padding:.55rem .85rem;background:linear-gradient(transparent,rgba(0,0,0,.75));display:flex;justify-content:flex-end;}
 .pzch{padding:.22rem .6rem;background:rgba(7,15,28,.8);border:1px solid var(--b2);border-radius:4px;font-size:.66rem;font-weight:600;color:var(--mu2);cursor:pointer;transition:border-color .15s;backdrop-filter:blur(4px);}
@@ -527,12 +527,12 @@ tr:hover td{background:rgba(47,128,237,.04);}
 .ba-card{background:var(--s2);border:1px solid var(--b2);border-radius:9px;padding:1.15rem;}
 .bal{font-size:.65rem;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.18rem;}
 .bap{font-size:2.5rem;font-weight:800;color:var(--wh);line-height:1;margin-bottom:.12rem;letter-spacing:-.02em;transition:color .2s;}
-.bap.flash{color:var(--acH)!important;text-shadow:0 0 20px rgba(47,128,237,.5);}
+.bap.flash{color:var(--acH)!important;text-shadow:0 0 20px rgba(56,178,246,.5);}
 .banl{font-size:.73rem;color:var(--mu);margin-bottom:.88rem;}
 .banl span{color:var(--wh2);font-weight:600;}
 
 /* BID RING */
-.bid-ring-wrap{display:flex;align-items:center;gap:.85rem;margin-bottom:.88rem;padding:.75rem;background:rgba(47,128,237,.06);border:1px solid rgba(47,128,237,.18);border-radius:8px;}
+.bid-ring-wrap{display:flex;align-items:center;gap:.85rem;margin-bottom:.88rem;padding:.75rem;background:rgba(56,178,246,.06);border:1px solid rgba(56,178,246,.18);border-radius:8px;}
 .bid-ring-outer{position:relative;width:52px;height:52px;flex-shrink:0;}
 .bid-ring-svg{transform:rotate(-90deg);}
 .bid-ring-bg{fill:none;stroke:var(--b1);stroke-width:4;}
@@ -544,9 +544,9 @@ tr:hover td{background:rgba(47,128,237,.04);}
 
 /* BID BUTTONS */
 .bb{width:100%;padding:.85rem;background:var(--ac);border:none;border-radius:8px;font-size:1rem;font-weight:700;color:#fff;cursor:pointer;transition:all .15s;letter-spacing:.01em;}
-.bb:hover:not(:disabled){background:var(--acH);transform:translateY(-2px);box-shadow:0 6px 20px rgba(47,128,237,.35);}
+.bb:hover:not(:disabled){background:var(--acH);transform:translateY(-2px);box-shadow:0 6px 20px rgba(56,178,246,.35);}
 .bb:disabled{opacity:.22;cursor:not-allowed;}
-.bb.sold{background:transparent;color:var(--ac);border:1px solid rgba(47,128,237,.3);}
+.bb.sold{background:transparent;color:var(--ac);border:1px solid rgba(56,178,246,.3);}
 .bb.view{background:rgba(90,127,168,.07);color:var(--mu);border:1px solid var(--b1);font-size:.76rem;cursor:default;}
 
 .bb-winning{width:100%;padding:.9rem 1.1rem;background:linear-gradient(135deg,#14532d,#166534);border:1px solid rgba(34,197,94,.3);border-radius:9px;display:flex;align-items:center;gap:.7rem;animation:winpulse 2.5s infinite;}
@@ -592,21 +592,21 @@ tr:hover td{background:rgba(47,128,237,.04);}
 .ctrl-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
 .ctrl-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:1.15rem;}
 .ctrl-card-title{font-size:.74rem;font-weight:700;color:var(--wh2);margin-bottom:.85rem;padding-bottom:.6rem;border-bottom:1px solid var(--b1);}
-.asel{width:100%;background:#0b1f38;border:1px solid var(--b2);border-radius:7px;color:var(--wh2);font-size:.8rem;padding:.5rem .75rem;cursor:pointer;margin-bottom:.7rem;}
+.asel{width:100%;background:#1F2937;border:1px solid var(--b2);border-radius:7px;color:var(--wh2);font-size:.8rem;padding:.5rem .75rem;cursor:pointer;margin-bottom:.7rem;}
 .asel:focus{outline:none;border-color:var(--ac);}
-.inc-ctrl{background:rgba(47,128,237,.05);border:1px solid rgba(47,128,237,.15);border-radius:8px;padding:.85rem;margin-bottom:.7rem;}
+.inc-ctrl{background:rgba(56,178,246,.05);border:1px solid rgba(56,178,246,.15);border-radius:8px;padding:.85rem;margin-bottom:.7rem;}
 .inc-title{font-size:.65rem;font-weight:700;color:var(--ac);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;}
 .inc-cur-lbl{font-size:.64rem;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.18rem;}
 .inc-cur{font-size:1.4rem;font-weight:800;color:var(--wh);letter-spacing:-.01em;margin-bottom:.45rem;}
 .inc-btns{display:flex;flex-wrap:wrap;gap:.28rem;}
 .inc-btn{padding:.26rem .56rem;border-radius:5px;border:1px solid var(--b1);background:transparent;font-size:.66rem;font-weight:500;color:var(--mu);cursor:pointer;transition:all .15s;}
 .inc-btn:hover{border-color:var(--ac);color:var(--ac);}
-.inc-btn.on{background:rgba(47,128,237,.15);border-color:var(--ac);color:var(--ac);font-weight:700;}
+.inc-btn.on{background:rgba(56,178,246,.15);border-color:var(--ac);color:var(--ac);font-weight:700;}
 .ab-list{display:flex;flex-direction:column;gap:.33rem;}
 .ab{padding:.58rem .9rem;border-radius:7px;border:none;font-size:.74rem;font-weight:600;cursor:pointer;transition:all .15s;}
 .ab:disabled{opacity:.22;cursor:not-allowed;}
-.ab.g{background:rgba(34,211,160,.1);color:var(--gr);border:1px solid rgba(34,211,160,.25);}
-.ab.g:hover:not(:disabled){background:rgba(34,211,160,.18);}
+.ab.g{background:rgba(20,184,166,.1);color:var(--gr);border:1px solid rgba(20,184,166,.25);}
+.ab.g:hover:not(:disabled){background:rgba(20,184,166,.18);}
 .ab.y{background:rgba(246,173,85,.09);color:var(--yl);border:1px solid rgba(246,173,85,.25);}
 .ab.y:hover:not(:disabled){background:rgba(246,173,85,.17);}
 .ab.r{background:rgba(245,101,101,.09);color:var(--rd);border:1px solid rgba(245,101,101,.25);}
@@ -620,7 +620,7 @@ tr:hover td{background:rgba(47,128,237,.04);}
 .ls-card{background:rgba(255,255,255,.025);border:1px solid var(--b1);border-radius:7px;padding:.65rem;text-align:center;}
 .ls-v{font-size:1rem;font-weight:800;color:var(--wh);line-height:1;}
 .ls-l{font-size:.58rem;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-top:.1rem;}
-.bid-ticker{margin-top:.65rem;background:rgba(47,128,237,.06);border:1px solid rgba(47,128,237,.18);border-radius:7px;padding:.6rem;display:flex;align-items:center;gap:.55rem;transition:background .3s,border .3s;}
+.bid-ticker{margin-top:.65rem;background:rgba(56,178,246,.06);border:1px solid rgba(56,178,246,.18);border-radius:7px;padding:.6rem;display:flex;align-items:center;gap:.55rem;transition:background .3s,border .3s;}
 .bid-ticker.urgent{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);}
 .bid-ticker.critical{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.35);animation:losepulse .5s infinite;}
 .bt-num{font-size:1.35rem;font-weight:800;min-width:24px;text-align:center;transition:color .5s;}
@@ -638,12 +638,12 @@ tr:hover td{background:rgba(47,128,237,.04);}
 .gar-step-n{font-size:.65rem;font-weight:700;color:var(--ac);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.22rem;}
 .gar-step-v{font-size:1.55rem;font-weight:800;color:var(--wh);line-height:1;letter-spacing:-.01em;}
 .gar-step-l{font-size:.68rem;color:var(--mu);margin-top:.12rem;}
-.gar-info{background:rgba(47,128,237,.07);border:1px solid rgba(47,128,237,.2);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.1rem;display:flex;align-items:flex-start;gap:.65rem;}
+.gar-info{background:rgba(56,178,246,.07);border:1px solid rgba(56,178,246,.2);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.1rem;display:flex;align-items:flex-start;gap:.65rem;}
 .gar-info-text{font-size:.76rem;color:var(--mu2);line-height:1.55;}
 .gar-info-text strong{color:var(--wh2);}
 .paleta-badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:7px;background:var(--ac);color:#fff;font-size:.82rem;font-weight:800;flex-shrink:0;}
 .paleta-none{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:7px;background:var(--s3);color:var(--mu);font-size:.65rem;border:1px dashed var(--b2);flex-shrink:0;}
-.p-aprobada{background:rgba(34,211,160,.1);color:var(--gr);border:1px solid rgba(34,211,160,.25);}
+.p-aprobada{background:rgba(20,184,166,.1);color:var(--gr);border:1px solid rgba(20,184,166,.25);}
 .p-devuelta{background:rgba(90,127,168,.1);color:var(--mu2);border:1px solid var(--b1);}
 
 /* ADJUDICACIONES */
@@ -658,12 +658,12 @@ tr:hover td{background:rgba(47,128,237,.04);}
 .adj-item-v.grn{color:var(--gr);}
 .adj-actions{display:flex;flex-direction:column;gap:.4rem;align-items:flex-end;}
 .p-saldo{background:rgba(246,173,85,.1);color:var(--yl);border:1px solid rgba(246,173,85,.25);}
-.p-pagado{background:rgba(34,211,160,.1);color:var(--gr);border:1px solid rgba(34,211,160,.25);}
+.p-pagado{background:rgba(20,184,166,.1);color:var(--gr);border:1px solid rgba(20,184,166,.25);}
 .exp-badge{display:inline-block;padding:.08rem .42rem;background:rgba(255,255,255,.04);border:1px solid var(--b1);border-radius:4px;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--mu2);}
 .role-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:4px;font-size:.65rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
 .role-badge.admin{background:rgba(246,173,85,.12);color:#f6ad55;border:1px solid rgba(246,173,85,.25);}
-.role-badge.martillero{background:rgba(47,128,237,.12);color:#2F80ED;border:1px solid rgba(47,128,237,.25);}
-.role-badge.comprador{background:rgba(34,211,160,.1);color:#22d3a0;border:1px solid rgba(34,211,160,.22);}
+.role-badge.martillero{background:rgba(56,178,246,.12);color:#38B2F6;border:1px solid rgba(56,178,246,.25);}
+.role-badge.comprador{background:rgba(20,184,166,.1);color:#14B8A6;border:1px solid rgba(20,184,166,.22);}
 
 /* LIQUIDACIONES */
 .liq-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:.7rem;}
@@ -677,7 +677,7 @@ tr:hover td{background:rgba(47,128,237,.04);}
 .liq-item-v.rd{color:var(--rd);}
 .liq-item-v.gr{color:var(--gr);}
 .liq-actions{display:flex;gap:.5rem;align-items:center;}
-.sent-badge{display:inline-flex;align-items:center;gap:.28rem;padding:.18rem .55rem;border-radius:4px;font-size:.66rem;font-weight:600;background:rgba(34,211,160,.08);color:var(--gr);border:1px solid rgba(34,211,160,.22);}
+.sent-badge{display:inline-flex;align-items:center;gap:.28rem;padding:.18rem .55rem;border-radius:4px;font-size:.66rem;font-weight:600;background:rgba(20,184,166,.08);color:var(--gr);border:1px solid rgba(20,184,166,.22);}
 
 /* DEVOLUCIONES */
 .dev-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:1rem 1.2rem;margin-bottom:.6rem;display:grid;grid-template-columns:1fr auto;gap:.9rem;align-items:center;}
@@ -707,7 +707,7 @@ tr:hover td{background:rgba(47,128,237,.04);}
 .chat-send:hover{background:var(--acH);}
 .mod-tabs{display:flex;gap:.3rem;padding:.52rem .65rem;border-bottom:1px solid var(--b1);flex-shrink:0;}
 .mod-tab{padding:.26rem .65rem;border-radius:5px;border:1px solid var(--b1);background:transparent;font-size:.65rem;font-weight:600;color:var(--mu);cursor:pointer;transition:all .15s;}
-.mod-tab.on{background:rgba(47,128,237,.15);border-color:var(--ac);color:var(--ac);}
+.mod-tab.on{background:rgba(56,178,246,.15);border-color:var(--ac);color:var(--ac);}
 .mod-tab:hover:not(.on){border-color:var(--b2);color:var(--mu2);}
 `;
 
@@ -721,12 +721,12 @@ const CustomTooltip = ({ active, payload, label }) => {
 // ── BID RING ──────────────────────────────────────────────────────
 const BidRing = ({ seconds, total, nextAmount, increment }) => {
   const r = 20, circ = 2 * Math.PI * r, offset = circ * (1 - seconds / total);
-  const color = seconds > 8 ? "#22d3a0" : seconds > 4 ? "#f6ad55" : "#f56565";
+  const color = seconds > 8 ? "#14B8A6" : seconds > 4 ? "#f6ad55" : "#f56565";
   const urgent = seconds <= 5;
   const adjudicando = seconds <= 1;
   return (
     <div className="bid-ring-wrap" style={{
-      background: urgent ? `rgba(${adjudicando?"239,68,68":"245,158,11"},.1)` : "rgba(47,128,237,.06)",
+      background: urgent ? `rgba(${adjudicando?"239,68,68":"245,158,11"},.1)` : "rgba(56,178,246,.06)",
       border: `1px solid rgba(${adjudicando?"239,68,68":"245,158,11"},.${urgent?".3":"18"})`,
       animation: urgent ? "losepulse 0.6s infinite" : "none",
     }}>
@@ -799,7 +799,7 @@ const AUTH_CSS = `
 
   .auth-root {
     min-height: 100vh;
-    background: #070f1c;
+    background: #0d1117;
     display: flex;
     font-family: 'Inter', sans-serif;
     position: relative;
@@ -812,8 +812,8 @@ const AUTH_CSS = `
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(47,128,237,.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(47,128,237,.04) 1px, transparent 1px);
+      linear-gradient(rgba(56,178,246,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,178,246,.04) 1px, transparent 1px);
     background-size: 48px 48px;
     animation: gridShift 20s linear infinite;
     pointer-events: none;
@@ -825,7 +825,7 @@ const AUTH_CSS = `
     content: '';
     position: absolute;
     width: 700px; height: 700px;
-    background: radial-gradient(circle, rgba(47,128,237,.12) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(56,178,246,.12) 0%, transparent 70%);
     top: -200px; right: -100px;
     border-radius: 50%;
     pointer-events: none;
@@ -848,18 +848,18 @@ const AUTH_CSS = `
     align-items: center;
     gap: .5rem;
     padding: .28rem .75rem;
-    background: rgba(47,128,237,.12);
-    border: 1px solid rgba(47,128,237,.3);
+    background: rgba(56,178,246,.12);
+    border: 1px solid rgba(56,178,246,.3);
     border-radius: 4px;
     font-size: .68rem;
     font-weight: 600;
-    color: #2F80ED;
+    color: #38B2F6;
     letter-spacing: .08em;
     text-transform: uppercase;
     margin-bottom: 2.5rem;
     width: fit-content;
   }
-  .auth-left-tag-dot { width: 5px; height: 5px; background: #2F80ED; border-radius: 50%; animation: blink 2s infinite; }
+  .auth-left-tag-dot { width: 5px; height: 5px; background: #38B2F6; border-radius: 50%; animation: blink 2s infinite; }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
   .auth-brand-title {
@@ -871,7 +871,7 @@ const AUTH_CSS = `
     letter-spacing: -.03em;
     margin-bottom: .6rem;
   }
-  .auth-brand-title span { color: #2F80ED; }
+  .auth-brand-title span { color: #38B2F6; }
   .auth-brand-sub {
     font-size: 1.05rem;
     color: #4a6a8a;
@@ -890,8 +890,8 @@ const AUTH_CSS = `
     font-size: .82rem; color: #5a7fa8;
     transition: all .2s;
   }
-  .auth-feat:hover { background: rgba(47,128,237,.06); border-color: rgba(47,128,237,.2); color: #8ab4d4; }
-  .auth-feat-icon { color: #2F80ED; flex-shrink: 0; }
+  .auth-feat:hover { background: rgba(56,178,246,.06); border-color: rgba(56,178,246,.2); color: #8ab4d4; }
+  .auth-feat-icon { color: #38B2F6; flex-shrink: 0; }
 
   /* Right form panel */
   .auth-right {
@@ -945,13 +945,13 @@ const AUTH_CSS = `
     gap: .25rem;
   }
   .role-tab.active {
-    background: rgba(47,128,237,.15);
-    box-shadow: 0 0 0 1px rgba(47,128,237,.35);
+    background: rgba(56,178,246,.15);
+    box-shadow: 0 0 0 1px rgba(56,178,246,.35);
   }
   .role-tab-icon { display:flex; align-items:center; justify-content:center; color: #4a6a8a; transition: color .18s; }
-  .role-tab.active .role-tab-icon { color: #2F80ED; }
+  .role-tab.active .role-tab-icon { color: #38B2F6; }
   .role-tab-label { font-size: .62rem; font-weight: 600; color: #4a6a8a; letter-spacing: .03em; text-transform: uppercase; transition: color .18s; }
-  .role-tab.active .role-tab-label { color: #2F80ED; }
+  .role-tab.active .role-tab-label { color: #38B2F6; }
 
   /* Form fields */
   .auth-field { margin-bottom: 1.1rem; }
@@ -968,8 +968,8 @@ const AUTH_CSS = `
     transition: all .18s;
     outline: none;
   }
-  .auth-input:focus { border-color: #2F80ED; background: rgba(47,128,237,.06); box-shadow: 0 0 0 3px rgba(47,128,237,.1); }
-  .auth-input::placeholder { color: #2a4a6a; }
+  .auth-input:focus { border-color: #38B2F6; background: rgba(56,178,246,.06); box-shadow: 0 0 0 3px rgba(56,178,246,.1); }
+  .auth-input::placeholder { color: #364d70; }
   .auth-input.mono { font-family: 'DM Mono', monospace; font-size: .95rem; letter-spacing: .12em; text-transform: uppercase; }
   .auth-input.error { border-color: #e05252; background: rgba(224,82,82,.05); }
 
@@ -988,7 +988,7 @@ const AUTH_CSS = `
   .auth-submit {
     width: 100%;
     padding: .85rem;
-    background: #2F80ED;
+    background: #38B2F6;
     border: none;
     border-radius: 8px;
     color: #fff;
@@ -1001,15 +1001,15 @@ const AUTH_CSS = `
     overflow: hidden;
     margin-top: .4rem;
   }
-  .auth-submit:hover { background: #1a6fd4; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(47,128,237,.35); }
+  .auth-submit:hover { background: #1a6fd4; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(56,178,246,.35); }
   .auth-submit:active { transform: none; }
   .auth-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
   .auth-hint {
     margin-top: 1.5rem;
     padding: .75rem .9rem;
-    background: rgba(47,128,237,.06);
-    border: 1px solid rgba(47,128,237,.15);
+    background: rgba(56,178,246,.06);
+    border: 1px solid rgba(56,178,246,.15);
     border-radius: 7px;
     font-size: .72rem;
     color: #4a6a8a;
@@ -1020,8 +1020,8 @@ const AUTH_CSS = `
   /* Buyer token view */
   .buyer-info {
     padding: 1rem;
-    background: rgba(34,211,160,.06);
-    border: 1px solid rgba(34,211,160,.2);
+    background: rgba(20,184,166,.06);
+    border: 1px solid rgba(20,184,166,.2);
     border-radius: 8px;
     margin-bottom: 1.2rem;
     font-size: .78rem;
@@ -1036,8 +1036,8 @@ const AUTH_CSS = `
     letter-spacing: .04em; text-transform: uppercase;
   }
   .role-badge.admin     { background: rgba(246,173,85,.12); color: #f6ad55; border: 1px solid rgba(246,173,85,.25); }
-  .role-badge.martillero{ background: rgba(47,128,237,.12); color: #2F80ED; border: 1px solid rgba(47,128,237,.25); }
-  .role-badge.comprador { background: rgba(34,211,160,.1);  color: #22d3a0; border: 1px solid rgba(34,211,160,.22); }
+  .role-badge.martillero{ background: rgba(56,178,246,.12); color: #38B2F6; border: 1px solid rgba(56,178,246,.25); }
+  .role-badge.comprador { background: rgba(20,184,166,.1);  color: #14B8A6; border: 1px solid rgba(20,184,166,.22); }
 
   @media (max-width: 900px) {
     .auth-left { display: none; }
@@ -1129,8 +1129,8 @@ function AuthScreen({ onLogin }) {
         {/* GR Logo — full size version */}
         <div style={{display:"flex",alignItems:"center",gap:"18px",marginBottom:"1.5rem"}}>
           <svg width="64" height="64" viewBox="0 0 36 36" fill="none">
-            <rect width="36" height="36" rx="8" fill="rgba(47,128,237,.1)" stroke="rgba(47,128,237,.25)" strokeWidth="1"/>
-            <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#2F80ED" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            <rect width="36" height="36" rx="8" fill="rgba(56,178,246,.1)" stroke="rgba(56,178,246,.25)" strokeWidth="1"/>
+            <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
             <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
           </svg>
           <div style={{fontFamily:"Inter,sans-serif",fontWeight:400,fontSize:".85rem",color:"#4a6a8a",letterSpacing:".12em",textTransform:"uppercase",marginTop:2}}>Auction Software</div>
@@ -1159,8 +1159,8 @@ function AuthScreen({ onLogin }) {
           <div style={{marginBottom:"2rem"}}>
             <div style={{display:"flex",alignItems:"center",gap:"14px",marginBottom:".6rem"}}>
               <svg width="52" height="52" viewBox="0 0 36 36" fill="none">
-                <rect width="36" height="36" rx="8" fill="rgba(47,128,237,.1)" stroke="rgba(47,128,237,.2)" strokeWidth="1"/>
-                <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#2F80ED" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                <rect width="36" height="36" rx="8" fill="rgba(56,178,246,.1)" stroke="rgba(56,178,246,.2)" strokeWidth="1"/>
+                <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
                 <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
               </svg>
               <div style={{fontFamily:"Inter,sans-serif",fontWeight:400,fontSize:".72rem",color:"#4a6a8a",letterSpacing:".12em",textTransform:"uppercase"}}>Auction Software</div>
@@ -1202,7 +1202,7 @@ function AuthScreen({ onLogin }) {
           ) : (
             <>
               <div className="buyer-info">
-                No necesitas crear una cuenta. Ingresa el <strong style={{color:"#22d3a0"}}>codigo de paleta</strong> que te asigno la casa de remates al momento de inscribirte y pagar tu garantia.
+                No necesitas crear una cuenta. Ingresa el <strong style={{color:"#14B8A6"}}>codigo de paleta</strong> que te asigno la casa de remates al momento de inscribirte y pagar tu garantia.
               </div>
               <div className="auth-field">
                 <label className="auth-label">Codigo de paleta</label>
@@ -1284,59 +1284,59 @@ function BuyerView({ user, onLogout }) {
 
   const BUYER_CSS = `
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #070f1c; }
-    .bv-root { min-height: 100vh; background: #070f1c; font-family: 'Inter', sans-serif; color: #e0eaf4; }
-    .bv-header { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.5rem; background: #0b1f38; border-bottom: 1px solid rgba(255,255,255,.07); position: sticky; top: 0; z-index: 10; }
+    body { background: #0d1117; }
+    .bv-root { min-height: 100vh; background: #0d1117; font-family: 'Inter', sans-serif; color: #e0eaf4; }
+    .bv-header { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.5rem; background: #1F2937; border-bottom: 1px solid rgba(255,255,255,.07); position: sticky; top: 0; z-index: 10; }
     .bv-casa { font-size: .82rem; font-weight: 700; color: #e0eaf4; }
-    .bv-paleta { font-family: 'DM Mono', monospace; font-size: .75rem; background: rgba(47,128,237,.15); color: #2F80ED; border: 1px solid rgba(47,128,237,.3); padding: .18rem .55rem; border-radius: 4px; }
+    .bv-paleta { font-family: 'DM Mono', monospace; font-size: .75rem; background: rgba(56,178,246,.15); color: #38B2F6; border: 1px solid rgba(56,178,246,.3); padding: .18rem .55rem; border-radius: 4px; }
     .bv-logout { background: transparent; border: 1px solid rgba(255,255,255,.1); color: #4a6a8a; font-size: .72rem; padding: .3rem .7rem; border-radius: 5px; cursor: pointer; }
-    .bv-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,.07); background: #0b1f38; padding: 0 1.5rem; }
+    .bv-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,.07); background: #1F2937; padding: 0 1.5rem; }
     .bv-tab { padding: .75rem 1.2rem; font-size: .78rem; font-weight: 600; color: #4a6a8a; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; display: flex; align-items: center; gap: .4rem; }
-    .bv-tab.on { color: #2F80ED; border-bottom-color: #2F80ED; }
+    .bv-tab.on { color: #38B2F6; border-bottom-color: #38B2F6; }
     .bv-body { max-width: 820px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-    .bv-card { background: #0b1f38; border: 1px solid rgba(255,255,255,.07); border-radius: 12px; overflow: hidden; }
+    .bv-card { background: #1F2937; border: 1px solid rgba(255,255,255,.07); border-radius: 12px; overflow: hidden; }
     .bv-card-header { padding: .7rem 1.1rem; border-bottom: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; justify-content: space-between; }
-    .bv-card-title { font-size: .7rem; font-weight: 700; color: #2F80ED; letter-spacing: .06em; text-transform: uppercase; }
+    .bv-card-title { font-size: .7rem; font-weight: 700; color: #38B2F6; letter-spacing: .06em; text-transform: uppercase; }
     .bv-card-body { padding: 1rem 1.1rem; }
-    .bv-dot-live { width: 8px; height: 8px; border-radius: 50%; background: #22d3a0; animation: bv-pulse 1.5s infinite; display: inline-block; margin-right: .35rem; }
+    .bv-dot-live { width: 8px; height: 8px; border-radius: 50%; background: #14B8A6; animation: bv-pulse 1.5s infinite; display: inline-block; margin-right: .35rem; }
     @keyframes bv-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
     .bv-lote-nombre { font-size: 1.2rem; font-weight: 800; color: #e0eaf4; margin-bottom: .2rem; }
     .bv-lote-cat { font-size: .72rem; color: #4a6a8a; margin-bottom: .7rem; }
     .bv-lote-desc { font-size: .78rem; color: #5a7fa8; line-height: 1.6; }
     .bv-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .7rem; margin-top: .9rem; }
     .bv-stat { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; padding: .65rem .8rem; text-align: center; }
-    .bv-stat-v { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 700; color: #2F80ED; }
-    .bv-stat-v.gr { color: #22d3a0; }
+    .bv-stat-v { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 700; color: #38B2F6; }
+    .bv-stat-v.gr { color: #14B8A6; }
     .bv-stat-v.yl { color: #f6ad55; }
     .bv-stat-l { font-size: .62rem; color: #4a6a8a; margin-top: .15rem; text-transform: uppercase; letter-spacing: .04em; }
     .bv-hist-row { display: flex; align-items: center; justify-content: space-between; padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.04); }
     .bv-hist-row:last-child { border-bottom: none; }
     .bv-hist-num { font-size: .75rem; font-weight: 600; color: #4a6a8a; font-family: 'DM Mono', monospace; }
     .bv-hist-monto { font-size: .8rem; font-weight: 700; color: #e0eaf4; font-family: 'DM Mono', monospace; }
-    .bv-hist-time { font-size: .68rem; color: #2a4a6a; font-family: 'DM Mono', monospace; }
-    .bv-info { padding: .85rem 1.1rem; background: rgba(47,128,237,.05); border: 1px solid rgba(47,128,237,.12); border-radius: 10px; font-size: .76rem; color: #4a6a8a; line-height: 1.7; }
+    .bv-hist-time { font-size: .68rem; color: #364d70; font-family: 'DM Mono', monospace; }
+    .bv-info { padding: .85rem 1.1rem; background: rgba(56,178,246,.05); border: 1px solid rgba(56,178,246,.12); border-radius: 10px; font-size: .76rem; color: #4a6a8a; line-height: 1.7; }
     /* Catálogo */
     .bv-search { width:100%; padding:.65rem .9rem; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:9px; color:#e0eaf4; font-family:'Inter',sans-serif; font-size:.85rem; outline:none; }
-    .bv-search:focus { border-color:#2F80ED; }
+    .bv-search:focus { border-color:#38B2F6; }
     .bv-cat-pills { display:flex; gap:.5rem; flex-wrap:wrap; margin:.75rem 0; }
     .bv-cat-pill { padding:.3rem .75rem; border-radius:20px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); font-size:.72rem; font-weight:600; color:#4a6a8a; cursor:pointer; transition:all .15s; }
-    .bv-cat-pill.on { background:rgba(47,128,237,.15); border-color:rgba(47,128,237,.4); color:#2F80ED; }
+    .bv-cat-pill.on { background:rgba(56,178,246,.15); border-color:rgba(56,178,246,.4); color:#38B2F6; }
     .bv-lote-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; }
     @media(max-width:500px){ .bv-lote-grid{grid-template-columns:1fr;} }
-    .bv-lote-card { background:#0b1f38; border:1px solid rgba(255,255,255,.07); border-radius:11px; overflow:hidden; transition:border .15s; }
-    .bv-lote-card:hover { border-color:rgba(47,128,237,.3); }
+    .bv-lote-card { background:#1F2937; border:1px solid rgba(255,255,255,.07); border-radius:11px; overflow:hidden; transition:border .15s; }
+    .bv-lote-card:hover { border-color:rgba(56,178,246,.3); }
     .bv-lote-card.watched { border-color:rgba(246,173,85,.35); }
     .bv-lote-img { width:100%; height:140px; object-fit:cover; background:rgba(255,255,255,.03); display:flex; align-items:center; justify-content:center; }
     .bv-lote-info { padding:.75rem; }
     .bv-lote-card-name { font-size:.83rem; font-weight:700; color:#e0eaf4; margin-bottom:.3rem; line-height:1.3; }
     .bv-lote-card-base { font-size:.72rem; color:#4a6a8a; }
-    .bv-lote-card-price { font-family:'DM Mono',monospace; font-size:.9rem; font-weight:700; color:#22d3a0; }
+    .bv-lote-card-price { font-family:'DM Mono',monospace; font-size:.9rem; font-weight:700; color:#14B8A6; }
     .bv-watch-btn { background:transparent; border:none; cursor:pointer; padding:.2rem; color:#4a6a8a; transition:color .15s; }
     .bv-watch-btn.on { color:#f6ad55; }
     .bv-empty { text-align:center; padding:2rem; color:#4a6a8a; font-size:.82rem; }
     /* Esperando */
     .bv-waiting { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 1.5rem; text-align:center; gap:1rem; }
-    .bv-waiting-icon { width:64px; height:64px; border-radius:50%; background:rgba(47,128,237,.08); border:1px solid rgba(47,128,237,.2); display:flex; align-items:center; justify-content:center; }
+    .bv-waiting-icon { width:64px; height:64px; border-radius:50%; background:rgba(56,178,246,.08); border:1px solid rgba(56,178,246,.2); display:flex; align-items:center; justify-content:center; }
   `;
 
   return (
@@ -1353,7 +1353,7 @@ function BuyerView({ user, onLogout }) {
           <div className="bv-paleta">Paleta {user.token||user.numero||"—"}</div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
-          <span style={{fontSize:".72rem",color:"#22d3a0"}}><span className="bv-dot-live"/>En vivo</span>
+          <span style={{fontSize:".72rem",color:"#14B8A6"}}><span className="bv-dot-live"/>En vivo</span>
           <button className="bv-logout" onClick={onLogout}>Salir</button>
         </div>
       </div>
@@ -1382,7 +1382,7 @@ function BuyerView({ user, onLogout }) {
             </div>
             {loteActivo ? (<>
               {/* Imagen */}
-              <div style={{position:"relative",background:"#050c18",height:260,display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <div style={{position:"relative",background:"#0d1117",height:260,display:"flex",alignItems:"center",justifyContent:"center"}}>
                 {imgs.length>0 ? (<>
                   <img src={imgs[photoIdx]} alt={loteActivo.nombre} style={{width:"100%",height:260,objectFit:"cover",display:"block"}}/>
                   {imgs.length>1&&(<>
@@ -1395,11 +1395,11 @@ function BuyerView({ user, onLogout }) {
                       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 2l4 4-4 4"/></svg>
                     </button>
                     <div style={{position:"absolute",bottom:10,left:"50%",transform:"translateX(-50%)",display:"flex",gap:5}}>
-                      {imgs.map((_,i)=><div key={i} onClick={()=>setPhotoIdx(i)} style={{width:i===photoIdx?18:7,height:7,borderRadius:4,background:i===photoIdx?"#2F80ED":"rgba(255,255,255,.35)",cursor:"pointer",transition:"all .2s"}}/>)}
+                      {imgs.map((_,i)=><div key={i} onClick={()=>setPhotoIdx(i)} style={{width:i===photoIdx?18:7,height:7,borderRadius:4,background:i===photoIdx?"#38B2F6":"rgba(255,255,255,.35)",cursor:"pointer",transition:"all .2s"}}/>)}
                     </div>
                   </>)}
                 </>) : (
-                  <div style={{textAlign:"center",color:"#2a4a6a"}}>
+                  <div style={{textAlign:"center",color:"#364d70"}}>
                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="4" y="8" width="32" height="24" rx="3"/><circle cx="20" cy="20" r="6"/><path d="M15 8l2.5-4h5L25 8"/></svg>
                     <div style={{fontSize:".75rem",marginTop:".5rem"}}>Sin fotos disponibles</div>
                   </div>
@@ -1435,11 +1435,11 @@ function BuyerView({ user, onLogout }) {
             </>) : (
               <div className="bv-waiting">
                 <div className="bv-waiting-icon">
-                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#2F80ED" strokeWidth="1.6" strokeLinecap="round"><circle cx="14" cy="14" r="11"/><path d="M14 8v6l4 3"/></svg>
+                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#38B2F6" strokeWidth="1.6" strokeLinecap="round"><circle cx="14" cy="14" r="11"/><path d="M14 8v6l4 3"/></svg>
                 </div>
                 <div style={{fontWeight:700,color:"#e0eaf4"}}>Esperando inicio del remate</div>
                 <div style={{fontSize:".78rem",color:"#4a6a8a"}}>El martillero iniciará en breve. Puedes revisar el catálogo mientras tanto.</div>
-                <button style={{padding:".5rem 1rem",background:"rgba(47,128,237,.1)",border:"1px solid rgba(47,128,237,.25)",borderRadius:8,color:"#2F80ED",fontSize:".78rem",fontWeight:600,cursor:"pointer"}}
+                <button style={{padding:".5rem 1rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.25)",borderRadius:8,color:"#38B2F6",fontSize:".78rem",fontWeight:600,cursor:"pointer"}}
                   onClick={()=>setTabView("catalogo")}>Ver catálogo →</button>
               </div>
             )}
@@ -1450,7 +1450,7 @@ function BuyerView({ user, onLogout }) {
             <div className="bv-card">
               <div className="bv-card-header">
                 <span className="bv-card-title">Historial de pujas</span>
-                <span style={{fontSize:".68rem",color:"#22d3a0"}}>{historial.length} pujas</span>
+                <span style={{fontSize:".68rem",color:"#14B8A6"}}>{historial.length} pujas</span>
               </div>
               <div className="bv-card-body">
                 {historial.map((h,i)=>(
@@ -1499,7 +1499,7 @@ function BuyerView({ user, onLogout }) {
                   <div className="bv-lote-img">
                     {lote.fotos?.[0]
                       ? <img src={lote.fotos[0]} alt={lote.nombre} style={{width:"100%",height:140,objectFit:"cover"}}/>
-                      : <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#2a4a6a" strokeWidth="1.3"><rect x="3" y="6" width="26" height="20" rx="3"/><circle cx="16" cy="16" r="5"/></svg>}
+                      : <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#364d70" strokeWidth="1.3"><rect x="3" y="6" width="26" height="20" rx="3"/><circle cx="16" cy="16" r="5"/></svg>}
                   </div>
                   <div className="bv-lote-info">
                     <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:".5rem"}}>
@@ -1514,7 +1514,7 @@ function BuyerView({ user, onLogout }) {
                         <div style={{fontSize:".6rem",color:"#4a6a8a",marginBottom:".1rem"}}>Base</div>
                         <div className="bv-lote-card-price">{fmt(lote.base||0)}</div>
                       </div>
-                      <span style={{fontSize:".62rem",padding:".15rem .45rem",borderRadius:5,background:"rgba(47,128,237,.1)",color:"#2F80ED",fontWeight:700,border:"1px solid rgba(47,128,237,.2)"}}>
+                      <span style={{fontSize:".62rem",padding:".15rem .45rem",borderRadius:5,background:"rgba(56,178,246,.1)",color:"#38B2F6",fontWeight:700,border:"1px solid rgba(56,178,246,.2)"}}>
                         {lote.estado||"disponible"}
                       </span>
                     </div>
@@ -1575,20 +1575,20 @@ function SpotterView({ user, onLogout }) {
 
   const SP_CSS = `
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#060d18;}
-    .sp-root{min-height:100vh;background:#060d18;font-family:'Inter',sans-serif;color:#e0eaf4;display:flex;flex-direction:column;}
-    .sp-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;background:#0b1f38;border-bottom:1px solid rgba(255,255,255,.07);}
+    body{background:#0d1117;}
+    .sp-root{min-height:100vh;background:#0d1117;font-family:'Inter',sans-serif;color:#e0eaf4;display:flex;flex-direction:column;}
+    .sp-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;background:#1F2937;border-bottom:1px solid rgba(255,255,255,.07);}
     .sp-body{flex:1;max-width:600px;width:100%;margin:0 auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;}
     .sp-lote-sel{display:flex;flex-direction:column;gap:.4rem;}
-    .sp-input{width:100%;padding:.85rem 1rem;background:#0b1f38;border:2px solid rgba(255,255,255,.1);border-radius:10px;color:#e0eaf4;font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;outline:none;text-align:center;letter-spacing:.05em;}
-    .sp-input:focus{border-color:#2F80ED;}
+    .sp-input{width:100%;padding:.85rem 1rem;background:#1F2937;border:2px solid rgba(255,255,255,.1);border-radius:10px;color:#e0eaf4;font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;outline:none;text-align:center;letter-spacing:.05em;}
+    .sp-input:focus{border-color:#38B2F6;}
     .sp-input.big{font-size:1.5rem;padding:1.1rem 1rem;}
     .sp-label{font-size:.68rem;font-weight:700;color:#4a6a8a;text-transform:uppercase;letter-spacing:.07em;text-align:center;}
-    .sp-btn{width:100%;padding:1rem;background:#2F80ED;border:none;border-radius:11px;color:#fff;font-size:1rem;font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:.02em;}
+    .sp-btn{width:100%;padding:1rem;background:#38B2F6;border:none;border-radius:11px;color:#fff;font-size:1rem;font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:.02em;}
     .sp-btn:hover{background:#1d6fd8;transform:translateY(-1px);}
     .sp-btn:active{transform:none;}
     .sp-hist-row{display:flex;align-items:center;justify-content:space-between;padding:.55rem .75rem;background:rgba(255,255,255,.02);border-radius:7px;margin-bottom:.35rem;}
-    .sp-notif{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#22d3a0;color:#0b1f38;font-weight:700;padding:.65rem 1.3rem;border-radius:8px;font-size:.85rem;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+    .sp-notif{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#14B8A6;color:#1F2937;font-weight:700;padding:.65rem 1.3rem;border-radius:8px;font-size:.85rem;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.3);}
   `;
 
   return (
@@ -1607,7 +1607,7 @@ function SpotterView({ user, onLogout }) {
 
       <div className="sp-body">
         {/* Selector de lote */}
-        <div style={{background:"#0b1f38",border:"1px solid rgba(255,255,255,.07)",borderRadius:12,padding:"1rem"}}>
+        <div style={{background:"#1F2937",border:"1px solid rgba(255,255,255,.07)",borderRadius:12,padding:"1rem"}}>
           <div style={{fontSize:".65rem",fontWeight:700,color:"#4a6a8a",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".5rem"}}>Lote en subasta</div>
           {lots.length>0 ? (
             <select style={{width:"100%",padding:".65rem .9rem",background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,color:"#e0eaf4",fontSize:".85rem",fontFamily:"'Inter',sans-serif"}}
@@ -1617,11 +1617,11 @@ function SpotterView({ user, onLogout }) {
           ) : (
             <div style={{textAlign:"center",color:"#4a6a8a",fontSize:".82rem",padding:".5rem"}}>Esperando que el martillero inicie el remate...</div>
           )}
-          {lote&&<div style={{marginTop:".6rem",fontSize:".75rem",color:"#2F80ED",fontFamily:"'DM Mono',monospace",textAlign:"center",fontWeight:700}}>Base: {fmt(lote.base||0)}</div>}
+          {lote&&<div style={{marginTop:".6rem",fontSize:".75rem",color:"#38B2F6",fontFamily:"'DM Mono',monospace",textAlign:"center",fontWeight:700}}>Base: {fmt(lote.base||0)}</div>}
         </div>
 
         {/* Registro de puja */}
-        <div style={{background:"#0b1f38",border:"1px solid rgba(255,255,255,.07)",borderRadius:12,padding:"1.2rem",display:"flex",flexDirection:"column",gap:".85rem"}}>
+        <div style={{background:"#1F2937",border:"1px solid rgba(255,255,255,.07)",borderRadius:12,padding:"1.2rem",display:"flex",flexDirection:"column",gap:".85rem"}}>
           <div className="sp-lote-sel">
             <label className="sp-label">N° Paleta</label>
             <input className="sp-input big" placeholder="045" value={paleta}
@@ -1641,11 +1641,11 @@ function SpotterView({ user, onLogout }) {
 
         {/* Últimas pujas registradas */}
         {ultPujas.length>0&&(
-          <div style={{background:"#0b1f38",border:"1px solid rgba(255,255,255,.07)",borderRadius:12,padding:"1rem"}}>
+          <div style={{background:"#1F2937",border:"1px solid rgba(255,255,255,.07)",borderRadius:12,padding:"1rem"}}>
             <div style={{fontSize:".65rem",fontWeight:700,color:"#4a6a8a",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".65rem"}}>Últimas pujas registradas</div>
             {ultPujas.map((p,i)=>(
               <div key={i} className="sp-hist-row">
-                <span style={{fontFamily:"'DM Mono',monospace",fontWeight:700,color:"#2F80ED",fontSize:".8rem"}}>Paleta {p.paleta}</span>
+                <span style={{fontFamily:"'DM Mono',monospace",fontWeight:700,color:"#38B2F6",fontSize:".8rem"}}>Paleta {p.paleta}</span>
                 <span style={{fontFamily:"'DM Mono',monospace",fontWeight:700,color:"#e0eaf4",fontSize:".85rem"}}>{p.monto}</span>
                 <span style={{fontSize:".68rem",color:"#4a6a8a"}}>{p.hora}</span>
               </div>
@@ -1699,7 +1699,7 @@ export default function Root() {
   const handleLogout = async () => { await supabase.auth.signOut(); setSession(null); };
 
   if (loading) return (
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",background:"#070f1c",color:"#5a7fa8",fontFamily:"Inter,sans-serif",fontSize:".85rem"}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",background:"#0d1117",color:"#5a7fa8",fontFamily:"Inter,sans-serif",fontSize:".85rem"}}>
       Cargando...
     </div>
   );
@@ -2446,7 +2446,7 @@ function Dashboard({ session, onLogout }) {
                   <div style={{display:"flex",gap:".5rem",marginBottom:"1rem"}}>
                     {[{k:"MUEBLES",icon:"📦",label:"Muebles"},{k:"VEHICULOS",icon:"🚗",label:"Vehículo"},{k:"INMUEBLES",icon:"🏠",label:"Inmueble"}].map(o=>(
                       <div key={o.k} onClick={()=>{setWizTipo(o.k);setLoteForm(f=>({...f,motorizado:o.k==="VEHICULOS"}));}}
-                        style={{flex:1,padding:".6rem .5rem",textAlign:"center",cursor:"pointer",borderRadius:8,border:`2px solid ${wizTipo===o.k?"var(--ac)":"var(--b2)"}`,background:wizTipo===o.k?"rgba(47,128,237,.1)":"var(--s2)",transition:"all .15s"}}>
+                        style={{flex:1,padding:".6rem .5rem",textAlign:"center",cursor:"pointer",borderRadius:8,border:`2px solid ${wizTipo===o.k?"var(--ac)":"var(--b2)"}`,background:wizTipo===o.k?"rgba(56,178,246,.1)":"var(--s2)",transition:"all .15s"}}>
                         <div style={{fontSize:"1.1rem",marginBottom:".2rem"}}>{o.icon}</div>
                         <div style={{fontSize:".72rem",fontWeight:wizTipo===o.k?700:500,color:wizTipo===o.k?"var(--ac)":"var(--mu2)"}}>{o.label}</div>
                       </div>
@@ -2517,7 +2517,7 @@ function Dashboard({ session, onLogout }) {
                   {wizTipo==="VEHICULOS" ? (
                     <div className="foto-grid">
                       {[["frente","Frente"],["izq","Lado izquierdo"],["der","Lado derecho"],["trasera","Trasera"]].map(([k,lbl])=>(
-                        <label key={k} className={`foto-slot${wizFotos[k]?" filled":""}`} style={{border:`2px ${wizFotos[k]?"solid rgba(34,211,160,.4)":"dashed rgba(224,82,82,.35)"}`}}>
+                        <label key={k} className={`foto-slot${wizFotos[k]?" filled":""}`} style={{border:`2px ${wizFotos[k]?"solid rgba(20,184,166,.4)":"dashed rgba(224,82,82,.35)"}`}}>
                           {wizFotos[k]
                             ? <><img src={URL.createObjectURL(wizFotos[k])} alt={lbl}/><div className="foto-label">✓ {lbl}</div></>
                             : <><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="var(--mu)" strokeWidth="1.4"><rect x="1" y="4" width="18" height="13" rx="2"/><circle cx="10" cy="10.5" r="3"/><path d="M6.5 4V3a1 1 0 011-1h5a1 1 0 011 1v1"/></svg><span style={{fontSize:".7rem",marginTop:".3rem"}}>{lbl}</span><span style={{fontSize:".6rem",color:"var(--rd)"}}>Requerida</span></>}
@@ -2530,7 +2530,7 @@ function Dashboard({ session, onLogout }) {
                       <div style={{fontSize:".73rem",color:"var(--mu2)",marginBottom:".75rem"}}>Agrega al menos una foto del artículo.</div>
                       {wizItems.map((it,i)=>(
                         <div key={it.id} className="item-card">
-                          <label style={{width:56,height:56,borderRadius:8,border:`2px dashed ${it.foto?"rgba(34,211,160,.4)":"rgba(224,82,82,.35)"}`,background:"rgba(255,255,255,.02)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0,overflow:"hidden"}}>
+                          <label style={{width:56,height:56,borderRadius:8,border:`2px dashed ${it.foto?"rgba(20,184,166,.4)":"rgba(224,82,82,.35)"}`,background:"rgba(255,255,255,.02)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0,overflow:"hidden"}}>
                             {it.foto?<img src={URL.createObjectURL(it.foto)} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:6}}/>
                               :<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="var(--mu)" strokeWidth="1.4"><rect x="1" y="4" width="18" height="13" rx="2"/><circle cx="10" cy="10.5" r="3"/></svg>}
                             <input type="file" accept="image/*" style={{display:"none"}} onChange={e=>e.target.files[0]&&setWizItems(items=>items.map((x,xi)=>xi===i?{...x,foto:e.target.files[0]}:x))}/>
@@ -2573,8 +2573,8 @@ function Dashboard({ session, onLogout }) {
                       ].map(doc=>{
                         const adj = wizDocs.find(d=>d.key===doc.key);
                         return (
-                          <div key={doc.key} style={{display:"flex",alignItems:"center",gap:".75rem",padding:".6rem .85rem",background:adj?.archivo?"rgba(34,211,160,.04)":"rgba(255,255,255,.02)",border:`1px solid ${adj?.archivo?"rgba(34,211,160,.2)":"var(--b1)"}`,borderRadius:8,marginBottom:".4rem"}}>
-                            <div style={{width:28,height:28,borderRadius:6,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:adj?.archivo?"rgba(34,211,160,.1)":"var(--s3)"}}>
+                          <div key={doc.key} style={{display:"flex",alignItems:"center",gap:".75rem",padding:".6rem .85rem",background:adj?.archivo?"rgba(20,184,166,.04)":"rgba(255,255,255,.02)",border:`1px solid ${adj?.archivo?"rgba(20,184,166,.2)":"var(--b1)"}`,borderRadius:8,marginBottom:".4rem"}}>
+                            <div style={{width:28,height:28,borderRadius:6,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:adj?.archivo?"rgba(20,184,166,.1)":"var(--s3)"}}>
                               {adj?.archivo
                                 ? <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="var(--gr)" strokeWidth="2.2" strokeLinecap="round"><path d="M2 7l4 4 6-7"/></svg>
                                 : <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--mu)" strokeWidth="1.5" strokeLinecap="round"><path d="M4 2h6l3 3v9H4V2z"/><path d="M10 2v3h3"/></svg>}
@@ -2583,7 +2583,7 @@ function Dashboard({ session, onLogout }) {
                               <div style={{fontSize:".76rem",fontWeight:600,color:"var(--wh2)"}}>{doc.label}</div>
                               <div style={{fontSize:".63rem",color:"var(--mu)"}}>{adj?.archivo?<span style={{color:"var(--gr)"}}>✓ {adj.archivo.name}</span>:doc.desc}</div>
                             </div>
-                            <label style={{fontSize:".68rem",fontWeight:600,color:adj?.archivo?"var(--mu)":"var(--ac)",cursor:"pointer",whiteSpace:"nowrap",padding:".25rem .55rem",border:`1px solid ${adj?.archivo?"var(--b2)":"rgba(47,128,237,.3)"}`,borderRadius:6,background:adj?.archivo?"transparent":"rgba(47,128,237,.06)"}}>
+                            <label style={{fontSize:".68rem",fontWeight:600,color:adj?.archivo?"var(--mu)":"var(--ac)",cursor:"pointer",whiteSpace:"nowrap",padding:".25rem .55rem",border:`1px solid ${adj?.archivo?"var(--b2)":"rgba(56,178,246,.3)"}`,borderRadius:6,background:adj?.archivo?"transparent":"rgba(56,178,246,.06)"}}>
                               {adj?.archivo?"Cambiar":"+ Adjuntar"}
                               <input type="file" accept=".pdf,.jpg,.png" style={{display:"none"}} onChange={e=>e.target.files[0]&&setWizDocs(docs=>{const ex=docs.find(d=>d.key===doc.key);return ex?docs.map(d=>d.key===doc.key?{...d,archivo:e.target.files[0]}:d):[...docs,{id:Date.now(),key:doc.key,nombre:doc.label,archivo:e.target.files[0]}];})}/>
                             </label>
@@ -2607,7 +2607,7 @@ function Dashboard({ session, onLogout }) {
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M7 1v12M1 7h12"/></svg> Agregar documento / acta
                   </div>
                   {/* Resumen final */}
-                  <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"rgba(47,128,237,.05)",border:"1px solid rgba(47,128,237,.15)",borderRadius:9,fontSize:".73rem",color:"var(--mu2)",lineHeight:1.7}}>
+                  <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:9,fontSize:".73rem",color:"var(--mu2)",lineHeight:1.7}}>
                     <div style={{fontWeight:700,color:"var(--wh2)",marginBottom:".3rem"}}>Resumen del lote</div>
                     <div>📦 <strong style={{color:"var(--wh2)"}}>{wizDatos.nombre||"—"}</strong> · {wizTipo||"—"} · Com. <strong style={{color:"var(--ac)"}}>{loteForm.comCustom||COMISIONES[loteForm.tipoRemate]?.com||"?"}%</strong></div>
                     <div>📸 {wizTipo==="VEHICULOS"?`${Object.values(wizFotos).filter(Boolean).length}/4 fotos`:`${wizItems.filter(x=>x.foto).length} foto(s)`} · 📄 {wizDocs.filter(d=>d.archivo).length} doc(s) adjunto(s)</div>
@@ -2617,7 +2617,7 @@ function Dashboard({ session, onLogout }) {
             </>}
             {modal==="nuevo-postor" && <>
               <div className="modal-title">Registrar postor</div>
-              <div style={{padding:".55rem .85rem",background:"rgba(47,128,237,.07)",border:"1px solid rgba(47,128,237,.2)",borderRadius:7,fontSize:".74rem",color:"var(--mu2)",marginBottom:".9rem",lineHeight:1.55}}>
+              <div style={{padding:".55rem .85rem",background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.2)",borderRadius:7,fontSize:".74rem",color:"var(--mu2)",marginBottom:".9rem",lineHeight:1.55}}>
                 Al registrarse se asignará un <strong style={{color:"var(--wh2)"}}>N° de comprador</strong> automáticamente.
               </div>
               <div className="form-grid">
@@ -2640,7 +2640,7 @@ function Dashboard({ session, onLogout }) {
                   </select>
                 </div>
                 <div className="fg full"><label className="fl">N° comprador asignado</label>
-                  <div className="fi" style={{fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--ac)",background:"rgba(47,128,237,.07)",border:"1px solid rgba(47,128,237,.25)",display:"flex",alignItems:"center"}}>
+                  <div className="fi" style={{fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--ac)",background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.25)",display:"flex",alignItems:"center"}}>
                     #{String((dbPostores.length||POSTORES_MERGED.length)+1).padStart(2,"0")} — asignado automáticamente
                   </div>
                 </div>
@@ -2795,7 +2795,7 @@ function Dashboard({ session, onLogout }) {
         ].map(n => (
           <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>setPage(n.id)}>
             <span className="sb-icon"><Icon name={n.icon}/></span>{n.label}
-            {n.badge ? <span className="sb-badge" style={{background:"var(--yl)",color:"#0b1f38"}}>{n.badge}</span> : null}
+            {n.badge ? <span className="sb-badge" style={{background:"var(--yl)",color:"#1F2937"}}>{n.badge}</span> : null}
           </div>
         ))}
 
@@ -2845,8 +2845,8 @@ function Dashboard({ session, onLogout }) {
               <div className="sb-uname">{session?.name||"Usuario"}</div>
               <div className="sb-urole">{session?.casaNombre||"GR Auction Software"}</div>
             </div>
-            <button title="Cerrar sesion" onClick={onLogout} style={{background:"transparent",border:"none",cursor:"pointer",color:"#2a4a6a",padding:".2rem",borderRadius:4,flexShrink:0,transition:"color .15s"}}
-              onMouseEnter={e=>e.target.style.color="#e05252"} onMouseLeave={e=>e.target.style.color="#2a4a6a"}>
+            <button title="Cerrar sesion" onClick={onLogout} style={{background:"transparent",border:"none",cursor:"pointer",color:"#364d70",padding:".2rem",borderRadius:4,flexShrink:0,transition:"color .15s"}}
+              onMouseEnter={e=>e.target.style.color="#e05252"} onMouseLeave={e=>e.target.style.color="#364d70"}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M5 2H2v10h3M9 10l3-3-3-3M12 7H5"/></svg>
             </button>
           </div>
@@ -2972,10 +2972,10 @@ function Dashboard({ session, onLogout }) {
             {/* Acciones rápidas */}
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"1rem",marginBottom:"1.5rem"}}>
               {[
-                {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#2F80ED" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="3" width="18" height="16" rx="3"/><path d="M7 3v3M15 3v3M2 9h18"/><path d="M11 13v4M9 15h4"/></svg>,
-                 label:"Nuevo remate", sub:"Crear y configurar", action:()=>setModal("nuevo-remate"), color:"rgba(47,128,237,.1)", border:"rgba(47,128,237,.2)"},
-                {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#22d3a0" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="2" width="16" height="18" rx="2"/><path d="M7 7h8M7 11h8M7 15h4"/><path d="M17 15v4M15 17h4"/></svg>,
-                 label:"Agregar lote", sub:"Ingresar artículo", action:()=>setModal("nuevo-lote"), color:"rgba(34,211,160,.08)", border:"rgba(34,211,160,.2)"},
+                {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#38B2F6" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="3" width="18" height="16" rx="3"/><path d="M7 3v3M15 3v3M2 9h18"/><path d="M11 13v4M9 15h4"/></svg>,
+                 label:"Nuevo remate", sub:"Crear y configurar", action:()=>setModal("nuevo-remate"), color:"rgba(56,178,246,.1)", border:"rgba(56,178,246,.2)"},
+                {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#14B8A6" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="2" width="16" height="18" rx="2"/><path d="M7 7h8M7 11h8M7 15h4"/><path d="M17 15v4M15 17h4"/></svg>,
+                 label:"Agregar lote", sub:"Ingresar artículo", action:()=>setModal("nuevo-lote"), color:"rgba(20,184,166,.08)", border:"rgba(20,184,166,.2)"},
                 {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#f6ad55" strokeWidth="1.8" strokeLinecap="round"><circle cx="9" cy="7" r="4"/><path d="M2 19c0-4 3-6 7-6s7 2 7 6"/><path d="M17 10v4M15 12h4"/></svg>,
                  label:"Registrar postor", sub:"Inscribir comprador", action:()=>setModal("nuevo-postor"), color:"rgba(246,173,85,.08)", border:"rgba(246,173,85,.2)"},
               ].map((a,i)=>(
@@ -3001,7 +3001,7 @@ function Dashboard({ session, onLogout }) {
                 </div>
               ) : REMATES_MERGED.filter(r=>r.estado==="activo").map(r=>(
                 <div key={r.id} style={{display:"flex",alignItems:"center",gap:"1rem",padding:".85rem 1.1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,cursor:"pointer",transition:"border-color .15s"}}
-                  onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(47,128,237,.3)"}
+                  onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(56,178,246,.3)"}
                   onMouseLeave={e=>e.currentTarget.style.borderColor="var(--b1)"}>
                   <div style={{width:8,height:8,borderRadius:"50%",background:"var(--gr)",flexShrink:0,boxShadow:"0 0 6px var(--gr)"}}/>
                   <div style={{flex:1,minWidth:0}}>
@@ -3051,7 +3051,7 @@ function Dashboard({ session, onLogout }) {
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--yl)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M7 6v4M7 4.5v.01"/></svg>
                   <span>Vista admin — ves todos los remates de todos los clientes. Lo ideal es que <strong style={{color:"var(--wh2)"}}>cada casa de remates cree y gestione los suyos</strong> desde su propio acceso.</span>
                 </div>
-              : <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".7rem 1rem",background:"rgba(47,128,237,.05)",border:"1px solid rgba(47,128,237,.15)",borderRadius:8,fontSize:".74rem",color:"var(--mu2)"}}>
+              : <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".7rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:8,fontSize:".74rem",color:"var(--mu2)"}}>
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M7 6v4M7 4.5v.01"/></svg>
                   <span>Solo ves los remates de <strong style={{color:"var(--wh2)"}}>{session?.casaNombre}</strong>. Crea y gestiona tus propios remates desde aquí.</span>
                 </div>
@@ -3110,7 +3110,7 @@ function Dashboard({ session, onLogout }) {
                             }}>Abrir sala</button>
                           )}
                           {(r.estado==="finalizado"||r.estado==="cerrado") && (
-                            <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap",color:"var(--gr)",border:"1px solid rgba(34,211,160,.25)"}}
+                            <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap",color:"var(--gr)",border:"1px solid rgba(20,184,166,.25)"}}
                               onClick={()=>{ setSelectedRemate(r.id||r.supabaseId); setPage("liquidac"); }}>
                               Ver liquidaciones
                             </button>
@@ -3254,7 +3254,7 @@ function Dashboard({ session, onLogout }) {
                       <td>
                         <div style={{display:"flex",gap:".35rem"}}>
                           {p.estado==="pendiente" && p.supabaseId && (
-                            <button className="btn-confirm" style={{fontSize:".65rem",padding:".22rem .55rem",background:"rgba(34,211,160,.1)",color:"var(--gr)",border:"1px solid rgba(34,211,160,.25)"}}
+                            <button className="btn-confirm" style={{fontSize:".65rem",padding:".22rem .55rem",background:"rgba(20,184,166,.1)",color:"var(--gr)",border:"1px solid rgba(20,184,166,.25)"}}
                               onClick={async()=>{
                                 const {error} = await supabase.from("postores").update({estado:"verificado"}).eq("id",p.supabaseId);
                                 if(!error){ const {data} = await supabase.from("postores").select("*").order("numero"); if(data) setDbPostores(data); notify(`${p.name} verificado.`,"sold"); }
@@ -3377,7 +3377,7 @@ function Dashboard({ session, onLogout }) {
                         {tramosArr.map((t,i)=>(
                           <tr key={i} style={{borderBottom:"1px solid var(--b1)"}}>
                             <td style={{padding:".55rem .75rem"}}>
-                              <span style={{padding:".15rem .5rem",background:"rgba(47,128,237,.1)",border:"1px solid rgba(47,128,237,.2)",borderRadius:5,fontFamily:"DM Mono,monospace",fontSize:".72rem",fontWeight:700,color:"var(--ac)"}}>{t.pct}%</span>
+                              <span style={{padding:".15rem .5rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:5,fontFamily:"DM Mono,monospace",fontSize:".72rem",fontWeight:700,color:"var(--ac)"}}>{t.pct}%</span>
                             </td>
                             <td style={{padding:".55rem .75rem",textAlign:"center",fontFamily:"DM Mono,monospace",fontSize:".76rem",color:"var(--mu2)"}}>{t.lotes.length}</td>
                             <td style={{padding:".55rem .75rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontSize:".73rem",color:"var(--wh2)"}}>{fmt(t.subtotalMonto)}</td>
@@ -3422,7 +3422,7 @@ function Dashboard({ session, onLogout }) {
                     </table>
 
                     {/* Ingreso neto empresa — resultado final */}
-                    <div style={{margin:"1rem",padding:".85rem 1rem",background:"rgba(47,128,237,.07)",border:"1px solid rgba(47,128,237,.2)",borderRadius:9}}>
+                    <div style={{margin:"1rem",padding:".85rem 1rem",background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.2)",borderRadius:9}}>
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                         <div>
                           <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".2rem"}}>Ingreso neto empresa</div>
@@ -3453,7 +3453,7 @@ function Dashboard({ session, onLogout }) {
                       <tr key={i}>
                         <td>
                           <div style={{display:"flex",alignItems:"center",gap:".4rem"}}>
-                            <div style={{width:22,height:22,borderRadius:5,background:"rgba(47,128,237,.1)",border:"1px solid rgba(47,128,237,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"DM Mono,monospace",fontSize:".6rem",fontWeight:800,color:"var(--ac)",flexShrink:0}}>
+                            <div style={{width:22,height:22,borderRadius:5,background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"DM Mono,monospace",fontSize:".6rem",fontWeight:800,color:"var(--ac)",flexShrink:0}}>
                               {String(postorD?.nComprador||"?").padStart(2,"0")}
                             </div>
                             <span style={{fontSize:".76rem",fontWeight:600}}>{a.postor}</span>
@@ -3461,7 +3461,7 @@ function Dashboard({ session, onLogout }) {
                         </td>
                         <td style={{fontSize:".73rem",color:"var(--mu2)"}}>{a.lote}</td>
                         <td>
-                          {loteR?.tipoRemate && <span className="pill" style={{fontSize:".6rem",background:"rgba(47,128,237,.08)",color:"var(--ac)",border:"1px solid rgba(47,128,237,.2)"}}>{COMISIONES[loteR.tipoRemate]?.label||loteR.tipoRemate}</span>}
+                          {loteR?.tipoRemate && <span className="pill" style={{fontSize:".6rem",background:"rgba(56,178,246,.08)",color:"var(--ac)",border:"1px solid rgba(56,178,246,.2)"}}>{COMISIONES[loteR.tipoRemate]?.label||loteR.tipoRemate}</span>}
                         </td>
                         <td className="gt">{fmt(a.monto||0)}</td>
                         <td style={{fontFamily:"DM Mono,monospace",fontSize:".73rem",fontWeight:700,color:"var(--ac)",textAlign:"center"}}>{a.comPct??3}%</td>
@@ -3517,7 +3517,7 @@ function Dashboard({ session, onLogout }) {
           return (
             <div className="page">
               {/* Selector de remate */}
-              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".7rem 1rem",background:"rgba(47,128,237,.05)",border:"1px solid rgba(47,128,237,.15)",borderRadius:9}}>
+              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".7rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:9}}>
                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="13" height="11" rx="2"/><path d="M1 6h13M5 2v4M10 2v4"/></svg>
                 <span style={{fontSize:".75rem",fontWeight:600,color:"var(--mu2)",whiteSpace:"nowrap"}}>Remate:</span>
                 <select className="fsel" style={{flex:1,maxWidth:340}} value={retiroFiltroRemate||""} onChange={e=>setRetiroFiltroRemate(e.target.value||null)}>
@@ -3573,13 +3573,13 @@ function Dashboard({ session, onLogout }) {
                           <td style={{maxWidth:200,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.lote}</td>
                           <td className="gt">{fmt(r.monto||0)}</td>
                           <td>
-                            <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .45rem",borderRadius:5,background:r.pagado?"rgba(34,211,160,.1)":"rgba(246,173,85,.1)",color:r.pagado?"var(--gr)":"var(--yl)"}}>
+                            <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .45rem",borderRadius:5,background:r.pagado?"rgba(20,184,166,.1)":"rgba(246,173,85,.1)",color:r.pagado?"var(--gr)":"var(--yl)"}}>
                               {r.pagado?"✓ Pagado":"Pendiente"}
                             </span>
                           </td>
                           <td>
                             {r.estado==="retirado"
-                              ? <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .45rem",borderRadius:5,background:"rgba(34,211,160,.1)",color:"var(--gr)"}}>
+                              ? <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .45rem",borderRadius:5,background:"rgba(20,184,166,.1)",color:"var(--gr)"}}>
                                   ✓ Retirado {r.fechaRetiro&&<span style={{color:"var(--mu)",fontWeight:400}}>· {r.fechaRetiro}</span>}
                                 </span>
                               : <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .45rem",borderRadius:5,background:"rgba(246,173,85,.1)",color:"var(--yl)"}}>
@@ -3589,7 +3589,7 @@ function Dashboard({ session, onLogout }) {
                           </td>
                           <td>
                             {r.estado==="pendiente" ? (
-                              <button className="btn-confirm" style={{fontSize:".68rem",padding:".28rem .65rem",background:"rgba(34,211,160,.12)",color:"var(--gr)",border:"1px solid rgba(34,211,160,.3)"}}
+                              <button className="btn-confirm" style={{fontSize:".68rem",padding:".28rem .65rem",background:"rgba(20,184,166,.12)",color:"var(--gr)",border:"1px solid rgba(20,184,166,.3)"}}
                                 onClick={()=>{
                                   const fecha = new Date().toLocaleDateString("es-CL");
                                   setLiquidaciones(prev=>prev.map(l=>l.id===r.id?{...l,retiro:fecha}:l));
@@ -3626,7 +3626,7 @@ function Dashboard({ session, onLogout }) {
           const BannerRemate = () => {
             const cerrados = REMATES_MERGED.filter(r => r.estado === "cerrado");
             return (
-              <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
+              <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",padding:".75rem 1rem",background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.18)",borderRadius:9}}>
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
                 <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
                 <select value={selectedRemate||""} onChange={e=>setSelectedRemate(e.target.value||null)}
@@ -3770,7 +3770,7 @@ function Dashboard({ session, onLogout }) {
                   </div>
 
                   {vd && (
-                    <div style={{padding:".65rem .85rem",background:"rgba(47,128,237,.05)",border:"1px solid rgba(47,128,237,.15)",borderRadius:8,marginBottom:".85rem",fontSize:".72rem",color:"var(--mu2)",lineHeight:1.8}}>
+                    <div style={{padding:".65rem .85rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:8,marginBottom:".85rem",fontSize:".72rem",color:"var(--mu2)",lineHeight:1.8}}>
                       <div><strong style={{color:"var(--wh2)"}}>RUT:</strong> {vd.rut}</div>
                       <div><strong style={{color:"var(--wh2)"}}>Giro:</strong> {vd.giro}</div>
                       <div><strong style={{color:"var(--wh2)"}}>Dirección:</strong> {vd.direccion}, {vd.comuna}</div>
@@ -3836,7 +3836,7 @@ function Dashboard({ session, onLogout }) {
                               <span style={{fontFamily:"DM Mono,monospace",fontSize:".76rem",color:"var(--gr)",fontWeight:700}}>{fmt(a.monto||0)}</span>
                             </div>
                           ))}
-                        <div style={{display:"flex",justifyContent:"space-between",padding:".5rem .85rem",background:"rgba(34,211,160,.05)"}}>
+                        <div style={{display:"flex",justifyContent:"space-between",padding:".5rem .85rem",background:"rgba(20,184,166,.05)"}}>
                           <span style={{fontSize:".72rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase"}}>Total ventas</span>
                           <span style={{fontFamily:"DM Mono,monospace",fontWeight:800,color:"var(--gr)"}}>{fmt(totalVentas)}</span>
                         </div>
@@ -3863,7 +3863,7 @@ function Dashboard({ session, onLogout }) {
                       </div>
 
                       {/* Líquido a pagar */}
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"1rem 1.1rem",background:"rgba(47,128,237,.07)",border:"1px solid rgba(47,128,237,.2)",borderRadius:9}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"1rem 1.1rem",background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.2)",borderRadius:9}}>
                         <div>
                           <div style={{fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".2rem"}}>Líquido a pagar al vendedor</div>
                           <div style={{fontSize:".68rem",color:"var(--mu)"}}>Ventas − comisiones − IVA</div>
@@ -4008,7 +4008,7 @@ function Dashboard({ session, onLogout }) {
                           <div key={i}>
                             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:".3rem"}}>
                               <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
-                                <div style={{width:22,height:22,borderRadius:6,background:i===0?"rgba(246,173,85,.15)":i===1?"rgba(47,128,237,.1)":"rgba(255,255,255,.05)",border:`1px solid ${i===0?"rgba(246,173,85,.3)":i===1?"rgba(47,128,237,.25)":"var(--b1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".65rem",fontWeight:800,color:i===0?"var(--yl)":i===1?"var(--ac)":"var(--mu)",flexShrink:0}}>
+                                <div style={{width:22,height:22,borderRadius:6,background:i===0?"rgba(246,173,85,.15)":i===1?"rgba(56,178,246,.1)":"rgba(255,255,255,.05)",border:`1px solid ${i===0?"rgba(246,173,85,.3)":i===1?"rgba(56,178,246,.25)":"var(--b1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".65rem",fontWeight:800,color:i===0?"var(--yl)":i===1?"var(--ac)":"var(--mu)",flexShrink:0}}>
                                   {i+1}
                                 </div>
                                 <div>
@@ -4063,7 +4063,7 @@ function Dashboard({ session, onLogout }) {
                   <BarChart data={VENTAS_MES} barSize={18}>
                     <XAxis dataKey="mes" tick={{fontFamily:"Inter",fontSize:9,fill:"#5a7fa8"}} axisLine={false} tickLine={false}/>
                     <YAxis hide/><Tooltip content={<CustomTooltip/>}/>
-                    <Bar dataKey="v" fill="#2F80ED" radius={[4,4,0,0]}/>
+                    <Bar dataKey="v" fill="#38B2F6" radius={[4,4,0,0]}/>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -4149,7 +4149,7 @@ function Dashboard({ session, onLogout }) {
 
                   {/* Header con selector */}
                   <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",paddingBottom:".8rem",borderBottom:"1px solid var(--b1)"}}>
-                    <div style={{width:28,height:28,borderRadius:7,background:"rgba(47,128,237,.12)",border:"1px solid rgba(47,128,237,.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <div style={{width:28,height:28,borderRadius:7,background:"rgba(56,178,246,.12)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                       <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><path d="M3 13V7M8 13V3M13 13V9"/></svg>
                     </div>
                     <div style={{flex:1}}>
@@ -4164,7 +4164,7 @@ function Dashboard({ session, onLogout }) {
                       <option value="">— Vista general —</option>
                       {stats.map(s=><option key={s.casa} value={s.casa}>{s.casa}</option>)}
                     </select>
-                    <span style={{fontSize:".65rem",padding:".2rem .55rem",background:"rgba(47,128,237,.1)",border:"1px solid rgba(47,128,237,.2)",borderRadius:4,color:"var(--ac)",fontWeight:700,letterSpacing:".05em",flexShrink:0}}>ADMIN</span>
+                    <span style={{fontSize:".65rem",padding:".2rem .55rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:4,color:"var(--ac)",fontWeight:700,letterSpacing:".05em",flexShrink:0}}>ADMIN</span>
                   </div>
 
                   {/* ── Vista general: ranking ── */}
@@ -4174,7 +4174,7 @@ function Dashboard({ session, onLogout }) {
                         <div key={s.casa}
                           onClick={()=>setAdminClienteSel(s.casa)}
                           style={{background:"var(--s2)",border:`1px solid ${adminClienteSel===s.casa?"var(--ac)":"var(--b1)"}`,borderRadius:11,padding:"1rem 1.2rem",position:"relative",overflow:"hidden",cursor:"pointer",transition:"border .15s"}}>
-                          <div style={{position:"absolute",top:0,left:0,height:"100%",width:`${Math.round(s.totalVendido/maxVendido*100)}%`,background:"rgba(47,128,237,.04)",borderRight:"1px solid rgba(47,128,237,.08)",pointerEvents:"none"}}/>
+                          <div style={{position:"absolute",top:0,left:0,height:"100%",width:`${Math.round(s.totalVendido/maxVendido*100)}%`,background:"rgba(56,178,246,.04)",borderRight:"1px solid rgba(56,178,246,.08)",pointerEvents:"none"}}/>
                           <div style={{display:"flex",alignItems:"center",gap:"1rem",position:"relative"}}>
                             <div style={{width:32,height:32,borderRadius:8,background:i===0?"rgba(246,173,85,.15)":"rgba(255,255,255,.04)",border:`1px solid ${i===0?"rgba(246,173,85,.3)":"var(--b2)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                               <span style={{fontSize:".9rem",fontWeight:900,color:i===0?"var(--yl)":"var(--mu2)"}}>#{i+1}</span>
@@ -4256,7 +4256,7 @@ function Dashboard({ session, onLogout }) {
                         </table>
                       </div>
 
-                      <div style={{marginTop:".75rem",padding:".6rem .9rem",background:"rgba(47,128,237,.04)",border:"1px solid rgba(47,128,237,.1)",borderRadius:7,fontSize:".7rem",color:"var(--mu)",lineHeight:1.6}}>
+                      <div style={{marginTop:".75rem",padding:".6rem .9rem",background:"rgba(56,178,246,.04)",border:"1px solid rgba(56,178,246,.1)",borderRadius:7,fontSize:".7rem",color:"var(--mu)",lineHeight:1.6}}>
                         Datos basados en remates registrados. En producción con Supabase se calcularán en tiempo real con historial completo.
                       </div>
                     </div>
@@ -4326,8 +4326,8 @@ function Dashboard({ session, onLogout }) {
 
           const ROLE_COLOR = {
             "admin":        {bg:"rgba(224,82,82,.12)",  color:"#e05252", border:"rgba(224,82,82,.25)"},
-            "martillero":   {bg:"rgba(47,128,237,.12)", color:"#2F80ED", border:"rgba(47,128,237,.25)"},
-            "postremate":   {bg:"rgba(34,211,160,.1)",  color:"#22d3a0", border:"rgba(34,211,160,.25)"},
+            "martillero":   {bg:"rgba(56,178,246,.12)", color:"#38B2F6", border:"rgba(56,178,246,.25)"},
+            "postremate":   {bg:"rgba(20,184,166,.1)",  color:"#14B8A6", border:"rgba(20,184,166,.25)"},
             "garantias":    {bg:"rgba(246,173,85,.12)", color:"#f6ad55", border:"rgba(246,173,85,.25)"},
             "solo lectura": {bg:"rgba(255,255,255,.06)",color:"#5a7fa8", border:"rgba(255,255,255,.1)"},
           };
@@ -4373,7 +4373,7 @@ function Dashboard({ session, onLogout }) {
                           </div>
                         </td>
                         <td style={{padding:".65rem .9rem"}}>
-                          <div onClick={()=>toggleActivo(u.id)} style={{display:"inline-flex",alignItems:"center",gap:".35rem",cursor:"pointer",padding:".2rem .5rem",borderRadius:5,background:u.activo?"rgba(34,211,160,.08)":"rgba(255,255,255,.04)",border:`1px solid ${u.activo?"rgba(34,211,160,.2)":"var(--b2)"}`,transition:"all .15s"}}>
+                          <div onClick={()=>toggleActivo(u.id)} style={{display:"inline-flex",alignItems:"center",gap:".35rem",cursor:"pointer",padding:".2rem .5rem",borderRadius:5,background:u.activo?"rgba(20,184,166,.08)":"rgba(255,255,255,.04)",border:`1px solid ${u.activo?"rgba(20,184,166,.2)":"var(--b2)"}`,transition:"all .15s"}}>
                             <div style={{width:7,height:7,borderRadius:"50%",background:u.activo?"var(--gr)":"var(--mu)",transition:"background .15s"}}/>
                             <span style={{fontSize:".65rem",fontWeight:700,color:u.activo?"var(--gr)":"var(--mu)"}}>{u.activo?"Activo":"Inactivo"}</span>
                           </div>
@@ -4480,12 +4480,12 @@ function Dashboard({ session, onLogout }) {
         {page==="licencias" && session?.role==="admin" && (()=>{
           const PLANES = {
             trial:      {label:"Trial",       color:"#f6ad55", bg:"rgba(246,173,85,.1)",   dias:30,  precio:"Gratis"},
-            basico:     {label:"Básico",      color:"#2F80ED", bg:"rgba(47,128,237,.1)",   dias:365, precio:"$29.990/mes"},
-            profesional:{label:"Profesional", color:"#22d3a0", bg:"rgba(34,211,160,.1)",   dias:365, precio:"$59.990/mes"},
+            basico:     {label:"Básico",      color:"#38B2F6", bg:"rgba(56,178,246,.1)",   dias:365, precio:"$29.990/mes"},
+            profesional:{label:"Profesional", color:"#14B8A6", bg:"rgba(20,184,166,.1)",   dias:365, precio:"$59.990/mes"},
             enterprise: {label:"Enterprise",  color:"#a78bfa", bg:"rgba(167,139,250,.1)",  dias:365, precio:"A convenir"},
           };
           const ESTADOS = {
-            activo:     {label:"Activo",      color:"var(--gr)", bg:"rgba(34,211,160,.1)"},
+            activo:     {label:"Activo",      color:"var(--gr)", bg:"rgba(20,184,166,.1)"},
             suspendido: {label:"Suspendido",  color:"var(--yl)", bg:"rgba(246,173,85,.1)"},
             bloqueado:  {label:"Bloqueado",   color:"var(--rd)", bg:"rgba(224,82,82,.1)"},
           };
@@ -4563,7 +4563,7 @@ function Dashboard({ session, onLogout }) {
                         {/* Botones de control */}
                         <div style={{display:"flex",gap:".4rem",flexWrap:"wrap",justifyContent:"flex-end"}}>
                           {casa.licencia_estado !== "activo" && (
-                            <button className="btn-confirm" style={{fontSize:".68rem",padding:".3rem .7rem",background:"rgba(34,211,160,.12)",color:"var(--gr)",border:"1px solid rgba(34,211,160,.3)"}}
+                            <button className="btn-confirm" style={{fontSize:".68rem",padding:".3rem .7rem",background:"rgba(20,184,166,.12)",color:"var(--gr)",border:"1px solid rgba(20,184,166,.3)"}}
                               onClick={()=>actualizarLicencia(casa.id,"activo")}>
                               ✓ Activar
                             </button>
@@ -4660,7 +4660,7 @@ function Dashboard({ session, onLogout }) {
                   <div key={casa.id} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,overflow:"hidden"}}>
                     {/* Header casa */}
                     <div style={{display:"flex",alignItems:"center",gap:"1rem",padding:"1rem 1.2rem",borderBottom:"1px solid var(--b1)"}}>
-                      <div style={{width:40,height:40,borderRadius:10,background:"rgba(47,128,237,.1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                      <div style={{width:40,height:40,borderRadius:10,background:"rgba(56,178,246,.1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><path d="M2 16V8l7-6 7 6v8"/><path d="M7 16v-5h4v5"/></svg>
                       </div>
                       <div style={{flex:1}}>
@@ -4668,7 +4668,7 @@ function Dashboard({ session, onLogout }) {
                         <div style={{fontSize:".7rem",color:"var(--mu2)",marginTop:".1rem",fontFamily:"DM Mono,monospace"}}>slug: {casa.slug}</div>
                       </div>
                       <span style={{fontSize:".65rem",fontWeight:700,padding:".2rem .55rem",borderRadius:20,
-                        background:casa.licencia_estado==="activo"?"rgba(34,211,160,.1)":casa.licencia_estado==="suspendido"?"rgba(246,173,85,.1)":"rgba(255,255,255,.04)",
+                        background:casa.licencia_estado==="activo"?"rgba(20,184,166,.1)":casa.licencia_estado==="suspendido"?"rgba(246,173,85,.1)":"rgba(255,255,255,.04)",
                         color:casa.licencia_estado==="activo"?"var(--gr)":casa.licencia_estado==="suspendido"?"var(--yl)":"var(--mu)"}}>
                         {casa.licencia_estado||"trial"}
                       </span>
@@ -4677,7 +4677,7 @@ function Dashboard({ session, onLogout }) {
                     {/* Links */}
                     <div style={{padding:"1rem 1.2rem",display:"flex",flexDirection:"column",gap:".65rem"}}>
                       {/* Link inscripción */}
-                      <div style={{display:"flex",alignItems:"center",gap:".75rem",padding:".65rem .9rem",background:"rgba(47,128,237,.05)",border:"1px solid rgba(47,128,237,.15)",borderRadius:8}}>
+                      <div style={{display:"flex",alignItems:"center",gap:".75rem",padding:".65rem .9rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:8}}>
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M4 7h6M7 4l3 3-3 3"/></svg>
                         <div style={{flex:1,minWidth:0}}>
                           <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".15rem"}}>Página de inscripción pública</div>
@@ -4694,7 +4694,7 @@ function Dashboard({ session, onLogout }) {
                       </div>
 
                       {/* Link display */}
-                      <div style={{display:"flex",alignItems:"center",gap:".75rem",padding:".65rem .9rem",background:"rgba(34,211,160,.04)",border:"1px solid rgba(34,211,160,.15)",borderRadius:8}}>
+                      <div style={{display:"flex",alignItems:"center",gap:".75rem",padding:".65rem .9rem",background:"rgba(20,184,166,.04)",border:"1px solid rgba(20,184,166,.15)",borderRadius:8}}>
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--gr)" strokeWidth="1.8" strokeLinecap="round"><rect x="1" y="2" width="12" height="9" rx="2"/><path d="M5 13h4M7 11v2"/></svg>
                         <div style={{flex:1,minWidth:0}}>
                           <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".15rem"}}>Pantalla sala / display</div>
@@ -4762,7 +4762,7 @@ function Dashboard({ session, onLogout }) {
                           onChange={e=>setCasaForm(f=>({...f,direccion:e.target.value}))}/>
                       </div>
                     </div>
-                    <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"rgba(47,128,237,.05)",border:"1px solid rgba(47,128,237,.15)",borderRadius:9,fontSize:".73rem",color:"var(--mu2)",lineHeight:1.6}}>
+                    <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:9,fontSize:".73rem",color:"var(--mu2)",lineHeight:1.6}}>
                       Al crear la casa se generan automáticamente los links de <strong style={{color:"var(--wh2)"}}>inscripción pública</strong> y <strong style={{color:"var(--wh2)"}}>pantalla de sala</strong>. La licencia parte en modo <strong style={{color:"var(--yl)"}}>Trial (30 días)</strong>.
                     </div>
                     <div className="modal-actions">
@@ -4788,7 +4788,7 @@ function Dashboard({ session, onLogout }) {
                 {label:"Inscripción pública de postores", url:`https://gestionderemates.cl/participar/${session?.casa||"rematesahumada"}`, color:"var(--ac)", icon:<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M4 7h6M7 4l3 3-3 3"/></svg>},
                 {label:"Pantalla de sala (proyector)", url:`https://gestionderemates.cl/display/${session?.casa||"rematesahumada"}`, color:"var(--gr)", icon:<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="1" y="2" width="12" height="9" rx="2"/><path d="M5 13h4M7 11v2"/></svg>},
               ].map((l,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"center",gap:".75rem",padding:".65rem .9rem",background:i===0?"rgba(47,128,237,.05)":"rgba(34,211,160,.04)",border:`1px solid ${i===0?"rgba(47,128,237,.15)":"rgba(34,211,160,.15)"}`,borderRadius:8,marginBottom:".6rem"}}>
+                <div key={i} style={{display:"flex",alignItems:"center",gap:".75rem",padding:".65rem .9rem",background:i===0?"rgba(56,178,246,.05)":"rgba(20,184,166,.04)",border:`1px solid ${i===0?"rgba(56,178,246,.15)":"rgba(20,184,166,.15)"}`,borderRadius:8,marginBottom:".6rem"}}>
                   <span style={{color:l.color,flexShrink:0}}>{l.icon}</span>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".15rem"}}>{l.label}</div>
@@ -4923,8 +4923,8 @@ function Dashboard({ session, onLogout }) {
           const devBadge = (d) => {
             if(d==="N/A")       return {label:"Sin garantía", bg:"rgba(255,255,255,.04)", color:"var(--mu)"};
             if(d==="pendiente") return {label:"Pendiente",    bg:"rgba(246,173,85,.1)",   color:"var(--yl)"};
-            if(d==="cheque")    return {label:"Cheque",       bg:"rgba(34,211,160,.1)",   color:"var(--gr)"};
-            if(d==="efectivo")  return {label:"Efectivo",     bg:"rgba(34,211,160,.1)",   color:"var(--gr)"};
+            if(d==="cheque")    return {label:"Cheque",       bg:"rgba(20,184,166,.1)",   color:"var(--gr)"};
+            if(d==="efectivo")  return {label:"Efectivo",     bg:"rgba(20,184,166,.1)",   color:"var(--gr)"};
             return                     {label:d,              bg:"rgba(255,255,255,.04)", color:"var(--mu)"};
           };
 
@@ -4944,7 +4944,7 @@ function Dashboard({ session, onLogout }) {
           return (
             <div className="page">
               {/* Banner selector remate */}
-              <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
+              <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",padding:".75rem 1rem",background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.18)",borderRadius:9}}>
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
                 <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
                 <select value={selectedRemate||""} onChange={e=>setSelectedRemate(e.target.value||null)}
@@ -4975,7 +4975,7 @@ function Dashboard({ session, onLogout }) {
               {/* ── 1. Listado Compradores ── */}
               <div style={{marginBottom:"1.5rem"}}>
                 <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:".75rem"}}>
-                  <div style={{width:22,height:22,borderRadius:5,background:"rgba(47,128,237,.15)",border:"1px solid rgba(47,128,237,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:800,color:"var(--ac)"}}>1</div>
+                  <div style={{width:22,height:22,borderRadius:5,background:"rgba(56,178,246,.15)",border:"1px solid rgba(56,178,246,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:800,color:"var(--ac)"}}>1</div>
                   <span style={{fontSize:".85rem",fontWeight:800,color:"var(--wh2)"}}>Listado Compradores</span>
                   <span style={{fontSize:".7rem",color:"var(--mu2)",marginLeft:"auto"}}>{COMPRADORES_REMATE.length} compradores</span>
                 </div>
@@ -4997,7 +4997,7 @@ function Dashboard({ session, onLogout }) {
                           <td style={{padding:".6rem .9rem",fontSize:".72rem",color:"var(--mu2)"}}>{c.formaPago}</td>
                           <td style={{padding:".6rem .9rem"}}>
                             {c.pagado
-                              ? <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .45rem",borderRadius:4,background:"rgba(34,211,160,.1)",color:"var(--gr)",border:"1px solid rgba(34,211,160,.2)"}}>Pagado</span>
+                              ? <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .45rem",borderRadius:4,background:"rgba(20,184,166,.1)",color:"var(--gr)",border:"1px solid rgba(20,184,166,.2)"}}>Pagado</span>
                               : <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .45rem",borderRadius:4,background:"rgba(246,173,85,.1)",color:"var(--yl)",border:"1px solid rgba(246,173,85,.2)"}}>Saldo pendiente</span>
                             }
                           </td>
@@ -5072,7 +5072,7 @@ function Dashboard({ session, onLogout }) {
                               )}
                               {(c.devolucion==="cheque"||c.devolucion==="efectivo"||c.devolucion==="transferencia") && (
                                 <div style={{display:"flex",alignItems:"center",gap:".4rem"}}>
-                                  <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .5rem",borderRadius:4,background:"rgba(34,211,160,.1)",color:"var(--gr)",border:"1px solid rgba(34,211,160,.25)"}}>
+                                  <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .5rem",borderRadius:4,background:"rgba(20,184,166,.1)",color:"var(--gr)",border:"1px solid rgba(20,184,166,.25)"}}>
                                     ✓ {c.devolucion.toUpperCase()}
                                   </span>
                                   <button style={{fontSize:".6rem",padding:".1rem .35rem",background:"transparent",border:"1px solid var(--b2)",borderRadius:4,color:"var(--mu)",cursor:"pointer"}}
@@ -5108,7 +5108,7 @@ function Dashboard({ session, onLogout }) {
                 </div>
               );
               return (
-                <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
+                <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1rem",padding:".75rem 1rem",background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.18)",borderRadius:9}}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
                   <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
                   <select
@@ -5149,7 +5149,7 @@ function Dashboard({ session, onLogout }) {
                 </div>
               );
             })()}
-            <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".85rem 1rem",background:"rgba(47,128,237,.07)",border:"1px solid rgba(47,128,237,.2)",borderRadius:8}}>
+            <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".85rem 1rem",background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.2)",borderRadius:8}}>
               <div style={{flex:1}}>
                 <div style={{fontSize:".82rem",fontWeight:700,color:"var(--wh2)",marginBottom:".2rem"}}>
                   {liqReview
@@ -5217,7 +5217,7 @@ function Dashboard({ session, onLogout }) {
                       return (
                         <tr key={ci} style={{cursor:"pointer"}} onClick={()=>setLiqExpanded(liqExpanded===ci?null:ci)}>
                           <td>
-                            <div style={{width:30,height:30,borderRadius:6,background:"rgba(47,128,237,.1)",border:"1px solid rgba(47,128,237,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"DM Mono,monospace",fontSize:".78rem",fontWeight:800,color:"var(--ac)"}}>
+                            <div style={{width:30,height:30,borderRadius:6,background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"DM Mono,monospace",fontSize:".78rem",fontWeight:800,color:"var(--ac)"}}>
                               {String(c.key).padStart(2,"0")}
                             </div>
                           </td>
@@ -5280,7 +5280,7 @@ function Dashboard({ session, onLogout }) {
                   {/* Header comprador */}
                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom: isOpen?".9rem":"0",cursor:"pointer"}} onClick={()=>setLiqExpanded(isOpen?null:ci)}>
                     <div style={{display:"flex",alignItems:"center",gap:".85rem"}}>
-                      <div style={{width:38,height:38,borderRadius:8,background:"rgba(47,128,237,.12)",border:"1px solid rgba(47,128,237,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"DM Mono,monospace",fontSize:".8rem",fontWeight:700,color:"var(--ac)",flexShrink:0}}>
+                      <div style={{width:38,height:38,borderRadius:8,background:"rgba(56,178,246,.12)",border:"1px solid rgba(56,178,246,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"DM Mono,monospace",fontSize:".8rem",fontWeight:700,color:"var(--ac)",flexShrink:0}}>
                         {String(c.key).padStart(2,"0")}
                       </div>
                       <div>
@@ -5347,7 +5347,7 @@ function Dashboard({ session, onLogout }) {
                                 <td style={{padding:".45rem .5rem",fontFamily:"DM Mono,monospace",fontSize:".7rem",color:"var(--mu2)"}}>{ln.exp||`Lote ${li+1}`}</td>
                                 <td style={{padding:".45rem .5rem",textAlign:"center",color:"var(--mu2)"}}>1</td>
                                 <td style={{padding:".45rem .5rem",color:"var(--mu2)"}}>Comision {ln.comPct}%</td>
-                                <td style={{padding:".45rem .5rem",textAlign:"center"}}><span style={{fontSize:".62rem",padding:".1rem .35rem",background:"rgba(47,128,237,.08)",borderRadius:3,color:"var(--ac)"}}>AF</span></td>
+                                <td style={{padding:".45rem .5rem",textAlign:"center"}}><span style={{fontSize:".62rem",padding:".1rem .35rem",background:"rgba(56,178,246,.08)",borderRadius:3,color:"var(--ac)"}}>AF</span></td>
                                 <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"DM Mono,monospace",color:"var(--mu2)"}}>{fmt(ln.com)}</td>
                                 <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"DM Mono,monospace",color:"var(--mu2)"}}>{fmt(ln.com)}</td>
                               </tr>
@@ -5356,7 +5356,7 @@ function Dashboard({ session, onLogout }) {
                                   <td style={{padding:".45rem .5rem",fontFamily:"DM Mono,monospace",fontSize:".7rem",color:"var(--mu2)"}}>G-ADMIN</td>
                                   <td style={{padding:".45rem .5rem",textAlign:"center",color:"var(--mu2)"}}>1</td>
                                   <td style={{padding:".45rem .5rem",color:"var(--yl)",fontSize:".73rem"}}>Gastos Administrativos — Vehiculo Motorizado ({ln.exp||`Lote ${li+1}`})</td>
-                                  <td style={{padding:".45rem .5rem",textAlign:"center"}}><span style={{fontSize:".62rem",padding:".1rem .35rem",background:"rgba(47,128,237,.08)",borderRadius:3,color:"var(--ac)"}}>AF</span></td>
+                                  <td style={{padding:".45rem .5rem",textAlign:"center"}}><span style={{fontSize:".62rem",padding:".1rem .35rem",background:"rgba(56,178,246,.08)",borderRadius:3,color:"var(--ac)"}}>AF</span></td>
                                   <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"DM Mono,monospace",color:"var(--yl)"}}>{fmt(ln.gastosAdm)}</td>
                                   <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"DM Mono,monospace",color:"var(--yl)"}}>{fmt(ln.gastosAdm)}</td>
                                 </tr>
@@ -5383,11 +5383,11 @@ function Dashboard({ session, onLogout }) {
                             <span style={{color:"var(--wh2)"}}>Total:</span><span style={{fontFamily:"DM Mono,monospace",color:"var(--ac)"}}>{fmt(l.total)}</span>
                           </div>
                         </div>
-                        <div style={{background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.2)",borderRadius:8,padding:".8rem 1rem",fontSize:".78rem"}}>
+                        <div style={{background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.2)",borderRadius:8,padding:".8rem 1rem",fontSize:".78rem"}}>
                           <div style={{display:"flex",justifyContent:"space-between",marginBottom:".4rem",color:"var(--mu2)"}}>
                             <span>Garantia:</span><span style={{fontFamily:"DM Mono,monospace",color:"var(--gr)"}}>{fmt(l.garantia)}</span>
                           </div>
-                          <div style={{display:"flex",justifyContent:"space-between",paddingTop:".4rem",borderTop:"1px solid rgba(47,128,237,.2)"}}>
+                          <div style={{display:"flex",justifyContent:"space-between",paddingTop:".4rem",borderTop:"1px solid rgba(56,178,246,.2)"}}>
                             <span style={{fontWeight:700,color:"var(--wh2)",fontSize:".85rem"}}>Total a Pagar:</span>
                             <span style={{fontFamily:"DM Mono,monospace",fontWeight:800,fontSize:"1rem",color:"var(--ac)"}}>{fmt(l.totalAPagar)}</span>
                           </div>
@@ -5406,7 +5406,7 @@ function Dashboard({ session, onLogout }) {
                         {/* Enviar por correo */}
                         <button
                           className="btn-primary"
-                          style={{fontSize:".73rem", background: c.enviado?"rgba(34,211,160,.12)":"var(--ac)", color: c.enviado?"var(--gr)":"#fff", border: c.enviado?"1px solid rgba(34,211,160,.3)":"none"}}
+                          style={{fontSize:".73rem", background: c.enviado?"rgba(20,184,166,.12)":"var(--ac)", color: c.enviado?"var(--gr)":"#fff", border: c.enviado?"1px solid rgba(20,184,166,.3)":"none"}}
                           onClick={()=>{
                             generarPDFLiquidacion(c, liqReview.fecha);
                             setLiqReview(r=>({...r,compradores:r.compradores.map((x,xi)=>xi===ci?{...x,enviado:true}:x)}));
@@ -5428,7 +5428,7 @@ function Dashboard({ session, onLogout }) {
                               <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{marginRight:".3rem"}}><rect x="2" y="1" width="10" height="12" rx="1"/><path d="M5 5h4M5 8h4M5 11h2"/></svg>
                               Marcar como facturado
                             </button>
-                          : <div style={{display:"flex",alignItems:"center",gap:".35rem",fontSize:".72rem",color:"var(--gr)",padding:".35rem .7rem",background:"rgba(34,211,160,.07)",border:"1px solid rgba(34,211,160,.2)",borderRadius:6}}>
+                          : <div style={{display:"flex",alignItems:"center",gap:".35rem",fontSize:".72rem",color:"var(--gr)",padding:".35rem .7rem",background:"rgba(20,184,166,.07)",border:"1px solid rgba(20,184,166,.2)",borderRadius:6}}>
                               <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M2 7l4 4 6-7"/></svg>
                               Facturado
                             </div>
@@ -5449,7 +5449,7 @@ function Dashboard({ session, onLogout }) {
             {(() => {
               const cerrados = REMATES_MERGED.filter(r => r.estado === "cerrado");
               return (
-                <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1rem",padding:".75rem 1rem",background:"rgba(47,128,237,.06)",border:"1px solid rgba(47,128,237,.18)",borderRadius:9}}>
+                <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1rem",padding:".75rem 1rem",background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.18)",borderRadius:9}}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
                   <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
                   <select value={selectedRemate||""} onChange={e=>setSelectedRemate(e.target.value||null)}
@@ -5620,7 +5620,7 @@ function Dashboard({ session, onLogout }) {
                     {/* Botón agregar más fotos */}
                     {(item.imgs||[]).length > 0 && (
                       <label htmlFor={`phadd${idx}`}
-                        style={{position:"absolute",bottom:8,right:8,background:"rgba(47,128,237,.85)",borderRadius:5,padding:".2rem .55rem",fontSize:".65rem",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:".25rem"}}>
+                        style={{position:"absolute",bottom:8,right:8,background:"rgba(56,178,246,.85)",borderRadius:5,padding:".2rem .55rem",fontSize:".65rem",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:".25rem"}}>
                         <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 1v8M1 5h8"/></svg>
                         Agregar foto
                         <input id={`phadd${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
@@ -5769,7 +5769,7 @@ function Dashboard({ session, onLogout }) {
                       : bid.history.map((b,i) => (
                         <div key={i} className="fdi">
                           <div style={{display:"flex",alignItems:"center",gap:".35rem"}}>
-                            {b.online && <span style={{padding:".04rem .3rem",background:"rgba(47,128,237,.15)",color:"var(--ac)",borderRadius:3,fontSize:".55rem",fontWeight:700}}>WEB</span>}
+                            {b.online && <span style={{padding:".04rem .3rem",background:"rgba(56,178,246,.15)",color:"var(--ac)",borderRadius:3,fontSize:".55rem",fontWeight:700}}>WEB</span>}
                             <div className={`fdb${b.mine?" me":""}`}>{b.mine?"Tu (P-0245)":b.bidder}</div>
                           </div>
                           <div className="fda">{fmt(b.amount)}</div>
