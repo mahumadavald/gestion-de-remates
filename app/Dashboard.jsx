@@ -1760,9 +1760,9 @@ function Dashboard({ session, onLogout }) {
   // ── Licencias (solo admin GR) ──
   const [dbLicencias, setDbLicencias] = useState([]);
   // ── Casas (solo admin GR) ──
-  const [casaForm, setCasaForm] = useState({nombre:"",email:"",telefono:"",direccion:"",logoFile:null,logoUrl:null});
+  const [casaForm, setCasaForm] = useState({nombre:"",email:"",telefono:"",direccion:"",logoFile:null,logoUrl:null,martillero:"",rutMartillero:"",telefonoMartillero:"",emailMartillero:"",direccionMartillero:""});
   const [casaModal, setCasaModal] = useState(false);
-  const resetCasaForm = () => setCasaForm({nombre:"",email:"",telefono:"",direccion:"",logoFile:null,logoUrl:null});
+  const resetCasaForm = () => setCasaForm({nombre:"",email:"",telefono:"",direccion:"",logoFile:null,logoUrl:null,martillero:"",rutMartillero:"",telefonoMartillero:"",emailMartillero:"",direccionMartillero:""});
 
   useEffect(() => {
     if (session?.role !== "admin") return;
@@ -2185,155 +2185,227 @@ function Dashboard({ session, onLogout }) {
     const p   = c.postorData;
     const l   = c.liq;
     const num = String(c.key).padStart(2,"0");
-    const casaNombre = session?.casaNombre || "Remates Ahumada";
-    const fmtCLP = v => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(v);
+
+    // Datos de la casa desde Supabase o session
+    const casaData = dbLicencias.find(x => x.slug === session?.casa) || {};
+    const casaNombre   = casaData.nombre    || session?.casaNombre || "Remates Ahumada";
+    const logoUrl      = casaData.logo_url  || null;
+    const martillero   = casaData.martillero|| "";
+    const dirMart      = casaData.direccion_martillero || casaData.direccion || "";
+    const telMart      = casaData.telefono_martillero  || casaData.telefono  || "";
+    const emailMart    = casaData.email_martillero     || casaData.email     || "";
+
+    // Colores corporativos GR
+    const C_AZUL   = [31, 41, 55];    // #1F2937 secundario
+    const C_PRIMARY= [56, 178, 246];  // #38B2F6 primario
+    const C_TEAL   = [20, 184, 166];  // #14B8A6 acento
+    const C_GRAY   = [100, 116, 139];
+    const C_LIGHT  = [248, 250, 252];
+    const C_BORDER = [226, 232, 240];
+
+    const fmtCLP = v => "$ " + Math.round(v).toLocaleString("es-CL");
 
     const doc = new jsPDF({ orientation:"portrait", unit:"mm", format:"letter" });
     const W = doc.internal.pageSize.getWidth();
-    let y = 18;
+    const H = doc.internal.pageSize.getHeight();
+    let y = 14;
 
-    // ── Cabecera ──
-    doc.setFillColor(47,128,237);
-    doc.rect(14, y-6, W-28, 0.8, "F");
+    // ══════════════════════════════════════════
+    // HEADER — logo + datos casa + título centrado
+    // ══════════════════════════════════════════
+
+    // Franja superior color primario
+    doc.setFillColor(...C_PRIMARY);
+    doc.rect(0, 0, W, 2, "F");
+
+    // Bloque logo e info casa (izquierda)
+    if(logoUrl) {
+      try {
+        // Intentar cargar imagen — si falla usa texto
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        await new Promise((res) => { img.onload = res; img.onerror = res; img.src = logoUrl; });
+        if(img.naturalWidth > 0) {
+          doc.addImage(img, "PNG", 14, y, 36, 18, undefined, "FAST");
+          y += 2;
+        }
+      } catch(e) { /* logo failed, use text */ }
+    }
+
+    // Nombre casa en negrita
     doc.setFont("helvetica","bold");
-    doc.setFontSize(18);
-    doc.setTextColor(47,128,237);
-    doc.text("LIQUIDACIÓN DE COMPRA", 14, y+4);
-    doc.setFontSize(9);
-    doc.setTextColor(100,100,100);
-    doc.text(casaNombre.toUpperCase(), 14, y+10);
-    doc.setFontSize(10);
-    doc.setTextColor(50,50,50);
-    doc.text(`Fecha remate: ${fechaRemate}`, W-14, y+4, {align:"right"});
-    doc.setFontSize(9);
-    doc.setTextColor(120,120,120);
-    doc.text(`Comprador N° ${num}`, W-14, y+10, {align:"right"});
-    y += 18;
+    doc.setFontSize(12);
+    doc.setTextColor(...C_AZUL);
+    const logoOffset = logoUrl ? 56 : 14;
+    doc.text(casaNombre.toUpperCase(), logoOffset, y + 5);
 
-    // ── Badge comprador ──
-    doc.setFillColor(47,128,237);
-    doc.roundedRect(14, y, 52, 8, 2, 2, "F");
+    // Datos martillero
+    if(martillero) {
+      doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...C_PRIMARY);
+      doc.text("MARTILLERO PÚBLICO", logoOffset, y + 11);
+      doc.setFont("helvetica","normal"); doc.setTextColor(...C_GRAY);
+      doc.setFontSize(7.5);
+      if(martillero) doc.text(martillero, logoOffset, y + 16);
+      let infoLine = "";
+      if(telMart)   infoLine += `Fono: ${telMart}   `;
+      if(emailMart) infoLine += `Email: ${emailMart}`;
+      if(infoLine)  doc.text(infoLine, logoOffset, y + 21);
+      if(dirMart)   doc.text(`Dirección: ${dirMart}`, logoOffset, y + 26);
+    }
+
+    y = 46;
+
+    // Línea separadora
+    doc.setDrawColor(...C_PRIMARY);
+    doc.setLineWidth(0.6);
+    doc.line(14, y, W-14, y);
+    y += 6;
+
+    // ── Título centrado ──
     doc.setFont("helvetica","bold");
-    doc.setFontSize(11);
-    doc.setTextColor(255,255,255);
-    doc.text(`COMPRADOR N° ${num}`, 40, y+5.5, {align:"center"});
-    y += 13;
+    doc.setFontSize(15);
+    doc.setTextColor(...C_AZUL);
+    doc.text("LIQUIDACIÓN REMATE", W/2, y, {align:"center"});
+    y += 7;
+    doc.setFontSize(13);
+    doc.setTextColor(...C_PRIMARY);
+    doc.text(`COMPRADOR N° : ${num}`, W/2, y, {align:"center"});
+    y += 9;
 
-    // ── Datos comprador ──
-    doc.setFillColor(247,249,252);
-    doc.setDrawColor(221,227,240);
-    doc.roundedRect(14, y, W-28, 32, 2, 2, "FD");
-    const datos = [
-      ["Señor(es):", p?.razonSocial||"—"],
-      ["R.U.T:", p?.rut||"—"],
-      ["Giro:", p?.giro||"—"],
-      ["Dirección:", p?.direccion||"—"],
-      ["Comuna:", p?.comuna||"—"],
-      ["Teléfono:", p?.tel||"—"],
-      ["Email:", p?.email||"—"],
+    // ══════════════════════════════════════════
+    // DATOS DEL COMPRADOR — formato fiel al original
+    // ══════════════════════════════════════════
+    const datosComp = [
+      ["FECHA",     fechaRemate],
+      ["R.U.T",     p?.rut||"—"],
+      ["SEÑOR(ES)", p?.razonSocial||p?.nombre||"—"],
+      ["GIRO",      p?.giro||"—"],
+      ["DIRECCIÓN", p?.direccion||"—"],
+      ["TELÉFONO",  p?.tel||"—"],
+      ["MAIL",      p?.email||"—"],
+      ["COMUNA",    p?.comuna||"—"],
     ];
-    const col1 = datos.slice(0,4), col2 = datos.slice(4);
-    let dy = y+6;
-    col1.forEach(([k,v])=>{
-      doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(140,140,140);
-      doc.text(k, 18, dy);
-      doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30);
-      doc.text(v, 42, dy);
-      dy += 6;
-    });
-    dy = y+6;
-    col2.forEach(([k,v])=>{
-      doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(140,140,140);
-      doc.text(k, W/2+4, dy);
-      doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30);
-      doc.text(v, W/2+22, dy);
-      dy += 6;
-    });
-    y += 37;
 
-    // ── Tabla lotes ──
+    datosComp.forEach(([k, v]) => {
+      doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(...C_GRAY);
+      doc.text(k, 14, y);
+      doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30);
+      doc.text(String(v||"—"), 52, y);
+      y += 6;
+    });
+    y += 3;
+
+    // ══════════════════════════════════════════
+    // TABLA LOTES — fiel al formato original
+    // ══════════════════════════════════════════
     const rows = [];
     l.lineas.forEach(ln => {
-      rows.push([ln.exp||"—", ln.lote, "EX", fmtCLP(ln.monto), fmtCLP(ln.monto)]);
-      rows.push([ln.exp||"—", `Comisión ${ln.comPct}%`, "AF", fmtCLP(ln.com), fmtCLP(ln.com)]);
-      if(ln.motorizado) rows.push(["G-ADMIN", `Gastos Adm. Vehículo Motorizado (${ln.exp||ln.lote})`, "AF", fmtCLP(ln.gastosAdm), fmtCLP(ln.gastosAdm)]);
+      const loteLabel = ln.exp ? `LOTE ${ln.exp.replace(/[^0-9]/g,"")||ln.exp}` : "LOTE";
+      rows.push([loteLabel, "1", ln.lote.toUpperCase(), "EX", fmtCLP(ln.monto), fmtCLP(ln.monto)]);
+      rows.push([loteLabel, "1", `COMISION ${ln.comPct}%`, "AF", fmtCLP(ln.com), fmtCLP(ln.com)]);
+      if(ln.motorizado) rows.push(["G-ADMIN", "1",
+        `GASTOS ADMINISTRATIVOS
+VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
+        fmtCLP(ln.gastosAdm), fmtCLP(ln.gastosAdm)]);
     });
 
     autoTable(doc, {
       startY: y,
-      head: [["Expediente","Descripción","ND","Unitario","Total"]],
+      head: [["LOTE","CANTIDAD","DESCRIPCIÓN","ND","UNITARIO","TOTAL"]],
       body: rows,
-      styles: { fontSize:8.5, cellPadding:2.5, textColor:[50,50,50] },
-      headStyles: { fillColor:[26,37,64], textColor:255, fontStyle:"bold", fontSize:8 },
+      styles: { fontSize:8, cellPadding:2.8, textColor:[30,30,30], font:"helvetica" },
+      headStyles: { fillColor:C_AZUL, textColor:[255,255,255], fontStyle:"bold", fontSize:7.5, halign:"center" },
       columnStyles: {
-        0:{cellWidth:22, textColor:[140,140,140], fontSize:8},
-        2:{cellWidth:12, halign:"center"},
-        3:{cellWidth:28, halign:"right", font:"courier"},
-        4:{cellWidth:28, halign:"right", font:"courier", fontStyle:"bold"},
+        0: { cellWidth:18, halign:"center", textColor:C_GRAY, fontSize:7.5 },
+        1: { cellWidth:14, halign:"center" },
+        2: { cellWidth:"auto" },
+        3: { cellWidth:13, halign:"center" },
+        4: { cellWidth:26, halign:"right", fontStyle:"normal" },
+        5: { cellWidth:26, halign:"right", fontStyle:"bold" },
       },
-      alternateRowStyles: { fillColor:[250,251,253] },
+      alternateRowStyles: { fillColor:[248,250,252] },
+      tableLineColor: C_BORDER,
+      tableLineWidth: 0.2,
       didDrawCell: (data) => {
-        if(data.section==="body" && data.column.index===2){
+        if(data.section==="body" && data.column.index===3) {
           const txt = data.cell.raw;
-          const x=data.cell.x+1, cy=data.cell.y+1.5, w=data.cell.width-2, h=data.cell.height-3;
-          if(txt==="EX"){ doc.setFillColor(232,245,233); doc.setDrawColor(165,214,167); }
-          else if(txt==="AF"){ doc.setFillColor(227,240,255); doc.setDrawColor(144,202,249); }
+          const x=data.cell.x+1.5, cy=data.cell.y+1.8, w=data.cell.width-3, h=data.cell.height-3.5;
+          if(txt==="EX") { doc.setFillColor(220,252,231); doc.setDrawColor(134,239,172); }
+          else           { doc.setFillColor(219,234,254); doc.setDrawColor(147,197,253); }
           doc.roundedRect(x,cy,w,h,1,1,"FD");
-          doc.setFontSize(7);
-          doc.setTextColor(txt==="EX"?46:21, txt==="EX"?125:101, txt==="EX"?50:192);
+          doc.setFontSize(6.5);
+          doc.setTextColor(txt==="EX"?22:30, txt==="EX"?163:64, txt==="EX"?74:175);
           doc.setFont("helvetica","bold");
-          doc.text(txt, x+w/2, cy+h-1.5, {align:"center"});
+          doc.text(txt, x+w/2, cy+h-1.2, {align:"center"});
         }
       },
     });
-    y = doc.lastAutoTable.finalY + 8;
 
-    // ── Totales ──
+    y = doc.lastAutoTable.finalY + 6;
+
+    // ══════════════════════════════════════════
+    // TOTALES — lado izquierdo
+    // GARANTÍA + TOTAL A PAGAR — lado derecho
+    // ══════════════════════════════════════════
+    const totalesY = y;
+    const colW = (W-28)/2 - 4;
+
+    // Columna izquierda: totales
     const totales = [
-      ["Total Compras Exentas:", l.totalEx],
-      ["Total Compras Afectas:", l.totalAf],
-      ["Total Comisión:", l.totalCom],
+      ["TOTAL COMPRAS EXENTAS:", l.totalEx],
+      ["TOTAL COMPRAS AFECTAS:", l.totalAf],
+      ["TOTAL COMISION:", l.totalCom],
       ["19% IVA:", l.iva],
     ];
-    const txLeft = 14, txRight = W/2 - 4;
+    let ty = totalesY;
     totales.forEach(([k,v]) => {
-      doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(80,80,80);
-      doc.text(k, txLeft, y);
+      doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...C_GRAY);
+      doc.text(k, 14, ty);
       doc.setFont("helvetica","bold"); doc.setTextColor(30,30,30);
-      doc.text(fmtCLP(v), txRight, y, {align:"right"});
-      doc.setDrawColor(238,240,245);
-      doc.line(txLeft, y+1.5, txRight, y+1.5);
-      y += 6;
+      doc.text(fmtCLP(v), 14+colW, ty, {align:"right"});
+      doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.2);
+      doc.line(14, ty+2, 14+colW, ty+2);
+      ty += 6.5;
     });
-    // Total
-    doc.setDrawColor(47,128,237); doc.setLineWidth(0.5);
-    doc.line(txLeft, y-1, txRight, y-1);
-    doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(47,128,237);
-    doc.text("Total:", txLeft, y+4);
-    doc.text(fmtCLP(l.total), txRight, y+4, {align:"right"});
+    // Total final
+    doc.setDrawColor(...C_PRIMARY); doc.setLineWidth(0.6);
+    doc.line(14, ty, 14+colW, ty);
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...C_PRIMARY);
+    doc.text("TOTAL:", 14, ty+6);
+    doc.setFontSize(11);
+    doc.text(fmtCLP(l.total), 14+colW, ty+6, {align:"right"});
 
-    // ── Caja Total a Pagar ──
-    const bx = W/2+4, bw = W/2-18, by = doc.lastAutoTable.finalY+8;
-    doc.setFillColor(227,240,255); doc.setDrawColor(47,128,237); doc.setLineWidth(0.8);
-    doc.roundedRect(bx, by, bw, 28, 3, 3, "FD");
-    doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(80,80,80);
-    doc.text("Garantía pagada:", bx+4, by+8);
-    doc.setFont("helvetica","bold"); doc.setTextColor(46,125,50);
-    doc.text(`− ${fmtCLP(l.garantia)}`, bx+bw-4, by+8, {align:"right"});
-    doc.setDrawColor(144,202,249); doc.setLineWidth(0.3);
-    doc.line(bx+4, by+13, bx+bw-4, by+13);
-    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(26,37,64);
-    doc.text("Total a Pagar:", bx+4, by+21);
-    doc.setFontSize(14); doc.setTextColor(47,128,237);
-    doc.text(fmtCLP(l.totalAPagar), bx+bw-4, by+21, {align:"right"});
+    // Columna derecha: garantía + total a pagar
+    const bx = W/2 + 6, bw = W/2 - 20, bh = 28;
+    const by2 = totalesY;
+    doc.setFillColor(239,246,255);
+    doc.setDrawColor(...C_PRIMARY); doc.setLineWidth(0.6);
+    doc.roundedRect(bx, by2, bw, bh, 3, 3, "FD");
 
-    // ── Footer ──
-    const fy = doc.internal.pageSize.getHeight() - 12;
-    doc.setDrawColor(221,227,240); doc.setLineWidth(0.3);
+    doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...C_GRAY);
+    doc.text("GARANTÍA:", bx+4, by2+8);
+    doc.setFont("helvetica","bold"); doc.setTextColor(22,163,74);
+    doc.text(fmtCLP(l.garantia), bx+bw-4, by2+8, {align:"right"});
+
+    doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.2);
+    doc.line(bx+4, by2+12, bx+bw-4, by2+12);
+
+    doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...C_AZUL);
+    doc.text("TOTAL A PAGAR:", bx+4, by2+20);
+    doc.setFontSize(13); doc.setTextColor(...C_PRIMARY);
+    doc.text(fmtCLP(l.totalAPagar), bx+bw-4, by2+21, {align:"right"});
+
+    // ══════════════════════════════════════════
+    // FOOTER
+    // ══════════════════════════════════════════
+    const fy = H - 12;
+    doc.setFillColor(...C_PRIMARY);
+    doc.rect(0, H-4, W, 4, "F");
+    doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.2);
     doc.line(14, fy-3, W-14, fy-3);
-    doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(170,170,170);
-    doc.text(`${casaNombre} — Liquidación generada por GR Auction Software`, 14, fy+2);
-    doc.text(`Remate del ${fechaRemate} — Comprador N° ${num}`, W-14, fy+2, {align:"right"});
+    doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(...C_GRAY);
+    doc.text(`${casaNombre} · Powered by GR Auction Software · gestionderemates.cl`, 14, fy+1);
+    doc.text(`Remate ${fechaRemate} · Comprador N° ${num}`, W-14, fy+1, {align:"right"});
 
     doc.save(`liquidacion-comprador-${num}-${fechaRemate.replace(/\//g,"-")}.pdf`);
   };
@@ -4635,12 +4707,17 @@ function Dashboard({ session, onLogout }) {
               } catch(e) { /* storage optional */ }
             }
             const {data, error} = await supabase.from("casas").insert({
-              nombre:    casaForm.nombre.trim(),
+              nombre:              casaForm.nombre.trim(),
               slug,
-              email:     casaForm.email.trim()||null,
-              telefono:  casaForm.telefono.trim()||null,
-              direccion: casaForm.direccion.trim()||null,
-              logo_url:  logoUrl,
+              email:               casaForm.email.trim()||null,
+              telefono:            casaForm.telefono.trim()||null,
+              direccion:           casaForm.direccion.trim()||null,
+              logo_url:            logoUrl,
+              martillero:          casaForm.martillero.trim()||null,
+              rut_martillero:      casaForm.rutMartillero.trim()||null,
+              telefono_martillero: casaForm.telefonoMartillero.trim()||null,
+              email_martillero:    casaForm.emailMartillero.trim()||null,
+              direccion_martillero:casaForm.direccionMartillero.trim()||null,
               licencia_estado: "trial",
               licencia_plan:   "trial",
               licencia_vence:  new Date(Date.now()+30*24*60*60*1000).toISOString().split("T")[0],
@@ -4798,6 +4875,40 @@ function Dashboard({ session, onLogout }) {
                           onChange={e=>setCasaForm(f=>({...f,direccion:e.target.value}))}/>
                       </div>
                     </div>
+
+                    {/* Datos del Martillero Público */}
+                    <div style={{marginTop:"1.2rem",marginBottom:".6rem",fontSize:".72rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",display:"flex",alignItems:"center",gap:".5rem"}}>
+                      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14l8-8M9 3l2 2-6 6-2-2z"/><path d="M12 2l3 3-1.5 1.5"/></svg>
+                      Datos del Martillero Público
+                    </div>
+                    <div className="form-grid">
+                      <div className="fg full">
+                        <label className="fl">Nombre completo del martillero *</label>
+                        <input className="fi" placeholder="Juan Manuel Ahumada Baeza" value={casaForm.martillero}
+                          onChange={e=>setCasaForm(f=>({...f,martillero:e.target.value}))}/>
+                      </div>
+                      <div className="fg">
+                        <label className="fl">RUT del martillero</label>
+                        <input className="fi" placeholder="12.345.678-9" value={casaForm.rutMartillero}
+                          onChange={e=>setCasaForm(f=>({...f,rutMartillero:e.target.value}))}/>
+                      </div>
+                      <div className="fg">
+                        <label className="fl">Teléfono del martillero</label>
+                        <input className="fi" placeholder="+56 9 9145 3680" value={casaForm.telefonoMartillero}
+                          onChange={e=>setCasaForm(f=>({...f,telefonoMartillero:e.target.value}))}/>
+                      </div>
+                      <div className="fg">
+                        <label className="fl">Email del martillero</label>
+                        <input className="fi" type="email" placeholder="martillero@casa.cl" value={casaForm.emailMartillero}
+                          onChange={e=>setCasaForm(f=>({...f,emailMartillero:e.target.value}))}/>
+                      </div>
+                      <div className="fg">
+                        <label className="fl">Dirección del martillero</label>
+                        <input className="fi" placeholder="Hermanos Carrera 1320, Malloa" value={casaForm.direccionMartillero}
+                          onChange={e=>setCasaForm(f=>({...f,direccionMartillero:e.target.value}))}/>
+                      </div>
+                    </div>
+
                     <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:9,fontSize:".73rem",color:"var(--mu2)",lineHeight:1.6}}>
                       Al crear la casa se generan automáticamente los links de <strong style={{color:"var(--wh2)"}}>inscripción pública</strong> y <strong style={{color:"var(--wh2)"}}>pantalla de sala</strong>. La licencia parte en modo <strong style={{color:"var(--yl)"}}>Trial (30 días)</strong>.
                     </div>
