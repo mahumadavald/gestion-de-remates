@@ -4390,19 +4390,22 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 activo:   usuarioForm.activo,
               }).eq("id", usuarioForm.id);
               if(uErr){ notify("Error al actualizar: "+uErr.message,"inf"); return; }
-              // Si cambió la contraseña, actualizar via Edge Function
+              // Si ingresó nueva contraseña, enviar email de reset al usuario
               if(usuarioForm.pass && usuarioForm.pass.length >= 6) {
-                await fetch(`${SUPA_URL}/functions/v1/update-user-password`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${SUPA_KEY}`,
-                  },
-                  body: JSON.stringify({ userId: usuarioForm.id, password: usuarioForm.pass })
-                });
+                // Usamos resetPasswordForEmail — le llega un link al email del usuario
+                const {error: resetErr} = await supabase.auth.resetPasswordForEmail(
+                  usuarioForm.email,
+                  { redirectTo: `${window.location.origin}/dashboard` }
+                );
+                if(resetErr) {
+                  notify("Datos guardados. Error al enviar email de reset: "+resetErr.message,"inf");
+                } else {
+                  notify(`Datos guardados. Email de cambio de contraseña enviado a ${usuarioForm.email}.`,"sold");
+                }
+              } else {
+                notify("Usuario actualizado.","sold");
               }
               setUsuarios(u=>u.map(x=>x.id===usuarioForm.id?{...usuarioForm}:x));
-              notify("Usuario actualizado.","sold");
             }
             setUsuarioModal(false); resetUsuarioForm();
           };
@@ -4602,8 +4605,17 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         <input className="fi" type="email" placeholder="correo@casa.cl" value={usuarioForm.email} onChange={e=>setUsuarioForm(f=>({...f,email:e.target.value}))}/>
                       </div>
                       <div>
-                        <label className="fl">{usuarioModal==="editar"?"Nueva contraseña (opcional)":"Contraseña"}</label>
-                        <input className="fi" type="password" placeholder="••••••••" value={usuarioForm.pass} onChange={e=>setUsuarioForm(f=>({...f,pass:e.target.value}))}/>
+                        <label className="fl">{usuarioModal==="editar"?"Enviar reset de contraseña al email":"Contraseña *"}</label>
+                        <input className="fi" type="password"
+                          placeholder={usuarioModal==="editar"?"Escribe algo para enviar email de reset":"Mínimo 6 caracteres"}
+                          value={usuarioForm.pass}
+                          onChange={e=>setUsuarioForm(f=>({...f,pass:e.target.value}))}/>
+                        {usuarioModal==="editar" && usuarioForm.pass && (
+                          <div style={{fontSize:".68rem",color:"var(--yl)",marginTop:".3rem",display:"flex",alignItems:"center",gap:".35rem"}}>
+                            <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M7 4v3.5M7 9.5v.01"/></svg>
+                            Al guardar se enviará un email de cambio de contraseña a {usuarioForm.email}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <label className="fl">Casa de remates</label>
