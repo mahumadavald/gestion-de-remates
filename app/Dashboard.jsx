@@ -1194,10 +1194,7 @@ function AuthScreen({ onLogin }) {
                   value={password} onChange={e=>setPassword(e.target.value)}
                   onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
               </div>
-              <div className="auth-hint">
-                <strong>Demo Admin:</strong> admin@grauction.cl / admin2026<br/>
-                <strong>Demo Martillero:</strong> martillero@rematesahumada.cl / remates2026
-              </div>
+
             </>
           ) : (
             <>
@@ -1210,9 +1207,7 @@ function AuthScreen({ onLogin }) {
                   value={token} onChange={e=>setToken(e.target.value)}
                   onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
               </div>
-              <div className="auth-hint">
-                <strong>Demo Postor:</strong> RA-045 · RA-012 · RA-007
-              </div>
+
             </>
           )}
 
@@ -1765,9 +1760,9 @@ function Dashboard({ session, onLogout }) {
   // ── Licencias (solo admin GR) ──
   const [dbLicencias, setDbLicencias] = useState([]);
   // ── Casas (solo admin GR) ──
-  const [casaForm, setCasaForm] = useState({nombre:"",email:"",telefono:"",direccion:""});
+  const [casaForm, setCasaForm] = useState({nombre:"",email:"",telefono:"",direccion:"",logoFile:null,logoUrl:null});
   const [casaModal, setCasaModal] = useState(false);
-  const resetCasaForm = () => setCasaForm({nombre:"",email:"",telefono:"",direccion:""});
+  const resetCasaForm = () => setCasaForm({nombre:"",email:"",telefono:"",direccion:"",logoFile:null,logoUrl:null});
 
   useEffect(() => {
     if (session?.role !== "admin") return;
@@ -4625,12 +4620,27 @@ function Dashboard({ session, onLogout }) {
           const crearCasa = async () => {
             if(!casaForm.nombre.trim()){ notify("Ingresa el nombre de la casa.","inf"); return; }
             const slug = toSlug(casaForm.nombre);
+            // Upload logo if provided
+            let logoUrl = null;
+            if(casaForm.logoFile) {
+              try {
+                const ext = casaForm.logoFile.name.split(".").pop();
+                const path = `logos/${slug}.${ext}`;
+                const { data: upData, error: upErr } = await supabase.storage
+                  .from("logos").upload(path, casaForm.logoFile, { upsert: true });
+                if(!upErr && upData) {
+                  const { data: urlData } = supabase.storage.from("logos").getPublicUrl(path);
+                  logoUrl = urlData?.publicUrl || null;
+                }
+              } catch(e) { /* storage optional */ }
+            }
             const {data, error} = await supabase.from("casas").insert({
               nombre:    casaForm.nombre.trim(),
               slug,
               email:     casaForm.email.trim()||null,
               telefono:  casaForm.telefono.trim()||null,
               direccion: casaForm.direccion.trim()||null,
+              logo_url:  logoUrl,
               licencia_estado: "trial",
               licencia_plan:   "trial",
               licencia_vence:  new Date(Date.now()+30*24*60*60*1000).toISOString().split("T")[0],
@@ -4660,8 +4670,11 @@ function Dashboard({ session, onLogout }) {
                   <div key={casa.id} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,overflow:"hidden"}}>
                     {/* Header casa */}
                     <div style={{display:"flex",alignItems:"center",gap:"1rem",padding:"1rem 1.2rem",borderBottom:"1px solid var(--b1)"}}>
-                      <div style={{width:40,height:40,borderRadius:10,background:"rgba(56,178,246,.1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><path d="M2 16V8l7-6 7 6v8"/><path d="M7 16v-5h4v5"/></svg>
+                      <div style={{width:48,height:48,borderRadius:10,background:"rgba(56,178,246,.08)",border:"1px solid rgba(56,178,246,.15)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,overflow:"hidden"}}>
+                        {casa.logo_url
+                          ? <img src={casa.logo_url} alt={casa.nombre} style={{width:"100%",height:"100%",objectFit:"contain",padding:"4px"}}/>
+                          : <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><path d="M2 16V8l7-6 7 6v8"/><path d="M7 16v-5h4v5"/></svg>
+                        }
                       </div>
                       <div style={{flex:1}}>
                         <div style={{fontWeight:800,fontSize:".92rem",color:"var(--wh2)"}}>{casa.nombre}</div>
@@ -4735,6 +4748,29 @@ function Dashboard({ session, onLogout }) {
                   <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:440}}>
                     <div className="modal-title">Nueva casa de remates</div>
                     <div className="form-grid">
+                      {/* Logo upload */}
+                      <div className="fg full">
+                        <label className="fl">Logo de la casa</label>
+                        <label style={{display:"flex",alignItems:"center",gap:"1rem",padding:".75rem 1rem",background:"rgba(255,255,255,.03)",border:`2px dashed ${casaForm.logoFile?"rgba(20,184,166,.4)":"var(--b2)"}`,borderRadius:9,cursor:"pointer",transition:"all .15s"}}>
+                          <div style={{width:52,height:52,borderRadius:8,background:"rgba(56,178,246,.08)",border:"1px solid rgba(56,178,246,.15)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,overflow:"hidden"}}>
+                            {casaForm.logoUrl
+                              ? <img src={casaForm.logoUrl} alt="logo" style={{width:"100%",height:"100%",objectFit:"contain",padding:"4px"}}/>
+                              : <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="var(--mu)" strokeWidth="1.4"><rect x="2" y="4" width="18" height="14" rx="2"/><circle cx="11" cy="11" r="3"/><path d="M7 4V3a1 1 0 011-1h6a1 1 0 011 1v1"/></svg>
+                            }
+                          </div>
+                          <div>
+                            <div style={{fontSize:".82rem",fontWeight:600,color:casaForm.logoFile?"var(--gr)":"var(--wh2)"}}>
+                              {casaForm.logoFile ? `✓ ${casaForm.logoFile.name}` : "Subir logo"}
+                            </div>
+                            <div style={{fontSize:".7rem",color:"var(--mu)",marginTop:".15rem"}}>PNG, JPG o SVG — fondo transparente recomendado</div>
+                          </div>
+                          <input type="file" accept=".png,.jpg,.jpeg,.svg,.webp" style={{display:"none"}}
+                            onChange={e=>{
+                              const file = e.target.files[0];
+                              if(file) setCasaForm(f=>({...f, logoFile:file, logoUrl:URL.createObjectURL(file)}));
+                            }}/>
+                        </label>
+                      </div>
                       <div className="fg full">
                         <label className="fl">Nombre de la casa *</label>
                         <input className="fi" placeholder="Remates García Ltda." value={casaForm.nombre}
