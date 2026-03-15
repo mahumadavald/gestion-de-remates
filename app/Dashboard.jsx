@@ -1733,12 +1733,7 @@ function Dashboard({ session, onLogout }) {
 
   // ── Usuarios (solo admin GR) ──
   const ROLES_DISPONIBLES = ["admin","martillero","spotter","postremate","garantias","solo lectura"];
-  const [usuarios, setUsuarios] = useState([
-    {id:1, nombre:"Maximiliano Ahumada", usuario:"mahumada",  email:"max@rematesahumada.cl",  roles:["admin","martillero"],     casa:"Remates Ahumada", activo:true},
-    {id:2, nombre:"Nicolás Pérez",       usuario:"nperez",    email:"nperez@rematesahumada.cl",roles:["martillero","postremate"],casa:"Remates Ahumada", activo:true},
-    {id:3, nombre:"Jorge Leiva",         usuario:"jleiva",    email:"jleiva@rematesahumada.cl",roles:["garantias"],             casa:"Remates Ahumada", activo:true},
-    {id:4, nombre:"Demo Usuario",        usuario:"demo",      email:"demo@casaderemates.cl",   roles:["martillero"],            casa:"Casa Demo S.A.",  activo:true},
-  ]);
+  const [usuarios, setUsuarios] = useState([]);
   const [usuarioForm, setUsuarioForm] = useState({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
   const [usuarioModal, setUsuarioModal] = useState(false); // false | "crear" | "editar"
   const resetUsuarioForm = () => setUsuarioForm({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
@@ -1935,12 +1930,22 @@ function Dashboard({ session, onLogout }) {
           supabase.from("remates").select("*").order("created_at", {ascending:false}),
           supabase.from("lotes").select("*").order("orden"),
           supabase.from("postores").select("*").order("numero"),
+          supabase.from("usuarios").select("*, casas(nombre)").order("nombre"),
         ]);
-        const [remRes, lotRes, posRes] = await Promise.race([fetches, timeout]);
+        const [remRes, lotRes, posRes, usrRes] = await Promise.race([fetches, timeout]);
         if (mounted) {
           if (remRes?.data) setDbRemates(remRes.data);
           if (lotRes?.data) setDbLotes(lotRes.data);
           if (posRes?.data) setDbPostores(posRes.data);
+          if (usrRes?.data) setUsuarios(usrRes.data.map(u=>({
+            id:      u.id,
+            nombre:  u.nombre,
+            usuario: u.email?.split("@")[0]||"",
+            email:   u.email,
+            roles:   u.roles||[],
+            casa:    u.casas?.nombre||"",
+            activo:  u.activo,
+          })));
         }
       } catch(e) {
         console.warn("Supabase no disponible, usando mock:", e.message);
@@ -4336,7 +4341,8 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
         {/* ══ USUARIOS ══ */}
         {page==="usuarios" && session?.role==="admin" && (()=>{
-          const CASAS_LISTA = [...new Set(REMATES_MERGED.map(r=>r.casa))];
+          // Casas reales desde Supabase — incluye "GR Auction Software" para admin global
+          const CASAS_LISTA_REAL = [{ id: null, nombre: "GR Auction Software (Admin global)" }, ...dbLicencias];
           const toggleRol = (rol) => {
             setUsuarioForm(f=>({...f, roles: f.roles.includes(rol) ? f.roles.filter(r=>r!==rol) : [...f.roles, rol]}));
           };
@@ -4344,36 +4350,57 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
             if(!usuarioForm.nombre||!usuarioForm.email) { notify("Completa nombre y email.","inf"); return; }
             if(usuarioModal==="crear") {
               if(!usuarioForm.pass||usuarioForm.pass.length<6){ notify("La contraseña debe tener al menos 6 caracteres.","inf"); return; }
-              // Usar signUp — crea el usuario en Supabase Auth
+
+              // Crear usuario con signUp — requiere "Disable email confirmations" en Supabase Auth Settings
               const {data:signData, error:signErr} = await supabase.auth.signUp({
-                email: usuarioForm.email,
+                email:    usuarioForm.email,
                 password: usuarioForm.pass,
-                options: { data: { nombre: usuarioForm.nombre } }
+                options:  { data: { nombre: usuarioForm.nombre } }
               });
               if(signErr){ notify("Error: "+signErr.message,"inf"); return; }
               const userId = signData?.user?.id;
-              if(!userId){ notify("No se pudo crear el usuario.","inf"); return; }
-              // Guardar perfil en tabla usuarios
+              if(!userId){ notify("No se pudo crear el usuario. Verifica que 'Email confirmations' esté desactivado en Supabase Auth Settings.","inf"); return; }
+
+              // Insertar perfil en tabla usuarios
               const {data:casaData} = await supabase.from("casas").select("id").eq("nombre",usuarioForm.casa).single();
               const {error:uErr} = await supabase.from("usuarios").insert({
-                id: userId,
+                id:      userId,
+                email:   usuarioForm.email,
+                nombre:  usuarioForm.nombre,
                 casa_id: casaData?.id||null,
-                nombre: usuarioForm.nombre,
-                email: usuarioForm.email,
-                roles: usuarioForm.roles,
-                activo: usuarioForm.activo,
+                roles:   usuarioForm.roles,
+                activo:  usuarioForm.activo,
               });
-              if(uErr){ notify("Usuario Auth creado pero error en perfil: "+uErr.message,"inf"); return; }
-              setUsuarios(u=>[...u, {...usuarioForm, id:userId}]);
-              notify(`Usuario ${usuarioForm.email} creado. Debe confirmar su email para activarse.`,"sold");
+              if(uErr){ notify("Error al crear perfil: "+uErr.message,"inf"); return; }
+
+              // Recargar lista
+              const {data:uList} = await supabase.from("usuarios").select("*, casas(nombre)").order("nombre");
+              if(uList) setUsuarios(uList.map(u=>({
+                id:u.id, nombre:u.nombre, usuario:u.email?.split("@")[0]||"",
+                email:u.email, roles:u.roles||[], casa:u.casas?.nombre||"", activo:u.activo,
+              })));
+              notify(`✓ Usuario ${usuarioForm.email} creado correctamente.`,"sold");
             } else {
+              // Editar usuario existente
               const {data:casaData} = await supabase.from("casas").select("id").eq("nombre",usuarioForm.casa).single();
-              await supabase.from("usuarios").update({
-                nombre: usuarioForm.nombre,
-                casa_id: casaData?.id||null,
-                roles: usuarioForm.roles,
-                activo: usuarioForm.activo,
+              const {error:uErr} = await supabase.from("usuarios").update({
+                nombre:   usuarioForm.nombre,
+                casa_id:  casaData?.id||null,
+                roles:    usuarioForm.roles,
+                activo:   usuarioForm.activo,
               }).eq("id", usuarioForm.id);
+              if(uErr){ notify("Error al actualizar: "+uErr.message,"inf"); return; }
+              // Si cambió la contraseña, actualizar via Edge Function
+              if(usuarioForm.pass && usuarioForm.pass.length >= 6) {
+                await fetch(`${SUPA_URL}/functions/v1/update-user-password`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${SUPA_KEY}`,
+                  },
+                  body: JSON.stringify({ userId: usuarioForm.id, password: usuarioForm.pass })
+                });
+              }
               setUsuarios(u=>u.map(x=>x.id===usuarioForm.id?{...usuarioForm}:x));
               notify("Usuario actualizado.","sold");
             }
@@ -4383,12 +4410,19 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
             setUsuarioForm({...u, pass:""});
             setUsuarioModal("editar");
           };
-          const eliminarUsuario = (id) => {
+          const eliminarUsuario = async (id) => {
+            if(!window.confirm("¿Eliminar este usuario? No podrá iniciar sesión.")) return;
+            // Eliminar perfil de tabla usuarios
+            await supabase.from("usuarios").delete().eq("id", id);
             setUsuarios(u=>u.filter(x=>x.id!==id));
             notify("Usuario eliminado.","inf");
           };
-          const toggleActivo = (id) => {
-            setUsuarios(u=>u.map(x=>x.id===id?{...x,activo:!x.activo}:x));
+          const toggleActivo = async (id) => {
+            const usr = usuarios.find(u=>u.id===id);
+            if(!usr) return;
+            const nuevoEstado = !usr.activo;
+            await supabase.from("usuarios").update({activo: nuevoEstado}).eq("id", id);
+            setUsuarios(u=>u.map(x=>x.id===id?{...x,activo:nuevoEstado}:x));
           };
 
           const ROLE_COLOR = {
@@ -4405,30 +4439,89 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
               <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.3rem"}}>
                 <div style={{flex:1}}>
                   <div style={{fontSize:"1rem",fontWeight:800,color:"var(--wh2)"}}>Gestión de Usuarios</div>
-                  <div style={{fontSize:".72rem",color:"var(--mu2)",marginTop:".15rem"}}>Solo visible para administrador GR — {usuarios.length} usuarios registrados</div>
+                  <div style={{fontSize:".72rem",color:"var(--mu2)",marginTop:".15rem"}}>Solo visible para administrador GR — {usuarios.length} usuarios · puedes asignar múltiples usuarios a la misma casa</div>
                 </div>
                 <button className="btn-primary" onClick={()=>{resetUsuarioForm();setUsuarioModal("crear");}}>
                   + Nuevo usuario
                 </button>
               </div>
 
+              {/* Resumen por casa */}
+              {dbLicencias.length > 0 && (
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:".65rem",marginBottom:"1.2rem"}}>
+                  {/* Admins globales */}
+                  {usuarios.filter(u=>!u.casa).length > 0 && (
+                    <div style={{padding:".75rem 1rem",background:"rgba(224,82,82,.06)",border:"1px solid rgba(224,82,82,.15)",borderRadius:10}}>
+                      <div style={{fontSize:".68rem",fontWeight:700,color:"var(--rd)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".4rem"}}>Admin GR</div>
+                      <div style={{fontSize:"1.2rem",fontWeight:800,color:"var(--wh2)"}}>{usuarios.filter(u=>!u.casa).length}</div>
+                      <div style={{fontSize:".68rem",color:"var(--mu)",marginTop:".1rem"}}>Sin casa asignada</div>
+                    </div>
+                  )}
+                  {/* Una card por casa */}
+                  {dbLicencias.map(casa=>{
+                    const usrsCasa = usuarios.filter(u=>u.casa===casa.nombre);
+                    return (
+                      <div key={casa.id} style={{padding:".75rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:10,cursor:"pointer",transition:"border .15s"}}
+                        onClick={()=>{ resetUsuarioForm(); setUsuarioForm(f=>({...f,casa:casa.nombre})); setUsuarioModal("crear"); }}
+                        title="Click para crear usuario en esta casa"
+                        onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(56,178,246,.4)"}
+                        onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(56,178,246,.15)"}>
+                        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:".4rem"}}>
+                          <div style={{fontSize:".68rem",fontWeight:700,color:"var(--ac)",textTransform:"uppercase",letterSpacing:".05em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"80%"}}>{casa.nombre}</div>
+                          <span style={{fontSize:".6rem",padding:".1rem .35rem",borderRadius:4,background:"rgba(56,178,246,.12)",color:"var(--ac)",fontWeight:700}}>+ Agregar</span>
+                        </div>
+                        <div style={{fontSize:"1.2rem",fontWeight:800,color:"var(--wh2)"}}>{usrsCasa.length}</div>
+                        <div style={{fontSize:".68rem",color:"var(--mu)",marginTop:".1rem"}}>
+                          {usrsCasa.length===0?"Sin usuarios aún":usrsCasa.map(u=>u.roles[0]||"—").join(", ")}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Tabla usuarios */}
               <div className="table-card">
                 <table style={{width:"100%",borderCollapse:"collapse"}}>
                   <thead>
                     <tr style={{background:"rgba(255,255,255,.02)"}}>
-                      {["Usuario","Nombre","Email","Casa","Roles","Estado","Acciones"].map(h=>(
+                      {["Usuario / Email","Casa asignada","Roles","Estado","Acciones"].map(h=>(
                         <th key={h} style={{padding:".55rem .9rem",textAlign:"left",fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em",borderBottom:"1px solid var(--b1)"}}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
+                    {usuarios.length===0 && (
+                      <tr><td colSpan={7} style={{padding:"2rem",textAlign:"center",color:"var(--mu)",fontSize:".82rem"}}>
+                        No hay usuarios registrados aún. Crea el primero con el botón de arriba.
+                      </td></tr>
+                    )}
                     {usuarios.map(u=>(
                       <tr key={u.id} style={{borderBottom:"1px solid rgba(255,255,255,.03)",opacity:u.activo?1:.5,transition:"opacity .2s"}}>
-                        <td style={{padding:".65rem .9rem",fontFamily:"DM Mono,monospace",fontSize:".78rem",fontWeight:700,color:"var(--ac)"}}>{u.usuario}</td>
-                        <td style={{padding:".65rem .9rem",fontSize:".82rem",fontWeight:600,color:"var(--wh2)"}}>{u.nombre}</td>
-                        <td style={{padding:".65rem .9rem",fontSize:".73rem",color:"var(--mu2)"}}>{u.email}</td>
-                        <td style={{padding:".65rem .9rem",fontSize:".73rem",color:"var(--mu2)"}}>{u.casa}</td>
+                        {/* Avatar + nombre */}
+                        <td style={{padding:".65rem .9rem"}}>
+                          <div style={{display:"flex",alignItems:"center",gap:".6rem"}}>
+                            <div style={{width:30,height:30,borderRadius:"50%",background:"linear-gradient(135deg,var(--ac),var(--teal)||"#14B8A6")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".68rem",fontWeight:800,color:"#fff",flexShrink:0}}>
+                              {u.nombre?.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()||"??"}
+                            </div>
+                            <div>
+                              <div style={{fontSize:".82rem",fontWeight:700,color:"var(--wh2)"}}>{u.nombre}</div>
+                              <div style={{fontSize:".68rem",color:"var(--mu2)",fontFamily:"DM Mono,monospace"}}>{u.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        {/* Casa asignada */}
+                        <td style={{padding:".65rem .9rem"}}>
+                          {u.casa ? (
+                            <div style={{display:"inline-flex",alignItems:"center",gap:".4rem",padding:".2rem .6rem",background:"rgba(56,178,246,.08)",border:"1px solid rgba(56,178,246,.2)",borderRadius:6}}>
+                              <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><path d="M2 12V6l5-4 5 4v6"/><path d="M5 12V9h4v3"/></svg>
+                              <span style={{fontSize:".72rem",fontWeight:600,color:"var(--ac)"}}>{u.casa}</span>
+                            </div>
+                          ) : (
+                            <span style={{fontSize:".7rem",color:"var(--mu)",fontStyle:"italic"}}>Admin global</span>
+                          )}
+                        </td>
+                        {/* Roles */}
                         <td style={{padding:".65rem .9rem"}}>
                           <div style={{display:"flex",gap:".3rem",flexWrap:"wrap"}}>
                             {u.roles.map(r=>(
@@ -4439,18 +4532,28 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                             {u.roles.length===0 && <span style={{fontSize:".65rem",color:"var(--mu)"}}>Sin roles</span>}
                           </div>
                         </td>
+                        {/* Estado activo/inactivo */}
                         <td style={{padding:".65rem .9rem"}}>
-                          <div onClick={()=>toggleActivo(u.id)} style={{display:"inline-flex",alignItems:"center",gap:".35rem",cursor:"pointer",padding:".2rem .5rem",borderRadius:5,background:u.activo?"rgba(20,184,166,.08)":"rgba(255,255,255,.04)",border:`1px solid ${u.activo?"rgba(20,184,166,.2)":"var(--b2)"}`,transition:"all .15s"}}>
+                          <div onClick={()=>toggleActivo(u.id)} style={{display:"inline-flex",alignItems:"center",gap:".35rem",cursor:"pointer",padding:".22rem .55rem",borderRadius:5,background:u.activo?"rgba(20,184,166,.08)":"rgba(255,255,255,.04)",border:`1px solid ${u.activo?"rgba(20,184,166,.2)":"var(--b2)"}`,transition:"all .15s"}}
+                            title={u.activo?"Click para desactivar":"Click para activar"}>
                             <div style={{width:7,height:7,borderRadius:"50%",background:u.activo?"var(--gr)":"var(--mu)",transition:"background .15s"}}/>
                             <span style={{fontSize:".65rem",fontWeight:700,color:u.activo?"var(--gr)":"var(--mu)"}}>{u.activo?"Activo":"Inactivo"}</span>
                           </div>
                         </td>
+                        {/* Acciones */}
                         <td style={{padding:".65rem .9rem"}}>
                           <div style={{display:"flex",gap:".4rem"}}>
-                            <button className="btn-sec" style={{fontSize:".68rem",padding:".25rem .6rem"}} onClick={()=>editarUsuario(u)}>Editar</button>
-                            {u.id!==1 && (
-                              <button style={{fontSize:".68rem",padding:".25rem .6rem",background:"rgba(224,82,82,.08)",border:"1px solid rgba(224,82,82,.2)",borderRadius:6,color:"var(--rd)",cursor:"pointer"}}
-                                onClick={()=>eliminarUsuario(u.id)}>Eliminar</button>
+                            <button className="btn-sec" style={{fontSize:".68rem",padding:".25rem .6rem"}}
+                              onClick={()=>editarUsuario(u)}>
+                              ✎ Editar
+                            </button>
+                            {u.id !== session?.id && (
+                              <button style={{fontSize:".68rem",padding:".25rem .6rem",background:"rgba(224,82,82,.08)",border:"1px solid rgba(224,82,82,.2)",borderRadius:6,color:"var(--rd)",cursor:"pointer",transition:"all .15s"}}
+                                onMouseEnter={e=>{e.currentTarget.style.background="rgba(224,82,82,.18)";}}
+                                onMouseLeave={e=>{e.currentTarget.style.background="rgba(224,82,82,.08)";}}
+                                onClick={()=>eliminarUsuario(u.id)}>
+                                🗑 Eliminar
+                              </button>
                             )}
                           </div>
                         </td>
@@ -4505,7 +4608,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                       <div>
                         <label className="fl">Casa de remates</label>
                         <select className="fsel" value={usuarioForm.casa} onChange={e=>setUsuarioForm(f=>({...f,casa:e.target.value}))}>
-                          {CASAS_LISTA.map(c=><option key={c} value={c}>{c}</option>)}
+                          {CASAS_LISTA_REAL.map(c=><option key={c.id||"admin"} value={c.nombre}>{c.nombre}</option>)}
                         </select>
                       </div>
                     </div>
