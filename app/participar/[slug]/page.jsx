@@ -416,7 +416,15 @@ export default function ParticiparPage({ params }) {
           <div className="hero-orb" style={{width:200,height:200,background:"#0ea5e9",bottom:100,right:-60}}/>
         </div>
         <div style={{position:"relative",zIndex:1}}>
-          <div className="hero-brand">{casa?.nombre || "Casa de Remates"}</div>
+          {/* Logo casa de remates */}
+          {casa?.logo_url ? (
+            <div style={{marginBottom:"1.5rem"}}>
+              <img src={casa.logo_url} alt={casa.nombre}
+                style={{maxHeight:56,maxWidth:200,objectFit:"contain",display:"block"}}/>
+            </div>
+          ) : (
+            <div className="hero-brand">{casa?.nombre || "Casa de Remates"}</div>
+          )}
           <div className="hero-title">Inscripción de Participantes</div>
           <div className="hero-sub">Regístrate para participar en nuestros remates. El proceso toma menos de 3 minutos.</div>
 
@@ -443,6 +451,17 @@ export default function ParticiparPage({ params }) {
             <div className="hero-note-b">
               Tu inscripción quedará como <strong style={{color:"#e2eaf4"}}>pre-inscrita</strong> hasta que {casa?.nombre} verifique el pago de la garantía. Recibirás confirmación por correo.
             </div>
+          </div>
+
+          {/* GR Branding al fondo */}
+          <div style={{marginTop:"2rem",paddingTop:"1.25rem",borderTop:"1px solid rgba(255,255,255,.06)",display:"flex",alignItems:"center",gap:".6rem"}}>
+            <svg width="20" height="20" viewBox="0 0 36 36" fill="none">
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.5)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+            </svg>
+            <span style={{fontFamily:"'Inter',sans-serif",fontSize:".7rem",color:"#4a6a8a",letterSpacing:".04em"}}>
+              Powered by <strong style={{color:"#5ec4f8"}}>GR Auction Software</strong> · gestionderemates.cl
+            </span>
           </div>
         </div>
       </div>
@@ -471,13 +490,28 @@ export default function ParticiparPage({ params }) {
           </div>
         ) : (
           <>
-            <div className="form-header fade-up">
-              <div className="form-badge">
-                <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><circle cx="4" cy="4" r="3" fill="#5ec4f8"/></svg>
-                {casa?.nombre}
-              </div>
+            <div className="form-header fade-up" style={{textAlign:"center"}}>
+              {/* Logo centrado arriba */}
+              {casa?.logo_url ? (
+                <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
+                  <img src={casa.logo_url} alt={casa.nombre}
+                    style={{maxHeight:64,maxWidth:220,objectFit:"contain",display:"block"}}/>
+                </div>
+              ) : (
+                <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
+                  <div style={{display:"inline-flex",alignItems:"center",gap:".6rem",padding:".4rem .85rem",background:"rgba(56,178,246,.08)",border:"1px solid rgba(56,178,246,.2)",borderRadius:8}}>
+                    <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+                      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                      <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3" strokeLinecap="round" fill="none"/>
+                    </svg>
+                    <span style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:".82rem",color:"#e8f4fe"}}>{casa?.nombre}</span>
+                  </div>
+                </div>
+              )}
               <div className="form-title">Inscripción de postor</div>
               <div className="form-sub">Completa el formulario para participar en nuestros remates.</div>
+              {/* Separador */}
+              <div style={{width:48,height:3,background:"linear-gradient(90deg,#38B2F6,#14B8A6)",borderRadius:2,margin:"1rem auto 0"}}/>
             </div>
 
             {/* ── 1. Validación RUT ── */}
