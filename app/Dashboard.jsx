@@ -90,21 +90,21 @@ const GARANTIAS = [
 // Lotes reales del sitio rematesahumada.cl (formato expediente)
 // Comisiones por tipo de remate
 const COMISIONES = {
-  judicial:   { label:"Judicial",            com: 3,   desc:"Remate por orden judicial. Comision fija 3%." },
-  concursal:  { label:"Concursal",           com: 2.5, desc:"Liquidacion concursal. Comision 2.5%." },
-  privado:    { label:"Privado",             com: 5,   desc:"Remate privado. Comision configurable." },
+  judicial:  { label:"Judicial",   com: 10,  desc:"Remate judicial — comisión fija 10% por ley, se cobra al comprador." },
+  concursal: { label:"Concursal",  com: 7,   desc:"Liquidación concursal — comisión fija 7% por ley." },
+  privado:   { label:"Privado",    com: null, desc:"Remate privado — comisión personalizada según acuerdo." },
 };
 const GASTO_ADMIN_MOTORIZADO = 50000; // CLP — solo vehículos motorizados
 
 const LOTES_REALES = [
-  {id:"L-E61",  exp:"E-61-2025",   mandante:"Tanner Servicios Financieros S.A.",propietario:"Figueroa",        name:"JAC JS3 1.6",                          cat:"Vehiculo",  year:2022,base:4500000, min:4000000, com:3,   tipoRemate:"judicial",  motorizado:true,  estado:"publicado",patente:"FKRP-45"},
-  {id:"L-E3039",exp:"E-3039-2025", mandante:"Tanner Servicios Financieros S.A.",propietario:"Vega",            name:"Hyundai Santa Fe 2.4",                  cat:"Vehiculo",  year:2019,base:9800000, min:8500000, com:3,   tipoRemate:"judicial",  motorizado:true,  estado:"publicado",patente:"JZXF-12"},
-  {id:"L-20543",exp:"20-543-K-2021",mandante:"Judicial",                        propietario:"Faunes Jimenez",  name:"Hyundai Accent RB GL 1.4",              cat:"Vehiculo",  year:2018,base:5200000, min:4500000, com:3,   tipoRemate:"judicial",  motorizado:true,  estado:"publicado",patente:"BKRL-89"},
-  {id:"L-NK01", exp:"NK-01-2026",  mandante:"Particular",                       propietario:"",               name:"Nissan Kicks",                          cat:"Vehiculo",  year:2021,base:8900000, min:8000000, com:5,   tipoRemate:"privado",   motorizado:true,  estado:"publicado",patente:"HKPZ-33"},
-  {id:"L-P315", exp:"P-315-2026",  mandante:"Particular",                       propietario:"",               name:"Parcela 315 — Altos de Coinco VI Region",cat:"Inmueble",  year:null,base:42000000,min:38000000, com:2.5, tipoRemate:"concursal", motorizado:false, estado:"publicado",patente:null},
-  {id:"L-C1537",exp:"C-1537-2025", mandante:"Judicial",                         propietario:"Vallejos Moro",  name:"Enseres Varios — Hogar",                cat:"Enseres",   year:null,base:1200000, min:900000,  com:3,   tipoRemate:"judicial",  motorizado:false, estado:"publicado",patente:null},
-  {id:"L-C2502",exp:"C-2502-2024", mandante:"Judicial",                         propietario:"Arenas Bustamante",name:"Enseres Varios — Oficina",             cat:"Enseres",   year:null,base:850000,  min:650000,  com:3,   tipoRemate:"judicial",  motorizado:false, estado:"publicado",patente:null},
-  {id:"L-C916", exp:"C-916-2025",  mandante:"Judicial",                         propietario:"Droguett Navarro",name:"Enseres Varios — Electrodomesticos",    cat:"Enseres",   year:null,base:780000,  min:600000,  com:3,   tipoRemate:"judicial",  motorizado:false, estado:"publicado",patente:null},
+  {id:"L-E61",  exp:"E-61-2025",   mandante:"Tanner Servicios Financieros S.A.",propietario:"Figueroa",        name:"JAC JS3 1.6",                          cat:"Vehiculo",  year:2022,base:4500000, min:4000000, com:10,  tipoRemate:"judicial",  motorizado:true,  estado:"publicado",patente:"FKRP-45"},
+  {id:"L-E3039",exp:"E-3039-2025", mandante:"Tanner Servicios Financieros S.A.",propietario:"Vega",            name:"Hyundai Santa Fe 2.4",                  cat:"Vehiculo",  year:2019,base:9800000, min:8500000, com:10,  tipoRemate:"judicial",  motorizado:true,  estado:"publicado",patente:"JZXF-12"},
+  {id:"L-20543",exp:"20-543-K-2021",mandante:"Judicial",                        propietario:"Faunes Jimenez",  name:"Hyundai Accent RB GL 1.4",              cat:"Vehiculo",  year:2018,base:5200000, min:4500000, com:10,  tipoRemate:"judicial",  motorizado:true,  estado:"publicado",patente:"BKRL-89"},
+  {id:"L-NK01", exp:"NK-01-2026",  mandante:"Particular",                       propietario:"",               name:"Nissan Kicks",                          cat:"Vehiculo",  year:2021,base:8900000, min:8000000, com:null, tipoRemate:"privado",   motorizado:true,  estado:"publicado",patente:"HKPZ-33"},
+  {id:"L-P315", exp:"P-315-2026",  mandante:"Particular",                       propietario:"",               name:"Parcela 315 — Altos de Coinco VI Region",cat:"Inmueble",  year:null,base:42000000,min:38000000, com:7,   tipoRemate:"concursal", motorizado:false, estado:"publicado",patente:null},
+  {id:"L-C1537",exp:"C-1537-2025", mandante:"Judicial",                         propietario:"Vallejos Moro",  name:"Enseres Varios — Hogar",                cat:"Enseres",   year:null,base:1200000, min:900000,  com:10,  tipoRemate:"judicial",  motorizado:false, estado:"publicado",patente:null},
+  {id:"L-C2502",exp:"C-2502-2024", mandante:"Judicial",                         propietario:"Arenas Bustamante",name:"Enseres Varios — Oficina",             cat:"Enseres",   year:null,base:850000,  min:650000,  com:10,  tipoRemate:"judicial",  motorizado:false, estado:"publicado",patente:null},
+  {id:"L-C916", exp:"C-916-2025",  mandante:"Judicial",                         propietario:"Droguett Navarro",name:"Enseres Varios — Electrodomesticos",    cat:"Enseres",   year:null,base:780000,  min:600000,  com:10,  tipoRemate:"judicial",  motorizado:false, estado:"publicado",patente:null},
 ];
 
 // Adjudicaciones post-remate
@@ -2044,7 +2044,7 @@ function Dashboard({ session, onLogout }) {
     const loteReal = LOTES_REALES.find(l => l.name === loteNom) || {};
     const tipoRemate  = loteReal.tipoRemate || "judicial";
     const motorizado  = loteReal.motorizado || lots[idx]?.cat==="Vehiculo" || false;
-    const comPct      = loteReal.com ?? COMISIONES[tipoRemate]?.com ?? 3;
+    const comPct      = loteReal.com ?? COMISIONES[tipoRemate]?.com ?? 10;
     const gastosAdm   = motorizado ? GASTO_ADMIN_MOTORIZADO : 0;
 
     setBids(p=>{const n=[...p];n[idx]={...n[idx],status:"sold"};return n;});
@@ -2481,9 +2481,9 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 </div>
                 <div className="fg full"><label className="fl">Tipo de remate</label>
                   <select className="fsel" value={remateForm.tipo} onChange={e=>setRemateForm(f=>({...f,tipo:e.target.value}))}>
-                    <option value="judicial">Judicial — 3% comisión</option>
-                    <option value="concursal">Concursal — 2.5% comisión</option>
-                    <option value="privado">Privado — comisión personalizada</option>
+                    <option value="judicial">Judicial</option>
+                    <option value="concursal">Concursal</option>
+                    <option value="privado">Privado / Mixto</option>
                   </select>
                 </div>
                 {remateForm.tipo==="privado" && (
@@ -2493,7 +2493,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   </div>
                 )}
                 <div className="fg full" style={{padding:".65rem .85rem",background:`rgba(${remateForm.tipo==="judicial"?"47,128,237":remateForm.tipo==="concursal"?"246,173,85":"34,211,160"},.07)`,border:`1px solid rgba(${remateForm.tipo==="judicial"?"47,128,237":remateForm.tipo==="concursal"?"246,173,85":"34,211,160"},.2)`,borderRadius:7,fontSize:".75rem",color:"var(--mu2)"}}>
-                  {COMISIONES[remateForm.tipo]?.desc}{remateForm.tipo==="privado"&&remateForm.comCustom?` Comisión configurada: ${remateForm.comCustom}%.`:""}
+                  La comisión se define por cada lote individualmente, no por el remate. Un remate puede tener lotes judiciales (10%), concursales (7%) y privados mezclados.
                 </div>
               </div>
             </>}
@@ -2516,10 +2516,10 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 <div>
                   {/* Selector tipo inline */}
                   <div style={{display:"flex",gap:".5rem",marginBottom:"1rem"}}>
-                    {[{k:"MUEBLES",icon:"📦",label:"Muebles"},{k:"VEHICULOS",icon:"🚗",label:"Vehículo"},{k:"INMUEBLES",icon:"🏠",label:"Inmueble"}].map(o=>(
+                    {[{k:"MUEBLES",icon:null,label:"Muebles"},{k:"VEHICULOS",icon:null,label:"Vehículo"},{k:"INMUEBLES",icon:null,label:"Inmueble"}].map(o=>(
                       <div key={o.k} onClick={()=>{setWizTipo(o.k);setLoteForm(f=>({...f,motorizado:o.k==="VEHICULOS"}));}}
                         style={{flex:1,padding:".6rem .5rem",textAlign:"center",cursor:"pointer",borderRadius:8,border:`2px solid ${wizTipo===o.k?"var(--ac)":"var(--b2)"}`,background:wizTipo===o.k?"rgba(56,178,246,.1)":"var(--s2)",transition:"all .15s"}}>
-                        <div style={{fontSize:"1.1rem",marginBottom:".2rem"}}>{o.icon}</div>
+                        
                         <div style={{fontSize:".72rem",fontWeight:wizTipo===o.k?700:500,color:wizTipo===o.k?"var(--ac)":"var(--mu2)"}}>{o.label}</div>
                       </div>
                     ))}
@@ -2554,14 +2554,25 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     <div className="fg">
                       <label className="fl">Tipo de remate</label>
                       <select className="fsel" value={loteForm.tipoRemate} onChange={e=>setLoteForm(f=>({...f,tipoRemate:e.target.value}))}>
-                        <option value="judicial">Judicial (3%)</option>
-                        <option value="concursal">Concursal (2.5%)</option>
-                        <option value="privado">Privado</option>
+                        <option value="judicial">Judicial — 10% (fijo por ley)</option>
+                        <option value="concursal">Concursal — 7% (fijo por ley)</option>
+                        <option value="privado">Privado — personalizado</option>
                       </select>
                     </div>
                     <div className="fg">
                       <label className="fl">Comisión (%)</label>
-                      <input className="fi" type="number" step="0.5" min="0" max="50" placeholder={`${COMISIONES[loteForm.tipoRemate]?.com??3}`} value={loteForm.comCustom} onChange={e=>setLoteForm(f=>({...f,comCustom:e.target.value}))} style={{fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--ac)"}}/>
+                      <input className="fi" type="number" step="0.5" min="0" max="50"
+                          placeholder={loteForm.tipoRemate==="judicial"?"10 (fijo por ley)":loteForm.tipoRemate==="concursal"?"7 (fijo por ley)":"Ej: 5"}
+                          value={loteForm.comCustom}
+                          readOnly={loteForm.tipoRemate==="judicial"||loteForm.tipoRemate==="concursal"}
+                          style={{fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--ac)",opacity:loteForm.tipoRemate!=="privado"?.7:1,cursor:loteForm.tipoRemate!=="privado"?"not-allowed":"text"}}
+                          onChange={e=>loteForm.tipoRemate==="privado"&&setLoteForm(f=>({...f,comCustom:e.target.value}))}/>
+                        {loteForm.tipoRemate!=="privado" && (
+                          <div style={{fontSize:".68rem",color:"var(--yl)",marginTop:".3rem",display:"flex",alignItems:"center",gap:".3rem"}}>
+                            <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M7 4v3.5M7 9.5v.01"/></svg>
+                            Comisión fija por ley — no editable
+                          </div>
+                        )}
                     </div>
                     {wizTipo==="VEHICULOS" && <div className="fg full" style={{padding:".5rem .75rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:7,fontSize:".72rem",color:"var(--yl)"}}>Vehículo motorizado — se agregarán $50.000 gastos administrativos en la liquidación.</div>}
                     <div className="fg"><label className="fl">Precio base</label>
@@ -2681,8 +2692,8 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   {/* Resumen final */}
                   <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:9,fontSize:".73rem",color:"var(--mu2)",lineHeight:1.7}}>
                     <div style={{fontWeight:700,color:"var(--wh2)",marginBottom:".3rem"}}>Resumen del lote</div>
-                    <div>📦 <strong style={{color:"var(--wh2)"}}>{wizDatos.nombre||"—"}</strong> · {wizTipo||"—"} · Com. <strong style={{color:"var(--ac)"}}>{loteForm.comCustom||COMISIONES[loteForm.tipoRemate]?.com||"?"}%</strong></div>
-                    <div>📸 {wizTipo==="VEHICULOS"?`${Object.values(wizFotos).filter(Boolean).length}/4 fotos`:`${wizItems.filter(x=>x.foto).length} foto(s)`} · 📄 {wizDocs.filter(d=>d.archivo).length} doc(s) adjunto(s)</div>
+                    <div><strong style={{color:"var(--wh2)"}}>{wizDatos.nombre||"—"}</strong> · {wizTipo||"—"} · Com. <strong style={{color:"var(--ac)"}}>{loteForm.tipoRemate==="judicial"?"10":loteForm.tipoRemate==="concursal"?"7":(loteForm.comCustom||"?")}%</strong> <span style={{fontSize:".65rem",color:"var(--mu)"}}>{loteForm.tipoRemate==="judicial"?"(judicial - fijo por ley)":loteForm.tipoRemate==="concursal"?"(concursal - fijo por ley)":"(privado)"}</span></div>
+                    <div style={{color:"var(--mu2)",fontSize:".72rem"}}>{wizTipo==="VEHICULOS"?`${Object.values(wizFotos).filter(Boolean).length}/4 fotos`:`${wizItems.filter(x=>x.foto).length} foto(s)`} · {wizDocs.filter(d=>d.archivo).length} documento(s) adjunto(s)</div>
                   </div>
                 </div>
               )}
@@ -2769,7 +2780,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           base:        baseNum,
                           minimo:      minNum,
                           incremento:  incNum,
-                          comision:    parseFloat(loteForm.comCustom)||COMISIONES[loteForm.tipoRemate]?.com||3,
+                          comision:    loteForm.tipoRemate==="judicial" ? 10 : loteForm.tipoRemate==="concursal" ? 7 : (parseFloat(loteForm.comCustom)||5),
                           tipo_iva:    "AF",
                           estado:      "disponible",
                           orden:       dbLotes.length+1,
