@@ -74,7 +74,7 @@ export default function LandingPage() {
     <div class="stat-div"></div>
     <div class="stat-item"><div class="stat-num">100<span class="blue">%</span></div><div class="stat-lbl">Online y presencial</div></div>
   </div>
-  <div class="scroll-hint"><div class="scroll-txt">Scroll</div><div class="scroll-line"></div></div>
+
 </section>
 
 <!-- FEATURES -->
