@@ -27,6 +27,8 @@ export default function LandingPage() {
     return () => { window.removeEventListener('scroll', handleScroll); observer.disconnect(); };
   }, []);
 
+  const WA_DEMO = "https://wa.me/56991453680?text=Hola%2C%20me%20interesa%20GR%20Auction%20Software.%20Mi%20nombre%20es%20____%20y%20soy%20de%20la%20casa%20de%20remates%20____";
+
   const bodyHTML = `<nav id="navbar">
   <a href="#" class="nav-logo">
     <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
@@ -36,7 +38,6 @@ export default function LandingPage() {
     </svg>
     <div>
       <div class="nav-logo-text">GR Auction Software</div>
-      
     </div>
   </a>
   <div class="nav-links">
@@ -46,7 +47,7 @@ export default function LandingPage() {
     <a href="#contact">Contacto</a>
   </div>
   <div class="nav-cta">
-    <a href="https://wa.me/56991453680?text=Hola%2C%20quiero%20solicitar%20una%20demo%20de%20GR%20Auction%20Software" target="_blank" class="btn-nav btn-nav-ghost">Solicitar demo</a>
+    <a href="${WA_DEMO}" target="_blank" class="btn-nav btn-nav-ghost">Solicitar demo</a>
     <a href="/dashboard" class="btn-nav btn-nav-solid">Iniciar sesión →</a>
   </div>
 </nav>
@@ -61,9 +62,8 @@ export default function LandingPage() {
   </h1>
   <p class="hero-sub">Plataforma digital para gestionar, operar y escalar remates en cualquier lugar.</p>
   <div class="hero-btns">
-    <a href="https://wa.me/56991453680?text=Hola%2C%20quiero%20solicitar%20una%20demo%20de%20GR%20Auction%20Software" target="_blank" class="btn-primary">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.553 4.103 1.518 5.829L.057 23.492a.5.5 0 00.614.611l5.783-1.517A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.947 0-3.768-.497-5.35-1.367l-.383-.215-3.434.9.916-3.352-.234-.38A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-      Solicitar demo por WhatsApp
+    <a href="${WA_DEMO}" target="_blank" class="btn-primary">
+      Solicitar demo
     </a>
     <a href="/dashboard" class="btn-secondary">Iniciar sesión →</a>
   </div>
@@ -72,7 +72,7 @@ export default function LandingPage() {
     <div class="stat-div"></div>
     <div class="stat-item"><div class="stat-num">0<span class="blue"> papel</span></div><div class="stat-lbl">Todo digital</div></div>
     <div class="stat-div"></div>
-    <div class="stat-item"><div class="stat-num">15<span class="blue"> días</span></div><div class="stat-lbl">Prueba gratuita</div></div>
+    <div class="stat-item"><div class="stat-num">100<span class="blue">%</span></div><div class="stat-lbl">Online y presencial</div></div>
   </div>
   <div class="scroll-hint"><div class="scroll-txt">Scroll</div><div class="scroll-line"></div></div>
 </section>
@@ -167,10 +167,9 @@ export default function LandingPage() {
       Planes
     </div>
     <h2 class="section-title" style="margin:0 auto 1rem;text-align:center">Planes diseñados para cada casa de remates</h2>
-    <p class="section-sub" style="margin:0 auto 3rem;text-align:center">15 días de prueba gratuita. Sin tarjeta de crédito. Contáctanos y te armamos el plan que mejor se ajusta a tu operación.</p>
+    <p class="section-sub" style="margin:0 auto 3rem;text-align:center">Contáctanos y te armamos el plan que mejor se ajusta a tu operación.</p>
   </div>
 
-  <!-- 3 plan cards sin precios -->
   <div class="pricing-grid reveal">
 
     <div class="plan-card">
@@ -188,7 +187,7 @@ export default function LandingPage() {
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Postores self-service</li>
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Hasta 2 usuarios</li>
       </ul>
-      <a href="https://wa.me/56991453680?text=Hola%2C%20quiero%20consultar%20el%20plan%20B%C3%A1sico%20de%20GR%20Auction%20Software" target="_blank" class="btn-plan btn-plan-outline">Consultar precio →</a>
+      <a href="${WA_DEMO}" target="_blank" class="btn-plan btn-plan-outline">Consultar precio →</a>
     </div>
 
     <div class="plan-card featured">
@@ -208,7 +207,7 @@ export default function LandingPage() {
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Reportes avanzados + CSV</li>
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Soporte prioritario</li>
       </ul>
-      <a href="https://wa.me/56991453680?text=Hola%2C%20quiero%20consultar%20el%20plan%20Profesional%20de%20GR%20Auction%20Software" target="_blank" class="btn-plan btn-plan-solid">Consultar precio →</a>
+      <a href="${WA_DEMO}" target="_blank" class="btn-plan btn-plan-solid">Consultar precio →</a>
     </div>
 
     <div class="plan-card">
@@ -227,7 +226,7 @@ export default function LandingPage() {
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>SLA garantizado</li>
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Soporte 24/7</li>
       </ul>
-      <a href="https://wa.me/56991453680?text=Hola%2C%20quiero%20cotizar%20un%20plan%20Enterprise%20de%20GR%20Auction%20Software" target="_blank" class="btn-plan btn-plan-outline">Cotizar ahora →</a>
+      <a href="${WA_DEMO}" target="_blank" class="btn-plan btn-plan-outline">Cotizar ahora →</a>
     </div>
 
   </div>
@@ -243,22 +242,22 @@ export default function LandingPage() {
       Contacto
     </div>
     <h2 class="section-title" style="margin:0 auto 1rem;text-align:center;max-width:700px">¿Listo para modernizar tu casa de remates?</h2>
-    <p class="section-sub" style="margin:0 auto 2.5rem;text-align:center">15 días de prueba gratuita. Sin tarjeta de crédito. Te configuramos todo en un día.</p>
+    <p class="section-sub" style="margin:0 auto 2.5rem;text-align:center">Contáctanos y te configuramos todo en un día.</p>
     <div class="hero-btns">
-      <a href="https://wa.me/56991453680?text=Hola%2C%20quiero%20solicitar%20una%20demo%20de%20GR%20Auction%20Software" target="_blank" class="btn-primary">
+      <a href="${WA_DEMO}" target="_blank" class="btn-primary">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.553 4.103 1.518 5.829L.057 23.492a.5.5 0 00.614.611l5.783-1.517A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.947 0-3.768-.497-5.35-1.367l-.383-.215-3.434.9.916-3.352-.234-.38A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-        Solicitar demo por WhatsApp
+        Solicitar demo
       </a>
-      <a href="/cdn-cgi/l/email-protection#91f2feffe5f0f2e5fed1f6e3f0e4f2e5f8feffbff2fd" class="btn-secondary"><span class="__cf_email__" data-cfemail="c0a3afaeb4a1a3b4af80a7b2a1b5a3b4a9afaeeea3ac">[email&#160;protected]</span></a>
+      <a href="mailto:contacto@grauction.cl" class="btn-secondary">contacto@grauction.cl</a>
     </div>
     <div class="cta-contact">
       <a href="https://wa.me/56991453680" target="_blank" class="contact-item">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.02 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
         +56 9 9145 3680
       </a>
-      <a href="/cdn-cgi/l/email-protection#492a26273d282a3d26092e3b283c2a3d202627672a25" class="contact-item">
+      <a href="mailto:contacto@grauction.cl" class="contact-item">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <span class="__cf_email__" data-cfemail="75161a1b011416011a351207140016011c1a1b5b1619">[email&#160;protected]</span>
+        contacto@grauction.cl
       </a>
       <span class="contact-item">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
@@ -282,7 +281,7 @@ export default function LandingPage() {
     <a href="#features">Características</a>
     <a href="#pricing">Planes</a>
     <a href="/dashboard">Iniciar sesión</a>
-    <a href="/cdn-cgi/l/email-protection#23404c4d574240574c634451425640574a4c4d0d404f">Contacto</a>
+    <a href="mailto:contacto@grauction.cl">Contacto</a>
   </div>
 </footer>`;
 
@@ -375,14 +374,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,var(--blue),var(--teal));color:#fff;font-size:.65rem;font-weight:700;padding:.25rem .85rem;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
 .plan-name{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--white);margin-bottom:.25rem;}
 .plan-desc{font-size:.78rem;color:var(--gray);margin-bottom:1.5rem;line-height:1.5;}
-.plan-price-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--white);line-height:1;}
-.plan-price-num span{font-size:1rem;color:var(--gray);font-weight:400;}
-.plan-price-sub{font-size:.72rem;color:var(--gray);margin-top:.3rem;margin-bottom:1.75rem;}
 .plan-features{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-bottom:2rem;}
 .plan-features li{display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:var(--gray);}
 .plan-features li svg{color:var(--teal);flex-shrink:0;}
-.plan-features li.dim{opacity:.4;}
-.plan-features li.dim svg{color:var(--gray);}
 .btn-plan{width:100%;padding:.8rem;border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:block;transition:all .2s;}
 .btn-plan-outline{background:transparent;border:1px solid var(--border);color:var(--light);}
 .btn-plan-outline:hover{border-color:var(--blue);color:var(--blue);}
