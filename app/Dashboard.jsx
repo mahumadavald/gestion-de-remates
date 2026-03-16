@@ -310,24 +310,24 @@ const CSS = `
 ${FONT}
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:#0d1117;
-  --s1:#1F2937;
-  --s2:#243447;
-  --s3:#2a3d52;
-  --b1:#2d4060;
-  --b2:#364d70;
-  --ac:#38B2F6;
-  --acH:#5ec4f8;
+  --bg:#f4f4f2;
+  --s1:#f4f4f2;
+  --s2:#ffffff;
+  --s3:#f0f0ef;
+  --b1:#e5e7eb;
+  --b2:#d1d5db;
+  --ac:#06B6D4;
+  --acH:#22d3ee;
   --acD:#1a8fd4;
-  --wh:#ffffff;
-  --wh2:#e8f4fe;
-  --mu:#5a7fa8;
-  --mu2:#7aaec8;
-  --gr:#14B8A6;
-  --rd:#f56565;
-  --yl:#f6ad55;
+  --wh:#1a1a1a;
+  --wh2:#1a1a1a;
+  --mu:#6b7280;
+  --mu2:#4b5563;
+  --gr:#0d9488;
+  --rd:#dc2626;
+  --yl:#d97706;
 }
-html,body{height:100%;background:var(--bg);color:var(--wh2);font-family:'Inter',sans-serif;overflow:hidden;font-size:16px;}
+html,body{height:100%;background:#f4f4f2;color:#1a1a1a;font-family:'Inter',sans-serif;overflow:hidden;font-size:16px;}
 button,input,select{font-family:'Inter',sans-serif;}
 
 /* ── APP SHELL ── */
