@@ -25,20 +25,18 @@ const CSS = `
     overflow: hidden;
   }
 
-  /* ── Header ── */
   .disp-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1rem 2.5rem;
     background: #1F2937;
     border-bottom: 2px solid #2d4060;
   }
-  .disp-logo { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: #38B2F6; letter-spacing: .05em; text-transform: uppercase; }
+  .disp-logo { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: #06B6D4; letter-spacing: .05em; text-transform: uppercase; }
   .disp-casa { font-size: .9rem; font-weight: 600; color: #7a9ab8; }
   .disp-live  { display: flex; align-items: center; gap: .6rem; font-size: .85rem; font-weight: 700; color: #14B8A6; }
   .disp-dot   { width: 10px; height: 10px; border-radius: 50%; background: #14B8A6; animation: pulse 1.5s infinite; }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
 
-  /* ── Main body ── */
   .disp-body {
     display: grid;
     grid-template-columns: 1fr 420px;
@@ -46,7 +44,6 @@ const CSS = `
     overflow: hidden;
   }
 
-  /* ── Foto / imagen ── */
   .disp-foto {
     position: relative;
     background: #0d1117;
@@ -56,7 +53,6 @@ const CSS = `
   .disp-foto img { width: 100%; height: 100%; object-fit: contain; }
   .disp-foto-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: #2a3d52; }
 
-  /* ── Panel derecho ── */
   .disp-panel {
     background: #0d1117;
     border-left: 2px solid #2d4060;
@@ -64,17 +60,15 @@ const CSS = `
     overflow: hidden;
   }
 
-  /* Lote info */
   .disp-lote-info {
     padding: 1.5rem 1.75rem;
     border-bottom: 1px solid #2d4060;
     flex-shrink: 0;
   }
-  .disp-lote-num { font-family: 'DM Mono', monospace; font-size: .75rem; font-weight: 700; color: #38B2F6; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .4rem; }
+  .disp-lote-num { font-family: 'DM Mono', monospace; font-size: .75rem; font-weight: 700; color: #06B6D4; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .4rem; }
   .disp-lote-name { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: .4rem; }
   .disp-lote-cat  { font-size: .82rem; color: #4a6a8a; }
 
-  /* Oferta actual — grande */
   .disp-oferta-wrap {
     padding: 1.5rem 1.75rem;
     border-bottom: 1px solid #2d4060;
@@ -85,7 +79,6 @@ const CSS = `
   .disp-oferta-val.flash { color: #f59e0b; }
   .disp-paleta       { font-family: 'DM Mono', monospace; font-size: .95rem; font-weight: 700; color: #7a9ab8; margin-top: .5rem; }
 
-  /* Timer */
   .disp-timer-wrap {
     padding: 1rem 1.75rem;
     border-bottom: 1px solid #2d4060;
@@ -96,7 +89,6 @@ const CSS = `
   .disp-timer-fill  { height: 100%; border-radius: 4px; transition: width 1s linear, background .5s; }
   .disp-timer-num   { font-family: 'DM Mono', monospace; font-size: 1.5rem; font-weight: 700; margin-top: .4rem; }
 
-  /* Historial */
   .disp-hist {
     flex: 1; overflow-y: auto;
     padding: 1rem 1.75rem;
@@ -108,7 +100,6 @@ const CSS = `
   .disp-hist-monto { font-family: 'DM Mono', monospace; font-size: .9rem; font-weight: 700; color: #e0eaf4; }
   .disp-hist-row.top .disp-hist-monto { color: #14B8A6; }
 
-  /* ── Footer ── */
   .disp-footer {
     padding: .65rem 2.5rem;
     background: #1F2937;
@@ -116,9 +107,8 @@ const CSS = `
     display: flex; align-items: center; justify-content: space-between;
   }
   .disp-footer-txt { font-size: .72rem; color: #2a4a6a; }
-  .disp-footer-url { font-family: 'DM Mono', monospace; font-size: .72rem; color: #38B2F6; }
+  .disp-footer-url { font-family: 'DM Mono', monospace; font-size: .72rem; color: #06B6D4; }
 
-  /* ── Waiting screen ── */
   .disp-waiting {
     grid-column: 1 / -1;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -127,7 +117,6 @@ const CSS = `
   .disp-waiting-title { font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800; color: #2d4060; }
   .disp-waiting-sub   { font-size: 1rem; color: #2a3d52; }
 
-  /* ── Adjudicado overlay ── */
   .disp-sold-overlay {
     position: absolute; inset: 0;
     background: rgba(4,11,20,.85);
@@ -140,10 +129,9 @@ const CSS = `
   .disp-sold-paleta { font-family: 'DM Mono', monospace; font-size: 1.5rem; color: #7a9ab8; }
   .disp-sold-monto  { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; }
 
-  /* ── Dots ── */
   .disp-foto-dots { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
   .disp-foto-dot  { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.3); cursor: pointer; transition: all .2s; }
-  .disp-foto-dot.on { width: 22px; border-radius: 4px; background: #38B2F6; }
+  .disp-foto-dot.on { width: 22px; border-radius: 4px; background: #06B6D4; }
 `;
 
 export default function DisplayPage({ params }) {
@@ -155,20 +143,17 @@ export default function DisplayPage({ params }) {
   const [ganador,    setGanador]    = useState(null);
   const [historial,  setHistorial]  = useState([]);
   const [timer,      setTimer]      = useState(15);
-  const [estado,     setEstado]     = useState("waiting"); // waiting | live | sold
+  const [estado,     setEstado]     = useState("waiting");
   const [flash,      setFlash]      = useState(false);
   const [photoIdx,   setPhotoIdx]   = useState(0);
 
-  // Cargar casa
   useEffect(()=>{
     supabase.from("casas").select("*").eq("slug",slug).single()
       .then(({data})=>{ if(data) setCasa(data); });
   },[slug]);
 
-  // Realtime — escuchar pujas y cambios de lote
   useEffect(()=>{
     const ch = supabase.channel("display-live")
-      // Nueva puja
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"pujas"},(p)=>{
         const puja = p.new;
         setOferta(puja.monto);
@@ -181,7 +166,6 @@ export default function DisplayPage({ params }) {
           monto: puja.monto,
         },...prev].slice(0,8));
       })
-      // Lote cambia a en_subasta
       .on("postgres_changes",{event:"UPDATE",schema:"public",table:"lotes"},(p)=>{
         const l = p.new;
         if(l.estado==="en_subasta"){
@@ -201,7 +185,6 @@ export default function DisplayPage({ params }) {
     return ()=>supabase.removeChannel(ch);
   },[]);
 
-  // Timer countdown
   useEffect(()=>{
     if(estado!=="live") return;
     if(timer<=0){ setEstado("sold"); return; }
@@ -209,7 +192,6 @@ export default function DisplayPage({ params }) {
     return ()=>clearTimeout(t);
   },[timer,estado]);
 
-  // Auto-avance fotos
   const imgs = loteActivo?.fotos || [];
   useEffect(()=>{
     if(imgs.length<=1) return;
@@ -224,15 +206,12 @@ export default function DisplayPage({ params }) {
     <div className="disp-root">
       <style>{CSS}</style>
 
-      {/* Header */}
       <div className="disp-header">
-        {/* Lado izquierdo: logo GR + separador + logo casa */}
         <div style={{display:"flex",alignItems:"center",gap:"1.25rem"}}>
-          {/* Logo GR Auction Software */}
           <div style={{display:"flex",alignItems:"center",gap:".65rem",flexShrink:0}}>
             <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
-              <rect width="36" height="36" rx="8" fill="rgba(56,178,246,.15)" stroke="rgba(56,178,246,.3)" strokeWidth="1"/>
-              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <rect width="36" height="36" rx="8" fill="rgba(6,182,212,.15)" stroke="rgba(6,182,212,.3)" strokeWidth="1"/>
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
               <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3.2" strokeLinecap="round" fill="none"/>
             </svg>
             <div>
@@ -241,14 +220,11 @@ export default function DisplayPage({ params }) {
             </div>
           </div>
 
-          {/* Separador */}
           {casa?.logo_url && <div style={{width:1,height:32,background:"rgba(255,255,255,.12)"}}/>}
 
-          {/* Logo de la casa de remates */}
           {casa?.logo_url ? (
             <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
-              <img src={casa.logo_url} alt={casa.nombre}
-                style={{height:36,maxWidth:160,objectFit:"contain"}}/>
+              <img src={casa.logo_url} alt={casa.nombre} style={{height:36,maxWidth:160,objectFit:"contain"}}/>
               <div className="disp-casa" style={{fontSize:".78rem"}}>{casa?.nombre||slug}</div>
             </div>
           ) : (
@@ -256,14 +232,12 @@ export default function DisplayPage({ params }) {
           )}
         </div>
 
-        {/* Lado derecho: estado en vivo */}
         <div className="disp-live">
           <div className="disp-dot"/>
           {estado==="live"?"EN VIVO":estado==="sold"?"ADJUDICADO":"PRÓXIMAMENTE"}
         </div>
       </div>
 
-      {/* Body */}
       <div className="disp-body">
         {!loteActivo ? (
           <div className="disp-waiting">
@@ -274,7 +248,6 @@ export default function DisplayPage({ params }) {
             <div className="disp-waiting-sub">{casa?.nombre}</div>
           </div>
         ) : (<>
-          {/* Foto */}
           <div className="disp-foto">
             {imgs.length>0 ? (
               <>
@@ -293,7 +266,6 @@ export default function DisplayPage({ params }) {
                 <div style={{fontSize:"1rem",color:"#2a3d52"}}>Sin fotos disponibles</div>
               </div>
             )}
-            {/* Overlay adjudicado */}
             {estado==="sold"&&(
               <div className="disp-sold-overlay">
                 <div className="disp-sold-badge">ADJUDICADO</div>
@@ -303,16 +275,13 @@ export default function DisplayPage({ params }) {
             )}
           </div>
 
-          {/* Panel derecho */}
           <div className="disp-panel">
-            {/* Info lote */}
             <div className="disp-lote-info">
               <div className="disp-lote-num">Lote {loteActivo.orden||"—"} · {loteActivo.categoria}</div>
               <div className="disp-lote-name">{loteActivo.nombre}</div>
               <div className="disp-lote-cat">{loteActivo.descripcion?.split("|")[0]?.trim()||""}</div>
             </div>
 
-            {/* Oferta actual */}
             <div className="disp-oferta-wrap">
               <div className="disp-oferta-label">Oferta actual</div>
               <div className={`disp-oferta-val${flash?" flash":""}`}>{fmt(oferta||loteActivo.base||0)}</div>
@@ -329,7 +298,6 @@ export default function DisplayPage({ params }) {
               </div>
             </div>
 
-            {/* Timer */}
             {estado==="live"&&(
               <div className="disp-timer-wrap">
                 <div className="disp-timer-label">Tiempo para adjudicar</div>
@@ -340,7 +308,6 @@ export default function DisplayPage({ params }) {
               </div>
             )}
 
-            {/* Historial */}
             <div className="disp-hist">
               <div className="disp-hist-title">Historial de pujas</div>
               {historial.length===0 ? (
@@ -356,7 +323,6 @@ export default function DisplayPage({ params }) {
         </>)}
       </div>
 
-      {/* Footer */}
       <div className="disp-footer">
         <div className="disp-footer-txt">Sigue el remate desde tu celular</div>
         <div className="disp-footer-url">gestionderemates.cl/participar/{slug}</div>
