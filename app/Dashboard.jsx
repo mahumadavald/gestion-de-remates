@@ -1137,7 +1137,7 @@ function AuthScreen({ onLogin }) {
           <div style={{fontFamily:"Inter,sans-serif",fontWeight:400,fontSize:".85rem",color:"#4a6a8a",letterSpacing:".12em",textTransform:"uppercase",marginTop:2}}>Auction Software</div>
         </div>
 
-        <div className="auth-brand-sub">La plataforma que moderniza<br/>los remates en Chile.</div>
+        <div className="auth-brand-sub" style={{whiteSpace:"nowrap"}}>La plataforma que moderniza los remates en Chile.</div>
         <div className="auth-features">
           {[
             ["Sala en vivo hibrida", "Presencial y online en un solo sistema"],
@@ -1158,15 +1158,15 @@ function AuthScreen({ onLogin }) {
         <div className="auth-form-wrap" key={role}>
           {/* Logo en vez de título de texto */}
           <div style={{marginBottom:"2rem"}}>
-            <div style={{display:"flex",alignItems:"center",gap:"14px",marginBottom:".6rem"}}>
-              <svg width="52" height="52" viewBox="0 0 36 36" fill="none">
-                <rect width="36" height="36" rx="8" fill="rgba(56,178,246,.1)" stroke="rgba(56,178,246,.2)" strokeWidth="1"/>
+            <div style={{display:"flex",alignItems:"center",gap:"18px",marginBottom:".6rem"}}>
+              <svg width="64" height="64" viewBox="0 0 36 36" fill="none">
+                <rect width="36" height="36" rx="8" fill="rgba(56,178,246,.1)" stroke="rgba(56,178,246,.25)" strokeWidth="1"/>
                 <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
                 <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
               </svg>
-              <div style={{fontFamily:"Inter,sans-serif",fontWeight:400,fontSize:".72rem",color:"#4a6a8a",letterSpacing:".12em",textTransform:"uppercase"}}>Auction Software</div>
+              <div style={{fontFamily:"Inter,sans-serif",fontWeight:400,fontSize:".85rem",color:"#4a6a8a",letterSpacing:".12em",textTransform:"uppercase",marginTop:2}}>Auction Software</div>
             </div>
-            <div style={{fontSize:".8rem",color:"#4a6a8a",lineHeight:1.5}}>{cfg.sub}</div>
+            <div style={{fontSize:"1.05rem",color:"#6b7280",lineHeight:1.5}}>{cfg.sub}</div>
           </div>
 
           {/* Role selector */}
