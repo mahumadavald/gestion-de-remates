@@ -1056,7 +1056,6 @@ function AuthScreen({ onLogin }) {
   const [loading,  setLoading]  = useState(false);
 
   const roleConfig = {
-    admin:      { label:"Admin",      icon:<svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="8.5" cy="8.5" r="2.2"/><path d="M8.5 1v2M8.5 14v2M1 8.5h2M14 8.5h2M3.1 3.1l1.4 1.4M12.5 12.5l1.4 1.4M3.1 13.9l1.4-1.4M12.5 4.5l1.4-1.4"/></svg>,  title:"Acceso administrador",  sub:"Panel de control GR Auction Software. Gestion de clientes y configuracion global." },
     martillero: { label:"Martillero", icon:<svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14l8-8"/><path d="M9 3l2 2-6 6-2-2z"/><path d="M12 2l3 3-1.5 1.5"/></svg>,  title:"Acceso casa de remates", sub:"Gestiona tus remates, lotes, postores y liquidaciones post-remate." },
     comprador:  { label:"Postor",     icon:<svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="13" height="9" rx="1.5"/><path d="M5 5V4a3.5 3.5 0 017 0v1"/><path d="M8.5 9v2"/></svg>,  title:"Acceso postor",          sub:"Entra con tu codigo de paleta asignado al inscribirte en la casa de remates." },
   };
