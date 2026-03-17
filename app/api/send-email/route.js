@@ -17,124 +17,161 @@ async function sendMail({ to, subject, html }) {
   return { ok: res.ok, data };
 }
 
+// ── Shared header HTML (logo de la casa o nombre) ────────────────
+function buildHeader({ casa, logo_url, titulo, subtitulo }) {
+  const logoHtml = logo_url
+    ? `<img src="${logo_url}" alt="${casa}" style="max-height:52px;max-width:180px;object-fit:contain;display:block;margin-bottom:14px;" />`
+    : `<div style="font-size:18px;font-weight:800;color:#ffffff;letter-spacing:-.02em;margin-bottom:10px;">${casa}</div>`;
+
+  return `
+    <div style="background:linear-gradient(135deg,#0f4c5c 0%,#0891b2 60%,#06B6D4 100%);padding:32px 36px 28px;">
+      ${logoHtml}
+      <div style="font-size:20px;font-weight:700;color:#ffffff;line-height:1.2;">${titulo}</div>
+      ${subtitulo ? `<div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:6px;">${subtitulo}</div>` : ""}
+    </div>
+  `;
+}
+
+// ── Shared table row ─────────────────────────────────────────────
+function tr(label, value) {
+  if (!value) return "";
+  return `
+    <tr>
+      <td style="padding:10px 14px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6b7280;background:#f9fafb;border-bottom:1px solid #e5e7eb;white-space:nowrap;width:1%;">${label}</td>
+      <td style="padding:10px 14px;font-size:14px;font-weight:600;color:#1a1a1a;background:#ffffff;border-bottom:1px solid #e5e7eb;">${value}</td>
+    </tr>
+  `;
+}
+
+// ── Shared footer ────────────────────────────────────────────────
+const FOOTER = `
+  <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:16px 36px;text-align:center;">
+    <img src="https://gestionderemates.cl/gr-logo.png" alt="GR" style="height:18px;opacity:.5;margin-bottom:6px;" onerror="this.style.display='none'" />
+    <div style="font-size:11px;color:#9ca3af;">Powered by <a href="https://gestionderemates.cl" style="color:#06B6D4;text-decoration:none;">GR Auction Software</a></div>
+  </div>
+`;
+
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { tipo, nombre, numero, remate, fecha, casa, email_cliente, email_casa,
-            rut, telefono, giro, direccion, banco, tipo_cuenta, numero_cuenta } = body;
+    const {
+      tipo, nombre, numero, remate, fecha, casa, logo_url,
+      email_cliente, email_casa,
+      rut, telefono, giro, direccion, comuna,
+      banco, tipo_cuenta, numero_cuenta, modalidad,
+    } = body;
 
     const fechaStr = fecha
       ? new Date(fecha).toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
-      : "";
+      : null;
 
     const results = [];
 
-    // ── 1. Email al cliente ──────────────────────────────────────────
+    // ── 1. Email al CLIENTE ──────────────────────────────────────────
     if (tipo === "cliente" && email_cliente) {
-      const html = `
-        <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; background: #f4f4f2; margin: 0; padding: 0; }
-          .wrap { max-width: 560px; margin: 32px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
-          .header { background: linear-gradient(135deg, #0f4c5c, #06B6D4); padding: 32px 36px; }
-          .header h1 { color: #fff; margin: 0; font-size: 22px; font-weight: 700; }
-          .header p  { color: rgba(255,255,255,.8); margin: 6px 0 0; font-size: 14px; }
-          .body { padding: 32px 36px; }
-          .num-box { background: #f0fdfe; border: 2px solid #06B6D4; border-radius: 10px; text-align: center; padding: 20px; margin: 20px 0; }
-          .num-box .label { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: #6b7280; }
-          .num-box .num   { font-size: 40px; font-weight: 800; color: #06B6D4; letter-spacing: .05em; }
-          .info-row { display: flex; gap: 8px; margin-bottom: 8px; font-size: 14px; }
-          .info-row .key { color: #6b7280; min-width: 120px; }
-          .info-row .val { color: #1a1a1a; font-weight: 600; }
-          .alert { background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 14px 16px; margin: 20px 0; font-size: 13px; color: #92400e; line-height: 1.6; }
-          .footer { background: #f9fafb; padding: 20px 36px; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; }
-          .footer a { color: #06B6D4; }
-        </style></head><body>
-        <div class="wrap">
-          <div class="header">
-            <h1>Pre-inscripción recibida</h1>
-            <p>${casa} · ${remate}</p>
-          </div>
-          <div class="body">
-            <p style="font-size:15px;color:#374151;">Hola <strong>${nombre}</strong>,</p>
-            <p style="font-size:14px;color:#6b7280;margin-top:8px;">Tu pre-inscripción en <strong style="color:#1a1a1a">${remate}</strong> fue recibida correctamente. Te asignamos el siguiente número de postor provisional:</p>
-            <div class="num-box">
-              <div class="label">Número de postor provisional</div>
-              <div class="num">#${numero}</div>
+      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
+        <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+
+          ${buildHeader({
+            casa, logo_url,
+            titulo: "Pre-inscripción recibida",
+            subtitulo: remate + (fechaStr ? " · " + fechaStr : ""),
+          })}
+
+          <div style="background:#ffffff;padding:28px 36px;">
+            <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${nombre}</strong></p>
+            <p style="font-size:14px;color:#6b7280;margin:0 0 20px;line-height:1.6;">Tu pre-inscripción en <strong style="color:#1a1a1a;">${remate}</strong> fue recibida correctamente.</p>
+
+            <!-- Número de postor -->
+            <div style="background:linear-gradient(135deg,#f0fdfe,#ecfeff);border:2px solid #06B6D4;border-radius:12px;text-align:center;padding:22px 16px;margin-bottom:24px;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#0891b2;margin-bottom:6px;">Número de postor provisional</div>
+              <div style="font-size:52px;font-weight:800;color:#06B6D4;line-height:1;letter-spacing:-.02em;">#${numero}</div>
             </div>
-            <div class="info-row"><span class="key">Remate</span><span class="val">${remate}</span></div>
-            ${fechaStr ? `<div class="info-row"><span class="key">Fecha</span><span class="val">${fechaStr}</span></div>` : ""}
-            <div class="info-row"><span class="key">RUT</span><span class="val">${rut}</span></div>
-            <div class="info-row"><span class="key">Casa de remates</span><span class="val">${casa}</span></div>
-            <div class="alert">
-              Tu inscripción está como <strong>PRE-INSCRITA</strong>. Será confirmada una vez que ${casa} verifique el comprobante de pago de garantía que adjuntaste. Recibirás otro correo cuando sea aprobada.
+
+            <!-- Tabla de datos -->
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-bottom:10px;">Datos de tu inscripción</div>
+            <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+              ${tr("Remate", remate)}
+              ${fechaStr ? tr("Fecha", fechaStr) : ""}
+              ${tr("RUT", rut)}
+              ${tr("Nombre", nombre)}
+              ${tr("Correo", email_cliente)}
+              ${telefono ? tr("Teléfono", telefono) : ""}
+              ${tr("Forma de participación", modalidad || "—")}
+            </table>
+
+            <!-- Aviso pendiente -->
+            <div style="background:#fffbeb;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:14px 16px;margin:20px 0;font-size:13px;color:#92400e;line-height:1.6;">
+              <strong>Inscripción pendiente de aprobación.</strong><br>
+              ${casa} verificará tu comprobante de transferencia y confirmará tu participación. Recibirás un correo cuando sea aprobada.
             </div>
+
+            <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;">¿Dudas? Contacta directamente a ${casa}${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#06B6D4;'>" + email_casa + "</a>" : ""}.</p>
           </div>
-          <div class="footer">
-            Este correo fue generado automáticamente · <a href="https://gestionderemates.cl">GR Auction Software</a>
-          </div>
+
+          ${FOOTER}
         </div>
-        </body></html>
-      `;
+      </body></html>`;
+
       const r = await sendMail({
         to: email_cliente,
-        subject: `Pre-inscripción #${numero} — ${remate}`,
+        subject: `Pre-inscripción #${numero} confirmada — ${remate}`,
         html,
       });
       results.push({ destino: "cliente", ...r });
     }
 
-    // ── 2. Email al martillero / casa ────────────────────────────────
+    // ── 2. Email al MARTILLERO / CASA ────────────────────────────────
     if (tipo === "casa" && email_casa) {
-      const html = `
-        <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; background: #f4f4f2; margin: 0; padding: 0; }
-          .wrap { max-width: 560px; margin: 32px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
-          .header { background: linear-gradient(135deg, #0f4c5c, #06B6D4); padding: 28px 36px; }
-          .header h1 { color: #fff; margin: 0; font-size: 20px; font-weight: 700; }
-          .header p  { color: rgba(255,255,255,.8); margin: 6px 0 0; font-size: 13px; }
-          .body { padding: 28px 36px; }
-          .card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px; margin: 18px 0; }
-          .row { display: flex; gap: 8px; margin-bottom: 7px; font-size: 14px; }
-          .row .k { color: #6b7280; min-width: 140px; }
-          .row .v { color: #1a1a1a; font-weight: 600; }
-          .badge { display: inline-block; background: rgba(6,182,212,.1); color: #0891b2; border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 700; }
-          .footer { background: #f9fafb; padding: 18px 36px; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; }
-        </style></head><body>
-        <div class="wrap">
-          <div class="header">
-            <h1>Nueva pre-inscripción recibida</h1>
-            <p>${remate} ${fechaStr ? "· " + fechaStr : ""}</p>
-          </div>
-          <div class="body">
-            <p style="font-size:14px;color:#374151;">Se ha registrado un nuevo postor en <strong>${remate}</strong>. <span class="badge">Postor #${numero}</span></p>
-            <div class="card">
-              <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-bottom:12px;">Datos del postor</div>
-              <div class="row"><span class="k">Nombre</span><span class="v">${nombre}</span></div>
-              <div class="row"><span class="k">RUT</span><span class="v">${rut}</span></div>
-              <div class="row"><span class="k">Correo</span><span class="v">${email_cliente}</span></div>
-              ${telefono ? `<div class="row"><span class="k">Teléfono</span><span class="v">${telefono}</span></div>` : ""}
-              ${giro ? `<div class="row"><span class="k">Giro / Actividad</span><span class="v">${giro}</span></div>` : ""}
-              ${direccion ? `<div class="row"><span class="k">Dirección</span><span class="v">${direccion}</span></div>` : ""}
+      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
+        <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+
+          ${buildHeader({
+            casa, logo_url,
+            titulo: "Nueva pre-inscripción recibida",
+            subtitulo: remate + (fechaStr ? " · " + fechaStr : ""),
+          })}
+
+          <div style="background:#ffffff;padding:28px 36px;">
+            <p style="font-size:14px;color:#374151;margin:0 0 4px;">Se registró un nuevo postor en <strong style="color:#1a1a1a;">${remate}</strong>.</p>
+            <div style="display:inline-block;background:rgba(6,182,212,.1);color:#0891b2;border-radius:6px;padding:4px 12px;font-size:13px;font-weight:700;margin:10px 0 20px;">Postor #${numero}</div>
+
+            <!-- DATOS DEL PARTICIPANTE -->
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-bottom:10px;">Datos del participante</div>
+            <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:20px;">
+              ${tr("Nombres / Razón social", nombre)}
+              ${tr("R.U.T.", rut)}
+              ${tr("Correo electrónico", email_cliente)}
+              ${telefono ? tr("Teléfono", telefono) : ""}
+              ${tr("Giro", giro || "Sin giro")}
+              ${tr("Dirección", direccion)}
+              ${comuna ? tr("Comuna", comuna) : ""}
+              ${tr("Forma de participación", modalidad || "—")}
+            </table>
+
+            <!-- DATOS BANCARIOS -->
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-bottom:10px;">Datos para devolución de garantía</div>
+            <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:20px;">
+              ${tr("Banco", banco || "—")}
+              ${tr("Tipo de cuenta", tipo_cuenta || "—")}
+              ${tr("Número de cuenta", numero_cuenta || "—")}
+            </table>
+
+            <!-- Aviso comprobante -->
+            <div style="background:#f0fdf4;border-left:4px solid #14B8A6;border-radius:0 8px 8px 0;padding:13px 16px;font-size:13px;color:#065f46;line-height:1.6;">
+              El postor adjuntó un <strong>comprobante de transferencia</strong>. Revisa el panel de control para verificar el pago y aprobar la inscripción.
             </div>
-            <div class="card">
-              <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-bottom:12px;">Datos de devolución de garantía</div>
-              <div class="row"><span class="k">Banco</span><span class="v">${banco || "—"}</span></div>
-              <div class="row"><span class="k">Tipo de cuenta</span><span class="v">${tipo_cuenta || "—"}</span></div>
-              <div class="row"><span class="k">Número de cuenta</span><span class="v">${numero_cuenta || "—"}</span></div>
-            </div>
-            <p style="font-size:13px;color:#6b7280;">El postor adjuntó un comprobante de transferencia. Revisa el panel de control para verificar y aprobar la inscripción.</p>
           </div>
-          <div class="footer">
-            GR Auction Software · gestionderemates.cl
-          </div>
+
+          ${FOOTER}
         </div>
-        </body></html>
-      `;
+      </body></html>`;
+
       const r = await sendMail({
         to: email_casa,
-        subject: `Nueva inscripción #${numero} en ${remate} — ${nombre}`,
+        subject: `Nueva inscripción #${numero} — ${nombre} en ${remate}`,
         html,
       });
       results.push({ destino: "casa", ...r });
