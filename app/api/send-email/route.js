@@ -53,11 +53,12 @@ function tr(label, value) {
 
 // ── Footer con logo GR ────────────────────────────────────────────
 const FOOTER = `
-  <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:18px 36px;text-align:center;">
-    <div style="margin-bottom:8px;">
-      <img src="https://gestionderemates.cl/gr-icon.png" alt="GR Auction Software" style="height:28px;display:inline-block;" onerror="this.style.display='none'" />
+  <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 36px;text-align:center;">
+    <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <div style="display:inline-block;background:rgba(6,182,212,.15);border:1.5px solid rgba(6,182,212,.35);border-radius:8px;width:30px;height:30px;line-height:30px;text-align:center;font-size:13px;font-weight:800;color:#0891b2;font-family:Arial,sans-serif;">GR</div>
+      <span style="font-size:13px;font-weight:700;color:#374151;letter-spacing:-.01em;">GR Auction Software</span>
     </div>
-    <div style="font-size:11px;color:#9ca3af;">Powered by <a href="https://gestionderemates.cl" style="color:#0891b2;text-decoration:none;font-weight:600;">GR Auction Software</a></div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:2px;"><a href="https://gestionderemates.cl" style="color:#9ca3af;text-decoration:none;">gestionderemates.cl</a></div>
   </div>
 `;
 
