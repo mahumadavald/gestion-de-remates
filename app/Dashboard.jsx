@@ -5135,7 +5135,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 <div style={{fontSize:".72rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:"1rem"}}>Mi perfil</div>
                 <div className="fg" style={{marginBottom:".7rem"}}>
                   <label className="fl">Nombre</label>
-                  <input className="fi" defaultValue={session?.nombre||""} placeholder="Tu nombre"/>
+                  <input className="fi" defaultValue={session?.name||""} placeholder="Tu nombre"/>
                 </div>
                 <div className="fg" style={{marginBottom:".7rem"}}>
                   <label className="fl">Correo electrónico</label>
@@ -5143,7 +5143,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 </div>
                 <div className="fg" style={{marginBottom:"1rem"}}>
                   <label className="fl">Rol</label>
-                  <input className="fi" value={session?.rol==="admin"?"Administrador":"Martillero"} readOnly style={{opacity:.7,cursor:"default"}}/>
+                  <input className="fi" value={session?.role==="admin"?"Administrador":"Martillero"} readOnly style={{opacity:.7,cursor:"default"}}/>
                 </div>
                 <button className="btn-primary" style={{fontSize:".78rem"}} onClick={()=>notify("Perfil actualizado.")}>Guardar cambios</button>
               </div>
@@ -5164,26 +5164,6 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   <input className="fi" type="password" placeholder="••••••••"/>
                 </div>
                 <button className="btn-primary" style={{fontSize:".78rem"}} onClick={()=>notify("Contraseña actualizada.")}>Actualizar contraseña</button>
-              </div>
-
-              {/* Links rápidos */}
-              <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1.1rem 1.2rem"}}>
-                <div style={{fontSize:".72rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:"1rem"}}>Links de tu casa de remates</div>
-                {[
-                  {label:"Inscripción pública de postores", url:`https://gestionderemates.cl/participar/${session?.casa||"rematesahumada"}`, color:"var(--ac)"},
-                  {label:"Pantalla de sala (proyector)",    url:`https://gestionderemates.cl/display/${session?.casa||"rematesahumada"}`,    color:"var(--gr)"},
-                ].map((l,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:".75rem",padding:".6rem .85rem",background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,marginBottom:".5rem"}}>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:".63rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".1rem"}}>{l.label}</div>
-                      <code style={{fontSize:".7rem",color:l.color,fontFamily:"DM Mono,monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block"}}>{l.url}</code>
-                    </div>
-                    <button className="btn-sec" style={{fontSize:".63rem",flexShrink:0}}
-                      onClick={()=>{navigator.clipboard.writeText(l.url);notify("Link copiado.","sold");}}>Copiar</button>
-                    <a href={l.url} target="_blank" rel="noreferrer"
-                      style={{fontSize:".63rem",color:"var(--mu2)",textDecoration:"none",flexShrink:0,padding:".25rem .5rem",border:"1px solid var(--b2)",borderRadius:6}}>Abrir →</a>
-                  </div>
-                ))}
               </div>
 
             </div>
