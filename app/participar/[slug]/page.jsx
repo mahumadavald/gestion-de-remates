@@ -107,7 +107,7 @@ const CSS = `
 
   /* ── Hero Typography ── */
   .hero-brand { font-family: var(--font); font-size: .82rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.6); }
-  .hero-title { font-family: var(--head); font-size: 1.85rem; font-weight: 800; color: #ffffff; line-height: 1.15; margin: .9rem 0 .55rem; }
+  .hero-title { font-family: var(--head); font-size: 1.85rem; font-weight: 800; color: #ffffff; line-height: 1.15; letter-spacing: -.02em; margin: .9rem 0 .55rem; }
   .hero-sub   { font-size: .95rem; color: rgba(255,255,255,.75); line-height: 1.7; }
 
   .hero-steps { margin-top: 2rem; }
@@ -122,7 +122,7 @@ const CSS = `
 
   /* ── Form header ── */
   .form-header { margin-bottom: 1.75rem; }
-  .form-title  { font-family: var(--head); font-size: 1.65rem; font-weight: 800; color: var(--wh); line-height: 1.2; }
+  .form-title  { font-family: var(--head); font-size: 1.65rem; font-weight: 800; color: var(--wh); line-height: 1.2; letter-spacing: -.02em; }
   .form-sub    { font-size: .9rem; color: var(--mu); margin-top: .45rem; }
 
   /* ── RUT step ── */
