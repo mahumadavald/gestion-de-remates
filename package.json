@@ -1,11 +1,12 @@
 {
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.79.0",
+    "@supabase/supabase-js": "^2.49.0",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
     "next": "latest",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "recharts": "^2.15.0",
-    "jspdf": "^2.5.1",
-    "jspdf-autotable": "^3.8.2",
-    "@supabase/supabase-js": "^2.49.0"
+    "recharts": "^2.15.0"
   }
 }
