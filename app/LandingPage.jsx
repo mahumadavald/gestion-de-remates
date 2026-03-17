@@ -347,7 +347,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 /* SECTION */
 .section{padding:7rem 4rem;max-width:1200px;margin:0 auto;}
 .section-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.7rem;font-weight:700;color:var(--teal);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem;}
-.section-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;color:#1a1a1a;line-height:1.15;max-width:600px;margin-bottom:1rem;}
+.section-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;color:#1a1a1a;line-height:1.15;letter-spacing:-.02em;max-width:600px;margin-bottom:1rem;}
 .section-sub{font-size:.95rem;color:var(--gray);max-width:500px;line-height:1.7;}
 
 /* FEATURES */
