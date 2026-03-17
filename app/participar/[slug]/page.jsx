@@ -177,7 +177,7 @@ const CSS = `
   .mpill.sel  { border-color: var(--ac); background: rgba(6,182,212,.08); color: var(--ac); }
 
   /* ── File upload ── */
-  .file-zone { border: 2px dashed var(--b2); border-radius: 11px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all .15s; background: var(--s1); }
+  .file-zone { display: block; border: 2px dashed var(--b2); border-radius: 11px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all .15s; background: var(--s1); }
   .file-zone:hover { border-color: var(--ac); background: rgba(6,182,212,.04); }
   .file-zone.filled { border-color: var(--gr); border-style: solid; background: rgba(20,184,166,.04); }
   .file-zone input  { display: none; }
@@ -302,6 +302,10 @@ export default function ParticiparPage({ params }) {
     if (!rut || rutStatus !== "ok")   { setError("RUT inválido. Verifica el formato."); return; }
     if (!nombre.trim())               { setError("Ingresa tu nombre completo o razón social."); return; }
     if (!email.trim())                { setError("Ingresa tu correo electrónico."); return; }
+    if (!giro.trim())                 { setError("El giro o actividad es obligatorio para la facturación."); return; }
+    if (!direccion.trim())            { setError("La dirección es obligatoria para la facturación."); return; }
+    if (!banco)                       { setError("Selecciona el banco para la devolución de garantía."); return; }
+    if (!numCta.trim())               { setError("El número de cuenta es obligatorio para devolver la garantía."); return; }
     if (!remateId)                    { setError("Selecciona un remate para inscribirte."); return; }
     if (!comprobante)                 { setError("Debes adjuntar el comprobante de transferencia."); return; }
 
@@ -344,12 +348,14 @@ export default function ParticiparPage({ params }) {
           email:           email.trim(),
           telefono:        telefono.trim(),
           tipo:            giro ? "empresa" : "natural",
-          empresa:         giro || null,
+          empresa:         giro.trim() || null,
+          direccion:       direccion.trim() || null,
+          comuna:          comuna || null,
           estado:          "pendiente",
           modalidad:       modalidad,
           banco:           banco || null,
           tipo_cuenta:     tipoCta || null,
-          numero_cuenta:   numCta || null,
+          numero_cuenta:   numCta.trim() || null,
           comprobante_url: comprobanteUrl,
           suscrito:        suscribir,
         })
@@ -358,20 +364,41 @@ export default function ParticiparPage({ params }) {
 
       if (postorErr) throw new Error(postorErr.message);
 
-      // 4. Enviar email de confirmación via Supabase Edge Function (si está configurado)
+      // 4. Enviar emails de confirmación
+      const emailPayload = {
+        nombre,
+        numero:        String(numero).padStart(3,"0"),
+        remate:        remateSeleccionado?.nombre || "Remate",
+        fecha:         remateSeleccionado?.fecha || null,
+        casa:          casa.nombre,
+        email_cliente: email.trim(),
+        email_casa:    casa.email || null,
+        rut:           rut.trim(),
+        telefono:      telefono.trim(),
+        giro:          giro.trim(),
+        direccion:     direccion.trim(),
+        banco:         banco,
+        tipo_cuenta:   tipoCta,
+        numero_cuenta: numCta.trim(),
+      };
+      // Email al cliente
       try {
-        await supabase.functions.invoke("send-confirmation-email", {
-          body: {
-            to:      email,
-            nombre,
-            numero:  String(numero).padStart(3,"0"),
-            remate:  remateSeleccionado?.nombre || "Remate",
-            fecha:   remateSeleccionado?.fecha,
-            casa:    casa.nombre,
-            email_casa: casa.email || "",
-          }
+        await fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...emailPayload, tipo: "cliente" }),
         });
-      } catch(e) { /* email es opcional, no bloquea */ }
+      } catch(e) { /* no bloquea */ }
+      // Email al martillero/casa
+      if (casa.email) {
+        try {
+          await fetch("/api/send-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...emailPayload, tipo: "casa" }),
+          });
+        } catch(e) { /* no bloquea */ }
+      }
 
       setSuccess({
         numero: String(numero).padStart(3,"0"),
@@ -491,22 +518,16 @@ export default function ParticiparPage({ params }) {
           <>
             <div className="form-header fade-up" style={{textAlign:"center"}}>
               {/* Logo centrado arriba */}
-              {casa?.logo_url ? (
-                <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
+              <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
+                {casa?.logo_url ? (
                   <img src={casa.logo_url} alt={casa.nombre}
                     style={{maxHeight:64,maxWidth:220,objectFit:"contain",display:"block"}}/>
-                </div>
-              ) : (
-                <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
-                  <div style={{display:"inline-flex",alignItems:"center",gap:".6rem",padding:".4rem .85rem",background:"rgba(6,182,212,.08)",border:"1px solid rgba(6,182,212,.2)",borderRadius:8}}>
-                    <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
-                      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                      <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" fill="none"/>
-                    </svg>
-                    <span style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:".82rem",color:"#1a1a1a"}}>{casa?.nombre}</span>
+                ) : (
+                  <div style={{display:"inline-flex",alignItems:"center",padding:".5rem 1.1rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.18)",borderRadius:8}}>
+                    <span style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:".88rem",color:"#1a1a1a",letterSpacing:"-.01em"}}>{casa?.nombre}</span>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
               <div className="form-title">Inscripción de postor</div>
               <div className="form-sub">Completa el formulario para participar en nuestros remates.</div>
               {/* Separador */}
@@ -552,11 +573,11 @@ export default function ParticiparPage({ params }) {
                     <input className="field-input" placeholder="+56 9 1234 5678" value={telefono} onChange={e=>setTelefono(e.target.value)}/>
                   </div>
                   <div className="field-wrap">
-                    <label className="field-label">Giro / Actividad</label>
+                    <label className="field-label">Giro / Actividad *</label>
                     <input className="field-input" placeholder="Particular / Transporte / etc." value={giro} onChange={e=>setGiro(e.target.value)}/>
                   </div>
                   <div className="field-wrap">
-                    <label className="field-label">Dirección</label>
+                    <label className="field-label">Dirección *</label>
                     <input className="field-input" placeholder="Av. Los Aromos 234" value={direccion} onChange={e=>setDireccion(e.target.value)}/>
                   </div>
                   <div className="field-wrap">
@@ -572,7 +593,7 @@ export default function ParticiparPage({ params }) {
                 <div className="sec-title fade-up">Datos para devolución de garantía</div>
                 <div className="field-grid fade-up fade-up-1">
                   <div className="field-wrap">
-                    <label className="field-label">Banco</label>
+                    <label className="field-label">Banco *</label>
                     <select className="field-select" value={banco} onChange={e=>setBanco(e.target.value)}>
                       <option value="">— Selecciona banco —</option>
                       {BANCOS.map(b=><option key={b} value={b}>{b}</option>)}
@@ -587,7 +608,7 @@ export default function ParticiparPage({ params }) {
                     </select>
                   </div>
                   <div className="field-wrap field-full">
-                    <label className="field-label">Número de cuenta</label>
+                    <label className="field-label">Número de cuenta *</label>
                     <input className="field-input" style={{fontFamily:"var(--mono)"}} placeholder="123456789" value={numCta} onChange={e=>setNumCta(e.target.value)}/>
                   </div>
                 </div>
