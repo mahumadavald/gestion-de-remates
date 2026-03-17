@@ -371,15 +371,18 @@ export default function ParticiparPage({ params }) {
         remate:        remateSeleccionado?.nombre || "Remate",
         fecha:         remateSeleccionado?.fecha || null,
         casa:          casa.nombre,
+        logo_url:      casa.logo_url || null,
         email_cliente: email.trim(),
         email_casa:    casa.email || null,
         rut:           rut.trim(),
         telefono:      telefono.trim(),
         giro:          giro.trim(),
         direccion:     direccion.trim(),
+        comuna:        comuna || null,
         banco:         banco,
         tipo_cuenta:   tipoCta,
         numero_cuenta: numCta.trim(),
+        modalidad:     modalidad,
       };
       // Email al cliente
       try {
