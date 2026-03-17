@@ -2652,6 +2652,61 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           ? <span style={{color:"var(--gr)",fontWeight:600}}>✓ {wizItems.filter(x=>x.foto).length} foto{wizItems.filter(x=>x.foto).length!==1?"s":""} cargada{wizItems.filter(x=>x.foto).length!==1?"s":""}</span>
                           : <span style={{color:"var(--rd)"}}>⚠ Debes agregar al menos una foto</span>}</>}
                   </div>
+                  {/* ── IA inline: solo aparece cuando hay al menos 1 foto ── */}
+                  {(wizTipo==="VEHICULOS" ? Object.values(wizFotos).some(Boolean) : wizItems.some(x=>x.foto)) && (
+                    <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"linear-gradient(135deg,rgba(6,182,212,.06),rgba(20,184,166,.06))",border:"1px solid rgba(6,182,212,.2)",borderRadius:10}}>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:"1rem",flexWrap:"wrap"}}>
+                        <div>
+                          <div style={{fontSize:".75rem",fontWeight:700,color:"var(--ac)"}}>✨ Describir con IA <span style={{fontWeight:400,color:"var(--mu)",fontSize:".68rem"}}>(opcional)</span></div>
+                          <div style={{fontSize:".67rem",color:"var(--mu)",marginTop:".15rem"}}>Genera un título y descripción profesional a partir de la foto.</div>
+                        </div>
+                        <button
+                          disabled={aiLoteLoading}
+                          style={{fontSize:".72rem",fontWeight:700,padding:".35rem .85rem",borderRadius:7,border:"1px solid rgba(6,182,212,.35)",background:"linear-gradient(135deg,rgba(6,182,212,.12),rgba(20,184,166,.12))",color:"var(--ac)",cursor:aiLoteLoading?"not-allowed":"pointer",whiteSpace:"nowrap",opacity:aiLoteLoading?.6:1}}
+                          onClick={async()=>{
+                            setAiLoteLoading(true);
+                            setAiLoteResult(null);
+                            try {
+                              // Tomar la primera foto disponible
+                              let fotoFile = wizTipo==="VEHICULOS"
+                                ? Object.values(wizFotos).find(Boolean)
+                                : wizItems.find(x=>x.foto)?.foto;
+                              let imageBase64=null, mediaType=null;
+                              if(fotoFile){
+                                const buf = await fotoFile.arrayBuffer();
+                                imageBase64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+                                mediaType = fotoFile.type||"image/jpeg";
+                              }
+                              const res = await fetch("/api/ai/describe-lot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imageBase64,mediaType,name:wizDatos.nombre,category:wizTipo})});
+                              const data = await res.json();
+                              if(data.titulo||data.descripcion){
+                                setAiLoteResult(data);
+                              }
+                            } catch(e){ notify("Error al conectar con IA","err"); }
+                            setAiLoteLoading(false);
+                          }}
+                        >{aiLoteLoading?"Analizando...":"Generar descripción"}</button>
+                      </div>
+                      {aiLoteResult && (
+                        <div style={{marginTop:".75rem",display:"flex",flexDirection:"column",gap:".5rem"}}>
+                          {aiLoteResult.titulo && (
+                            <div style={{display:"flex",alignItems:"flex-start",gap:".5rem"}}>
+                              <span style={{fontSize:".67rem",color:"var(--mu)",whiteSpace:"nowrap",paddingTop:".1rem"}}>Título:</span>
+                              <span style={{fontSize:".73rem",color:"var(--wh2)",fontWeight:600,flex:1}}>{aiLoteResult.titulo}</span>
+                              <button onClick={()=>setWizDatos(f=>({...f,nombre:aiLoteResult.titulo}))} style={{fontSize:".65rem",padding:".2rem .5rem",borderRadius:5,border:"1px solid rgba(20,184,166,.3)",background:"rgba(20,184,166,.08)",color:"var(--gr)",cursor:"pointer",whiteSpace:"nowrap"}}>Usar</button>
+                            </div>
+                          )}
+                          {aiLoteResult.descripcion && (
+                            <div style={{display:"flex",alignItems:"flex-start",gap:".5rem"}}>
+                              <span style={{fontSize:".67rem",color:"var(--mu)",whiteSpace:"nowrap",paddingTop:".1rem"}}>Desc.:</span>
+                              <span style={{fontSize:".72rem",color:"var(--mu2)",flex:1,lineHeight:1.4}}>{aiLoteResult.descripcion}</span>
+                              <button onClick={()=>setWizDatos(f=>({...f,descripcion:aiLoteResult.descripcion}))} style={{fontSize:".65rem",padding:".2rem .5rem",borderRadius:5,border:"1px solid rgba(20,184,166,.3)",background:"rgba(20,184,166,.08)",color:"var(--gr)",cursor:"pointer",whiteSpace:"nowrap"}}>Usar</button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
               {/* ── PASO 3: Documentos ── */}
@@ -3257,10 +3312,6 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
               <div className="table-head">
                 <div className="table-title">{lotesMostrar.length} lotes{lotesFiltroRemate ? ` — ${REMATES_MERGED.find(r=>(r.supabaseId||r.id)===lotesFiltroRemate)?.name||""}` : ""}</div>
                 <div style={{display:"flex",gap:".5rem"}}>
-                  <button className="btn-sec" style={{fontSize:".7rem",background:"linear-gradient(135deg,rgba(6,182,212,.12),rgba(20,184,166,.12))",border:"1px solid rgba(6,182,212,.3)",color:"var(--ac)",fontWeight:700}}
-                    onClick={()=>{ setAiLoteImg(null); setAiLoteName(""); setAiLoteCat(""); setAiLoteResult(null); setAiLoteModal(true); }}>
-                    ✨ Describir con IA
-                  </button>
                   <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>notify("Exportando listado...","inf")}>Exportar PDF</button>
                 </div>
               </div>
