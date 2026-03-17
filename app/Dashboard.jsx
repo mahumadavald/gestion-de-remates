@@ -444,10 +444,10 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .fg{margin-bottom:.0;}
 .fg.full{grid-column:1/-1;}
 .fl{display:block;font-size:.68rem;font-weight:600;color:var(--mu2);margin-bottom:.26rem;letter-spacing:.01em;}
-.fi{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--b2);border-radius:7px;color:var(--wh2);font-size:.82rem;padding:.55rem .78rem;transition:border-color .15s;}
+.fi{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--wh2);font-size:.82rem;padding:.55rem .78rem;transition:border-color .15s;}
 .fi:focus{outline:none;border-color:var(--ac);background:rgba(56,178,246,.05);}
 .fi::placeholder{color:var(--mu);}
-.fsel{width:100%;background:#1F2937;border:1px solid var(--b2);border-radius:7px;color:var(--wh2);font-size:.82rem;padding:.55rem .78rem;cursor:pointer;}
+.fsel{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--wh2);font-size:.82rem;padding:.55rem .78rem;cursor:pointer;}
 .fsel:focus{outline:none;border-color:var(--ac);}
 .modal-actions{display:flex;gap:.6rem;margin-top:1.2rem;}
 /* Lote wizard steps */
@@ -1753,6 +1753,19 @@ function Dashboard({ session, onLogout }) {
   const [postorForm, setPostorForm] = useState({nombre:"",rut:"",email:"",telefono:"",tipo:"natural",empresa:"",garantia:300000});
   const resetPostorForm = () => setPostorForm({nombre:"",rut:"",email:"",telefono:"",tipo:"natural",empresa:"",garantia:300000});
   const [postorModal, setPostorModal] = useState(false);
+
+  // ── IA: Descripción de lote ──
+  const [aiLoteModal,   setAiLoteModal]   = useState(false);
+  const [aiLoteImg,     setAiLoteImg]     = useState(null);      // { base64, mediaType, preview }
+  const [aiLoteName,    setAiLoteName]    = useState("");
+  const [aiLoteCat,     setAiLoteCat]     = useState("");
+  const [aiLoteResult,  setAiLoteResult]  = useState(null);      // { titulo, descripcion }
+  const [aiLoteLoading, setAiLoteLoading] = useState(false);
+
+  // ── IA: Resumen post-remate ──
+  const [aiRemateModal,   setAiRemateModal]   = useState(null);  // null | remate object
+  const [aiRemateResult,  setAiRemateResult]  = useState(null);  // { resumen, destacados, conclusion }
+  const [aiRemateLoading, setAiRemateLoading] = useState(false);
 
   // ── Licencias (solo admin GR) ──
   const [dbLicencias, setDbLicencias] = useState([]);
@@ -3194,12 +3207,16 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                               setPage("sala"); notify("Sala abierta.","sold");
                             }}>Abrir sala</button>
                           )}
-                          {(r.estado==="finalizado"||r.estado==="cerrado") && (
+                          {(r.estado==="finalizado"||r.estado==="cerrado") && (<>
                             <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap",color:"var(--gr)",border:"1px solid rgba(20,184,166,.25)"}}
                               onClick={()=>{ setSelectedRemate(r.id||r.supabaseId); setPage("liquidac"); }}>
                               Ver liquidaciones
                             </button>
-                          )}
+                            <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap",background:"linear-gradient(135deg,rgba(6,182,212,.12),rgba(20,184,166,.12))",border:"1px solid rgba(6,182,212,.3)",color:"var(--ac)",fontWeight:700}}
+                              onClick={()=>{ setAiRemateResult(null); setAiRemateModal(r); }}>
+                              ✨ Resumen IA
+                            </button>
+                          </>)}
                         </div>
                       </td>
                     </tr>
@@ -3239,7 +3256,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
             <div className="table-card">
               <div className="table-head">
                 <div className="table-title">{lotesMostrar.length} lotes{lotesFiltroRemate ? ` — ${REMATES_MERGED.find(r=>(r.supabaseId||r.id)===lotesFiltroRemate)?.name||""}` : ""}</div>
-                <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>notify("Exportando listado...","inf")}>Exportar PDF</button>
+                <div style={{display:"flex",gap:".5rem"}}>
+                  <button className="btn-sec" style={{fontSize:".7rem",background:"linear-gradient(135deg,rgba(6,182,212,.12),rgba(20,184,166,.12))",border:"1px solid rgba(6,182,212,.3)",color:"var(--ac)",fontWeight:700}}
+                    onClick={()=>{ setAiLoteImg(null); setAiLoteName(""); setAiLoteCat(""); setAiLoteResult(null); setAiLoteModal(true); }}>
+                    ✨ Describir con IA
+                  </button>
+                  <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>notify("Exportando listado...","inf")}>Exportar PDF</button>
+                </div>
               </div>
               <table>
                 <thead><tr><th>Código</th><th>Artículo</th><th>Categoría</th><th>Base</th><th>Com.</th><th>Estado</th></tr></thead>
@@ -6086,6 +6109,154 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         )}
 
       </div>
+
+      {/* ══ MODAL IA: Descripción de lote ══ */}
+      {aiLoteModal && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.55)",zIndex:9000,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}
+          onClick={e=>{ if(e.target===e.currentTarget) setAiLoteModal(false); }}>
+          <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:16,width:"100%",maxWidth:520,padding:"1.75rem",position:"relative"}}>
+            <button onClick={()=>setAiLoteModal(false)} style={{position:"absolute",top:"1rem",right:"1rem",background:"transparent",border:"none",color:"var(--mu)",fontSize:"1.2rem",cursor:"pointer",lineHeight:1}}>×</button>
+            <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:"1.25rem"}}>
+              <span style={{fontSize:"1.3rem"}}>✨</span>
+              <div>
+                <div style={{fontFamily:"Syne,sans-serif",fontWeight:800,fontSize:"1rem",color:"var(--wh)"}}>Describir lote con IA</div>
+                <div style={{fontSize:".72rem",color:"var(--mu)"}}>Sube una foto y la IA genera título y descripción automáticamente</div>
+              </div>
+            </div>
+            <div style={{marginBottom:"1rem"}}>
+              <label style={{display:"block",fontSize:".7rem",fontWeight:600,color:"var(--mu2)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".4rem"}}>Foto del lote (opcional)</label>
+              <label style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:".5rem",padding:"1.25rem",background:"var(--s1)",border:`2px dashed ${aiLoteImg?"var(--ac)":"var(--b2)"}`,borderRadius:10,cursor:"pointer",transition:"border-color .2s"}}>
+                {aiLoteImg
+                  ? <img src={aiLoteImg.preview} alt="preview" style={{maxHeight:120,maxWidth:"100%",borderRadius:8,objectFit:"contain"}}/>
+                  : <>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--mu)" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                      <span style={{fontSize:".75rem",color:"var(--mu)"}}>Haz clic para subir imagen</span>
+                    </>
+                }
+                <input type="file" accept="image/*" style={{display:"none"}} onChange={e=>{
+                  const file = e.target.files?.[0];
+                  if(!file) return;
+                  const reader = new FileReader();
+                  reader.onload = ev => {
+                    const base64 = ev.target.result.split(",")[1];
+                    setAiLoteImg({ base64, mediaType: file.type, preview: ev.target.result });
+                  };
+                  reader.readAsDataURL(file);
+                }}/>
+              </label>
+              {aiLoteImg && <button onClick={()=>setAiLoteImg(null)} style={{marginTop:".4rem",fontSize:".68rem",color:"var(--mu)",background:"transparent",border:"none",cursor:"pointer"}}>× Quitar imagen</button>}
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".75rem",marginBottom:"1.25rem"}}>
+              <div>
+                <label style={{display:"block",fontSize:".7rem",fontWeight:600,color:"var(--mu2)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".35rem"}}>Nombre del artículo</label>
+                <input value={aiLoteName} onChange={e=>setAiLoteName(e.target.value)} placeholder="Ej: Toyota Hilux 2018" style={{width:"100%",background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:7,color:"var(--wh2)",fontSize:".82rem",padding:".6rem .8rem",outline:"none"}}/>
+              </div>
+              <div>
+                <label style={{display:"block",fontSize:".7rem",fontWeight:600,color:"var(--mu2)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".35rem"}}>Categoría</label>
+                <select value={aiLoteCat} onChange={e=>setAiLoteCat(e.target.value)} style={{width:"100%",background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:7,color:"var(--wh2)",fontSize:".82rem",padding:".6rem .8rem",outline:"none"}}>
+                  <option value="">Sin especificar</option>
+                  <option>Vehículo</option><option>Maquinaria</option><option>Inmueble</option>
+                  <option>Enseres</option><option>Electrodomésticos</option><option>Herramientas</option><option>Otro</option>
+                </select>
+              </div>
+            </div>
+            {aiLoteResult && (
+              <div style={{marginBottom:"1.25rem",padding:"1rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.2)",borderRadius:10}}>
+                <div style={{fontSize:".68rem",fontWeight:700,color:"var(--ac)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".5rem"}}>Resultado generado</div>
+                <div style={{fontWeight:700,color:"var(--wh)",marginBottom:".35rem",fontSize:".9rem"}}>{aiLoteResult.titulo}</div>
+                <div style={{fontSize:".8rem",color:"var(--mu2)",lineHeight:1.6}}>{aiLoteResult.descripcion}</div>
+                <button onClick={()=>{ navigator.clipboard.writeText(`${aiLoteResult.titulo}\n\n${aiLoteResult.descripcion}`); notify("Copiado al portapapeles","sold"); }}
+                  style={{marginTop:".75rem",fontSize:".7rem",padding:".35rem .8rem",background:"rgba(6,182,212,.15)",border:"1px solid rgba(6,182,212,.3)",borderRadius:6,color:"var(--ac)",fontWeight:600,cursor:"pointer"}}>
+                  Copiar texto
+                </button>
+              </div>
+            )}
+            <button disabled={aiLoteLoading||(!aiLoteImg&&!aiLoteName)} style={{width:"100%",padding:".8rem",background:aiLoteLoading||(!aiLoteImg&&!aiLoteName)?"var(--s3)":"var(--ac)",border:"none",borderRadius:8,color:"#fff",fontWeight:700,fontSize:".88rem",cursor:aiLoteLoading||(!aiLoteImg&&!aiLoteName)?"not-allowed":"pointer",transition:"background .2s"}}
+              onClick={async()=>{
+                setAiLoteLoading(true); setAiLoteResult(null);
+                try {
+                  const res = await fetch("/api/ai/describe-lot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imageBase64:aiLoteImg?.base64,mediaType:aiLoteImg?.mediaType,name:aiLoteName,category:aiLoteCat})});
+                  const data = await res.json();
+                  if(data.error) throw new Error(data.error);
+                  setAiLoteResult(data);
+                } catch(e){ notify("Error al generar: "+e.message,"inf"); }
+                finally{ setAiLoteLoading(false); }
+              }}>
+              {aiLoteLoading ? "Generando descripción…" : "✨ Generar con IA"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ══ MODAL IA: Resumen post-remate ══ */}
+      {aiRemateModal && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.55)",zIndex:9000,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}
+          onClick={e=>{ if(e.target===e.currentTarget){ setAiRemateModal(null); setAiRemateResult(null); } }}>
+          <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:16,width:"100%",maxWidth:560,padding:"1.75rem",position:"relative"}}>
+            <button onClick={()=>{ setAiRemateModal(null); setAiRemateResult(null); }} style={{position:"absolute",top:"1rem",right:"1rem",background:"transparent",border:"none",color:"var(--mu)",fontSize:"1.2rem",cursor:"pointer",lineHeight:1}}>×</button>
+            <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:"1.25rem"}}>
+              <span style={{fontSize:"1.3rem"}}>✨</span>
+              <div>
+                <div style={{fontFamily:"Syne,sans-serif",fontWeight:800,fontSize:"1rem",color:"var(--wh)"}}>Resumen ejecutivo IA</div>
+                <div style={{fontSize:".72rem",color:"var(--mu)"}}>{aiRemateModal.name} — {aiRemateModal.fecha}</div>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:".6rem",marginBottom:"1.25rem"}}>
+              {[
+                {label:"Modalidad",val:aiRemateModal.modal},
+                {label:"Lotes",val:aiRemateModal.lotes},
+                {label:"Recaudado",val:aiRemateModal.recaudado?`$${(aiRemateModal.recaudado/1000000).toFixed(1)}M`:"N/D"},
+              ].map(item=>(
+                <div key={item.label} style={{padding:".65rem .8rem",background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,textAlign:"center"}}>
+                  <div style={{fontSize:".62rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".2rem"}}>{item.label}</div>
+                  <div style={{fontWeight:700,color:"var(--wh2)",fontSize:".88rem"}}>{item.val}</div>
+                </div>
+              ))}
+            </div>
+            {aiRemateResult && (
+              <div style={{marginBottom:"1.25rem"}}>
+                <div style={{padding:"1rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.2)",borderRadius:10,marginBottom:".75rem"}}>
+                  <div style={{fontSize:".68rem",fontWeight:700,color:"var(--ac)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".5rem"}}>Resumen</div>
+                  <div style={{fontSize:".82rem",color:"var(--mu2)",lineHeight:1.65}}>{aiRemateResult.resumen}</div>
+                </div>
+                <div style={{padding:"1rem",background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:10,marginBottom:".75rem"}}>
+                  <div style={{fontSize:".68rem",fontWeight:700,color:"var(--gr)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".6rem"}}>Puntos destacados</div>
+                  {aiRemateResult.destacados?.map((d,i)=>(
+                    <div key={i} style={{display:"flex",alignItems:"flex-start",gap:".5rem",marginBottom:".4rem",fontSize:".8rem",color:"var(--mu2)"}}>
+                      <span style={{color:"var(--ac)",fontWeight:700,flexShrink:0}}>·</span>{d}
+                    </div>
+                  ))}
+                </div>
+                <div style={{padding:".8rem 1rem",background:"rgba(20,184,166,.06)",border:"1px solid rgba(20,184,166,.2)",borderRadius:8,fontSize:".8rem",color:"var(--gr)",fontStyle:"italic",lineHeight:1.55}}>
+                  {aiRemateResult.conclusion}
+                </div>
+                <button onClick={()=>{
+                  const txt = `RESUMEN — ${aiRemateModal.name}\n\n${aiRemateResult.resumen}\n\nPUNTOS DESTACADOS\n${aiRemateResult.destacados?.map(d=>`• ${d}`).join("\n")}\n\n${aiRemateResult.conclusion}`;
+                  navigator.clipboard.writeText(txt); notify("Resumen copiado","sold");
+                }} style={{marginTop:".75rem",fontSize:".7rem",padding:".35rem .8rem",background:"rgba(6,182,212,.15)",border:"1px solid rgba(6,182,212,.3)",borderRadius:6,color:"var(--ac)",fontWeight:600,cursor:"pointer"}}>
+                  Copiar resumen
+                </button>
+              </div>
+            )}
+            {!aiRemateResult && (
+              <button disabled={aiRemateLoading} style={{width:"100%",padding:".8rem",background:aiRemateLoading?"var(--s3)":"var(--ac)",border:"none",borderRadius:8,color:"#fff",fontWeight:700,fontSize:".88rem",cursor:aiRemateLoading?"not-allowed":"pointer"}}
+                onClick={async()=>{
+                  setAiRemateLoading(true);
+                  try {
+                    const res = await fetch("/api/ai/remate-summary",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({remate:aiRemateModal})});
+                    const data = await res.json();
+                    if(data.error) throw new Error(data.error);
+                    setAiRemateResult(data);
+                  } catch(e){ notify("Error al generar: "+e.message,"inf"); }
+                  finally{ setAiRemateLoading(false); }
+                }}>
+                {aiRemateLoading ? "Generando resumen…" : "✨ Generar resumen ejecutivo"}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
