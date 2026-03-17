@@ -3102,7 +3102,6 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 </label>
                 <button className="btn-primary" onClick={()=>setModal("nuevo-lote")}>+ Agregar lote</button>
               </>}
-              {page==="postores"  && <button className="btn-primary" onClick={()=>setModal("nuevo-postor")}>+ Registrar postor</button>}
               {page==="garantias" && <button className="btn-primary" onClick={()=>setModal("nueva-garantia")}>+ Registrar garantia</button>}
             </div>
           </div>
@@ -3122,14 +3121,12 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
             </div>
 
             {/* Acciones rápidas */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"1rem",marginBottom:"1.5rem"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:"1rem",marginBottom:"1.5rem"}}>
               {[
                 {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#38B2F6" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="3" width="18" height="16" rx="3"/><path d="M7 3v3M15 3v3M2 9h18"/><path d="M11 13v4M9 15h4"/></svg>,
                  label:"Nuevo remate", sub:"Crear y configurar", action:()=>setModal("nuevo-remate"), color:"rgba(56,178,246,.1)", border:"rgba(56,178,246,.2)"},
                 {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#14B8A6" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="2" width="16" height="18" rx="2"/><path d="M7 7h8M7 11h8M7 15h4"/><path d="M17 15v4M15 17h4"/></svg>,
                  label:"Agregar lote", sub:"Ingresar artículo", action:()=>setModal("nuevo-lote"), color:"rgba(20,184,166,.08)", border:"rgba(20,184,166,.2)"},
-                {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#f6ad55" strokeWidth="1.8" strokeLinecap="round"><circle cx="9" cy="7" r="4"/><path d="M2 19c0-4 3-6 7-6s7 2 7 6"/><path d="M17 10v4M15 12h4"/></svg>,
-                 label:"Registrar postor", sub:"Inscribir comprador", action:()=>setModal("nuevo-postor"), color:"rgba(246,173,85,.08)", border:"rgba(246,173,85,.2)"},
               ].map((a,i)=>(
                 <div key={i} onClick={a.action} style={{padding:"1.2rem",background:a.color,border:`1px solid ${a.border}`,borderRadius:12,cursor:"pointer",transition:"all .15s"}}
                   onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 4px 20px rgba(0,0,0,.2)"}}
