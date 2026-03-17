@@ -5156,7 +5156,6 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
             <div className="config-grid">
               {[
                 {title:"Casa de remates",fields:[["Nombre","Remates Ahumada"],["RUT","76.123.456-7"],["Direccion","Av. O'Higgins 456, Rancagua"],["Telefono","+56 72 234 5678"]]},
-                {title:"Configuracion de pujas",fields:[["Incremento por defecto","$500.000"],["Timer entre pujas","15 segundos"],["Tiempo maximo por lote","120 segundos"],["Comision por defecto","3%"]]},
               ].map((s,i) => (
                 <div className="config-card" key={i}>
                   <div className="config-title">{s.title}</div>
