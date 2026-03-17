@@ -838,7 +838,7 @@ const AUTH_CSS = `
 
   /* Left branding panel */
   .auth-left {
-    flex: 1;
+    flex: 0 0 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -898,7 +898,7 @@ const AUTH_CSS = `
 
   /* Right form panel */
   .auth-right {
-    width: 480px;
+    flex: 0 0 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
