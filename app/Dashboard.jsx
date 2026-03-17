@@ -5128,46 +5128,64 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         {/* ══ CONFIG ══ */}
         {page==="config" && (
           <div className="page">
-            {/* Links de esta casa — visible para todos */}
-            <div style={{marginBottom:"1.5rem",padding:"1rem 1.2rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12}}>
-              <div style={{fontSize:".75rem",fontWeight:700,color:"var(--wh2)",marginBottom:"1rem"}}>
-                Links de {session?.casaNombre||"tu casa de remates"}
-              </div>
-              {[
-                {label:"Inscripción pública de postores", url:`https://gestionderemates.cl/participar/${session?.casa||"rematesahumada"}`, color:"var(--ac)", icon:<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M4 7h6M7 4l3 3-3 3"/></svg>},
-                {label:"Pantalla de sala (proyector)", url:`https://gestionderemates.cl/display/${session?.casa||"rematesahumada"}`, color:"var(--gr)", icon:<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="1" y="2" width="12" height="9" rx="2"/><path d="M5 13h4M7 11v2"/></svg>},
-              ].map((l,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"center",gap:".75rem",padding:".65rem .9rem",background:i===0?"rgba(56,178,246,.05)":"rgba(20,184,166,.04)",border:`1px solid ${i===0?"rgba(56,178,246,.15)":"rgba(20,184,166,.15)"}`,borderRadius:8,marginBottom:".6rem"}}>
-                  <span style={{color:l.color,flexShrink:0}}>{l.icon}</span>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".15rem"}}>{l.label}</div>
-                    <code style={{fontSize:".73rem",color:l.color,fontFamily:"DM Mono,monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block"}}>{l.url}</code>
-                  </div>
-                  <button className="btn-sec" style={{fontSize:".65rem",flexShrink:0}}
-                    onClick={()=>{navigator.clipboard.writeText(l.url);notify("Link copiado.","sold");}}>Copiar</button>
-                  <a href={l.url} target="_blank" rel="noreferrer"
-                    style={{fontSize:".65rem",color:"var(--mu2)",textDecoration:"none",flexShrink:0,padding:".28rem .55rem",border:"1px solid var(--b2)",borderRadius:6}}>
-                    Abrir →
-                  </a>
-                </div>
-              ))}
-            </div>
+            <div style={{maxWidth:520,display:"flex",flexDirection:"column",gap:"1.1rem"}}>
 
-            <div className="config-grid">
-              {[
-                {title:"Casa de remates",fields:[["Nombre","Remates Ahumada"],["RUT","76.123.456-7"],["Direccion","Av. O'Higgins 456, Rancagua"],["Telefono","+56 72 234 5678"]]},
-              ].map((s,i) => (
-                <div className="config-card" key={i}>
-                  <div className="config-title">{s.title}</div>
-                  {s.fields.map(([l,v]) => (
-                    <div className="fg" key={l} style={{marginBottom:".7rem"}}>
-                      <label className="fl">{l}</label>
-                      <input className="fi" defaultValue={v}/>
-                    </div>
-                  ))}
-                  <button className="btn-primary" style={{marginTop:".3rem"}} onClick={()=>notify("Configuracion guardada.")}>Guardar cambios</button>
+              {/* Perfil */}
+              <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1.1rem 1.2rem"}}>
+                <div style={{fontSize:".72rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:"1rem"}}>Mi perfil</div>
+                <div className="fg" style={{marginBottom:".7rem"}}>
+                  <label className="fl">Nombre</label>
+                  <input className="fi" defaultValue={session?.nombre||""} placeholder="Tu nombre"/>
                 </div>
-              ))}
+                <div className="fg" style={{marginBottom:".7rem"}}>
+                  <label className="fl">Correo electrónico</label>
+                  <input className="fi" defaultValue={session?.email||""} placeholder="correo@ejemplo.cl" type="email"/>
+                </div>
+                <div className="fg" style={{marginBottom:"1rem"}}>
+                  <label className="fl">Rol</label>
+                  <input className="fi" value={session?.rol==="admin"?"Administrador":"Martillero"} readOnly style={{opacity:.7,cursor:"default"}}/>
+                </div>
+                <button className="btn-primary" style={{fontSize:".78rem"}} onClick={()=>notify("Perfil actualizado.")}>Guardar cambios</button>
+              </div>
+
+              {/* Cambiar contraseña */}
+              <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1.1rem 1.2rem"}}>
+                <div style={{fontSize:".72rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:"1rem"}}>Cambiar contraseña</div>
+                <div className="fg" style={{marginBottom:".7rem"}}>
+                  <label className="fl">Contraseña actual</label>
+                  <input className="fi" type="password" placeholder="••••••••"/>
+                </div>
+                <div className="fg" style={{marginBottom:".7rem"}}>
+                  <label className="fl">Nueva contraseña</label>
+                  <input className="fi" type="password" placeholder="••••••••"/>
+                </div>
+                <div className="fg" style={{marginBottom:"1rem"}}>
+                  <label className="fl">Confirmar nueva contraseña</label>
+                  <input className="fi" type="password" placeholder="••••••••"/>
+                </div>
+                <button className="btn-primary" style={{fontSize:".78rem"}} onClick={()=>notify("Contraseña actualizada.")}>Actualizar contraseña</button>
+              </div>
+
+              {/* Links rápidos */}
+              <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1.1rem 1.2rem"}}>
+                <div style={{fontSize:".72rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:"1rem"}}>Links de tu casa de remates</div>
+                {[
+                  {label:"Inscripción pública de postores", url:`https://gestionderemates.cl/participar/${session?.casa||"rematesahumada"}`, color:"var(--ac)"},
+                  {label:"Pantalla de sala (proyector)",    url:`https://gestionderemates.cl/display/${session?.casa||"rematesahumada"}`,    color:"var(--gr)"},
+                ].map((l,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:".75rem",padding:".6rem .85rem",background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,marginBottom:".5rem"}}>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:".63rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".1rem"}}>{l.label}</div>
+                      <code style={{fontSize:".7rem",color:l.color,fontFamily:"DM Mono,monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block"}}>{l.url}</code>
+                    </div>
+                    <button className="btn-sec" style={{fontSize:".63rem",flexShrink:0}}
+                      onClick={()=>{navigator.clipboard.writeText(l.url);notify("Link copiado.","sold");}}>Copiar</button>
+                    <a href={l.url} target="_blank" rel="noreferrer"
+                      style={{fontSize:".63rem",color:"var(--mu2)",textDecoration:"none",flexShrink:0,padding:".25rem .5rem",border:"1px solid var(--b2)",borderRadius:6}}>Abrir →</a>
+                  </div>
+                ))}
+              </div>
+
             </div>
           </div>
         )}
