@@ -36,24 +36,23 @@ const COMUNAS = ["ALGARROBO","ALHUE","ALTO BIOBIO","ALTO DEL CARMEN","ALTO HOSPI
 const BANCOS = ["BANCO DE CHILE","BANCO DEL ESTADO DE CHILE","SCOTIABANK","BCI","BCI MACH","BANCO BICE","HSBC BANK","BANCO SANTANDER","ITAU CHILE","BANCO SECURITY","BANCO FALABELLA","BANCO RIPLEY","BANCO CONSORCIO","COOPEUCH","TENPO PREPAGO S.A","MERCADO PAGO"];
 
 // ── CSS ───────────────────────────────────────────────────────────
-// ── CSS ───────────────────────────────────────────────────────────
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:   #0d1117;
-    --s1:   #1F2937;
-    --s2:   #243447;
-    --b1:   rgba(255,255,255,.07);
-    --b2:   rgba(255,255,255,.12);
-    --ac:   #38B2F6;
-    --acL:  #5ec4f8;
-    --wh:   #ffffff;
-    --wh2:  #e8f4fe;
-    --mu:   #4a6a8a;
-    --mu2:  #7a9ab8;
+    --bg:   #f4f4f2;
+    --s1:   #f4f4f2;
+    --s2:   #ffffff;
+    --b1:   #e5e7eb;
+    --b2:   #d1d5db;
+    --ac:   #06B6D4;
+    --acL:  #22d3ee;
+    --wh:   #1a1a1a;
+    --wh2:  #374151;
+    --mu:   #6b7280;
+    --mu2:  #9ca3af;
     --gr:   #14B8A6;
     --rd:   #ef4444;
     --yl:   #f59e0b;
@@ -62,7 +61,7 @@ const CSS = `
     --head: 'Syne', sans-serif;
   }
 
-  html, body { height: 100%; background: var(--bg); color: var(--wh2); font-family: var(--font); font-size: 16px; line-height: 1.6; overflow: hidden; }
+  html, body { height: 100%; background: var(--bg); color: var(--wh); font-family: var(--font); font-size: 16px; line-height: 1.6; overflow: hidden; }
 
   /* ── Layout 50/50 full height ── */
   .page-wrap {
@@ -78,11 +77,11 @@ const CSS = `
     .form-col  { height: auto !important; overflow: visible !important; }
   }
 
-  /* ── Hero col — scrollable ── */
+  /* ── Hero col — teal gradient ── */
   .hero-col {
     grid-column: 1;
-    background: linear-gradient(160deg, #1F2937 0%, #0d1117 60%);
-    border-right: 1px solid var(--b1);
+    background: linear-gradient(160deg, #0f4c5c 0%, #0891b2 55%, #06B6D4 100%);
+    border-right: 1px solid rgba(255,255,255,.1);
     padding: 2.5rem 2.5rem 3rem;
     display: flex; flex-direction: column; gap: 0;
     height: 100vh;
@@ -91,49 +90,49 @@ const CSS = `
   }
   .hero-col::-webkit-scrollbar { width: 4px; }
   .hero-col::-webkit-scrollbar-track { background: transparent; }
-  .hero-col::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+  .hero-col::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 2px; }
 
   .hero-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-  .hero-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .12; }
+  .hero-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .15; }
 
-  /* ── Form col — scrollable ── */
+  /* ── Form col — scrollable, white ── */
   .form-col {
     grid-column: 2;
     height: 100vh;
     overflow-y: auto;
     padding: 2.5rem 2.75rem 4rem;
+    background: var(--s2);
   }
   .form-col::-webkit-scrollbar { width: 4px; }
   .form-col::-webkit-scrollbar-track { background: transparent; }
-  .form-col::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+  .form-col::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 2px; }
 
-  /* ── Typography ── */
-  .hero-brand { font-family: var(--font); font-size: .82rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--mu2); }
-  .hero-title { font-family: var(--head); font-size: 1.85rem; font-weight: 800; color: var(--wh); line-height: 1.15; margin: .9rem 0 .55rem; }
-  .hero-sub   { font-size: .95rem; color: var(--mu2); line-height: 1.7; }
+  /* ── Hero Typography ── */
+  .hero-brand { font-family: var(--font); font-size: .82rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+  .hero-title { font-family: var(--head); font-size: 1.85rem; font-weight: 800; color: #ffffff; line-height: 1.15; margin: .9rem 0 .55rem; }
+  .hero-sub   { font-size: .95rem; color: rgba(255,255,255,.75); line-height: 1.7; }
 
   .hero-steps { margin-top: 2rem; }
   .step-item  { display: flex; align-items: flex-start; gap: .9rem; margin-bottom: 1.25rem; }
-  .step-num   { width: 28px; height: 28px; border-radius: 50%; background: rgba(56,178,246,.15); border: 1px solid rgba(56,178,246,.3); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: .72rem; font-weight: 700; color: var(--acL); flex-shrink: 0; margin-top: .15rem; }
-  .step-txt   { font-size: .88rem; color: var(--mu2); }
-  .step-ttl   { font-weight: 700; color: var(--wh2); margin-bottom: .1rem; font-size: .92rem; }
+  .step-num   { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: .72rem; font-weight: 700; color: #ffffff; flex-shrink: 0; margin-top: .15rem; }
+  .step-txt   { font-size: .88rem; color: rgba(255,255,255,.7); }
+  .step-ttl   { font-weight: 700; color: #ffffff; margin-bottom: .1rem; font-size: .92rem; }
 
-  .hero-note  { background: rgba(56,178,246,.06); border: 1px solid rgba(56,178,246,.15); border-radius: 10px; padding: .9rem 1rem; margin-top: 2rem; }
-  .hero-note-t{ font-size: .75rem; font-weight: 700; color: var(--acL); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .3rem; }
-  .hero-note-b{ font-size: .84rem; color: var(--mu2); line-height: 1.6; }
+  .hero-note  { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); border-radius: 10px; padding: .9rem 1rem; margin-top: 2rem; }
+  .hero-note-t{ font-size: .75rem; font-weight: 700; color: rgba(255,255,255,.9); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .3rem; }
+  .hero-note-b{ font-size: .84rem; color: rgba(255,255,255,.72); line-height: 1.6; }
 
   /* ── Form header ── */
   .form-header { margin-bottom: 1.75rem; }
-  .form-badge  { display: inline-flex; align-items: center; gap: .4rem; background: rgba(56,178,246,.08); border: 1px solid rgba(56,178,246,.2); border-radius: 20px; padding: .28rem .8rem; font-size: .72rem; font-weight: 700; color: var(--acL); letter-spacing: .05em; text-transform: uppercase; margin-bottom: .9rem; }
   .form-title  { font-family: var(--head); font-size: 1.65rem; font-weight: 800; color: var(--wh); line-height: 1.2; }
-  .form-sub    { font-size: .9rem; color: var(--mu2); margin-top: .45rem; }
+  .form-sub    { font-size: .9rem; color: var(--mu); margin-top: .45rem; }
 
   /* ── RUT step ── */
   .rut-wrap    { margin-bottom: 1.75rem; }
   .rut-label   { font-size: .78rem; font-weight: 700; color: var(--mu); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .5rem; }
   .rut-input-w { position: relative; }
-  .rut-input   { width: 100%; padding: .9rem 1rem .9rem 3rem; background: var(--s1); border: 2px solid var(--b2); border-radius: 10px; color: var(--wh); font-family: var(--mono); font-size: 1.05rem; font-weight: 500; outline: none; transition: border .2s; letter-spacing: .05em; }
-  .rut-input:focus { border-color: var(--acL); }
+  .rut-input   { width: 100%; padding: .9rem 1rem .9rem 3rem; background: var(--s2); border: 2px solid var(--b1); border-radius: 10px; color: var(--wh); font-family: var(--mono); font-size: 1.05rem; font-weight: 500; outline: none; transition: border .2s; letter-spacing: .05em; }
+  .rut-input:focus { border-color: var(--ac); }
   .rut-input.ok    { border-color: var(--gr); }
   .rut-input.err   { border-color: var(--rd); }
   .rut-icon  { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); pointer-events: none; }
@@ -149,73 +148,73 @@ const CSS = `
   .field-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
   .field-full  { grid-column: 1 / -1; }
   .field-wrap  { display: flex; flex-direction: column; gap: .35rem; }
-  .field-label { font-size: .76rem; font-weight: 600; color: var(--mu2); text-transform: uppercase; letter-spacing: .06em; }
-  .field-input, .field-select { width: 100%; padding: .75rem .95rem; background: var(--s1); border: 1.5px solid var(--b1); border-radius: 9px; color: var(--wh2); font-family: var(--font); font-size: .9rem; outline: none; transition: border .15s; }
-  .field-input:focus, .field-select:focus { border-color: var(--acL); }
-  .field-select option { background: var(--s1); }
-  .field-input::placeholder { color: var(--mu); }
+  .field-label { font-size: .76rem; font-weight: 600; color: var(--wh2); text-transform: uppercase; letter-spacing: .06em; }
+  .field-input, .field-select { width: 100%; padding: .75rem .95rem; background: var(--s2); border: 1.5px solid var(--b1); border-radius: 9px; color: var(--wh); font-family: var(--font); font-size: .9rem; outline: none; transition: border .15s; }
+  .field-input:focus, .field-select:focus { border-color: var(--ac); }
+  .field-select option { background: var(--s2); color: var(--wh); }
+  .field-input::placeholder { color: var(--mu2); }
 
   /* ── Remate card selector ── */
   .remate-grid { display: flex; flex-direction: column; gap: .65rem; }
   .remate-card { display: flex; align-items: center; gap: 1rem; padding: .9rem 1rem; background: var(--s1); border: 2px solid var(--b1); border-radius: 11px; cursor: pointer; transition: all .15s; }
-  .remate-card:hover { border-color: rgba(56,178,246,.35); background: rgba(56,178,246,.05); }
-  .remate-card.sel   { border-color: var(--acL); background: rgba(56,178,246,.08); }
-  .remate-card-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--mu); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; }
-  .remate-card.sel .remate-card-radio { border-color: var(--acL); background: var(--acL); }
-  .remate-card-dot   { width: 8px; height: 8px; border-radius: 50%; background: var(--wh); opacity: 0; transition: opacity .15s; }
+  .remate-card:hover { border-color: var(--ac); background: rgba(6,182,212,.04); }
+  .remate-card.sel   { border-color: var(--ac); background: rgba(6,182,212,.07); }
+  .remate-card-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--b2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; }
+  .remate-card.sel .remate-card-radio { border-color: var(--ac); background: var(--ac); }
+  .remate-card-dot   { width: 8px; height: 8px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .15s; }
   .remate-card.sel .remate-card-dot  { opacity: 1; }
   .remate-card-info  { flex: 1; min-width: 0; }
-  .remate-card-name  { font-weight: 700; font-size: .92rem; color: var(--wh2); }
-  .remate-card-meta  { font-size: .76rem; color: var(--mu2); margin-top: .1rem; }
+  .remate-card-name  { font-weight: 700; font-size: .92rem; color: var(--wh); }
+  .remate-card-meta  { font-size: .76rem; color: var(--mu); margin-top: .1rem; }
   .remate-card-badge { font-size: .64rem; font-weight: 700; padding: .15rem .5rem; border-radius: 5px; white-space: nowrap; }
   .rb-activo   { background: rgba(20,184,166,.1);  color: var(--gr); }
-  .rb-publicado{ background: rgba(56,178,246,.1);  color: var(--acL); }
+  .rb-publicado{ background: rgba(6,182,212,.1);   color: var(--ac); }
 
   /* ── Modalidad pills ── */
   .modal-pills { display: flex; gap: .6rem; }
-  .mpill { flex: 1; padding: .7rem; text-align: center; border-radius: 9px; border: 2px solid var(--b1); background: var(--s1); font-size: .84rem; font-weight: 600; color: var(--mu2); cursor: pointer; transition: all .15s; }
+  .mpill { flex: 1; padding: .7rem; text-align: center; border-radius: 9px; border: 2px solid var(--b1); background: var(--s2); font-size: .84rem; font-weight: 600; color: var(--mu); cursor: pointer; transition: all .15s; }
   .mpill:hover { border-color: var(--b2); }
-  .mpill.sel  { border-color: var(--acL); background: rgba(56,178,246,.1); color: var(--acL); }
+  .mpill.sel  { border-color: var(--ac); background: rgba(6,182,212,.08); color: var(--ac); }
 
   /* ── File upload ── */
   .file-zone { border: 2px dashed var(--b2); border-radius: 11px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all .15s; background: var(--s1); }
-  .file-zone:hover { border-color: rgba(56,178,246,.4); background: rgba(56,178,246,.04); }
+  .file-zone:hover { border-color: var(--ac); background: rgba(6,182,212,.04); }
   .file-zone.filled { border-color: var(--gr); border-style: solid; background: rgba(20,184,166,.04); }
   .file-zone input  { display: none; }
   .file-icon { margin-bottom: .6rem; }
-  .file-text { font-size: .84rem; color: var(--mu2); }
+  .file-text { font-size: .84rem; color: var(--mu); }
   .file-name { font-size: .86rem; font-weight: 600; color: var(--gr); }
-  .file-hint { font-size: .7rem; color: var(--mu); margin-top: .3rem; }
+  .file-hint { font-size: .7rem; color: var(--mu2); margin-top: .3rem; }
 
   /* ── Suscripcion ── */
   .check-row { display: flex; align-items: flex-start; gap: .75rem; cursor: pointer; }
-  .check-box { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--b2); background: var(--s1); flex-shrink: 0; margin-top: .15rem; display: flex; align-items: center; justify-content: center; transition: all .15s; }
-  .check-box.on { background: var(--acL); border-color: var(--acL); }
-  .check-label { font-size: .86rem; color: var(--mu2); line-height: 1.5; }
+  .check-box { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--b2); background: var(--s2); flex-shrink: 0; margin-top: .15rem; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .check-box.on { background: var(--ac); border-color: var(--ac); }
+  .check-label { font-size: .86rem; color: var(--mu); line-height: 1.5; }
 
   /* ── Submit ── */
-  .submit-btn { width: 100%; padding: 1rem; background: var(--acL); border: none; border-radius: 11px; color: #fff; font-family: var(--font); font-size: 1rem; font-weight: 700; cursor: pointer; letter-spacing: .02em; transition: all .2s; margin-top: 1.5rem; }
-  .submit-btn:hover:not(:disabled) { background: var(--ac); transform: translateY(-1px); box-shadow: 0 8px 25px rgba(56,178,246,.3); }
-  .submit-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .submit-btn { width: 100%; padding: 1rem; background: linear-gradient(135deg, #06B6D4, #14B8A6); border: none; border-radius: 11px; color: #fff; font-family: var(--font); font-size: 1rem; font-weight: 700; cursor: pointer; letter-spacing: .02em; transition: all .2s; margin-top: 1.5rem; }
+  .submit-btn:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); box-shadow: 0 8px 25px rgba(6,182,212,.3); }
+  .submit-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
 
   /* ── Monto garantía ── */
-  .monto-badge { display: flex; align-items: center; justify-content: space-between; padding: .8rem 1rem; background: rgba(245,158,11,.06); border: 1px solid rgba(245,158,11,.2); border-radius: 9px; margin-top: .75rem; }
+  .monto-badge { display: flex; align-items: center; justify-content: space-between; padding: .8rem 1rem; background: rgba(245,158,11,.06); border: 1px solid rgba(245,158,11,.25); border-radius: 9px; margin-top: .75rem; }
   .monto-label { font-size: .78rem; color: var(--yl); font-weight: 600; }
   .monto-val   { font-family: var(--mono); font-size: 1.05rem; font-weight: 700; color: var(--yl); }
 
   /* ── Error / Success ── */
-  .err-msg  { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25); border-radius: 9px; padding: .8rem 1rem; font-size: .84rem; color: #fca5a5; margin-top: .75rem; }
+  .err-msg  { background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.2); border-radius: 9px; padding: .8rem 1rem; font-size: .84rem; color: #ef4444; margin-top: .75rem; }
   .success-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3rem 1.5rem; min-height: 60vh; }
   .success-icon { width: 72px; height: 72px; border-radius: 50%; background: rgba(20,184,166,.1); border: 2px solid rgba(20,184,166,.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
   .success-title { font-family: var(--head); font-size: 1.5rem; font-weight: 800; color: var(--wh); margin-bottom: .75rem; }
-  .success-sub   { font-size: .92rem; color: var(--mu2); max-width: 340px; line-height: 1.7; }
-  .success-num   { font-family: var(--mono); font-size: 2rem; font-weight: 700; color: var(--acL); margin: 1.2rem 0 .4rem; }
-  .success-num-l { font-size: .74rem; color: var(--mu); text-transform: uppercase; letter-spacing: .1em; }
+  .success-sub   { font-size: .92rem; color: var(--mu); max-width: 340px; line-height: 1.7; }
+  .success-num   { font-family: var(--mono); font-size: 2rem; font-weight: 700; color: var(--ac); margin: 1.2rem 0 .4rem; }
+  .success-num-l { font-size: .74rem; color: var(--mu2); text-transform: uppercase; letter-spacing: .1em; }
 
   /* ── Loading ── */
-  .loading-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; gap: .75rem; color: var(--mu2); font-size: .9rem; }
+  .loading-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; gap: .75rem; color: var(--mu); font-size: .9rem; background: var(--bg); }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .spinner { width: 20px; height: 20px; border: 2px solid var(--b2); border-top-color: var(--acL); border-radius: 50%; animation: spin .8s linear infinite; }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--b1); border-top-color: var(--ac); border-radius: 50%; animation: spin .8s linear infinite; }
 
   /* ── Animations ── */
   @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
@@ -399,8 +398,8 @@ export default function ParticiparPage({ params }) {
     <div className="loading-wrap">
       <style>{CSS}</style>
       <div style={{textAlign:"center"}}>
-        <div style={{fontSize:"1.2rem",fontWeight:700,color:"#e2eaf4",marginBottom:".5rem"}}>Casa de remates no encontrada</div>
-        <div style={{fontSize:".85rem",color:"#4a6a8a"}}>Verifica la URL o contacta a GR Auction Software.</div>
+        <div style={{fontSize:"1.2rem",fontWeight:700,color:"var(--wh)",marginBottom:".5rem"}}>Casa de remates no encontrada</div>
+        <div style={{fontSize:".85rem",color:"var(--mu)"}}>Verifica la URL o contacta a GR Auction Software.</div>
       </div>
     </div>
   );
@@ -449,18 +448,18 @@ export default function ParticiparPage({ params }) {
           <div className="hero-note">
             <div className="hero-note-t">Importante</div>
             <div className="hero-note-b">
-              Tu inscripción quedará como <strong style={{color:"#e2eaf4"}}>pre-inscrita</strong> hasta que {casa?.nombre} verifique el pago de la garantía. Recibirás confirmación por correo.
+              Tu inscripción quedará como <strong style={{color:"rgba(255,255,255,.95)"}}>pre-inscrita</strong> hasta que {casa?.nombre} verifique el pago de la garantía. Recibirás confirmación por correo.
             </div>
           </div>
 
           {/* GR Branding al fondo */}
-          <div style={{marginTop:"2rem",paddingTop:"1.25rem",borderTop:"1px solid rgba(255,255,255,.06)",display:"flex",alignItems:"center",gap:".6rem"}}>
+          <div style={{marginTop:"2rem",paddingTop:"1.25rem",borderTop:"1px solid rgba(255,255,255,.15)",display:"flex",alignItems:"center",gap:".6rem"}}>
             <svg width="20" height="20" viewBox="0 0 36 36" fill="none">
-              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.5)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="rgba(255,255,255,.9)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.4)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
             </svg>
-            <span style={{fontFamily:"'Inter',sans-serif",fontSize:".7rem",color:"#4a6a8a",letterSpacing:".04em"}}>
-              Powered by <strong style={{color:"#5ec4f8"}}>GR Auction Software</strong> · gestionderemates.cl
+            <span style={{fontFamily:"'Inter',sans-serif",fontSize:".7rem",color:"rgba(255,255,255,.6)",letterSpacing:".04em"}}>
+              Powered by <strong style={{color:"rgba(255,255,255,.9)"}}>GR Auction Software</strong> · gestionderemates.cl
             </span>
           </div>
         </div>
@@ -477,12 +476,12 @@ export default function ParticiparPage({ params }) {
             <div className="success-num">#{success.numero}</div>
             <div className="success-num-l">Tu número de postor provisional</div>
             <div className="success-sub" style={{marginTop:"1rem"}}>
-              Te inscribiste en <strong style={{color:"#e2eaf4"}}>{success.remate}</strong>.
+              Te inscribiste en <strong style={{color:"var(--wh)"}}>{success.remate}</strong>.
               <br/><br/>
-              Tu participación será <strong style={{color:"#e2eaf4"}}>confirmada por {casa?.nombre}</strong> una vez que verifiquen tu comprobante de pago. Te notificaremos por correo a <strong style={{color:"#e2eaf4"}}>{email}</strong>.
+              Tu participación será <strong style={{color:"var(--wh)"}}>confirmada por {casa?.nombre}</strong> una vez que verifiquen tu comprobante de pago. Te notificaremos por correo a <strong style={{color:"var(--wh)"}}>{email}</strong>.
             </div>
-            <div style={{marginTop:"2rem",padding:"1rem 1.5rem",background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.15)",borderRadius:10,maxWidth:320,width:"100%",fontSize:".78rem",color:"#7a9ab8",lineHeight:1.7}}>
-              <div style={{fontWeight:700,color:"#e2eaf4",marginBottom:".3rem"}}>¿Dudas?</div>
+            <div style={{marginTop:"2rem",padding:"1rem 1.5rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.15)",borderRadius:10,maxWidth:320,width:"100%",fontSize:".78rem",color:"#6b7280",lineHeight:1.7}}>
+              <div style={{fontWeight:700,color:"#1a1a1a",marginBottom:".3rem"}}>¿Dudas?</div>
               Contacta a {casa?.nombre}<br/>
               {casa?.email && <>{casa.email}<br/></>}
               {casa?.telefono && <>{casa.telefono}</>}
@@ -499,19 +498,19 @@ export default function ParticiparPage({ params }) {
                 </div>
               ) : (
                 <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
-                  <div style={{display:"inline-flex",alignItems:"center",gap:".6rem",padding:".4rem .85rem",background:"rgba(56,178,246,.08)",border:"1px solid rgba(56,178,246,.2)",borderRadius:8}}>
+                  <div style={{display:"inline-flex",alignItems:"center",gap:".6rem",padding:".4rem .85rem",background:"rgba(6,182,212,.08)",border:"1px solid rgba(6,182,212,.2)",borderRadius:8}}>
                     <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
-                      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                      <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3" strokeLinecap="round" fill="none"/>
+                      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                      <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" fill="none"/>
                     </svg>
-                    <span style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:".82rem",color:"#e8f4fe"}}>{casa?.nombre}</span>
+                    <span style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:".82rem",color:"#1a1a1a"}}>{casa?.nombre}</span>
                   </div>
                 </div>
               )}
               <div className="form-title">Inscripción de postor</div>
               <div className="form-sub">Completa el formulario para participar en nuestros remates.</div>
               {/* Separador */}
-              <div style={{width:48,height:3,background:"linear-gradient(90deg,#38B2F6,#14B8A6)",borderRadius:2,margin:"1rem auto 0"}}/>
+              <div style={{width:48,height:3,background:"linear-gradient(90deg,#06B6D4,#14B8A6)",borderRadius:2,margin:"1rem auto 0"}}/>
             </div>
 
             {/* ── 1. Validación RUT ── */}
@@ -653,7 +652,7 @@ export default function ParticiparPage({ params }) {
                   ) : (
                     <>
                       <div className="file-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#4a6a8a" strokeWidth="1.6" strokeLinecap="round"><path d="M14 3v14M10 7l4-4 4 4"/><path d="M4 20v3a2 2 0 002 2h16a2 2 0 002-2v-3"/></svg></div>
-                      <div className="file-text">Arrastra tu comprobante aquí o <strong style={{color:"#5ec4f8"}}>haz click para seleccionar</strong></div>
+                      <div className="file-text">Arrastra tu comprobante aquí o <strong style={{color:"var(--ac)"}}>haz click para seleccionar</strong></div>
                       <div className="file-hint">PDF, JPG o PNG — máx. 5MB</div>
                     </>
                   )}
