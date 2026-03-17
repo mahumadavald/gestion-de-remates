@@ -355,8 +355,8 @@ button,input,select{font-family:'Inter',sans-serif;}
 
 /* ── MAIN ── */
 .main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 1.6rem;height:52px;background:var(--s1);border-bottom:1px solid var(--b1);flex-shrink:0;}
-.topbar-left{display:flex;align-items:center;gap:.8rem;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 1.6rem;height:52px;background:var(--s1);border-bottom:1px solid var(--b1);flex-shrink:0;flex-wrap:nowrap;overflow:hidden;}
+.topbar-left{display:flex;align-items:center;gap:.8rem;flex:1;min-width:0;overflow:hidden;}
 .topbar-title{font-size:.95rem;font-weight:700;color:var(--wh);}
 .topbar-right{display:flex;align-items:center;gap:.75rem;}
 .tb-live{display:flex;align-items:center;gap:.4rem;padding:.25rem .7rem;border-radius:5px;background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.25);font-size:.7rem;font-weight:600;color:var(--gr);}
@@ -596,7 +596,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .ctrl-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
 .ctrl-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:1.15rem;}
 .ctrl-card-title{font-size:.74rem;font-weight:700;color:var(--wh2);margin-bottom:.85rem;padding-bottom:.6rem;border-bottom:1px solid var(--b1);}
-.asel{width:100%;background:#1F2937;border:1px solid var(--b2);border-radius:7px;color:var(--wh2);font-size:.8rem;padding:.5rem .75rem;cursor:pointer;margin-bottom:.7rem;}
+.asel{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--wh);font-size:.8rem;padding:.5rem .75rem;cursor:pointer;margin-bottom:.7rem;}
 .asel:focus{outline:none;border-color:var(--ac);}
 .inc-ctrl{background:rgba(56,178,246,.05);border:1px solid rgba(56,178,246,.15);border-radius:8px;padding:.85rem;margin-bottom:.7rem;}
 .inc-title{font-size:.65rem;font-weight:700;color:var(--ac);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;}
@@ -3102,6 +3102,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 </label>
                 <button className="btn-primary" onClick={()=>setModal("nuevo-lote")}>+ Agregar lote</button>
               </>}
+              {page==="postores"  && <button className="btn-primary" onClick={()=>setModal("nuevo-postor")}>+ Agregar postor</button>}
               {page==="garantias" && <button className="btn-primary" onClick={()=>setModal("nueva-garantia")}>+ Registrar garantia</button>}
             </div>
           </div>
@@ -5848,7 +5849,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 <button className="btn-sec" onClick={()=>setPage("remates")}>← Volver</button>
                 <div className="topbar-title">Sala en vivo</div>
                 {/* Selector de remate en sala */}
-                <select className="fsel" style={{maxWidth:260,fontSize:".75rem"}}
+                <select className="fsel" style={{maxWidth:200,fontSize:".75rem",flexShrink:1,minWidth:0}}
                   value={salaRemateId||""}
                   onChange={async e=>{
                     const rid = e.target.value;
@@ -5881,7 +5882,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 {aState==="live" && <div className="tb-live"><div className="ldot"/>Transmitiendo</div>}
                 <button className="btn-sec" style={{fontSize:".7rem"}} title="Abrir pantalla para proyección en sala"
                   onClick={()=>window.open(`/display/${session?.casa||"rematesahumada"}`,"_blank","width=1280,height=720")}>
-                  📺 Pantalla sala
+                  Pantalla sala
                 </button>
                 {bids.every(b=>b.status==="sold"||bids[idx].count>0) && (
                   <button className="btn-primary" style={{fontSize:".7rem"}} onClick={cerrarRemateCompleto}>Cerrar remate</button>
