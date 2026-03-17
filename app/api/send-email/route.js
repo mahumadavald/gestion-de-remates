@@ -177,6 +177,49 @@ export async function POST(req) {
       results.push({ destino: "casa", ...r });
     }
 
+    // ── 3. Email de CONFIRMACIÓN (postor verificado por martillero) ──
+    if (tipo === "verificado" && email_cliente) {
+      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
+        <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+
+          ${buildHeader({
+            casa, logo_url,
+            titulo: "✅ Inscripción confirmada",
+            subtitulo: remate + (fechaStr ? " · " + fechaStr : ""),
+          })}
+
+          <div style="background:#ffffff;padding:28px 36px;">
+            <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${nombre}</strong></p>
+            <p style="font-size:14px;color:#6b7280;margin:0 0 20px;line-height:1.6;">Tu inscripción en <strong style="color:#1a1a1a;">${remate}</strong> ha sido <strong style="color:#14B8A6;">verificada y aprobada</strong>. Ya puedes participar en el remate.</p>
+
+            <!-- Número de postor -->
+            <div style="background:linear-gradient(135deg,#f0fdf4,#ecfeff);border:2px solid #14B8A6;border-radius:12px;text-align:center;padding:22px 16px;margin-bottom:24px;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#0f766e;margin-bottom:6px;">Tu número de postor</div>
+              <div style="font-size:52px;font-weight:800;color:#14B8A6;line-height:1;letter-spacing:-.02em;">#${numero}</div>
+              ${modalidad ? `<div style="font-size:13px;color:#6b7280;margin-top:8px;">Modalidad: <strong>${modalidad}</strong></div>` : ""}
+            </div>
+
+            <!-- Aviso aprobado -->
+            <div style="background:#f0fdf4;border-left:4px solid #14B8A6;border-radius:0 8px 8px 0;padding:14px 16px;margin:0 0 20px;font-size:13px;color:#065f46;line-height:1.6;">
+              <strong>¡Todo listo!</strong> Tu garantía fue verificada y tu inscripción está aprobada. Preséntate el día del remate con tu número de postor.
+            </div>
+
+            <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;">¿Dudas? Contacta directamente a ${casa}${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#06B6D4;'>" + email_casa + "</a>" : ""}.</p>
+          </div>
+
+          ${FOOTER}
+        </div>
+      </body></html>`;
+
+      const r = await sendMail({
+        to: email_cliente,
+        subject: `✅ Inscripción confirmada #${numero} — ${remate}`,
+        html,
+      });
+      results.push({ destino: "verificado", ...r });
+    }
+
     return NextResponse.json({ ok: true, results });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e.message }, { status: 500 });

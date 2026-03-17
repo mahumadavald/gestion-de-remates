@@ -3413,7 +3413,34 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                             <button className="btn-confirm" style={{fontSize:".65rem",padding:".22rem .55rem",background:"rgba(20,184,166,.1)",color:"var(--gr)",border:"1px solid rgba(20,184,166,.25)"}}
                               onClick={async()=>{
                                 const {error} = await supabase.from("postores").update({estado:"verificado"}).eq("id",p.supabaseId);
-                                if(!error){ const {data} = await supabase.from("postores").select("*").order("numero"); if(data) setDbPostores(data); notify(`${p.name} verificado.`,"sold"); }
+                                if(!error){
+                                  const {data} = await supabase.from("postores").select("*").order("numero");
+                                  if(data) setDbPostores(data);
+                                  notify(`${p.name} verificado.`,"sold");
+                                  // Enviar email de confirmación al postor
+                                  const casaInfo = dbLicencias.find(x => x.slug === session?.casa) || {};
+                                  const remateInfo = REMATES_MERGED.find(r => (r.supabaseId||r.id) === p.remate_id);
+                                  if(p.email){
+                                    try {
+                                      await fetch("/api/send-email", {
+                                        method: "POST",
+                                        headers: {"Content-Type":"application/json"},
+                                        body: JSON.stringify({
+                                          tipo:          "verificado",
+                                          nombre:        p.name,
+                                          numero:        String(p.nComprador).padStart(3,"0"),
+                                          remate:        remateInfo?.name || "Remate",
+                                          fecha:         remateInfo?.fecha || null,
+                                          casa:          casaInfo.nombre || session?.casaNombre || "",
+                                          logo_url:      casaInfo.logo_url || null,
+                                          email_cliente: p.email,
+                                          email_casa:    casaInfo.email || null,
+                                          modalidad:     p.modalidad || null,
+                                        }),
+                                      });
+                                    } catch(e) { /* no bloquea */ }
+                                  }
+                                }
                               }}>✓ Verificar</button>
                           )}
                           {p.estado==="verificado" && p.supabaseId && (
