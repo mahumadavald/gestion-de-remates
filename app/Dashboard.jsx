@@ -8,7 +8,6 @@ const SUPA_URL = "https://xqkfcqibukghtyfjcwfb.supabase.co";
 const SUPA_KEY = "sb_publishable_m2bABYE65JScB4oCJUBmFg_3eVzUuIR";
 const supabase = createClient(SUPA_URL, SUPA_KEY);
 
-const FONT = `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');`;
 
 // ── BRAND ─────────────────────────────────────────────────────────
 const GRLogo = ({ collapsed = false }) => (
@@ -342,8 +341,8 @@ th{padding:.5rem 1.2rem;text-align:left;font-size:.67rem;font-weight:600;letter-
 td{padding:.7rem 1.2rem;font-size:.78rem;border-bottom:1px solid rgba(26,58,92,.5);vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:rgba(56,178,246,.04);}
-.mono{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--mu2);}
-.gt{color:var(--ac);font-family:'DM Mono',monospace;font-size:.75rem;font-weight:500;}
+.mono{font-family:'Inter', sans-serif;font-size:.72rem;color:var(--mu2);}
+.gt{color:var(--ac);font-family:'Inter', sans-serif;font-size:.75rem;font-weight:500;}
 .pill{display:inline-flex;align-items:center;gap:.22rem;padding:.12rem .52rem;border-radius:12px;font-size:.66rem;font-weight:600;white-space:nowrap;}
 .p-activo      {background:rgba(56,178,246,.12);color:var(--ac);border:1px solid rgba(56,178,246,.28);}
 .p-cerrado     {background:rgba(90,127,168,.1); color:var(--mu2);border:1px solid var(--b1);}
@@ -432,7 +431,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .lph{width:100%;height:74px;border-radius:6px;background:var(--s3);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;margin-bottom:.38rem;font-size:.7rem;font-weight:500;color:var(--mu);}
 .ln{font-size:.62rem;font-weight:600;color:var(--mu);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.12rem;}
 .lnm{font-size:.78rem;font-weight:600;color:var(--wh2);line-height:1.3;margin-bottom:.25rem;}
-.lpr{font-family:'DM Mono',monospace;font-size:.74rem;color:var(--ac);font-weight:500;}
+.lpr{font-family:'Inter', sans-serif;font-size:.74rem;color:var(--ac);font-weight:500;}
 .lbdg{display:inline-block;padding:.07rem .36rem;border-radius:4px;font-size:.6rem;font-weight:600;margin-top:.2rem;}
 .blv{background:rgba(20,184,166,.1);color:var(--gr);}
 .bsd{background:rgba(56,178,246,.12);color:var(--ac);}
@@ -513,7 +512,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 @keyframes fdin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .fdb{font-size:.73rem;font-weight:600;color:var(--wh2);margin-bottom:.07rem;}
 .fdb.me{color:var(--gr);}
-.fda{font-family:'DM Mono',monospace;font-size:.78rem;font-weight:500;color:var(--ac);}
+.fda{font-family:'Inter', sans-serif;font-size:.78rem;font-weight:500;color:var(--ac);}
 .fdt{font-size:.62rem;color:var(--mu);}
 .fde{padding:2rem;text-align:center;font-size:.7rem;color:var(--mu);}
 
@@ -592,7 +591,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .adj-actions{display:flex;flex-direction:column;gap:.4rem;align-items:flex-end;}
 .p-saldo{background:rgba(246,173,85,.1);color:var(--yl);border:1px solid rgba(246,173,85,.25);}
 .p-pagado{background:rgba(20,184,166,.1);color:var(--gr);border:1px solid rgba(20,184,166,.25);}
-.exp-badge{display:inline-block;padding:.08rem .42rem;background:rgba(255,255,255,.04);border:1px solid var(--b1);border-radius:4px;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--mu2);}
+.exp-badge{display:inline-block;padding:.08rem .42rem;background:rgba(255,255,255,.04);border:1px solid var(--b1);border-radius:4px;font-family:'Inter', sans-serif;font-size:.62rem;color:var(--mu2);}
 .role-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:4px;font-size:.65rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
 .role-badge.admin{background:rgba(246,173,85,.12);color:#f6ad55;border:1px solid rgba(246,173,85,.25);}
 .role-badge.martillero{background:rgba(56,178,246,.12);color:#38B2F6;border:1px solid rgba(56,178,246,.25);}
@@ -616,7 +615,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .dev-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:1rem 1.2rem;margin-bottom:.6rem;display:grid;grid-template-columns:1fr auto;gap:.9rem;align-items:center;}
 .dev-name{font-size:.86rem;font-weight:700;color:var(--wh);margin-bottom:.1rem;}
 .dev-sub{font-size:.72rem;color:var(--mu2);}
-.dev-monto{font-family:'DM Mono',monospace;font-size:1rem;font-weight:700;color:var(--gr);margin-top:.15rem;}
+.dev-monto{font-family:'Inter', sans-serif;font-size:1rem;font-weight:700;color:var(--gr);margin-top:.15rem;}
 .dev-actions{display:flex;gap:.4rem;flex-direction:column;align-items:flex-end;}
 
 /* CHAT */
@@ -726,7 +725,6 @@ const PALETAS_ACTIVAS = [
 ];
 
 const AUTH_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -795,7 +793,7 @@ const AUTH_CSS = `
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
   .auth-brand-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 3.6rem;
     font-weight: 800;
     color: #1a1a1a;
@@ -844,7 +842,7 @@ const AUTH_CSS = `
   @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
 
   .auth-form-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 1.65rem;
     font-weight: 800;
     color: #1a1a1a;
@@ -901,7 +899,7 @@ const AUTH_CSS = `
   }
   .auth-input:focus { border-color: #06B6D4; background: rgba(6,182,212,.04); box-shadow: 0 0 0 3px rgba(6,182,212,.1); }
   .auth-input::placeholder { color: #9ca3af; }
-  .auth-input.mono { font-family: 'DM Mono', monospace; font-size: .95rem; letter-spacing: .12em; text-transform: uppercase; }
+  .auth-input.mono { font-family: 'Inter', sans-serif; font-size: .95rem; letter-spacing: .12em; text-transform: uppercase; }
   .auth-input.error { border-color: #e05252; background: rgba(224,82,82,.05); }
 
   .auth-error {
@@ -1245,7 +1243,7 @@ function BuyerView({ user, onLogout }) {
     .bv-root { min-height: 100vh; background: #0d1117; font-family: 'Inter', sans-serif; color: #e0eaf4; }
     .bv-header { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.5rem; background: #1F2937; border-bottom: 1px solid rgba(255,255,255,.07); position: sticky; top: 0; z-index: 10; }
     .bv-casa { font-size: .82rem; font-weight: 700; color: #e0eaf4; }
-    .bv-paleta { font-family: 'DM Mono', monospace; font-size: .75rem; background: rgba(56,178,246,.15); color: #38B2F6; border: 1px solid rgba(56,178,246,.3); padding: .18rem .55rem; border-radius: 4px; }
+    .bv-paleta { font-family: 'Inter', sans-serif; font-size: .75rem; background: rgba(56,178,246,.15); color: #38B2F6; border: 1px solid rgba(56,178,246,.3); padding: .18rem .55rem; border-radius: 4px; }
     .bv-logout { background: transparent; border: 1px solid rgba(255,255,255,.1); color: #4a6a8a; font-size: .72rem; padding: .3rem .7rem; border-radius: 5px; cursor: pointer; }
     .bv-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,.07); background: #1F2937; padding: 0 1.5rem; }
     .bv-tab { padding: .75rem 1.2rem; font-size: .78rem; font-weight: 600; color: #4a6a8a; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; display: flex; align-items: center; gap: .4rem; }
@@ -1262,15 +1260,15 @@ function BuyerView({ user, onLogout }) {
     .bv-lote-desc { font-size: .78rem; color: #5a7fa8; line-height: 1.6; }
     .bv-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .7rem; margin-top: .9rem; }
     .bv-stat { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; padding: .65rem .8rem; text-align: center; }
-    .bv-stat-v { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 700; color: #38B2F6; }
+    .bv-stat-v { font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 700; color: #38B2F6; }
     .bv-stat-v.gr { color: #14B8A6; }
     .bv-stat-v.yl { color: #f6ad55; }
     .bv-stat-l { font-size: .62rem; color: #4a6a8a; margin-top: .15rem; text-transform: uppercase; letter-spacing: .04em; }
     .bv-hist-row { display: flex; align-items: center; justify-content: space-between; padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.04); }
     .bv-hist-row:last-child { border-bottom: none; }
-    .bv-hist-num { font-size: .75rem; font-weight: 600; color: #4a6a8a; font-family: 'DM Mono', monospace; }
-    .bv-hist-monto { font-size: .8rem; font-weight: 700; color: #e0eaf4; font-family: 'DM Mono', monospace; }
-    .bv-hist-time { font-size: .68rem; color: #364d70; font-family: 'DM Mono', monospace; }
+    .bv-hist-num { font-size: .75rem; font-weight: 600; color: #4a6a8a; font-family: 'Inter', sans-serif; }
+    .bv-hist-monto { font-size: .8rem; font-weight: 700; color: #e0eaf4; font-family: 'Inter', sans-serif; }
+    .bv-hist-time { font-size: .68rem; color: #364d70; font-family: 'Inter', sans-serif; }
     .bv-info { padding: .85rem 1.1rem; background: rgba(56,178,246,.05); border: 1px solid rgba(56,178,246,.12); border-radius: 10px; font-size: .76rem; color: #4a6a8a; line-height: 1.7; }
     /* Catálogo */
     .bv-search { width:100%; padding:.65rem .9rem; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:9px; color:#e0eaf4; font-family:'Inter',sans-serif; font-size:.85rem; outline:none; }
@@ -1287,7 +1285,7 @@ function BuyerView({ user, onLogout }) {
     .bv-lote-info { padding:.75rem; }
     .bv-lote-card-name { font-size:.83rem; font-weight:700; color:#e0eaf4; margin-bottom:.3rem; line-height:1.3; }
     .bv-lote-card-base { font-size:.72rem; color:#4a6a8a; }
-    .bv-lote-card-price { font-family:'DM Mono',monospace; font-size:.9rem; font-weight:700; color:#14B8A6; }
+    .bv-lote-card-price { font-family:'Inter', sans-serif; font-size:.9rem; font-weight:700; color:#14B8A6; }
     .bv-watch-btn { background:transparent; border:none; cursor:pointer; padding:.2rem; color:#4a6a8a; transition:color .15s; }
     .bv-watch-btn.on { color:#f6ad55; }
     .bv-empty { text-align:center; padding:2rem; color:#4a6a8a; font-size:.82rem; }
@@ -1298,7 +1296,6 @@ function BuyerView({ user, onLogout }) {
 
   return (
     <div className="bv-root">
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');`}</style>
       <style>{BUYER_CSS}</style>
 
       {/* Header */}
@@ -1333,7 +1330,7 @@ function BuyerView({ user, onLogout }) {
           <div className="bv-card">
             <div className="bv-card-header">
               <span className="bv-card-title">Lote en subasta</span>
-              <span style={{fontSize:".68rem",color:"#4a6a8a",fontFamily:"DM Mono,monospace"}}>
+              <span style={{fontSize:".68rem",color:"#4a6a8a",fontFamily:"Inter,sans-serif"}}>
                 {loteActivo ? `Lote ${loteActivo.orden||"—"}` : "Esperando..."}
               </span>
             </div>
@@ -1537,7 +1534,7 @@ function SpotterView({ user, onLogout }) {
     .sp-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;background:#1F2937;border-bottom:1px solid rgba(255,255,255,.07);}
     .sp-body{flex:1;max-width:600px;width:100%;margin:0 auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;}
     .sp-lote-sel{display:flex;flex-direction:column;gap:.4rem;}
-    .sp-input{width:100%;padding:.85rem 1rem;background:#1F2937;border:2px solid rgba(255,255,255,.1);border-radius:10px;color:#e0eaf4;font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;outline:none;text-align:center;letter-spacing:.05em;}
+    .sp-input{width:100%;padding:.85rem 1rem;background:#1F2937;border:2px solid rgba(255,255,255,.1);border-radius:10px;color:#e0eaf4;font-family:'Inter', sans-serif;font-size:1.1rem;font-weight:700;outline:none;text-align:center;letter-spacing:.05em;}
     .sp-input:focus{border-color:#38B2F6;}
     .sp-input.big{font-size:1.5rem;padding:1.1rem 1rem;}
     .sp-label{font-size:.68rem;font-weight:700;color:#4a6a8a;text-transform:uppercase;letter-spacing:.07em;text-align:center;}
@@ -1550,7 +1547,6 @@ function SpotterView({ user, onLogout }) {
 
   return (
     <div className="sp-root">
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=DM+Mono:wght@400;500;700&display=swap');`}</style>
       <style>{SP_CSS}</style>
       {notif&&<div className="sp-notif">{notif}</div>}
 
@@ -1574,7 +1570,7 @@ function SpotterView({ user, onLogout }) {
           ) : (
             <div style={{textAlign:"center",color:"#4a6a8a",fontSize:".82rem",padding:".5rem"}}>Esperando que el martillero inicie el remate...</div>
           )}
-          {lote&&<div style={{marginTop:".6rem",fontSize:".75rem",color:"#38B2F6",fontFamily:"'DM Mono',monospace",textAlign:"center",fontWeight:700}}>Base: {fmt(lote.base||0)}</div>}
+          {lote&&<div style={{marginTop:".6rem",fontSize:".75rem",color:"#38B2F6",fontFamily:"'Inter', sans-serif",textAlign:"center",fontWeight:700}}>Base: {fmt(lote.base||0)}</div>}
         </div>
 
         {/* Registro de puja */}
@@ -1602,8 +1598,8 @@ function SpotterView({ user, onLogout }) {
             <div style={{fontSize:".65rem",fontWeight:700,color:"#4a6a8a",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".65rem"}}>Últimas pujas registradas</div>
             {ultPujas.map((p,i)=>(
               <div key={i} className="sp-hist-row">
-                <span style={{fontFamily:"'DM Mono',monospace",fontWeight:700,color:"#38B2F6",fontSize:".8rem"}}>Paleta {p.paleta}</span>
-                <span style={{fontFamily:"'DM Mono',monospace",fontWeight:700,color:"#e0eaf4",fontSize:".85rem"}}>{p.monto}</span>
+                <span style={{fontFamily:"'Inter', sans-serif",fontWeight:700,color:"#38B2F6",fontSize:".8rem"}}>Paleta {p.paleta}</span>
+                <span style={{fontFamily:"'Inter', sans-serif",fontWeight:700,color:"#e0eaf4",fontSize:".85rem"}}>{p.monto}</span>
                 <span style={{fontSize:".68rem",color:"#4a6a8a"}}>{p.hora}</span>
               </div>
             ))}
@@ -2517,7 +2513,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     </div>
                     {wizTipo==="VEHICULOS" && <>
                       <div className="fg"><label className="fl">Patente</label>
-                        <input className="fi" placeholder="ABCD-12" style={{fontFamily:"DM Mono,monospace",fontWeight:700}} value={wizDatos.patente} onChange={e=>setWizDatos(f=>({...f,patente:e.target.value}))}/>
+                        <input className="fi" placeholder="ABCD-12" style={{fontFamily:"Inter,sans-serif",fontWeight:700}} value={wizDatos.patente} onChange={e=>setWizDatos(f=>({...f,patente:e.target.value}))}/>
                       </div>
                       <div className="fg"><label className="fl">Año</label>
                         <input className="fi" placeholder="2020" value={wizDatos.year} onChange={e=>setWizDatos(f=>({...f,year:e.target.value}))}/>
@@ -2537,7 +2533,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           placeholder={loteForm.tipoRemate==="judicial"?"10 (fijo por ley)":loteForm.tipoRemate==="concursal"?"7 (fijo por ley)":"Ej: 5"}
                           value={loteForm.comCustom}
                           readOnly={loteForm.tipoRemate==="judicial"||loteForm.tipoRemate==="concursal"}
-                          style={{fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--ac)",opacity:loteForm.tipoRemate!=="privado"?.7:1,cursor:loteForm.tipoRemate!=="privado"?"not-allowed":"text"}}
+                          style={{fontFamily:"Inter,sans-serif",fontWeight:700,color:"var(--ac)",opacity:loteForm.tipoRemate!=="privado"?.7:1,cursor:loteForm.tipoRemate!=="privado"?"not-allowed":"text"}}
                           onChange={e=>loteForm.tipoRemate==="privado"&&setLoteForm(f=>({...f,comCustom:e.target.value}))}/>
                         {loteForm.tipoRemate!=="privado" && (
                           <div style={{fontSize:".68rem",color:"var(--yl)",marginTop:".3rem",display:"flex",alignItems:"center",gap:".3rem"}}>
@@ -2750,7 +2746,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   </select>
                 </div>
                 <div className="fg full"><label className="fl">N° comprador asignado</label>
-                  <div className="fi" style={{fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--ac)",background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.25)",display:"flex",alignItems:"center"}}>
+                  <div className="fi" style={{fontFamily:"Inter,sans-serif",fontWeight:700,color:"var(--ac)",background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.25)",display:"flex",alignItems:"center"}}>
                     #{String((dbPostores.length||POSTORES_MERGED.length)+1).padStart(2,"0")} — asignado automáticamente
                   </div>
                 </div>
@@ -3343,7 +3339,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     .filter(p=>(filterTab==="todos"||p.estado===filterTab)&&(!lotesFiltroRemate||(p.remateId===lotesFiltroRemate||p.remate_id===lotesFiltroRemate)))
                     .map(p => (
                     <tr key={p.id}>
-                      <td><span style={{fontFamily:"DM Mono,monospace",fontSize:".8rem",fontWeight:700,color:"var(--ac)"}}>#{String(p.nComprador).padStart(2,"0")}</span></td>
+                      <td><span style={{fontFamily:"Inter,sans-serif",fontSize:".8rem",fontWeight:700,color:"var(--ac)"}}>#{String(p.nComprador).padStart(2,"0")}</span></td>
                       <td style={{fontWeight:600}}>{p.name}</td>
                       <td className="mono" style={{fontSize:".73rem"}}>{p.rut}</td>
                       <td style={{fontSize:".73rem",color:"var(--mu2)"}}>{p.email}</td>
@@ -3429,7 +3425,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
             <div style={{marginTop:"1.2rem",padding:".85rem 1rem",background:"rgba(37,99,235,.05)",border:"1px solid rgba(37,99,235,.15)",borderRadius:10,display:"flex",alignItems:"center",gap:".75rem",flexWrap:"wrap"}}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M4 7h6M7 4l3 3-3 3"/></svg>
               <span style={{fontSize:".75rem",color:"var(--mu2)"}}>Link de inscripción pública:</span>
-              <code style={{fontSize:".73rem",color:"var(--ac)",fontFamily:"DM Mono,monospace",flex:1}}>
+              <code style={{fontSize:".73rem",color:"var(--ac)",fontFamily:"Inter,sans-serif",flex:1}}>
                 gestionderemates.cl/participar/{session?.casa||"rematesahumada"}
               </code>
               <button className="btn-sec" style={{fontSize:".68rem"}} onClick={()=>{
@@ -3527,18 +3523,18 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         {tramosArr.map((t,i)=>(
                           <tr key={i} style={{borderBottom:"1px solid var(--b1)"}}>
                             <td style={{padding:".55rem .75rem"}}>
-                              <span style={{padding:".15rem .5rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:5,fontFamily:"DM Mono,monospace",fontSize:".72rem",fontWeight:700,color:"var(--ac)"}}>{t.pct}%</span>
+                              <span style={{padding:".15rem .5rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:5,fontFamily:"Inter,sans-serif",fontSize:".72rem",fontWeight:700,color:"var(--ac)"}}>{t.pct}%</span>
                             </td>
-                            <td style={{padding:".55rem .75rem",textAlign:"center",fontFamily:"DM Mono,monospace",fontSize:".76rem",color:"var(--mu2)"}}>{t.lotes.length}</td>
-                            <td style={{padding:".55rem .75rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontSize:".73rem",color:"var(--wh2)"}}>{fmt(t.subtotalMonto)}</td>
-                            <td style={{padding:".55rem .75rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontSize:".76rem",fontWeight:700,color:"var(--gr)"}}>{fmt(t.subtotalCom)}</td>
+                            <td style={{padding:".55rem .75rem",textAlign:"center",fontFamily:"Inter,sans-serif",fontSize:".76rem",color:"var(--mu2)"}}>{t.lotes.length}</td>
+                            <td style={{padding:".55rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".73rem",color:"var(--wh2)"}}>{fmt(t.subtotalMonto)}</td>
+                            <td style={{padding:".55rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".76rem",fontWeight:700,color:"var(--gr)"}}>{fmt(t.subtotalCom)}</td>
                           </tr>
                         ))}
                       </tbody>
                       <tfoot>
                         <tr style={{borderTop:"2px solid var(--b2)",background:"rgba(255,255,255,.02)"}}>
                           <td colSpan={3} style={{padding:".65rem .75rem",textAlign:"right",fontSize:".72rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase",letterSpacing:".04em"}}>Total neto comisiones</td>
-                          <td style={{padding:".65rem .75rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontSize:".85rem",fontWeight:900,color:"var(--gr)"}}>{fmt(totalComNeto)}</td>
+                          <td style={{padding:".65rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".85rem",fontWeight:900,color:"var(--gr)"}}>{fmt(totalComNeto)}</td>
                         </tr>
                       </tfoot>
                     </table>
@@ -3559,14 +3555,14 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         ].map(([l,v,c],i)=>(
                           <tr key={i} style={{borderBottom:"1px solid var(--b1)"}}>
                             <td style={{padding:".65rem .9rem",fontSize:".76rem",fontStyle:"italic",color:"var(--mu2)"}}>{l}</td>
-                            <td style={{padding:".65rem .9rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontWeight:700,color:c,fontSize:".8rem"}}>{v}</td>
+                            <td style={{padding:".65rem .9rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:700,color:c,fontSize:".8rem"}}>{v}</td>
                           </tr>
                         ))}
                       </tbody>
                       <tfoot>
                         <tr style={{borderTop:"2px solid rgba(246,173,85,.3)",background:"rgba(246,173,85,.04)"}}>
                           <td style={{padding:".7rem .9rem",textAlign:"right",fontSize:".72rem",fontWeight:700,color:"var(--yl)",textTransform:"uppercase",letterSpacing:".04em"}}>Suma extras + IVA</td>
-                          <td style={{padding:".7rem .9rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontSize:".88rem",fontWeight:900,color:"var(--yl)"}}>{fmt(sumaExtras)}</td>
+                          <td style={{padding:".7rem .9rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".88rem",fontWeight:900,color:"var(--yl)"}}>{fmt(sumaExtras)}</td>
                         </tr>
                       </tfoot>
                     </table>
@@ -3578,7 +3574,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".2rem"}}>Ingreso neto empresa</div>
                           <div style={{fontSize:".68rem",color:"var(--mu)",lineHeight:1.4}}>Com. netas + G.adm. − IVA</div>
                         </div>
-                        <div style={{fontFamily:"DM Mono,monospace",fontSize:"1.2rem",fontWeight:900,color:"var(--ac)"}}>
+                        <div style={{fontFamily:"Inter,sans-serif",fontSize:"1.2rem",fontWeight:900,color:"var(--ac)"}}>
                           {fmt(totalComNeto + totalGAdm - iva)}
                         </div>
                       </div>
@@ -3603,7 +3599,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                       <tr key={i}>
                         <td>
                           <div style={{display:"flex",alignItems:"center",gap:".4rem"}}>
-                            <div style={{width:22,height:22,borderRadius:5,background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"DM Mono,monospace",fontSize:".6rem",fontWeight:800,color:"var(--ac)",flexShrink:0}}>
+                            <div style={{width:22,height:22,borderRadius:5,background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,sans-serif",fontSize:".6rem",fontWeight:800,color:"var(--ac)",flexShrink:0}}>
                               {String(postorD?.nComprador||"?").padStart(2,"0")}
                             </div>
                             <span style={{fontSize:".76rem",fontWeight:600}}>{a.postor}</span>
@@ -3614,10 +3610,10 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           {loteR?.tipoRemate && <span className="pill" style={{fontSize:".6rem",background:"rgba(56,178,246,.08)",color:"var(--ac)",border:"1px solid rgba(56,178,246,.2)"}}>{COMISIONES[loteR.tipoRemate]?.label||loteR.tipoRemate}</span>}
                         </td>
                         <td className="gt">{fmt(a.monto||0)}</td>
-                        <td style={{fontFamily:"DM Mono,monospace",fontSize:".73rem",fontWeight:700,color:"var(--ac)",textAlign:"center"}}>{a.comPct??3}%</td>
-                        <td style={{fontFamily:"DM Mono,monospace",fontSize:".73rem",fontWeight:700,color:"var(--gr)",textAlign:"right"}}>{fmt(com)}</td>
-                        <td style={{fontFamily:"DM Mono,monospace",fontSize:".73rem",color: gadm?"var(--yl)":"var(--mu)",textAlign:"right"}}>{gadm?fmt(gadm):"—"}</td>
-                        <td style={{fontFamily:"DM Mono,monospace",fontSize:".78rem",fontWeight:800,color:"var(--wh2)",textAlign:"right"}}>{fmt(com+gadm)}</td>
+                        <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:700,color:"var(--ac)",textAlign:"center"}}>{a.comPct??3}%</td>
+                        <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:700,color:"var(--gr)",textAlign:"right"}}>{fmt(com)}</td>
+                        <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",color: gadm?"var(--yl)":"var(--mu)",textAlign:"right"}}>{gadm?fmt(gadm):"—"}</td>
+                        <td style={{fontFamily:"Inter,sans-serif",fontSize:".78rem",fontWeight:800,color:"var(--wh2)",textAlign:"right"}}>{fmt(com+gadm)}</td>
                       </tr>
                     );
                   })}
@@ -3630,9 +3626,9 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     return (
                       <tr style={{borderTop:"2px solid var(--b2)",background:"rgba(255,255,255,.02)"}}>
                         <td colSpan={5} style={{padding:".6rem .75rem",textAlign:"right",fontSize:".7rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase"}}>Totales</td>
-                        <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontWeight:900,color:"var(--gr)",fontSize:".82rem"}}>{fmt(tCom)}</td>
-                        <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--yl)",fontSize:".82rem"}}>{fmt(tGadm)}</td>
-                        <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontWeight:900,color:"var(--ac)",fontSize:".85rem"}}>{fmt(tCom+tGadm)}</td>
+                        <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:900,color:"var(--gr)",fontSize:".82rem"}}>{fmt(tCom)}</td>
+                        <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:700,color:"var(--yl)",fontSize:".82rem"}}>{fmt(tGadm)}</td>
+                        <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:900,color:"var(--ac)",fontSize:".85rem"}}>{fmt(tCom+tGadm)}</td>
                       </tr>
                     );
                   })()}
@@ -3983,12 +3979,12 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           : adjVendedor.map((a,i)=>(
                             <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:".5rem .85rem",borderBottom:"1px solid var(--b1)"}}>
                               <span style={{fontSize:".75rem",color:"var(--wh2)",fontWeight:600}}>{a.lote}</span>
-                              <span style={{fontFamily:"DM Mono,monospace",fontSize:".76rem",color:"var(--gr)",fontWeight:700}}>{fmt(a.monto||0)}</span>
+                              <span style={{fontFamily:"Inter,sans-serif",fontSize:".76rem",color:"var(--gr)",fontWeight:700}}>{fmt(a.monto||0)}</span>
                             </div>
                           ))}
                         <div style={{display:"flex",justifyContent:"space-between",padding:".5rem .85rem",background:"rgba(20,184,166,.05)"}}>
                           <span style={{fontSize:".72rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase"}}>Total ventas</span>
-                          <span style={{fontFamily:"DM Mono,monospace",fontWeight:800,color:"var(--gr)"}}>{fmt(totalVentas)}</span>
+                          <span style={{fontFamily:"Inter,sans-serif",fontWeight:800,color:"var(--gr)"}}>{fmt(totalVentas)}</span>
                         </div>
                       </div>
 
@@ -4003,12 +3999,12 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         ].map(([k,v],i)=>(
                           <div key={i} style={{display:"flex",justifyContent:"space-between",padding:".5rem .85rem",borderBottom:"1px solid var(--b1)"}}>
                             <span style={{fontSize:".73rem",color:"var(--mu2)"}}>{k}</span>
-                            <span style={{fontFamily:"DM Mono,monospace",fontSize:".73rem",color:"var(--rd)",fontWeight:600}}>− {fmt(v)}</span>
+                            <span style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",color:"var(--rd)",fontWeight:600}}>− {fmt(v)}</span>
                           </div>
                         ))}
                         <div style={{display:"flex",justifyContent:"space-between",padding:".5rem .85rem",background:"rgba(245,101,101,.05)"}}>
                           <span style={{fontSize:".72rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase"}}>Total descuentos</span>
-                          <span style={{fontFamily:"DM Mono,monospace",fontWeight:800,color:"var(--rd)"}}>− {fmt(totalDescuentos)}</span>
+                          <span style={{fontFamily:"Inter,sans-serif",fontWeight:800,color:"var(--rd)"}}>− {fmt(totalDescuentos)}</span>
                         </div>
                       </div>
 
@@ -4018,7 +4014,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           <div style={{fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".2rem"}}>Líquido a pagar al vendedor</div>
                           <div style={{fontSize:".68rem",color:"var(--mu)"}}>Ventas − comisiones − IVA</div>
                         </div>
-                        <div style={{fontFamily:"DM Mono,monospace",fontSize:"1.4rem",fontWeight:900,color:liquidoAPagar>=0?"var(--ac)":"var(--rd)"}}>
+                        <div style={{fontFamily:"Inter,sans-serif",fontSize:"1.4rem",fontWeight:900,color:liquidoAPagar>=0?"var(--ac)":"var(--rd)"}}>
                           {fmt(liquidoAPagar)}
                         </div>
                       </div>
@@ -4166,7 +4162,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                                   <div style={{fontSize:".62rem",color:"var(--mu)"}}>{t.lotes} lote{t.lotes>1?"s":""} · Paleta #{String(posData?.nComprador||"—").padStart(2,"0")}</div>
                                 </div>
                               </div>
-                              <div style={{fontFamily:"DM Mono,monospace",fontSize:".8rem",fontWeight:700,color:"var(--wh2)"}}>{fmt(t.monto)}</div>
+                              <div style={{fontFamily:"Inter,sans-serif",fontSize:".8rem",fontWeight:700,color:"var(--wh2)"}}>{fmt(t.monto)}</div>
                             </div>
                             <div style={{height:4,borderRadius:2,background:"var(--b1)",overflow:"hidden"}}>
                               <div style={{height:"100%",width:`${pct}%`,background:i===0?"var(--yl)":i===1?"var(--ac)":"var(--mu)",borderRadius:2,transition:"width .4s"}}/>
@@ -4191,12 +4187,12 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                       ].map(([l,v,c,b])=>(
                         <div key={l} style={{display:"flex",justifyContent:"space-between",padding:".52rem 0",borderBottom:"1px solid var(--b1)",fontSize:".76rem"}}>
                           <span style={{color:"var(--mu2)"}}>{l}</span>
-                          <span style={{fontFamily:"DM Mono,monospace",fontWeight:700,color:c}}>{v}</span>
+                          <span style={{fontFamily:"Inter,sans-serif",fontWeight:700,color:c}}>{v}</span>
                         </div>
                       ))}
                       <div style={{display:"flex",justifyContent:"space-between",padding:".7rem 0 .2rem",marginTop:".2rem"}}>
                         <span style={{fontSize:".88rem",fontWeight:800,color:"var(--wh)"}}>BRUTO TOTAL:</span>
-                        <span style={{fontFamily:"DM Mono,monospace",fontSize:"1.05rem",fontWeight:800,color:"var(--ac)"}}>{fmt(bruto)}</span>
+                        <span style={{fontFamily:"Inter,sans-serif",fontSize:"1.05rem",fontWeight:800,color:"var(--ac)"}}>{fmt(bruto)}</span>
                       </div>
                     </div>
                   </div>
@@ -4265,9 +4261,9 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         <td className="mono">{Math.round(r.lotes*.78)}</td>
                         <td className="mono" style={{color:"var(--rd)"}}>{Math.round(r.lotes*.22)}</td>
                         <td className="gt">{fmt(r.recaudado)}</td>
-                        <td style={{color:"var(--gr)",fontFamily:"DM Mono,monospace",fontSize:".73rem",fontWeight:600}}>{fmt(com)}</td>
-                        <td style={{color:"var(--mu2)",fontFamily:"DM Mono,monospace",fontSize:".73rem"}}>{fmt(iva)}</td>
-                        <td style={{color:"var(--ac)",fontFamily:"DM Mono,monospace",fontSize:".73rem",fontWeight:700}}>{fmt(r.recaudado+com+iva)}</td>
+                        <td style={{color:"var(--gr)",fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:600}}>{fmt(com)}</td>
+                        <td style={{color:"var(--mu2)",fontFamily:"Inter,sans-serif",fontSize:".73rem"}}>{fmt(iva)}</td>
+                        <td style={{color:"var(--ac)",fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:700}}>{fmt(r.recaudado+com+iva)}</td>
                         <td><span className={`pill p-${r.estado}`}>{r.estado.charAt(0).toUpperCase()+r.estado.slice(1)}</span></td>
                       </tr>
                     );
@@ -4339,15 +4335,15 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                             </div>
                             <div style={{display:"flex",gap:"1.5rem",flexShrink:0}}>
                               <div style={{textAlign:"right"}}>
-                                <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--ac)"}}>{fmt(s.totalVendido)}</div>
+                                <div style={{fontFamily:"Inter,sans-serif",fontSize:".95rem",fontWeight:700,color:"var(--ac)"}}>{fmt(s.totalVendido)}</div>
                                 <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Total vendido</div>
                               </div>
                               <div style={{textAlign:"right"}}>
-                                <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--gr)"}}>{fmt(s.promLote)}</div>
+                                <div style={{fontFamily:"Inter,sans-serif",fontSize:".95rem",fontWeight:700,color:"var(--gr)"}}>{fmt(s.promLote)}</div>
                                 <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Prom/lote</div>
                               </div>
                               <div style={{textAlign:"right"}}>
-                                <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--wh2)"}}>{s.totalLotes}</div>
+                                <div style={{fontFamily:"Inter,sans-serif",fontSize:".95rem",fontWeight:700,color:"var(--wh2)"}}>{s.totalLotes}</div>
                                 <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Lotes totales</div>
                               </div>
                             </div>
@@ -4372,7 +4368,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         ].map((c,i)=>(
                           <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,padding:".85rem 1rem",borderTop:`3px solid ${c.color}`}}>
                             <div style={{fontSize:".62rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".4rem"}}>{c.label}</div>
-                            <div style={{fontFamily:"DM Mono,monospace",fontSize:"1.1rem",fontWeight:800,color:c.color}}>{c.val}</div>
+                            <div style={{fontFamily:"Inter,sans-serif",fontSize:"1.1rem",fontWeight:800,color:c.color}}>{c.val}</div>
                           </div>
                         ))}
                       </div>
@@ -4393,12 +4389,12 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           <tbody>
                             {clienteActivo.remates.map(r=>(
                               <tr key={r.id} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}>
-                                <td style={{padding:".55rem .85rem",fontFamily:"DM Mono,monospace",fontSize:".72rem",color:"var(--mu2)"}}>{r.id}</td>
+                                <td style={{padding:".55rem .85rem",fontFamily:"Inter,sans-serif",fontSize:".72rem",color:"var(--mu2)"}}>{r.id}</td>
                                 <td style={{padding:".55rem .85rem",fontSize:".78rem",fontWeight:600,color:"var(--wh2)"}}>{r.name}</td>
-                                <td style={{padding:".55rem .85rem",fontFamily:"DM Mono,monospace",fontSize:".72rem",color:"var(--mu2)"}}>{r.fecha}</td>
-                                <td style={{padding:".55rem .85rem",fontFamily:"DM Mono,monospace",fontSize:".78rem",color:"var(--wh2)"}}>{r.lotes}</td>
+                                <td style={{padding:".55rem .85rem",fontFamily:"Inter,sans-serif",fontSize:".72rem",color:"var(--mu2)"}}>{r.fecha}</td>
+                                <td style={{padding:".55rem .85rem",fontFamily:"Inter,sans-serif",fontSize:".78rem",color:"var(--wh2)"}}>{r.lotes}</td>
                                 <td style={{padding:".55rem .85rem",fontSize:".72rem",color:"var(--mu2)"}}>{r.modal}</td>
-                                <td style={{padding:".55rem .85rem",fontFamily:"DM Mono,monospace",fontSize:".78rem",fontWeight:700,color:"var(--ac)"}}>{fmt(r.recaudado)}</td>
+                                <td style={{padding:".55rem .85rem",fontFamily:"Inter,sans-serif",fontSize:".78rem",fontWeight:700,color:"var(--ac)"}}>{fmt(r.recaudado)}</td>
                                 <td style={{padding:".55rem .85rem"}}><span className={`pill p-${r.estado}`}>{r.estado.charAt(0).toUpperCase()+r.estado.slice(1)}</span></td>
                               </tr>
                             ))}
@@ -4587,7 +4583,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                             </div>
                             <div>
                               <div style={{fontSize:".82rem",fontWeight:700,color:"var(--wh2)"}}>{u.nombre}</div>
-                              <div style={{fontSize:".68rem",color:"var(--mu2)",fontFamily:"DM Mono,monospace"}}>{u.email}</div>
+                              <div style={{fontSize:".68rem",color:"var(--mu2)",fontFamily:"Inter,sans-serif"}}>{u.email}</div>
                             </div>
                           </div>
                         </td>
@@ -4948,7 +4944,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                       </div>
                       <div style={{flex:1}}>
                         <div style={{fontWeight:800,fontSize:".92rem",color:"var(--wh2)"}}>{casa.nombre}</div>
-                        <div style={{fontSize:".7rem",color:"var(--mu2)",marginTop:".1rem",fontFamily:"DM Mono,monospace"}}>slug: {casa.slug}</div>
+                        <div style={{fontSize:".7rem",color:"var(--mu2)",marginTop:".1rem",fontFamily:"Inter,sans-serif"}}>slug: {casa.slug}</div>
                       </div>
                       <span style={{fontSize:".65rem",fontWeight:700,padding:".2rem .55rem",borderRadius:20,
                         background:casa.licencia_estado==="activo"?"rgba(20,184,166,.1)":casa.licencia_estado==="suspendido"?"rgba(246,173,85,.1)":"rgba(255,255,255,.04)",
@@ -4964,7 +4960,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M4 7h6M7 4l3 3-3 3"/></svg>
                         <div style={{flex:1,minWidth:0}}>
                           <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".15rem"}}>Página de inscripción pública</div>
-                          <code style={{fontSize:".73rem",color:"var(--ac)",fontFamily:"DM Mono,monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block"}}>
+                          <code style={{fontSize:".73rem",color:"var(--ac)",fontFamily:"Inter,sans-serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block"}}>
                             {BASE_URL}/participar/{casa.slug}
                           </code>
                         </div>
@@ -4981,7 +4977,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--gr)" strokeWidth="1.8" strokeLinecap="round"><rect x="1" y="2" width="12" height="9" rx="2"/><path d="M5 13h4M7 11v2"/></svg>
                         <div style={{flex:1,minWidth:0}}>
                           <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".15rem"}}>Pantalla sala / display</div>
-                          <code style={{fontSize:".73rem",color:"var(--gr)",fontFamily:"DM Mono,monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block"}}>
+                          <code style={{fontSize:".73rem",color:"var(--gr)",fontFamily:"Inter,sans-serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block"}}>
                             {BASE_URL}/display/{casa.slug}
                           </code>
                         </div>
@@ -5046,7 +5042,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         <input className="fi" placeholder="Remates García Ltda." value={casaForm.nombre}
                           onChange={e=>setCasaForm(f=>({...f,nombre:e.target.value}))}/>
                         {casaForm.nombre && (
-                          <div style={{marginTop:".4rem",fontSize:".7rem",color:"var(--mu2)",fontFamily:"DM Mono,monospace"}}>
+                          <div style={{marginTop:".4rem",fontSize:".7rem",color:"var(--mu2)",fontFamily:"Inter,sans-serif"}}>
                             Slug: <span style={{color:"var(--ac)"}}>{toSlug(casaForm.nombre)}</span>
                             <span style={{color:"var(--mu)",marginLeft:".5rem"}}>→ gestionderemates.cl/participar/{toSlug(casaForm.nombre)}</span>
                           </div>
@@ -5290,7 +5286,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   {cerrados.map(r=><option key={r.id} value={r.id}>{r.name} · {r.fecha} · {r.casa}</option>)}
                 </select>
                 {remateActual && (
-                  <span style={{fontSize:".72rem",color:"var(--mu2)",whiteSpace:"nowrap",fontFamily:"DM Mono,monospace"}}>{remateActual.name}</span>
+                  <span style={{fontSize:".72rem",color:"var(--mu2)",whiteSpace:"nowrap",fontFamily:"Inter,sans-serif"}}>{remateActual.name}</span>
                 )}
               </div>
 
@@ -5304,7 +5300,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 ].map((s,i)=>(
                   <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,padding:".8rem 1rem",borderTop:`3px solid ${s.color}`}}>
                     <div style={{fontSize:".62rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".3rem"}}>{s.label}</div>
-                    <div style={{fontFamily:"DM Mono,monospace",fontSize:"1.4rem",fontWeight:800,color:s.color}}>{s.val}</div>
+                    <div style={{fontFamily:"Inter,sans-serif",fontSize:"1.4rem",fontWeight:800,color:s.color}}>{s.val}</div>
                   </div>
                 ))}
               </div>
@@ -5328,9 +5324,9 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     <tbody>
                       {COMPRADORES_REMATE.map((c,i)=>(
                         <tr key={i} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}>
-                          <td style={{padding:".6rem .9rem",fontFamily:"DM Mono,monospace",fontSize:".82rem",fontWeight:700,color:"var(--ac)"}}>{c.nPart}</td>
+                          <td style={{padding:".6rem .9rem",fontFamily:"Inter,sans-serif",fontSize:".82rem",fontWeight:700,color:"var(--ac)"}}>{c.nPart}</td>
                           <td style={{padding:".6rem .9rem",fontSize:".82rem",fontWeight:600,color:"var(--wh2)"}}>{c.nombre}</td>
-                          <td style={{padding:".6rem .9rem",fontFamily:"DM Mono,monospace",fontSize:".78rem",color:c.garantia>0?"var(--gr)":"var(--mu)"}}>{c.garantia>0?fmt(c.garantia):"Sin garantía"}</td>
+                          <td style={{padding:".6rem .9rem",fontFamily:"Inter,sans-serif",fontSize:".78rem",color:c.garantia>0?"var(--gr)":"var(--mu)"}}>{c.garantia>0?fmt(c.garantia):"Sin garantía"}</td>
                           <td style={{padding:".6rem .9rem",fontSize:".72rem",color:"var(--mu2)"}}>{c.formaPago}</td>
                           <td style={{padding:".6rem .9rem"}}>
                             {c.pagado
@@ -5382,9 +5378,9 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                       {NO_COMPRADORES_REMATE.map((c,i)=>{
                         return (
                           <tr key={i} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}>
-                            <td style={{padding:".6rem .9rem",fontFamily:"DM Mono,monospace",fontSize:".82rem",fontWeight:700,color:"var(--mu2)"}}>{c.nPart}</td>
+                            <td style={{padding:".6rem .9rem",fontFamily:"Inter,sans-serif",fontSize:".82rem",fontWeight:700,color:"var(--mu2)"}}>{c.nPart}</td>
                             <td style={{padding:".6rem .9rem",fontSize:".82rem",fontWeight:600,color:"var(--wh2)"}}>{c.nombre}</td>
-                            <td style={{padding:".6rem .9rem",fontFamily:"DM Mono,monospace",fontSize:".78rem",color:c.garantia>0?"var(--yl)":"var(--mu)"}}>{c.garantia>0?fmt(c.garantia):"$0"}</td>
+                            <td style={{padding:".6rem .9rem",fontFamily:"Inter,sans-serif",fontSize:".78rem",color:c.garantia>0?"var(--yl)":"var(--mu)"}}>{c.garantia>0?fmt(c.garantia):"$0"}</td>
                             <td style={{padding:".6rem .9rem",fontSize:".72rem",color:"var(--mu2)"}}>{c.formaPago}</td>
                             <td style={{padding:".6rem .9rem"}}>
                               {c.devolucion==="N/A" && (
@@ -5490,7 +5486,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
               <div style={{flex:1}}>
                 <div style={{fontSize:".82rem",fontWeight:700,color:"var(--wh2)",marginBottom:".2rem"}}>
                   {liqReview
-                    ? <span>Liquidaciones — <span style={{color:"var(--ac)"}}>{liqReview.remateNombre||"Remate"}</span> &nbsp;·&nbsp; <span style={{fontFamily:"DM Mono,monospace",color:"var(--mu2)"}}>{liqReview.fecha}</span> &nbsp;·&nbsp; {liqReview.compradores.length} compradores</span>
+                    ? <span>Liquidaciones — <span style={{color:"var(--ac)"}}>{liqReview.remateNombre||"Remate"}</span> &nbsp;·&nbsp; <span style={{fontFamily:"Inter,sans-serif",color:"var(--mu2)"}}>{liqReview.fecha}</span> &nbsp;·&nbsp; {liqReview.compradores.length} compradores</span>
                     : "Liquidaciones por comprador"
                   }
                 </div>
@@ -5554,23 +5550,23 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                       return (
                         <tr key={ci} style={{cursor:"pointer"}} onClick={()=>setLiqExpanded(liqExpanded===ci?null:ci)}>
                           <td>
-                            <div style={{width:30,height:30,borderRadius:6,background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"DM Mono,monospace",fontSize:".78rem",fontWeight:800,color:"var(--ac)"}}>
+                            <div style={{width:30,height:30,borderRadius:6,background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,sans-serif",fontSize:".78rem",fontWeight:800,color:"var(--ac)"}}>
                               {String(c.key).padStart(2,"0")}
                             </div>
                           </td>
                           <td style={{fontWeight:600,color:"var(--wh2)",textTransform:"uppercase"}}>
                             {p?.razonSocial||c.lotes[0]?.postor||"—"}
                           </td>
-                          <td style={{fontFamily:"DM Mono,monospace",fontSize:".78rem",color:"var(--mu2)",textAlign:"center"}}>
+                          <td style={{fontFamily:"Inter,sans-serif",fontSize:".78rem",color:"var(--mu2)",textAlign:"center"}}>
                             {c.lotes.length}
                           </td>
-                          <td style={{fontFamily:"DM Mono,monospace",fontSize:".78rem",textAlign:"right",color:l.garantia>0?"var(--yl)":"var(--mu)"}}>
+                          <td style={{fontFamily:"Inter,sans-serif",fontSize:".78rem",textAlign:"right",color:l.garantia>0?"var(--yl)":"var(--mu)"}}>
                             {fmt(l.garantia)}
                           </td>
-                          <td style={{fontFamily:"DM Mono,monospace",fontWeight:700,textAlign:"right",color:"var(--wh2)"}}>
+                          <td style={{fontFamily:"Inter,sans-serif",fontWeight:700,textAlign:"right",color:"var(--wh2)"}}>
                             {fmt(l.total)}
                           </td>
-                          <td style={{fontFamily:"DM Mono,monospace",fontWeight:800,textAlign:"right",color:"var(--ac)",fontSize:".9rem"}}>
+                          <td style={{fontFamily:"Inter,sans-serif",fontWeight:800,textAlign:"right",color:"var(--ac)",fontSize:".9rem"}}>
                             {fmt(l.totalAPagar)}
                           </td>
                           <td style={{textAlign:"center"}}>
@@ -5594,10 +5590,10 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   <tfoot>
                     <tr style={{borderTop:"2px solid var(--b2)",background:"rgba(255,255,255,.02)"}}>
                       <td colSpan={4} style={{padding:".6rem .75rem",textAlign:"right",fontSize:".7rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase"}}>Totales</td>
-                      <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--wh2)",fontSize:".82rem"}}>
+                      <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:700,color:"var(--wh2)",fontSize:".82rem"}}>
                         {fmt(liqReview.compradores.reduce((s,c)=>s+c.liq.total,0))}
                       </td>
-                      <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontWeight:900,color:"var(--ac)",fontSize:".85rem"}}>
+                      <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:900,color:"var(--ac)",fontSize:".85rem"}}>
                         {fmt(liqReview.compradores.reduce((s,c)=>s+c.liq.totalAPagar,0))}
                       </td>
                       <td colSpan={2}/>
@@ -5617,7 +5613,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   {/* Header comprador */}
                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom: isOpen?".9rem":"0",cursor:"pointer"}} onClick={()=>setLiqExpanded(isOpen?null:ci)}>
                     <div style={{display:"flex",alignItems:"center",gap:".85rem"}}>
-                      <div style={{width:38,height:38,borderRadius:8,background:"rgba(56,178,246,.12)",border:"1px solid rgba(56,178,246,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"DM Mono,monospace",fontSize:".8rem",fontWeight:700,color:"var(--ac)",flexShrink:0}}>
+                      <div style={{width:38,height:38,borderRadius:8,background:"rgba(56,178,246,.12)",border:"1px solid rgba(56,178,246,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,sans-serif",fontSize:".8rem",fontWeight:700,color:"var(--ac)",flexShrink:0}}>
                         {String(c.key).padStart(2,"0")}
                       </div>
                       <div>
@@ -5627,7 +5623,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:".6rem"}}>
                       <div style={{textAlign:"right"}}>
-                        <div style={{fontFamily:"DM Mono,monospace",fontSize:".95rem",fontWeight:700,color:"var(--ac)"}}>{fmt(l.totalAPagar)}</div>
+                        <div style={{fontFamily:"Inter,sans-serif",fontSize:".95rem",fontWeight:700,color:"var(--ac)"}}>{fmt(l.totalAPagar)}</div>
                         <div style={{fontSize:".65rem",color:"var(--mu)"}}>total a pagar</div>
                       </div>
                       {c.enviado
@@ -5673,29 +5669,29 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           {l.lineas.map((ln,li)=>(
                             <>
                               <tr key={`a-${li}`} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}>
-                                <td style={{padding:".45rem .5rem",fontFamily:"DM Mono,monospace",fontSize:".7rem",color:"var(--mu2)"}}>{ln.exp||`Lote ${li+1}`}</td>
+                                <td style={{padding:".45rem .5rem",fontFamily:"Inter,sans-serif",fontSize:".7rem",color:"var(--mu2)"}}>{ln.exp||`Lote ${li+1}`}</td>
                                 <td style={{padding:".45rem .5rem",textAlign:"center",color:"var(--mu2)"}}>1</td>
                                 <td style={{padding:".45rem .5rem",fontWeight:600,color:"var(--wh2)"}}>{ln.lote}</td>
                                 <td style={{padding:".45rem .5rem",textAlign:"center"}}><span style={{fontSize:".62rem",padding:".1rem .35rem",background:"rgba(255,255,255,.05)",borderRadius:3,color:"var(--mu)"}}>EX</span></td>
-                                <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"DM Mono,monospace",color:"var(--wh2)"}}>{fmt(ln.monto)}</td>
-                                <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"DM Mono,monospace",fontWeight:700,color:"var(--wh2)"}}>{fmt(ln.monto)}</td>
+                                <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"Inter,sans-serif",color:"var(--wh2)"}}>{fmt(ln.monto)}</td>
+                                <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:700,color:"var(--wh2)"}}>{fmt(ln.monto)}</td>
                               </tr>
                               <tr key={`b-${li}`} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}>
-                                <td style={{padding:".45rem .5rem",fontFamily:"DM Mono,monospace",fontSize:".7rem",color:"var(--mu2)"}}>{ln.exp||`Lote ${li+1}`}</td>
+                                <td style={{padding:".45rem .5rem",fontFamily:"Inter,sans-serif",fontSize:".7rem",color:"var(--mu2)"}}>{ln.exp||`Lote ${li+1}`}</td>
                                 <td style={{padding:".45rem .5rem",textAlign:"center",color:"var(--mu2)"}}>1</td>
                                 <td style={{padding:".45rem .5rem",color:"var(--mu2)"}}>Comision {ln.comPct}%</td>
                                 <td style={{padding:".45rem .5rem",textAlign:"center"}}><span style={{fontSize:".62rem",padding:".1rem .35rem",background:"rgba(56,178,246,.08)",borderRadius:3,color:"var(--ac)"}}>AF</span></td>
-                                <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"DM Mono,monospace",color:"var(--mu2)"}}>{fmt(ln.com)}</td>
-                                <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"DM Mono,monospace",color:"var(--mu2)"}}>{fmt(ln.com)}</td>
+                                <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"Inter,sans-serif",color:"var(--mu2)"}}>{fmt(ln.com)}</td>
+                                <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"Inter,sans-serif",color:"var(--mu2)"}}>{fmt(ln.com)}</td>
                               </tr>
                               {ln.motorizado && (
                                 <tr key={`c-${li}`} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}>
-                                  <td style={{padding:".45rem .5rem",fontFamily:"DM Mono,monospace",fontSize:".7rem",color:"var(--mu2)"}}>G-ADMIN</td>
+                                  <td style={{padding:".45rem .5rem",fontFamily:"Inter,sans-serif",fontSize:".7rem",color:"var(--mu2)"}}>G-ADMIN</td>
                                   <td style={{padding:".45rem .5rem",textAlign:"center",color:"var(--mu2)"}}>1</td>
                                   <td style={{padding:".45rem .5rem",color:"var(--yl)",fontSize:".73rem"}}>Gastos Administrativos — Vehiculo Motorizado ({ln.exp||`Lote ${li+1}`})</td>
                                   <td style={{padding:".45rem .5rem",textAlign:"center"}}><span style={{fontSize:".62rem",padding:".1rem .35rem",background:"rgba(56,178,246,.08)",borderRadius:3,color:"var(--ac)"}}>AF</span></td>
-                                  <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"DM Mono,monospace",color:"var(--yl)"}}>{fmt(ln.gastosAdm)}</td>
-                                  <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"DM Mono,monospace",color:"var(--yl)"}}>{fmt(ln.gastosAdm)}</td>
+                                  <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"Inter,sans-serif",color:"var(--yl)"}}>{fmt(ln.gastosAdm)}</td>
+                                  <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"Inter,sans-serif",color:"var(--yl)"}}>{fmt(ln.gastosAdm)}</td>
                                 </tr>
                               )}
                             </>
@@ -5713,20 +5709,20 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                             ["19% IVA:", fmt(l.iva)],
                           ].map(([k,v])=>(
                             <div key={k} style={{display:"flex",justifyContent:"space-between",borderBottom:"1px solid rgba(255,255,255,.03)",padding:".12rem 0"}}>
-                              <span>{k}</span><span style={{fontFamily:"DM Mono,monospace",color:"var(--wh2)"}}>{v}</span>
+                              <span>{k}</span><span style={{fontFamily:"Inter,sans-serif",color:"var(--wh2)"}}>{v}</span>
                             </div>
                           ))}
                           <div style={{display:"flex",justifyContent:"space-between",padding:".25rem 0",borderTop:"1px solid var(--b2)",marginTop:".1rem",fontWeight:700,fontSize:".8rem"}}>
-                            <span style={{color:"var(--wh2)"}}>Total:</span><span style={{fontFamily:"DM Mono,monospace",color:"var(--ac)"}}>{fmt(l.total)}</span>
+                            <span style={{color:"var(--wh2)"}}>Total:</span><span style={{fontFamily:"Inter,sans-serif",color:"var(--ac)"}}>{fmt(l.total)}</span>
                           </div>
                         </div>
                         <div style={{background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.2)",borderRadius:8,padding:".8rem 1rem",fontSize:".78rem"}}>
                           <div style={{display:"flex",justifyContent:"space-between",marginBottom:".4rem",color:"var(--mu2)"}}>
-                            <span>Garantia:</span><span style={{fontFamily:"DM Mono,monospace",color:"var(--gr)"}}>{fmt(l.garantia)}</span>
+                            <span>Garantia:</span><span style={{fontFamily:"Inter,sans-serif",color:"var(--gr)"}}>{fmt(l.garantia)}</span>
                           </div>
                           <div style={{display:"flex",justifyContent:"space-between",paddingTop:".4rem",borderTop:"1px solid rgba(56,178,246,.2)"}}>
                             <span style={{fontWeight:700,color:"var(--wh2)",fontSize:".85rem"}}>Total a Pagar:</span>
-                            <span style={{fontFamily:"DM Mono,monospace",fontWeight:800,fontSize:"1rem",color:"var(--ac)"}}>{fmt(l.totalAPagar)}</span>
+                            <span style={{fontFamily:"Inter,sans-serif",fontWeight:800,fontSize:"1rem",color:"var(--ac)"}}>{fmt(l.totalAPagar)}</span>
                           </div>
                         </div>
                       </div>
@@ -5936,7 +5932,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                               ))}
                             </div>
                             {/* Contador */}
-                            <div style={{position:"absolute",top:8,right:8,background:"rgba(0,0,0,.6)",borderRadius:4,padding:".15rem .45rem",fontSize:".68rem",color:"#fff",fontFamily:"DM Mono,monospace"}}>
+                            <div style={{position:"absolute",top:8,right:8,background:"rgba(0,0,0,.6)",borderRadius:4,padding:".15rem .45rem",fontSize:".68rem",color:"#fff",fontFamily:"Inter,sans-serif"}}>
                               {(photoIdx%item.imgs.length)+1}/{item.imgs.length}
                             </div>
                           </>
@@ -6158,7 +6154,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
             <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:"1.25rem"}}>
               <span style={{fontSize:"1.3rem"}}>✨</span>
               <div>
-                <div style={{fontFamily:"Syne,sans-serif",fontWeight:800,fontSize:"1rem",color:"var(--wh)"}}>Describir lote con IA</div>
+                <div style={{fontFamily:"Poppins,sans-serif",fontWeight:800,fontSize:"1rem",color:"var(--wh)"}}>Describir lote con IA</div>
                 <div style={{fontSize:".72rem",color:"var(--mu)"}}>Sube una foto y la IA genera título y descripción automáticamente</div>
               </div>
             </div>
@@ -6236,7 +6232,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
             <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:"1.25rem"}}>
               <span style={{fontSize:"1.3rem"}}>✨</span>
               <div>
-                <div style={{fontFamily:"Syne,sans-serif",fontWeight:800,fontSize:"1rem",color:"var(--wh)"}}>Resumen ejecutivo IA</div>
+                <div style={{fontFamily:"Poppins,sans-serif",fontWeight:800,fontSize:"1rem",color:"var(--wh)"}}>Resumen ejecutivo IA</div>
                 <div style={{fontSize:".72rem",color:"var(--mu)"}}>{aiRemateModal.name} — {aiRemateModal.fecha}</div>
               </div>
             </div>

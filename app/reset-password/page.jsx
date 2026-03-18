@@ -7,9 +7,8 @@ const SUPA_KEY = "sb_publishable_m2bABYE65JScB4oCJUBmFg_3eVzUuIR";
 const supabase = createClient(SUPA_URL, SUPA_KEY);
 
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --ac:#06B6D4; --gr:#14B8A6; --rd:#ef4444; --b1:#e5e7eb; --b2:#d1d5db; --wh:#1a1a1a; --mu:#6b7280; --s2:#ffffff; --font:'Inter',sans-serif; --head:'Syne',sans-serif; }
+  :root { --ac:#06B6D4; --gr:#14B8A6; --rd:#ef4444; --b1:#e5e7eb; --b2:#d1d5db; --wh:#1a1a1a; --mu:#6b7280; --s2:#ffffff; --font:'Inter',sans-serif; --head:'Poppins', sans-serif; }
   html, body { min-height: 100vh; background: #f4f4f2; font-family: var(--font); display: flex; align-items: center; justify-content: center; }
   .wrap { width: 100%; max-width: 420px; margin: 2rem auto; padding: 0 1.25rem; }
   .card { background: var(--s2); border: 1px solid var(--b1); border-radius: 16px; padding: 2.5rem; box-shadow: 0 4px 24px rgba(0,0,0,.06); }

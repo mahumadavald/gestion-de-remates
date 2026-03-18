@@ -11,7 +11,6 @@ const supabase = createClient(SUPA_URL, SUPA_KEY);
 const fmt = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n);
 
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; overflow: hidden; background: #0d1117; }
 
@@ -31,7 +30,7 @@ const CSS = `
     background: #1F2937;
     border-bottom: 2px solid #2d4060;
   }
-  .disp-logo { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: #06B6D4; letter-spacing: .05em; text-transform: uppercase; }
+  .disp-logo { font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 800; color: #06B6D4; letter-spacing: .05em; text-transform: uppercase; }
   .disp-casa { font-size: .9rem; font-weight: 600; color: #7a9ab8; }
   .disp-live  { display: flex; align-items: center; gap: .6rem; font-size: .85rem; font-weight: 700; color: #14B8A6; }
   .disp-dot   { width: 10px; height: 10px; border-radius: 50%; background: #14B8A6; animation: pulse 1.5s infinite; }
@@ -65,8 +64,8 @@ const CSS = `
     border-bottom: 1px solid #2d4060;
     flex-shrink: 0;
   }
-  .disp-lote-num { font-family: 'DM Mono', monospace; font-size: .75rem; font-weight: 700; color: #06B6D4; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .4rem; }
-  .disp-lote-name { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: .4rem; }
+  .disp-lote-num { font-family: 'Inter', sans-serif; font-size: .75rem; font-weight: 700; color: #06B6D4; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .4rem; }
+  .disp-lote-name { font-family: 'Poppins', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: .4rem; }
   .disp-lote-cat  { font-size: .82rem; color: #4a6a8a; }
 
   .disp-oferta-wrap {
@@ -75,9 +74,9 @@ const CSS = `
     flex-shrink: 0;
   }
   .disp-oferta-label { font-size: .7rem; font-weight: 700; color: #4a6a8a; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .5rem; }
-  .disp-oferta-val   { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; color: #14B8A6; line-height: 1; transition: color .3s; }
+  .disp-oferta-val   { font-family: 'Poppins', sans-serif; font-size: 2.8rem; font-weight: 800; color: #14B8A6; line-height: 1; transition: color .3s; }
   .disp-oferta-val.flash { color: #f59e0b; }
-  .disp-paleta       { font-family: 'DM Mono', monospace; font-size: .95rem; font-weight: 700; color: #7a9ab8; margin-top: .5rem; }
+  .disp-paleta       { font-family: 'Inter', sans-serif; font-size: .95rem; font-weight: 700; color: #7a9ab8; margin-top: .5rem; }
 
   .disp-timer-wrap {
     padding: 1rem 1.75rem;
@@ -87,7 +86,7 @@ const CSS = `
   .disp-timer-label { font-size: .7rem; font-weight: 700; color: #4a6a8a; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .4rem; }
   .disp-timer-bar   { height: 8px; background: #2d4060; border-radius: 4px; overflow: hidden; }
   .disp-timer-fill  { height: 100%; border-radius: 4px; transition: width 1s linear, background .5s; }
-  .disp-timer-num   { font-family: 'DM Mono', monospace; font-size: 1.5rem; font-weight: 700; margin-top: .4rem; }
+  .disp-timer-num   { font-family: 'Inter', sans-serif; font-size: 1.5rem; font-weight: 700; margin-top: .4rem; }
 
   .disp-hist {
     flex: 1; overflow-y: auto;
@@ -96,8 +95,8 @@ const CSS = `
   .disp-hist-title { font-size: .7rem; font-weight: 700; color: #4a6a8a; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .65rem; }
   .disp-hist-row   { display: flex; align-items: center; justify-content: space-between; padding: .55rem 0; border-bottom: 1px solid rgba(255,255,255,.04); }
   .disp-hist-row:last-child { border-bottom: none; }
-  .disp-hist-pal   { font-family: 'DM Mono', monospace; font-size: .82rem; color: #4a6a8a; }
-  .disp-hist-monto { font-family: 'DM Mono', monospace; font-size: .9rem; font-weight: 700; color: #e0eaf4; }
+  .disp-hist-pal   { font-family: 'Inter', sans-serif; font-size: .82rem; color: #4a6a8a; }
+  .disp-hist-monto { font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 700; color: #e0eaf4; }
   .disp-hist-row.top .disp-hist-monto { color: #14B8A6; }
 
   .disp-footer {
@@ -107,14 +106,14 @@ const CSS = `
     display: flex; align-items: center; justify-content: space-between;
   }
   .disp-footer-txt { font-size: .72rem; color: #2a4a6a; }
-  .disp-footer-url { font-family: 'DM Mono', monospace; font-size: .72rem; color: #06B6D4; }
+  .disp-footer-url { font-family: 'Inter', sans-serif; font-size: .72rem; color: #06B6D4; }
 
   .disp-waiting {
     grid-column: 1 / -1;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 1.5rem; text-align: center;
   }
-  .disp-waiting-title { font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800; color: #2d4060; }
+  .disp-waiting-title { font-family: 'Poppins', sans-serif; font-size: 2.5rem; font-weight: 800; color: #2d4060; }
   .disp-waiting-sub   { font-size: 1rem; color: #2a3d52; }
 
   .disp-sold-overlay {
@@ -125,9 +124,9 @@ const CSS = `
     animation: fadeIn .3s ease;
   }
   @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-  .disp-sold-badge { font-family: 'Syne', sans-serif; font-size: 3.5rem; font-weight: 800; color: #14B8A6; }
-  .disp-sold-paleta { font-family: 'DM Mono', monospace; font-size: 1.5rem; color: #7a9ab8; }
-  .disp-sold-monto  { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; }
+  .disp-sold-badge { font-family: 'Poppins', sans-serif; font-size: 3.5rem; font-weight: 800; color: #14B8A6; }
+  .disp-sold-paleta { font-family: 'Inter', sans-serif; font-size: 1.5rem; color: #7a9ab8; }
+  .disp-sold-monto  { font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; }
 
   .disp-foto-dots { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
   .disp-foto-dot  { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.3); cursor: pointer; transition: all .2s; }
@@ -215,7 +214,7 @@ export default function DisplayPage({ params }) {
               <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3.2" strokeLinecap="round" fill="none"/>
             </svg>
             <div>
-              <div style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:".9rem",color:"#fff",letterSpacing:"-.01em",lineHeight:1}}>GR</div>
+              <div style={{fontFamily:"'Poppins', sans-serif",fontWeight:800,fontSize:".9rem",color:"#fff",letterSpacing:"-.01em",lineHeight:1}}>GR</div>
               <div style={{fontFamily:"'Inter',sans-serif",fontWeight:400,fontSize:".55rem",color:"#7aaec8",letterSpacing:".08em",textTransform:"uppercase",marginTop:1}}>Auction Software</div>
             </div>
           </div>
@@ -289,11 +288,11 @@ export default function DisplayPage({ params }) {
               <div style={{marginTop:".75rem",display:"flex",alignItems:"center",gap:"1rem"}}>
                 <div>
                   <div style={{fontSize:".6rem",color:"#4a6a8a",marginBottom:".15rem"}}>BASE</div>
-                  <div style={{fontFamily:"'DM Mono',monospace",fontSize:".9rem",color:"#4a6a8a"}}>{fmt(loteActivo.base||0)}</div>
+                  <div style={{fontFamily:"'Inter', sans-serif",fontSize:".9rem",color:"#4a6a8a"}}>{fmt(loteActivo.base||0)}</div>
                 </div>
                 <div>
                   <div style={{fontSize:".6rem",color:"#4a6a8a",marginBottom:".15rem"}}>PUJAS</div>
-                  <div style={{fontFamily:"'DM Mono',monospace",fontSize:".9rem",color:"#e0eaf4",fontWeight:700}}>{historial.length}</div>
+                  <div style={{fontFamily:"'Inter', sans-serif",fontSize:".9rem",color:"#e0eaf4",fontWeight:700}}>{historial.length}</div>
                 </div>
               </div>
             </div>

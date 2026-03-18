@@ -174,8 +174,8 @@ export default function LandingPage() {
       <div class="plan-name">Básico</div>
       <div class="plan-desc">Para casas pequeñas que realizan pocos remates al mes y necesitan lo esencial.</div>
       <div style="margin:1.5rem 0 1.75rem;padding:1.25rem;background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.15);border-radius:10px;text-align:center">
-        <div style="font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Precio</div>
-        <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--dark)">Consulta con nosotros</div>
+        <div style="font-family:'Poppins', sans-serif;font-size:.72rem;font-weight:700;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Precio</div>
+        <div style="font-family:'Poppins', sans-serif;font-size:1.4rem;font-weight:800;color:var(--dark)">Consulta con nosotros</div>
         <div style="font-size:.72rem;color:var(--gray);margin-top:.3rem">Adaptado a tu volumen de remates</div>
       </div>
       <ul class="plan-features">
@@ -193,8 +193,8 @@ export default function LandingPage() {
       <div class="plan-name">Profesional</div>
       <div class="plan-desc">Para casas activas con volumen regular de remates y varios usuarios operando.</div>
       <div style="margin:1.5rem 0 1.75rem;padding:1.25rem;background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.3);border-radius:10px;text-align:center">
-        <div style="font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Precio</div>
-        <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--dark)">Consulta con nosotros</div>
+        <div style="font-family:'Poppins', sans-serif;font-size:.72rem;font-weight:700;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Precio</div>
+        <div style="font-family:'Poppins', sans-serif;font-size:1.4rem;font-weight:800;color:var(--dark)">Consulta con nosotros</div>
         <div style="font-size:.72rem;color:var(--gray);margin-top:.3rem">Adaptado a tu volumen de remates</div>
       </div>
       <ul class="plan-features">
@@ -212,8 +212,8 @@ export default function LandingPage() {
       <div class="plan-name">Enterprise</div>
       <div class="plan-desc">Para grupos con múltiples casas de remates o necesidades personalizadas.</div>
       <div style="margin:1.5rem 0 1.75rem;padding:1.25rem;background:rgba(20,184,166,.05);border:1px solid rgba(20,184,166,.15);border-radius:10px;text-align:center">
-        <div style="font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Precio</div>
-        <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--dark)">A convenir</div>
+        <div style="font-family:'Poppins', sans-serif;font-size:.72rem;font-weight:700;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Precio</div>
+        <div style="font-family:'Poppins', sans-serif;font-size:1.4rem;font-weight:800;color:var(--dark)">A convenir</div>
         <div style="font-size:.72rem;color:var(--gray);margin-top:.3rem">Cotización personalizada</div>
       </div>
       <ul class="plan-features">
@@ -306,7 +306,7 @@ body{background:#fff;color:#1a1a1a;font-family:'Inter',sans-serif;font-size:16px
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.25rem 4rem;background:#fff;backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:all .3s;}
 .nav-logo{display:flex;align-items:center;gap:.75rem;text-decoration:none;}
-.nav-logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:#1a1a1a;}
+.nav-logo-text{font-family:'Poppins', sans-serif;font-weight:800;font-size:1.05rem;color:#1a1a1a;}
 .nav-logo-sub{font-size:.6rem;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;font-weight:500;}
 .nav-links{display:flex;align-items:center;gap:2.5rem;}
 .nav-links a{font-size:.82rem;font-weight:500;color:var(--gray);text-decoration:none;letter-spacing:.02em;transition:color .2s;}
@@ -328,7 +328,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem 1rem;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.25);border-radius:20px;font-size:.72rem;font-weight:600;color:var(--blue);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2rem;animation:fadeUp .6s ease both;}
 .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:blink 2s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.hero-title{font-family:'Syne',sans-serif;font-size:clamp(2.8rem,6vw,5.5rem);font-weight:800;color:#1a1a1a;line-height:1.05;letter-spacing:-.03em;max-width:900px;animation:fadeUp .7s ease .1s both;position:relative;z-index:1;}
+.hero-title{font-family:'Poppins', sans-serif;font-size:clamp(2.8rem,6vw,5.5rem);font-weight:800;color:#1a1a1a;line-height:1.05;letter-spacing:-.03em;max-width:900px;animation:fadeUp .7s ease .1s both;position:relative;z-index:1;}
 .hero-title .blue{color:var(--blue);}
 .hero-title .teal{color:var(--teal);}
 .hero-sub{font-size:clamp(.9rem,2vw,1.15rem);color:var(--gray);max-width:560px;margin:1.5rem auto 2.5rem;line-height:1.7;animation:fadeUp .7s ease .2s both;position:relative;z-index:1;}
@@ -338,7 +338,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .btn-secondary{padding:.9rem 2rem;border-radius:8px;background:transparent;border:1px solid var(--border);color:#1a1a1a;font-family:'Inter',sans-serif;font-size:.92rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem;}
 .btn-secondary:hover{border-color:var(--blue);color:var(--blue);}
 .hero-stats{display:flex;align-items:center;gap:3rem;justify-content:center;margin-top:4rem;padding-top:3rem;border-top:1px solid var(--border);animation:fadeUp .7s ease .4s both;flex-wrap:wrap;position:relative;z-index:1;}
-.stat-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:#1a1a1a;line-height:1;}
+.stat-num{font-family:'Poppins', sans-serif;font-size:2rem;font-weight:800;color:#1a1a1a;line-height:1;}
 .stat-num .blue{color:var(--blue);}
 .stat-lbl{font-size:.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:.08em;margin-top:.35rem;}
 .stat-div{width:1px;height:40px;background:var(--border);}
@@ -347,7 +347,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 /* SECTION */
 .section{padding:7rem 4rem;max-width:1200px;margin:0 auto;}
 .section-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.7rem;font-weight:700;color:var(--teal);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem;}
-.section-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;color:#1a1a1a;line-height:1.15;letter-spacing:-.02em;max-width:600px;margin-bottom:1rem;}
+.section-title{font-family:'Poppins', sans-serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;color:#1a1a1a;line-height:1.15;letter-spacing:-.02em;max-width:600px;margin-bottom:1rem;}
 .section-sub{font-size:.95rem;color:var(--gray);max-width:500px;line-height:1.7;}
 
 /* FEATURES */
@@ -357,7 +357,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .feat-card:hover{border-color:rgba(6,182,212,.4);transform:translateY(-4px);box-shadow:0 12px 32px rgba(6,182,212,.1);}
 .feat-card:hover::before{opacity:1;}
 .feat-icon{width:44px;height:44px;border-radius:10px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;color:var(--blue);}
-.feat-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#1a1a1a;margin-bottom:.5rem;}
+.feat-title{font-family:'Poppins', sans-serif;font-size:1rem;font-weight:700;color:#1a1a1a;margin-bottom:.5rem;}
 .feat-desc{font-size:.83rem;color:var(--gray);line-height:1.65;}
 
 /* HOW */
@@ -366,8 +366,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;margin-top:4rem;position:relative;}
 .steps-grid::before{content:'';position:absolute;top:22px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--blue),var(--teal),transparent);}
 .step-card{text-align:center;position:relative;}
-.step-num{width:44px;height:44px;border-radius:50%;background:#fff;border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.82rem;font-weight:700;color:var(--blue);margin:0 auto 1.25rem;position:relative;z-index:1;box-shadow:0 0 0 5px #f4f4f2;}
-.step-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:#1a1a1a;margin-bottom:.5rem;}
+.step-num{width:44px;height:44px;border-radius:50%;background:#fff;border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Inter', sans-serif;font-size:.82rem;font-weight:700;color:var(--blue);margin:0 auto 1.25rem;position:relative;z-index:1;box-shadow:0 0 0 5px #f4f4f2;}
+.step-title{font-family:'Poppins', sans-serif;font-size:.95rem;font-weight:700;color:#1a1a1a;margin-bottom:.5rem;}
 .step-desc{font-size:.8rem;color:var(--gray);line-height:1.6;}
 
 /* PRICING */
@@ -376,7 +376,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .plan-card:hover{border-color:rgba(6,182,212,.3);box-shadow:0 8px 24px rgba(6,182,212,.08);}
 .plan-card.featured{border-color:var(--blue);border-width:2px;transform:scale(1.03);box-shadow:0 12px 40px rgba(6,182,212,.15);}
 .plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,var(--blue),var(--teal));color:#fff;font-size:.65rem;font-weight:700;padding:.25rem .85rem;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
-.plan-name{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#1a1a1a;margin-bottom:.25rem;}
+.plan-name{font-family:'Poppins', sans-serif;font-size:1.1rem;font-weight:800;color:#1a1a1a;margin-bottom:.25rem;}
 .plan-desc{font-size:.78rem;color:var(--gray);margin-bottom:1.5rem;line-height:1.5;}
 .plan-features{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-bottom:2rem;}
 .plan-features li{display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:var(--gray);}

@@ -43,7 +43,6 @@ const BANCOS = ["BANCO DE CHILE","BANCO DEL ESTADO DE CHILE","SCOTIABANK","BCI",
 
 // ── CSS ───────────────────────────────────────────────────────────
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -63,8 +62,8 @@ const CSS = `
     --rd:   #ef4444;
     --yl:   #f59e0b;
     --font: 'Inter', sans-serif;
-    --mono: 'DM Mono', monospace;
-    --head: 'Syne', sans-serif;
+    --mono: 'Inter', sans-serif;
+    --head: 'Poppins', sans-serif;
   }
 
   html, body { height: 100%; background: var(--bg); color: var(--wh); font-family: var(--font); font-size: 16px; line-height: 1.6; overflow: hidden; }
@@ -485,7 +484,7 @@ function ParticiparContent() {
     <div className="loading-wrap" style={{flexDirection:"column",gap:"1.5rem",padding:"2rem"}}>
       <style>{CSS}</style>
       <div style={{textAlign:"center",maxWidth:480,width:"100%"}}>
-        <div style={{fontFamily:"'Syne',sans-serif",fontSize:"1.5rem",fontWeight:800,color:"var(--wh)",marginBottom:".5rem",letterSpacing:"-.02em"}}>Inscripción de postor</div>
+        <div style={{fontFamily:"'Poppins', sans-serif",fontSize:"1.5rem",fontWeight:800,color:"var(--wh)",marginBottom:".5rem",letterSpacing:"-.02em"}}>Inscripción de postor</div>
         <div style={{fontSize:".9rem",color:"var(--mu)",marginBottom:"2rem"}}>Selecciona la casa de remates en la que quieres participar.</div>
         <div className="casa-grid">
           {casas.map(c => (
