@@ -318,6 +318,19 @@ function ParticiparContent() {
     setSubmitting(true);
 
     try {
+      // 0. Verificar que el RUT no esté ya registrado
+      const { data: rutExistente } = await supabase
+        .from("postores")
+        .select("id")
+        .eq("rut", rut.trim())
+        .limit(1)
+        .single();
+      if (rutExistente) {
+        setError("Este RUT ya está registrado en el sistema. Si tienes problemas para acceder, usa '¿Olvidaste tu contraseña?' en el login.");
+        setSubmitting(false);
+        return;
+      }
+
       // 1. Crear cuenta Supabase Auth para el postor
       let userId = null;
       let tempPassword = null;
