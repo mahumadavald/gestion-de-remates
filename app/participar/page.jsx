@@ -108,9 +108,9 @@ const CSS = `
   .form-col::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 2px; }
 
   .hero-brand { font-family: var(--font); font-size: .82rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.6); }
-  .hero-title { font-family: var(--head); font-size: clamp(2.1rem, 3.5vw, 3rem); font-weight: 800; color: #ffffff; line-height: 1.1; letter-spacing: -.03em; margin: .9rem 0 .65rem; }
+  .hero-title { font-family: var(--head); font-size: clamp(2.5rem, 4vw, 3.6rem); font-weight: 800; color: #ffffff; line-height: 1.08; letter-spacing: -.03em; margin: .6rem 0 .85rem; }
   .hero-title span { color: #67e8f9; }
-  .hero-sub   { font-size: .97rem; color: rgba(255,255,255,.78); line-height: 1.75; }
+  .hero-sub   { font-size: 1.08rem; color: rgba(255,255,255,.78); line-height: 1.8; }
 
   .hero-topbar { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.75rem; }
   .hero-topbar-name { font-family: var(--font); font-weight: 700; font-size: .88rem; color: #fff; letter-spacing: -.01em; }
@@ -573,7 +573,6 @@ function ParticiparContent() {
             </svg>
             <div>
               <div className="hero-topbar-name">GR Auction Software</div>
-              <div className="hero-topbar-sub">gestionderemates.cl</div>
             </div>
           </div>
 
@@ -583,11 +582,6 @@ function ParticiparContent() {
               <img src={casa.logo_url} alt={casa.nombre} style={{maxHeight:48,maxWidth:180,objectFit:"contain",display:"block"}}/>
             </div>
           )}
-
-          {/* Eyebrow con nombre de la casa */}
-          <div className="hero-brand" style={{marginBottom:".5rem"}}>
-            {casa?.nombre ? `Remates — ${casa.nombre}` : "Portal de Inscripción"}
-          </div>
 
           <div className="hero-title">Inscríbete y<br/><span>participa en vivo.</span></div>
           <div className="hero-sub">Regístrate para participar en nuestros remates. El proceso toma menos de 3 minutos y es 100% online.</div>
@@ -617,33 +611,6 @@ function ParticiparContent() {
             </div>
           </div>
 
-          {/* Trust items */}
-          <div className="hero-trust">
-            <div className="trust-item">
-              <div className="trust-icon">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#67e8f9" strokeWidth="1.8" strokeLinecap="round"><path d="M8 2l1.5 3.5H13l-2.8 2 1 3.5L8 9.2l-3.2 1.8 1-3.5L3 5.5h3.5z"/></svg>
-              </div>
-              <div className="trust-text">Proceso validado<strong>RUT + garantía</strong></div>
-            </div>
-            <div className="trust-item">
-              <div className="trust-icon">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#67e8f9" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="5" width="12" height="9" rx="2"/><path d="M5 5V4a3 3 0 016 0v1"/></svg>
-              </div>
-              <div className="trust-text">Datos seguros<strong>cifrado de extremo a extremo</strong></div>
-            </div>
-            <div className="trust-item">
-              <div className="trust-icon">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#67e8f9" strokeWidth="1.8" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></svg>
-              </div>
-              <div className="trust-text">Menos de 3 min<strong>registro completo</strong></div>
-            </div>
-            <div className="trust-item">
-              <div className="trust-icon">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#67e8f9" strokeWidth="1.8" strokeLinecap="round"><path d="M2 8l4 4 8-8"/></svg>
-              </div>
-              <div className="trust-text">Confirmación inmediata<strong>por correo electrónico</strong></div>
-            </div>
-          </div>
 
           <div style={{marginTop:"2rem",paddingTop:"1.25rem",borderTop:"1px solid rgba(255,255,255,.15)",display:"flex",alignItems:"center",gap:".6rem"}}>
             <svg width="20" height="20" viewBox="0 0 36 36" fill="none">
@@ -651,7 +618,7 @@ function ParticiparContent() {
               <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.4)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
             </svg>
             <span style={{fontFamily:"'Inter',sans-serif",fontSize:".7rem",color:"rgba(255,255,255,.6)",letterSpacing:".04em"}}>
-              Powered by <strong style={{color:"rgba(255,255,255,.9)"}}>GR Auction Software</strong> · gestionderemates.cl
+              Powered by <strong style={{color:"rgba(255,255,255,.9)"}}>GR Auction Software</strong>
             </span>
           </div>
         </div>
