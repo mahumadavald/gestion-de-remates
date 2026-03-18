@@ -618,7 +618,7 @@ function ParticiparContent() {
               <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.4)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
             </svg>
             <span style={{fontFamily:"'Inter',sans-serif",fontSize:".7rem",color:"rgba(255,255,255,.6)",letterSpacing:".04em"}}>
-              Powered by <strong style={{color:"rgba(255,255,255,.9)"}}>GR Auction Software</strong>
+              Powered by <strong style={{color:"rgba(255,255,255,.9)"}}>GR Auction Software</strong> · gestionderemates.cl
             </span>
           </div>
         </div>
