@@ -288,6 +288,7 @@ button,input,select{font-family:'Inter',sans-serif;}
 .tb-live{display:flex;align-items:center;gap:.4rem;padding:.25rem .7rem;border-radius:5px;background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.25);font-size:.7rem;font-weight:600;color:var(--gr);}
 .ldot{width:6px;height:6px;border-radius:50%;background:var(--gr);box-shadow:0 0 6px var(--gr);animation:pu 1.8s infinite;}
 @keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* BUTTONS */
 .btn-primary{padding:.4rem 1rem;background:var(--ac);border:none;border-radius:6px;font-size:.76rem;font-weight:600;color:#fff;cursor:pointer;transition:all .15s;}
@@ -1724,7 +1725,28 @@ function Dashboard({ session, onLogout }) {
   // ── Casas (solo admin GR) ──
   const [casaForm, setCasaForm] = useState({nombre:"",email:"",telefono:"",direccion:"",logoFile:null,logoUrl:null,martillero:"",rutMartillero:"",telefonoMartillero:"",emailMartillero:"",direccionMartillero:""});
   const [casaModal, setCasaModal] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(null); // casa.id mientras sube
   const resetCasaForm = () => setCasaForm({nombre:"",email:"",telefono:"",direccion:"",logoFile:null,logoUrl:null,martillero:"",rutMartillero:"",telefonoMartillero:"",emailMartillero:"",direccionMartillero:""});
+
+  const subirLogoCasa = async (casaId, slug, file) => {
+    if (!file) return;
+    setLogoUploading(casaId);
+    try {
+      const ext  = file.name.split(".").pop();
+      const path = `logos/${slug}.${ext}`;
+      const { data: upData, error: upErr } = await supabase.storage
+        .from("logos").upload(path, file, { upsert: true });
+      if (upErr) { notify("Error subiendo logo: " + upErr.message, "inf"); return; }
+      const { data: urlData } = supabase.storage.from("logos").getPublicUrl(path);
+      const logoUrl = urlData?.publicUrl || null;
+      const { error: dbErr } = await supabase.from("casas").update({ logo_url: logoUrl }).eq("id", casaId);
+      if (dbErr) { notify("Error guardando logo.", "inf"); return; }
+      setDbLicencias(prev => prev.map(c => c.id === casaId ? { ...c, logo_url: logoUrl } : c));
+      notify("✓ Logo actualizado.", "sold");
+    } finally {
+      setLogoUploading(null);
+    }
+  };
 
   useEffect(() => {
     if (session?.role !== "admin") return;
@@ -4935,12 +4957,18 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   <div key={casa.id} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,overflow:"hidden"}}>
                     {/* Header casa */}
                     <div style={{display:"flex",alignItems:"center",gap:"1rem",padding:"1rem 1.2rem",borderBottom:"1px solid var(--b1)"}}>
-                      <div style={{width:48,height:48,borderRadius:10,background:"rgba(56,178,246,.08)",border:"1px solid rgba(56,178,246,.15)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,overflow:"hidden"}}>
-                        {casa.logo_url
-                          ? <img src={casa.logo_url} alt={casa.nombre} style={{width:"100%",height:"100%",objectFit:"contain",padding:"4px"}}/>
-                          : <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><path d="M2 16V8l7-6 7 6v8"/><path d="M7 16v-5h4v5"/></svg>
+                      <label title={casa.logo_url ? "Cambiar logo" : "Subir logo"} style={{width:48,height:48,borderRadius:10,background:"rgba(56,178,246,.08)",border:"1px solid rgba(56,178,246,.15)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,overflow:"hidden",cursor:"pointer",position:"relative",transition:"border-color .15s"}}
+                        onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(56,178,246,.5)"}
+                        onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(56,178,246,.15)"}>
+                        {logoUploading === casa.id
+                          ? <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--ac)" strokeWidth="2" strokeLinecap="round" style={{animation:"spin 1s linear infinite"}}><path d="M9 2a7 7 0 110 14A7 7 0 019 2z" strokeOpacity=".25"/><path d="M9 2a7 7 0 017 7"/></svg>
+                          : casa.logo_url
+                            ? <img src={casa.logo_url} alt={casa.nombre} style={{width:"100%",height:"100%",objectFit:"contain",padding:"4px"}}/>
+                            : <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><path d="M2 16V8l7-6 7 6v8"/><path d="M7 16v-5h4v5"/></svg>
                         }
-                      </div>
+                        <input type="file" accept=".png,.jpg,.jpeg,.svg,.webp" style={{display:"none"}}
+                          onChange={e=>{ const f=e.target.files[0]; if(f) subirLogoCasa(casa.id, casa.slug, f); e.target.value=""; }}/>
+                      </label>
                       <div style={{flex:1}}>
                         <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
                           <span style={{fontSize:".62rem",fontWeight:700,fontFamily:"Inter,sans-serif",color:"var(--ac)",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:5,padding:".1rem .4rem",letterSpacing:".04em",flexShrink:0}}>#{String(idx+1).padStart(3,"0")}</span>
