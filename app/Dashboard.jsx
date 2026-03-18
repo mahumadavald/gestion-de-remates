@@ -3412,6 +3412,15 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                                 if(!error){ const {data} = await supabase.from("postores").select("*").order("numero"); if(data) setDbPostores(data); notify("Postor marcado como pendiente.","inf"); }
                               }}>Deshacer</button>
                           )}
+                          {session.role==="admin" && p.supabaseId && (
+                            <button className="btn-sec" style={{fontSize:".65rem",padding:".22rem .55rem",color:"#f87171",borderColor:"rgba(248,113,113,.3)"}}
+                              onClick={async()=>{
+                                if(!window.confirm(`¿Eliminar a ${p.name}? Esta acción no se puede deshacer.`)) return;
+                                const {error} = await supabase.from("postores").delete().eq("id",p.supabaseId);
+                                if(!error){ const {data} = await supabase.from("postores").select("*").order("numero"); if(data) setDbPostores(data); notify(`${p.name} eliminado.`,"inf"); }
+                                else notify("Error al eliminar postor.","inf");
+                              }}>🗑</button>
+                          )}
                         </div>
                       </td>
                     </tr>
