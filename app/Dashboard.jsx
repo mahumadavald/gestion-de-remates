@@ -28,66 +28,17 @@ const GRLogo = ({ collapsed = false }) => (
 );
 
 // ── DATA ──────────────────────────────────────────────────────────
-const VENTAS_MES = [
-  {mes:"Sep",v:92},{mes:"Oct",v:118},{mes:"Nov",v:105},
-  {mes:"Dic",v:144},{mes:"Ene",v:128},{mes:"Feb",v:161},{mes:"Mar",v:185},
-];
-const TOP_LOTES = [
-  {name:"Maquinaria",v:68},{name:"Inmuebles",v:52},{name:"Vehículos",v:41},{name:"Otros",v:24},
-];
-const PIE_DATA = [
-  {name:"Online",v:58},{name:"Presencial",v:28},{name:"Híbrido",v:14},
-];
+const VENTAS_MES = [];
+const TOP_LOTES = [];
+const PIE_DATA = [];
 const PIE_COLORS = ["#38B2F6","#34d399","#f6ad55"];
 
-const REMATES = [
-  {id:"R-044",name:"Remate Industrial Marzo", fecha:"06 Mar 2026",lotes:190,modal:"Híbrido",   estado:"activo", recaudado:47500000, casa:"Remates Ahumada"},
-  {id:"R-043",name:"Remate Agrícola Febrero", fecha:"22 Feb 2026",lotes:87, modal:"Online",    estado:"activo", recaudado:32000000, casa:"Remates Ahumada"},
-  {id:"R-042",name:"Remate Inmobiliario Feb", fecha:"15 Feb 2026",lotes:12, modal:"Presencial",estado:"activo", recaudado:105500000,casa:"Casa Demo S.A."},
-  {id:"R-041",name:"Remate Industrial Enero", fecha:"18 Ene 2026",lotes:143,modal:"Híbrido",   estado:"cerrado",recaudado:89000000, casa:"Remates Ahumada"},
-  {id:"R-040",name:"Remate Vehículos Enero",  fecha:"11 Ene 2026",lotes:34, modal:"Online",    estado:"cerrado",recaudado:28400000, casa:"Casa Demo S.A."},
-  {id:"R-039",name:"Remate Agrícola Dic",     fecha:"14 Dic 2025",lotes:96, modal:"Presencial",estado:"cerrado",recaudado:63500000, casa:"Remates Ahumada"},
-];
+const REMATES = [];
+const LOTES = [];
+const POSTORES = [];
+const FACTURAS = [];
+const GARANTIAS = [];
 
-const LOTES = [
-  {id:"L-142",name:"Toyota Hilux 2018",          cat:"Vehículo",  base:8000000, min:7000000,  com:3, estado:"publicado"},
-  {id:"L-141",name:"Tractor John Deere 6130B",   cat:"Maquinaria",base:18500000,min:16000000, com:3, estado:"publicado"},
-  {id:"L-140",name:"Parcela 12 Hec. Santa Cruz", cat:"Inmueble",  base:95000000,min:88000000, com:2, estado:"publicado"},
-  {id:"L-139",name:"Cosechadora Case IH 8230",   cat:"Maquinaria",base:42000000,min:38000000, com:3, estado:"vendido"},
-  {id:"L-138",name:"Galpon 800m2 Rancagua",      cat:"Inmueble",  base:68000000,min:62000000, com:2, estado:"vendido"},
-  {id:"L-137",name:"Camioneta Ford Ranger 4x4",  cat:"Vehículo",  base:16900000,min:15000000, com:3, estado:"publicado"},
-  {id:"L-136",name:"Excavadora Komatsu PC200",   cat:"Maquinaria",base:55000000,min:50000000, com:3, estado:"publicado"},
-  {id:"L-135",name:"Depto 2D/1B Rancagua",       cat:"Inmueble",  base:48000000,min:44000000, com:2, estado:"sin vender"},
-];
-
-const POSTORES = [
-  {id:"P-0245",nComprador:45,name:"Rodrigo Fuentes",         razonSocial:"Rodrigo Fuentes Soto",                           rut:"12.345.678-9",giro:"Particular",                  direccion:"Los Aromos 234",       comuna:"Rancagua",  email:"rfuentes@gmail.com",   tel:"+56 9 8123 4567",pujas:18,remates:4,estado:"verificado"},
-  {id:"P-0318",nComprador:12,name:"Agricola Del Valle",       razonSocial:"Agricola Del Valle Ltda.",                       rut:"76.543.210-K",giro:"Agricultura y Ganaderia",     direccion:"Fundo El Recreo s/n", comuna:"Malloa",    email:"contacto@delvalle.cl", tel:"+56 9 7654 3210",pujas:34,remates:7,estado:"verificado"},
-  {id:"P-0112",nComprador:7, name:"Maria I. Torres",          razonSocial:"Maria Ines Torres Lopez",                        rut:"9.876.543-2", giro:"Particular",                  direccion:"Los Veleros Casa 11",  comuna:"Rancagua",  email:"mitorresl@outlook.com",tel:"+56 9 6543 2109",pujas:11,remates:3,estado:"verificado"},
-  {id:"P-0089",nComprador:33,name:"Carlos Mena",              razonSocial:"Carlos Mena Jimenez",                            rut:"15.432.109-8",giro:"Particular",                  direccion:"Av. O'Higgins 890",    comuna:"San Fernando",email:"cmena@gmail.com",     tel:"+56 9 5432 1098",pujas:6, remates:2,estado:"pendiente"},
-  {id:"P-0067",nComprador:19,name:"Transportes Lagos",        razonSocial:"Empresa Transportes Lagos SpA",                  rut:"77.891.234-5",giro:"Transporte de Carga",         direccion:"Ruta 5 Sur km 82",     comuna:"Graneros",  email:"admin@tlagos.cl",      tel:"+56 9 4321 0987",pujas:22,remates:5,estado:"verificado"},
-  {id:"P-0055",nComprador:19,name:"Emp. Transporte Nova",     razonSocial:"Empresa Transporte Pasajero Jose Luis Nova Orellana EIRL",rut:"77.922.655-7",giro:"Transporte de Pasajeros",direccion:"Los Veleros Casa 11",comuna:"Rancagua",email:"joselnova@gmail.com",tel:"+56 9 3210 9876",pujas:3, remates:1,estado:"verificado"},
-];
-
-const FACTURAS = [
-  {id:"F-2026-041",remate:"R-041",postor:"Agricola Del Valle",lote:"Retroexcavadora CAT",monto:47500000,com:1425000,estado:"pagado",  fecha:"01 Mar 2026"},
-  {id:"F-2026-040",remate:"R-040",postor:"R. Fuentes",        lote:"Parcela 8 Hec.",     monto:89000000,com:2670000,estado:"pagado",  fecha:"22 Feb 2026"},
-  {id:"F-2026-039",remate:"R-039",postor:"Transportes Lagos", lote:"Camion Volvo FH460", monto:63500000,com:1905000,estado:"pendiente",fecha:"15 Feb 2026"},
-  {id:"F-2026-038",remate:"R-038",postor:"Del Valle",         lote:"Tractor JD 6130B",   monto:22000000,com:660000, estado:"pagado",  fecha:"11 Feb 2026"},
-  {id:"F-2026-037",remate:"R-037",postor:"C. Mena",           lote:"Toyota Hilux 2019",  monto:12400000,com:372000, estado:"vencido", fecha:"04 Feb 2026"},
-];
-
-// Datos reales basados en el flujo de rematesahumada.cl
-const GARANTIAS = [
-  {id:"G-0245",postor:"Rodrigo Fuentes",      rut:"12.345.678-9",email:"rfuentes@gmail.com",   tel:"+56 9 8123 4567",remate:"Remate Industrial Marzo",monto:300000,metodo:"transferencia",comprobante:"comp_245.pdf",paleta:"45",estado:"aprobada",   devolucion:null,       fecha:"02 Mar 2026"},
-  {id:"G-0318",postor:"Agricola Del Valle",   rut:"76.543.210-K",email:"contacto@delvalle.cl", tel:"+56 9 7654 3210",remate:"Remate Industrial Marzo",monto:300000,metodo:"transferencia",comprobante:"comp_318.pdf",paleta:"12",estado:"aprobada",   devolucion:null,       fecha:"02 Mar 2026"},
-  {id:"G-0112",postor:"Maria I. Torres",      rut:"9.876.543-2", email:"mitorresl@outlook.com",tel:"+56 9 6543 2109",remate:"Remate Industrial Marzo",monto:300000,metodo:"transferencia",comprobante:"comp_112.pdf",paleta:"07",estado:"aprobada",   devolucion:null,       fecha:"03 Mar 2026"},
-  {id:"G-0089",postor:"Carlos Mena",          rut:"15.432.109-8",email:"cmena@gmail.com",       tel:"+56 9 5432 1098",remate:"Remate Industrial Marzo",monto:300000,metodo:"efectivo",    comprobante:null,          paleta:null,estado:"pendiente",  devolucion:null,       fecha:"05 Mar 2026"},
-  {id:"G-0067",postor:"Transportes Lagos",    rut:"77.891.234-5",email:"admin@tlagos.cl",       tel:"+56 9 4321 0987",remate:"Remate Agricola Febrero", monto:300000,metodo:"transferencia",comprobante:"comp_067.pdf",paleta:"33",estado:"devuelta",  devolucion:"14 Feb 2026",fecha:"20 Feb 2026"},
-  {id:"G-0055",postor:"Juan P. Sandoval",     rut:"18.765.432-1",email:"jpsandoval@gmail.com",  tel:"+56 9 3210 9876",remate:"Remate Agricola Febrero", monto:300000,metodo:"transferencia",comprobante:"comp_055.pdf",paleta:"19",estado:"devuelta",  devolucion:"14 Feb 2026",fecha:"21 Feb 2026"},
-];
-
-// Lotes reales del sitio rematesahumada.cl (formato expediente)
 // Comisiones por tipo de remate
 const COMISIONES = {
   judicial:  { label:"Judicial",   com: 10,  desc:"Remate judicial — comisión fija 10% por ley, se cobra al comprador." },
@@ -96,31 +47,9 @@ const COMISIONES = {
 };
 const GASTO_ADMIN_MOTORIZADO = 50000; // CLP — solo vehículos motorizados
 
-const LOTES_REALES = [
-  {id:"L-E61",  exp:"E-61-2025",   mandante:"Tanner Servicios Financieros S.A.",propietario:"Figueroa",        name:"JAC JS3 1.6",                          cat:"Vehiculo",  year:2022,base:4500000, min:4000000, com:10,  tipoRemate:"judicial",  motorizado:true,  estado:"publicado",patente:"FKRP-45"},
-  {id:"L-E3039",exp:"E-3039-2025", mandante:"Tanner Servicios Financieros S.A.",propietario:"Vega",            name:"Hyundai Santa Fe 2.4",                  cat:"Vehiculo",  year:2019,base:9800000, min:8500000, com:10,  tipoRemate:"judicial",  motorizado:true,  estado:"publicado",patente:"JZXF-12"},
-  {id:"L-20543",exp:"20-543-K-2021",mandante:"Judicial",                        propietario:"Faunes Jimenez",  name:"Hyundai Accent RB GL 1.4",              cat:"Vehiculo",  year:2018,base:5200000, min:4500000, com:10,  tipoRemate:"judicial",  motorizado:true,  estado:"publicado",patente:"BKRL-89"},
-  {id:"L-NK01", exp:"NK-01-2026",  mandante:"Particular",                       propietario:"",               name:"Nissan Kicks",                          cat:"Vehiculo",  year:2021,base:8900000, min:8000000, com:null, tipoRemate:"privado",   motorizado:true,  estado:"publicado",patente:"HKPZ-33"},
-  {id:"L-P315", exp:"P-315-2026",  mandante:"Particular",                       propietario:"",               name:"Parcela 315 — Altos de Coinco VI Region",cat:"Inmueble",  year:null,base:42000000,min:38000000, com:7,   tipoRemate:"concursal", motorizado:false, estado:"publicado",patente:null},
-  {id:"L-C1537",exp:"C-1537-2025", mandante:"Judicial",                         propietario:"Vallejos Moro",  name:"Enseres Varios — Hogar",                cat:"Enseres",   year:null,base:1200000, min:900000,  com:10,  tipoRemate:"judicial",  motorizado:false, estado:"publicado",patente:null},
-  {id:"L-C2502",exp:"C-2502-2024", mandante:"Judicial",                         propietario:"Arenas Bustamante",name:"Enseres Varios — Oficina",             cat:"Enseres",   year:null,base:850000,  min:650000,  com:10,  tipoRemate:"judicial",  motorizado:false, estado:"publicado",patente:null},
-  {id:"L-C916", exp:"C-916-2025",  mandante:"Judicial",                         propietario:"Droguett Navarro",name:"Enseres Varios — Electrodomesticos",    cat:"Enseres",   year:null,base:780000,  min:600000,  com:10,  tipoRemate:"judicial",  motorizado:false, estado:"publicado",patente:null},
-];
-
-// Adjudicaciones post-remate
-const ADJUDICACIONES = [
-  {id:"A-001",postor:"Rodrigo Fuentes",   rut:"12.345.678-9",lote:"Hyundai Santa Fe 2.4",monto:10500000,garantia:300000,saldo:10200000,estado:"saldo pendiente",retiro:null,      fecha:"06 Mar 2026"},
-  {id:"A-002",postor:"Agricola Del Valle",rut:"76.543.210-K",lote:"Tractor John Deere",  monto:21000000,garantia:300000,saldo:20700000,estado:"pagado",          retiro:"10 Mar 2026",fecha:"06 Mar 2026"},
-  {id:"A-003",postor:"Maria I. Torres",   rut:"9.876.543-2", lote:"Parcela 12 Hec.",     monto:98000000,garantia:300000,saldo:97700000,estado:"saldo pendiente",retiro:null,      fecha:"06 Mar 2026"},
-];
-
-const LOTES_SALA = [
-  {id:1,name:"Tractor John Deere 6130B",         cat:"Maquinaria",year:2018,base:18500000,imgs:[],desc:"3.200 hrs, cabina climatizada, doble traccion.",      inc:500000 },
-  {id:2,name:"Parcela 12 Hec. Santa Cruz",        cat:"Inmueble",  year:null,base:95000000,imgs:[],desc:"Tierra agricola, riego asegurado, escrituras al dia.",inc:2000000},
-  {id:3,name:"Cosechadora Case IH 8230",          cat:"Maquinaria",year:2016,base:42000000,imgs:[],desc:"Motor 354 HP, cabezal 30 pies incluido.",             inc:1000000},
-  {id:4,name:"Camioneta Ford Ranger XLT",         cat:"Vehiculo",  year:2021,base:16900000,imgs:[],desc:"Diesel 3.2L, 72.000 km, unico dueno.",                inc:300000 },
-  {id:5,name:"Galpon Industrial 800m2",           cat:"Inmueble",  year:2010,base:68000000,imgs:[],desc:"Estructura metalica, 3 fases, permiso vigente.",      inc:1500000},
-];
+const LOTES_REALES = [];
+const ADJUDICACIONES = [];
+const LOTES_SALA = [];
 
 const INC_OPTIONS = [100000,200000,300000,500000,750000,1000000,1500000,2000000,3000000,5000000];
 const BID_TIMER   = 15;
