@@ -232,6 +232,56 @@ export async function POST(req) {
       results.push({ destino: "verificado", ...r });
     }
 
+    // ── 4. Email de BIENVENIDA al postor (cuenta creada en /participar) ─
+    if (tipo === "bienvenida_postor" && email_cliente) {
+      const { temp_password } = body;
+      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
+        <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+
+          ${buildHeader({
+            casa, logo_url,
+            titulo: "Bienvenido a " + casa,
+            subtitulo: "Tu cuenta de postor ha sido creada",
+          })}
+
+          <div style="background:#ffffff;padding:28px 36px;">
+            <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${nombre}</strong></p>
+            <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">Tu cuenta de postor fue creada exitosamente. Usa estas credenciales para acceder a tu portal de postores.</p>
+
+            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+              <div style="margin-bottom:14px;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:4px;">Correo / Usuario</div>
+                <div style="font-size:15px;font-weight:600;color:#1a1a1a;">${email_cliente}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:4px;">Contraseña provisoria</div>
+                <div style="font-size:22px;font-weight:800;color:#0891b2;letter-spacing:.08em;font-family:monospace;">${temp_password || "—"}</div>
+              </div>
+            </div>
+
+            <div style="background:#fffbeb;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:24px;font-size:13px;color:#92400e;line-height:1.6;">
+              <strong>Esta contraseña es de un solo uso.</strong><br>
+              Al ingresar por primera vez debes cambiarla. Es personal e intransferible.
+            </div>
+
+            <a href="https://gestionderemates.cl/dashboard" style="display:block;text-align:center;background:linear-gradient(135deg,#06B6D4,#14B8A6);color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 24px;border-radius:10px;margin-bottom:16px;">Ingresar a mi portal →</a>
+
+            <p style="font-size:12px;color:#9ca3af;text-align:center;margin:0;">En caso de no poder ingresar, contacta a ${casa}.</p>
+          </div>
+
+          ${FOOTER}
+        </div>
+      </body></html>`;
+
+      const r = await sendMail({
+        to: email_cliente,
+        subject: `Bienvenido a ${casa} — Tus credenciales de acceso`,
+        html,
+      });
+      results.push({ destino: "bienvenida_postor", ...r });
+    }
+
     return NextResponse.json({ ok: true, results });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e.message }, { status: 500 });

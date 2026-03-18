@@ -1048,12 +1048,25 @@ const AUTH_CSS = `
 `;
 
 function AuthScreen({ onLogin }) {
-  const [role,     setRole]     = useState("martillero"); // admin | martillero | comprador
-  const [email,    setEmail]    = useState("");
-  const [password, setPassword] = useState("");
-  const [token,    setToken]    = useState("");
-  const [error,    setError]    = useState("");
-  const [loading,  setLoading]  = useState(false);
+  const [role,       setRole]       = useState("martillero");
+  const [email,      setEmail]      = useState("");
+  const [password,   setPassword]   = useState("");
+  const [token,      setToken]      = useState("");
+  const [error,      setError]      = useState("");
+  const [loading,    setLoading]    = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail,setForgotEmail]= useState("");
+  const [forgotSent, setForgotSent] = useState(false);
+
+  const handleForgot = async () => {
+    if (!forgotEmail.trim()) { setError("Ingresa tu correo."); return; }
+    setLoading(true); setError("");
+    await supabase.auth.resetPasswordForEmail(forgotEmail.trim(), {
+      redirectTo: "https://gestionderemates.cl/reset-password",
+    });
+    setForgotSent(true);
+    setLoading(false);
+  };
 
   const roleConfig = {
     martillero: { label:"Martillero", icon:<svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14l8-8"/><path d="M9 3l2 2-6 6-2-2z"/><path d="M12 2l3 3-1.5 1.5"/></svg>,  title:"Acceso casa de remates", sub:"Gestiona tus remates, lotes, postores y liquidaciones post-remate." },
@@ -1111,6 +1124,27 @@ function AuthScreen({ onLogin }) {
             };
           }
         } catch(e) { /* usar fallback */ }
+        // Si no tiene perfil en usuarios, verificar si es postor
+        if (sessionData.name === "Admin" && sessionData.role === "admin") {
+          try {
+            const { data: postorRow } = await supabase
+              .from("postores")
+              .select("nombre, casas(nombre, slug)")
+              .eq("user_id", data.user.id)
+              .limit(1)
+              .single();
+            if (postorRow) {
+              sessionData = {
+                id: data.user.id, email: data.user.email,
+                name: postorRow.nombre, role: "postor",
+                roles: ["postor"],
+                casa: postorRow.casas?.slug || null,
+                casaNombre: postorRow.casas?.nombre || "",
+                activo: true,
+              };
+            }
+          } catch(e2) {}
+        }
         onLogin(sessionData);
       }
     } catch(e) {
@@ -1215,6 +1249,50 @@ function AuthScreen({ onLogin }) {
           <button className="auth-submit" onClick={handleLogin} disabled={loading}>
             {loading ? "Verificando..." : role==="comprador" ? "Entrar al remate" : "Iniciar sesion"}
           </button>
+
+          {/* Olvidé mi contraseña */}
+          {role !== "comprador" && !forgotMode && (
+            <div style={{textAlign:"center",marginTop:"1rem"}}>
+              <button style={{background:"none",border:"none",color:"#6b7280",fontSize:".82rem",cursor:"pointer",textDecoration:"underline",fontFamily:"inherit"}}
+                onClick={()=>{setForgotMode(true);setError("");}}>
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+          )}
+
+          {role !== "comprador" && forgotMode && (
+            <div style={{marginTop:"1.25rem",padding:"1.1rem",background:"rgba(6,182,212,.05)",border:"1px solid rgba(6,182,212,.15)",borderRadius:10}}>
+              {forgotSent ? (
+                <div style={{fontSize:".85rem",color:"#0891b2",textAlign:"center",lineHeight:1.6}}>
+                  Revisa tu correo — te enviamos un link para recuperar tu contraseña.
+                  <div style={{marginTop:".75rem"}}>
+                    <button style={{background:"none",border:"none",color:"#6b7280",fontSize:".78rem",cursor:"pointer",textDecoration:"underline"}}
+                      onClick={()=>{setForgotMode(false);setForgotSent(false);}}>Volver al inicio de sesión</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div style={{fontSize:".78rem",fontWeight:600,color:"#374151",marginBottom:".6rem",textTransform:"uppercase",letterSpacing:".06em"}}>Recuperar contraseña</div>
+                  <input
+                    style={{width:"100%",padding:".7rem .9rem",border:"1.5px solid #d1d5db",borderRadius:8,fontFamily:"inherit",fontSize:".88rem",color:"#1a1a1a",outline:"none",marginBottom:".6rem"}}
+                    type="email" placeholder="correo@empresa.cl"
+                    value={forgotEmail} onChange={e=>setForgotEmail(e.target.value)}
+                    onKeyDown={e=>e.key==="Enter"&&handleForgot()}
+                  />
+                  <div style={{display:"flex",gap:".5rem"}}>
+                    <button style={{flex:1,padding:".65rem",background:"linear-gradient(135deg,#06B6D4,#14B8A6)",border:"none",borderRadius:8,color:"#fff",fontFamily:"inherit",fontSize:".85rem",fontWeight:700,cursor:"pointer"}}
+                      onClick={handleForgot} disabled={loading}>
+                      {loading ? "Enviando..." : "Enviar enlace"}
+                    </button>
+                    <button style={{padding:".65rem .9rem",background:"none",border:"1px solid #d1d5db",borderRadius:8,color:"#6b7280",fontFamily:"inherit",fontSize:".82rem",cursor:"pointer"}}
+                      onClick={()=>{setForgotMode(false);setError("");}}>
+                      Cancelar
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -1700,6 +1778,7 @@ export default function Root() {
     </div>
   );
   if (!session) return <AuthScreen onLogin={handleLogin}/>;
+  if (session.role === "postor")    { if (typeof window !== "undefined") window.location.href = "/postor"; return null; }
   if (session.role === "comprador") return <BuyerView user={session} onLogout={handleLogout}/>;
   if (session.role === "spotter")   return <SpotterView user={session} onLogout={handleLogout}/>;
   return <Dashboard session={session} onLogout={handleLogout}/>;
