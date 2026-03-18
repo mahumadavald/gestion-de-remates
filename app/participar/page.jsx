@@ -133,8 +133,12 @@ const CSS = `
   .hero-note-b{ font-size: .84rem; color: rgba(255,255,255,.72); line-height: 1.6; }
 
   .form-header { margin-bottom: 1.75rem; }
-  .form-title  { font-family: var(--head); font-size: 1.65rem; font-weight: 800; color: var(--wh); line-height: 1.2; letter-spacing: -.02em; }
-  .form-sub    { font-size: .9rem; color: var(--mu); margin-top: .45rem; }
+  .form-title  { font-family: var(--head); font-size: clamp(1.9rem, 3.5vw, 2.8rem); font-weight: 800; color: var(--wh); line-height: 1.1; letter-spacing: -.03em; }
+  .form-sub    { font-size: .92rem; color: var(--mu); margin-top: .55rem; line-height: 1.65; }
+
+  .form-topbar { display: flex; align-items: center; gap: .55rem; margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--b1); }
+  .form-topbar-label { font-size: .78rem; font-weight: 600; color: var(--wh); letter-spacing: -.01em; }
+  .form-topbar-sub   { font-size: .6rem; color: var(--mu); letter-spacing: .04em; text-transform: uppercase; margin-top: 1px; }
 
   .rut-wrap    { margin-bottom: 1.75rem; }
   .rut-label   { font-size: .78rem; font-weight: 700; color: var(--mu); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .5rem; }
@@ -648,19 +652,34 @@ function ParticiparContent() {
           </div>
         ) : (
           <>
-            <div className="form-header fade-up" style={{textAlign:"center"}}>
-              <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
-                {casa?.logo_url ? (
-                  <img src={casa.logo_url} alt={casa.nombre} style={{maxHeight:64,maxWidth:220,objectFit:"contain",display:"block"}}/>
-                ) : (
-                  <div style={{display:"inline-flex",alignItems:"center",padding:".5rem 1.1rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.18)",borderRadius:8}}>
-                    <span style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:".88rem",color:"#1a1a1a"}}>{casa?.nombre}</span>
-                  </div>
-                )}
+            {/* Logo GR Auction Software — visible en todas las pantallas */}
+            <div className="form-topbar">
+              <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
+                <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1a1a1a" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+              </svg>
+              <div>
+                <div className="form-topbar-label">GR Auction Software</div>
+                <div className="form-topbar-sub">Portal de inscripción</div>
               </div>
-              <div className="form-title">Inscripción de postor</div>
-              <div className="form-sub">Completa el formulario para participar en nuestros remates.</div>
-              <div style={{width:48,height:3,background:"linear-gradient(90deg,#06B6D4,#14B8A6)",borderRadius:2,margin:"1rem auto 0"}}/>
+            </div>
+
+            <div className="form-header fade-up" style={{textAlign:"center"}}>
+              {/* Logo de la casa si existe */}
+              {casa?.logo_url ? (
+                <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
+                  <img src={casa.logo_url} alt={casa.nombre} style={{maxHeight:64,maxWidth:220,objectFit:"contain",display:"block"}}/>
+                </div>
+              ) : casa?.nombre ? (
+                <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
+                  <div style={{display:"inline-flex",alignItems:"center",gap:".4rem",padding:".45rem 1rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.18)",borderRadius:8}}>
+                    <span style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:".85rem",color:"#1a1a1a"}}>{casa.nombre}</span>
+                  </div>
+                </div>
+              ) : null}
+              <div className="form-title">Inscríbete y<br/>participa en vivo.</div>
+              <div className="form-sub">Completa el formulario para participar en los remates de {casa?.nombre || "esta casa"}. El proceso toma menos de 3 minutos.</div>
+              <div style={{width:48,height:3,background:"linear-gradient(90deg,#06B6D4,#14B8A6)",borderRadius:2,margin:"1.1rem auto 0"}}/>
             </div>
 
             {/* RUT */}
