@@ -750,7 +750,7 @@ function ParticiparContent() {
               {/* Logo de la casa si existe */}
               {casa?.logo_url ? (
                 <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
-                  <img src={casa.logo_url} alt={casa.nombre} style={{maxHeight:64,maxWidth:220,objectFit:"contain",display:"block"}}/>
+                  <img src={casa.logo_url} alt={casa.nombre} style={{maxHeight:110,maxWidth:300,objectFit:"contain",display:"block"}}/>
                 </div>
               ) : casa?.nombre ? (
                 <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
