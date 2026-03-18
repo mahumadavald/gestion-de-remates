@@ -318,12 +318,21 @@ function ParticiparContent() {
     load();
   }, [idParam, casaSlug]);
 
+  // Detectar si la casa es Remates Ahumada (para integración MySQL)
+  const isAhumada = !!(
+    casa?.slug?.toLowerCase().includes("ahumada") ||
+    casa?.nombre?.toLowerCase().includes("ahumada")
+  );
+
   // ── Lookup de postor existente cuando RUT es válido ─────────────
+  // Prioridad: 1) Supabase (GR)  →  2) MySQL Ahumada (si es su casa)
   useEffect(() => {
     if (rutStatus !== "ok") { setReturningUser(false); setLookingUp(false); return; }
     let cancelled = false;
     const lookup = async () => {
       setLookingUp(true);
+
+      // 1. Buscar en Supabase (base de datos de GR Auction Software)
       const { data } = await supabase
         .from("postores")
         .select("nombre, email, telefono, empresa, direccion, comuna, banco, tipo_cuenta, numero_cuenta")
@@ -332,6 +341,7 @@ function ParticiparContent() {
         .limit(1)
         .maybeSingle();
       if (cancelled) return;
+
       if (data) {
         setNombre(data.nombre || "");
         setEmail(data.email || "");
@@ -343,14 +353,37 @@ function ParticiparContent() {
         setTipoCta(data.tipo_cuenta || "CUENTA CORRIENTE");
         setNumCta(data.numero_cuenta || "");
         setReturningUser(true);
-      } else {
-        setReturningUser(false);
+        setLookingUp(false);
+        return;
       }
-      setLookingUp(false);
+
+      // 2. Si no está en Supabase Y es Remates Ahumada → buscar en su DB MySQL
+      if (isAhumada) {
+        try {
+          const res = await fetch(`/api/ahumada?rut=${encodeURIComponent(rut)}`);
+          if (!cancelled && res.ok) {
+            const ahData = await res.json();
+            if (ahData.found && ahData.data) {
+              setNombre(ahData.data.nombre    || "");
+              setEmail(ahData.data.email      || "");
+              setTelefono(ahData.data.telefono|| "");
+              setGiro(ahData.data.giro        || "");
+              setDireccion(ahData.data.direccion || "");
+              setComuna(ahData.data.comuna    || "");
+              // banco y cuenta no vienen de su DB, el usuario los completa
+              setReturningUser(true);
+              setLookingUp(false);
+              return;
+            }
+          }
+        } catch(e) { /* si Ahumada no responde, continuamos normalmente */ }
+      }
+
+      if (!cancelled) { setReturningUser(false); setLookingUp(false); }
     };
     lookup();
     return () => { cancelled = true; };
-  }, [rutStatus, rut]);
+  }, [rutStatus, rut, isAhumada]);
 
   // Countdown y redirect automático tras éxito (si hay returnUrl)
   useEffect(() => {
@@ -535,6 +568,30 @@ function ParticiparContent() {
             body: JSON.stringify({ ...emailPayload, tipo: "casa" }),
           });
         } catch(e) {}
+      }
+
+      // 5d. Sync a base de datos MySQL de Remates Ahumada (fire & forget)
+      //     Actualiza su cartera de clientes + tabla de participantes
+      if (isAhumada) {
+        fetch("/api/ahumada", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nombre:          nombre.trim(),
+            rut:             rut.trim(),
+            email:           email.trim(),
+            telefono:        telefono.trim(),
+            giro:            giro.trim(),
+            direccion:       direccion.trim(),
+            comuna:          comuna || "",
+            banco:           banco || "",
+            tipo_cuenta:     tipoCta,
+            numero_cuenta:   numCta.trim(),
+            modalidad:       modalidad,
+            suscribir:       suscribir,
+            comprobante_url: comprobanteUrl || "",
+          }),
+        }).catch(() => {}); // No bloquear si falla — GR ya guardó en Supabase
       }
 
       setSuccess({
