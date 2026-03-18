@@ -234,7 +234,12 @@ const CSS = `
 
 function ParticiparContent() {
   const searchParams = useSearchParams();
-  const slugParam = searchParams.get("casa") || "";
+  const idParam   = searchParams.get("id")   || "";   // nuevo: ?id=UUID
+  const slugParam = searchParams.get("casa") || "";   // legado: ?casa=slug
+  const returnUrl = (() => {
+    try { return searchParams.get("return") ? decodeURIComponent(searchParams.get("return")) : ""; }
+    catch { return ""; }
+  })();
 
   const [casas,   setCasas]   = useState([]);
   const [casa,    setCasa]    = useState(null);
@@ -242,6 +247,7 @@ function ParticiparContent() {
   const [loading, setLoading] = useState(true);
   const [notFound,setNotFound]= useState(false);
   const [casaSlug,setCasaSlug]= useState(slugParam);
+  const [countdown, setCountdown] = useState(null); // para redirect automático
 
   // Form state
   const [rut,       setRut]       = useState("");
@@ -264,9 +270,26 @@ function ParticiparContent() {
   const [error,      setError]      = useState("");
   const [success,    setSuccess]    = useState(null);
 
-  // Si no hay slug, cargar todas las casas para selección
+  // Cargar casa por ?id= (UUID) o por ?casa= (slug), o todas si ninguno
   useEffect(() => {
     const load = async () => {
+      // ── Prioridad 1: ?id=UUID ──────────────────────────────────────
+      if (idParam) {
+        const { data: casaData } = await supabase
+          .from("casas").select("*").eq("id", idParam).single();
+        if (!casaData) { setNotFound(true); setLoading(false); return; }
+        setCasa(casaData);
+        const { data: rematesData } = await supabase
+          .from("remates").select("*")
+          .eq("casa_id", casaData.id)
+          .in("estado", ["publicado","en_vivo","activo"])
+          .order("fecha");
+        setRemates(rematesData || []);
+        setLoading(false);
+        return;
+      }
+
+      // ── Prioridad 2: ?casa=slug (legado) ──────────────────────────
       if (!casaSlug) {
         const { data } = await supabase.from("casas").select("*").order("nombre");
         setCasas(data || []);
@@ -290,7 +313,20 @@ function ParticiparContent() {
       setLoading(false);
     };
     load();
-  }, [casaSlug]);
+  }, [idParam, casaSlug]);
+
+  // Countdown y redirect automático tras éxito (si hay returnUrl)
+  useEffect(() => {
+    if (!success || !returnUrl) return;
+    setCountdown(5);
+    const interval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) { clearInterval(interval); window.location.href = returnUrl; return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [success, returnUrl]);
 
   const handleSelectCasa = async (c) => {
     setCasa(c);
@@ -638,12 +674,21 @@ function ParticiparContent() {
                 ? <>Se creó tu cuenta de acceso. <strong style={{color:"var(--wh)"}}>Revisa tu correo</strong> para obtener tu contraseña provisoria.</>
                 : <>Tu participación será <strong style={{color:"var(--wh)"}}>confirmada por {casa?.nombre}</strong> una vez que verifiquen tu comprobante.</>}
             </div>
-            {success.cuentaCreada && (
-              <a href="/dashboard" style={{marginTop:"1.5rem",display:"inline-block",padding:".75rem 2rem",background:"linear-gradient(135deg,#06B6D4,#14B8A6)",color:"#fff",borderRadius:10,fontWeight:700,fontSize:".9rem",textDecoration:"none"}}>
-                Ir al portal de postores →
-              </a>
-            )}
-            <div style={{marginTop:"1.5rem",padding:"1rem 1.5rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.15)",borderRadius:10,maxWidth:320,width:"100%",fontSize:".78rem",color:"#6b7280",lineHeight:1.7}}>
+            {/* Botones de acción post-inscripción */}
+            <div style={{marginTop:"1.5rem",display:"flex",flexDirection:"column",alignItems:"center",gap:".75rem",width:"100%",maxWidth:320}}>
+              {success.cuentaCreada && (
+                <a href="/dashboard" style={{display:"block",width:"100%",padding:".75rem 2rem",background:"linear-gradient(135deg,#06B6D4,#14B8A6)",color:"#fff",borderRadius:10,fontWeight:700,fontSize:".9rem",textDecoration:"none",textAlign:"center"}}>
+                  Ir al portal de postores →
+                </a>
+              )}
+              {returnUrl && (
+                <a href={returnUrl} style={{display:"block",width:"100%",padding:".7rem 2rem",background:"none",border:"1.5px solid var(--b2)",color:"var(--wh2)",borderRadius:10,fontWeight:600,fontSize:".88rem",textDecoration:"none",textAlign:"center"}}>
+                  ← Volver{countdown !== null && countdown > 0 ? ` (${countdown}s)` : ""}
+                </a>
+              )}
+            </div>
+
+            <div style={{marginTop:"1.25rem",padding:"1rem 1.5rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.15)",borderRadius:10,maxWidth:320,width:"100%",fontSize:".78rem",color:"#6b7280",lineHeight:1.7}}>
               <div style={{fontWeight:700,color:"#1a1a1a",marginBottom:".3rem"}}>¿Dudas?</div>
               Contacta a {casa?.nombre}<br/>
               {casa?.email && <>{casa.email}<br/></>}

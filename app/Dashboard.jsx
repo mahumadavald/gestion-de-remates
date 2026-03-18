@@ -1002,7 +1002,7 @@ function AuthScreen({ onLogin }) {
         try {
           const { data: perfil } = await supabase
             .from("usuarios")
-            .select("*, casas(slug, nombre, licencia_estado, licencia_vence, licencia_plan)")
+            .select("*, casas(id, slug, nombre, licencia_estado, licencia_vence, licencia_plan)")
             .eq("id", data.user.id)
             .single();
           if (perfil) {
@@ -1025,6 +1025,7 @@ function AuthScreen({ onLogin }) {
             sessionData = {
               id: data.user.id, email: data.user.email, name: perfil.nombre, role: r,
               roles: perfil.roles||[r], casa: perfil.casas?.slug||null,
+              casaId: perfil.casas?.id||null,
               casaNombre: perfil.casas?.nombre||"GR Auction Software",
               licencia: perfil.casas?.licencia_estado||"activo",
               licenciaPlan: perfil.casas?.licencia_plan||"trial",
@@ -3424,10 +3425,10 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M4 7h6M7 4l3 3-3 3"/></svg>
               <span style={{fontSize:".75rem",color:"var(--mu2)"}}>Link de inscripción pública:</span>
               <code style={{fontSize:".73rem",color:"var(--ac)",fontFamily:"Inter,sans-serif",flex:1}}>
-                gestionderemates.cl/participar/{session?.casa||"rematesahumada"}
+                gestionderemates.cl/participar?id={session?.casaId||session?.casa||"—"}
               </code>
               <button className="btn-sec" style={{fontSize:".68rem"}} onClick={()=>{
-                navigator.clipboard.writeText(`https://gestionderemates.cl/participar/${session?.casa||"rematesahumada"}`);
+                navigator.clipboard.writeText(`https://gestionderemates.cl/participar?id=${session?.casaId||session?.casa||""}`);
                 notify("Link copiado al portapapeles.","sold");
               }}>Copiar link</button>
             </div>
@@ -4959,12 +4960,12 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         <div style={{flex:1,minWidth:0}}>
                           <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".15rem"}}>Página de inscripción pública</div>
                           <code style={{fontSize:".73rem",color:"var(--ac)",fontFamily:"Inter,sans-serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block"}}>
-                            {BASE_URL}/participar/{casa.slug}
+                            {BASE_URL}/participar?id={casa.id}
                           </code>
                         </div>
                         <button className="btn-sec" style={{fontSize:".65rem",whiteSpace:"nowrap",flexShrink:0}}
-                          onClick={()=>copiar(`${BASE_URL}/participar/${casa.slug}`)}>Copiar</button>
-                        <a href={`${BASE_URL}/participar/${casa.slug}`} target="_blank" rel="noreferrer"
+                          onClick={()=>copiar(`${BASE_URL}/participar?id=${casa.id}`)}>Copiar</button>
+                        <a href={`${BASE_URL}/participar?id=${casa.id}`} target="_blank" rel="noreferrer"
                           style={{fontSize:".65rem",color:"var(--mu2)",textDecoration:"none",whiteSpace:"nowrap",flexShrink:0,padding:".28rem .55rem",border:"1px solid var(--b2)",borderRadius:6}}>
                           Abrir →
                         </a>
