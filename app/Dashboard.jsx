@@ -4931,7 +4931,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
               {/* Lista de casas */}
               <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
-                {dbLicencias.map(casa=>(
+                {dbLicencias.map((casa,idx)=>(
                   <div key={casa.id} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,overflow:"hidden"}}>
                     {/* Header casa */}
                     <div style={{display:"flex",alignItems:"center",gap:"1rem",padding:"1rem 1.2rem",borderBottom:"1px solid var(--b1)"}}>
@@ -4942,8 +4942,11 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         }
                       </div>
                       <div style={{flex:1}}>
-                        <div style={{fontWeight:800,fontSize:".92rem",color:"var(--wh2)"}}>{casa.nombre}</div>
-                        <div style={{fontSize:".7rem",color:"var(--mu2)",marginTop:".1rem",fontFamily:"Inter,sans-serif"}}>slug: {casa.slug}</div>
+                        <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
+                          <span style={{fontSize:".62rem",fontWeight:700,fontFamily:"Inter,sans-serif",color:"var(--ac)",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:5,padding:".1rem .4rem",letterSpacing:".04em",flexShrink:0}}>#{String(idx+1).padStart(3,"0")}</span>
+                          <div style={{fontWeight:800,fontSize:".92rem",color:"var(--wh2)"}}>{casa.nombre}</div>
+                        </div>
+                        <div style={{fontSize:".7rem",color:"var(--mu2)",marginTop:".25rem",fontFamily:"Inter,sans-serif"}}>slug: {casa.slug}</div>
                       </div>
                       <span style={{fontSize:".65rem",fontWeight:700,padding:".2rem .55rem",borderRadius:20,
                         background:casa.licencia_estado==="activo"?"rgba(20,184,166,.1)":casa.licencia_estado==="suspendido"?"rgba(246,173,85,.1)":"rgba(255,255,255,.04)",
