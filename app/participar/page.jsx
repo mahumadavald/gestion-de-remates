@@ -326,7 +326,7 @@ function ParticiparContent() {
         .limit(1)
         .single();
       if (rutExistente) {
-        setError("Este RUT ya está registrado en el sistema. Si tienes problemas para acceder, usa '¿Olvidaste tu contraseña?' en el login.");
+        setError("Ya tienes una cuenta registrada con este RUT. Ingresa en gestionderemates.cl/dashboard con tu correo y contraseña. Si no recuerdas tu contraseña, usa la opción '¿Olvidaste tu contraseña?' en el login.");
         setSubmitting(false);
         return;
       }
