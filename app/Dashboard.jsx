@@ -1048,31 +1048,28 @@ const AUTH_CSS = `
 `;
 
 function AuthScreen({ onLogin }) {
-  const [role,     setRole]     = useState("martillero"); // admin | martillero | comprador
-  const [email,    setEmail]    = useState("");
-  const [password, setPassword] = useState("");
-  const [token,    setToken]    = useState("");
-  const [error,    setError]    = useState("");
-  const [loading,  setLoading]  = useState(false);
+  const [email,      setEmail]      = useState("");
+  const [password,   setPassword]   = useState("");
+  const [error,      setError]      = useState("");
+  const [loading,    setLoading]    = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail,setForgotEmail]= useState("");
+  const [forgotSent, setForgotSent] = useState(false);
 
-  const roleConfig = {
-    martillero: { label:"Martillero", icon:<svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14l8-8"/><path d="M9 3l2 2-6 6-2-2z"/><path d="M12 2l3 3-1.5 1.5"/></svg>,  title:"Acceso casa de remates", sub:"Gestiona tus remates, lotes, postores y liquidaciones post-remate." },
-    comprador:  { label:"Postor",     icon:<svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="13" height="9" rx="1.5"/><path d="M5 5V4a3.5 3.5 0 017 0v1"/><path d="M8.5 9v2"/></svg>,  title:"Acceso postor",          sub:"Entra con tu codigo de paleta asignado al inscribirte en la casa de remates." },
+  const handleForgot = async () => {
+    if (!forgotEmail.trim()) { setError("Ingresa tu correo."); return; }
+    setLoading(true); setError("");
+    await supabase.auth.resetPasswordForEmail(forgotEmail.trim(), {
+      redirectTo: "https://gestionderemates.cl/reset-password",
+    });
+    setForgotSent(true);
+    setLoading(false);
   };
 
   const handleLogin = async () => {
     setError(""); setLoading(true);
     try {
-      if (role === "comprador") {
-        const { data: postor, error: pErr } = await supabase
-          .from("postores")
-          .select("*, casas(slug, nombre)")
-          .ilike("paleta", token.trim())
-          .eq("estado", "verificado")
-          .single();
-        if (pErr || !postor) { setError("Código de paleta no encontrado o no activo."); setLoading(false); return; }
-        onLogin({ role:"comprador", name:postor.nombre, rut:postor.rut, casa:postor.casas?.slug, casaNombre:postor.casas?.nombre, token:postor.paleta });
-      } else {
+      {
         const { data, error: authErr } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (authErr) { setError("Credenciales incorrectas."); setLoading(false); return; }
         // Buscar perfil — con fallback si no existe en tabla usuarios
@@ -1111,6 +1108,27 @@ function AuthScreen({ onLogin }) {
             };
           }
         } catch(e) { /* usar fallback */ }
+        // Si no tiene perfil en usuarios, verificar si es postor
+        if (sessionData.name === "Admin" && sessionData.role === "admin") {
+          try {
+            const { data: postorRow } = await supabase
+              .from("postores")
+              .select("nombre, casas(nombre, slug)")
+              .eq("user_id", data.user.id)
+              .limit(1)
+              .single();
+            if (postorRow) {
+              sessionData = {
+                id: data.user.id, email: data.user.email,
+                name: postorRow.nombre, role: "postor",
+                roles: ["postor"],
+                casa: postorRow.casas?.slug || null,
+                casaNombre: postorRow.casas?.nombre || "",
+                activo: true,
+              };
+            }
+          } catch(e2) {}
+        }
         onLogin(sessionData);
       }
     } catch(e) {
@@ -1118,8 +1136,6 @@ function AuthScreen({ onLogin }) {
       setLoading(false);
     }
   };
-
-  const cfg = roleConfig[role];
 
   return (
     <div className="auth-root">
@@ -1155,8 +1171,8 @@ function AuthScreen({ onLogin }) {
 
       {/* Right form */}
       <div className="auth-right">
-        <div className="auth-form-wrap" key={role}>
-          {/* Logo en vez de título de texto */}
+        <div className="auth-form-wrap">
+          {/* Logo */}
           <div style={{marginBottom:"2rem"}}>
             <div style={{display:"flex",alignItems:"center",gap:"18px",marginBottom:".6rem"}}>
               <svg width="64" height="64" viewBox="0 0 36 36" fill="none">
@@ -1166,55 +1182,71 @@ function AuthScreen({ onLogin }) {
               </svg>
               <div style={{fontFamily:"Inter,sans-serif",fontWeight:400,fontSize:".85rem",color:"#4a6a8a",letterSpacing:".12em",textTransform:"uppercase",marginTop:2}}>Auction Software</div>
             </div>
-            <div style={{fontSize:"1.05rem",color:"#6b7280",lineHeight:1.5}}>{cfg.sub}</div>
-          </div>
-
-          {/* Role selector */}
-          <div className="role-tabs">
-            {Object.entries(roleConfig).map(([k,v]) => (
-              <button key={k} className={`role-tab${role===k?" active":""}`} onClick={()=>{setRole(k);setError("");}}>
-                <span className="role-tab-icon">{v.icon}</span>
-                <span className="role-tab-label">{v.label}</span>
-              </button>
-            ))}
+            <div style={{fontSize:"1.05rem",color:"#6b7280",lineHeight:1.5}}>Ingresa con tu correo y contraseña. El sistema te llevará a tu área según tu perfil.</div>
           </div>
 
           {error && <div className="auth-error">{error}</div>}
 
-          {role !== "comprador" ? (
-            <>
-              <div className="auth-field">
-                <label className="auth-label">Correo electronico</label>
-                <input className={`auth-input${error?" error":""}`} type="email" placeholder="correo@empresa.cl"
-                  value={email} onChange={e=>setEmail(e.target.value)}
-                  onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
-              </div>
-              <div className="auth-field">
-                <label className="auth-label">Contraseña</label>
-                <input className={`auth-input${error?" error":""}`} type="password" placeholder="••••••••"
-                  value={password} onChange={e=>setPassword(e.target.value)}
-                  onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
-              </div>
-
-            </>
-          ) : (
-            <>
-              <div className="buyer-info">
-                No necesitas crear una cuenta. Ingresa el <strong style={{color:"#14B8A6"}}>codigo de paleta</strong> que te asigno la casa de remates al momento de inscribirte y pagar tu garantia.
-              </div>
-              <div className="auth-field">
-                <label className="auth-label">Codigo de paleta</label>
-                <input className={`auth-input mono${error?" error":""}`} type="text" placeholder="RA-045"
-                  value={token} onChange={e=>setToken(e.target.value)}
-                  onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
-              </div>
-
-            </>
-          )}
+          <div className="auth-field">
+            <label className="auth-label">Correo electronico</label>
+            <input className={`auth-input${error?" error":""}`} type="email" placeholder="correo@empresa.cl"
+              value={email} onChange={e=>setEmail(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
+          </div>
+          <div className="auth-field">
+            <label className="auth-label">Contraseña</label>
+            <input className={`auth-input${error?" error":""}`} type="password" placeholder="••••••••"
+              value={password} onChange={e=>setPassword(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
+          </div>
 
           <button className="auth-submit" onClick={handleLogin} disabled={loading}>
-            {loading ? "Verificando..." : role==="comprador" ? "Entrar al remate" : "Iniciar sesion"}
+            {loading ? "Verificando..." : "Iniciar sesion"}
           </button>
+
+          {/* Olvidé mi contraseña */}
+          {!forgotMode && (
+            <div style={{textAlign:"center",marginTop:"1rem"}}>
+              <button style={{background:"none",border:"none",color:"#6b7280",fontSize:".82rem",cursor:"pointer",textDecoration:"underline",fontFamily:"inherit"}}
+                onClick={()=>{setForgotMode(true);setError("");}}>
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+          )}
+
+          {forgotMode && (
+            <div style={{marginTop:"1.25rem",padding:"1.1rem",background:"rgba(6,182,212,.05)",border:"1px solid rgba(6,182,212,.15)",borderRadius:10}}>
+              {forgotSent ? (
+                <div style={{fontSize:".85rem",color:"#0891b2",textAlign:"center",lineHeight:1.6}}>
+                  Revisa tu correo — te enviamos un link para recuperar tu contraseña.
+                  <div style={{marginTop:".75rem"}}>
+                    <button style={{background:"none",border:"none",color:"#6b7280",fontSize:".78rem",cursor:"pointer",textDecoration:"underline"}}
+                      onClick={()=>{setForgotMode(false);setForgotSent(false);}}>Volver al inicio de sesión</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div style={{fontSize:".78rem",fontWeight:600,color:"#374151",marginBottom:".6rem",textTransform:"uppercase",letterSpacing:".06em"}}>Recuperar contraseña</div>
+                  <input
+                    style={{width:"100%",padding:".7rem .9rem",border:"1.5px solid #d1d5db",borderRadius:8,fontFamily:"inherit",fontSize:".88rem",color:"#1a1a1a",outline:"none",marginBottom:".6rem"}}
+                    type="email" placeholder="correo@empresa.cl"
+                    value={forgotEmail} onChange={e=>setForgotEmail(e.target.value)}
+                    onKeyDown={e=>e.key==="Enter"&&handleForgot()}
+                  />
+                  <div style={{display:"flex",gap:".5rem"}}>
+                    <button style={{flex:1,padding:".65rem",background:"linear-gradient(135deg,#06B6D4,#14B8A6)",border:"none",borderRadius:8,color:"#fff",fontFamily:"inherit",fontSize:".85rem",fontWeight:700,cursor:"pointer"}}
+                      onClick={handleForgot} disabled={loading}>
+                      {loading ? "Enviando..." : "Enviar enlace"}
+                    </button>
+                    <button style={{padding:".65rem .9rem",background:"none",border:"1px solid #d1d5db",borderRadius:8,color:"#6b7280",fontFamily:"inherit",fontSize:".82rem",cursor:"pointer"}}
+                      onClick={()=>{setForgotMode(false);setError("");}}>
+                      Cancelar
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -1700,6 +1732,7 @@ export default function Root() {
     </div>
   );
   if (!session) return <AuthScreen onLogin={handleLogin}/>;
+  if (session.role === "postor")    { if (typeof window !== "undefined") window.location.href = "/postor"; return null; }
   if (session.role === "comprador") return <BuyerView user={session} onLogout={handleLogout}/>;
   if (session.role === "spotter")   return <SpotterView user={session} onLogout={handleLogout}/>;
   return <Dashboard session={session} onLogout={handleLogout}/>;
@@ -3413,7 +3446,34 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                             <button className="btn-confirm" style={{fontSize:".65rem",padding:".22rem .55rem",background:"rgba(20,184,166,.1)",color:"var(--gr)",border:"1px solid rgba(20,184,166,.25)"}}
                               onClick={async()=>{
                                 const {error} = await supabase.from("postores").update({estado:"verificado"}).eq("id",p.supabaseId);
-                                if(!error){ const {data} = await supabase.from("postores").select("*").order("numero"); if(data) setDbPostores(data); notify(`${p.name} verificado.`,"sold"); }
+                                if(!error){
+                                  const {data} = await supabase.from("postores").select("*").order("numero");
+                                  if(data) setDbPostores(data);
+                                  notify(`${p.name} verificado.`,"sold");
+                                  // Enviar email de confirmación al postor
+                                  const casaInfo = dbLicencias.find(x => x.slug === session?.casa) || {};
+                                  const remateInfo = REMATES_MERGED.find(r => (r.supabaseId||r.id) === p.remate_id);
+                                  if(p.email){
+                                    try {
+                                      await fetch("/api/send-email", {
+                                        method: "POST",
+                                        headers: {"Content-Type":"application/json"},
+                                        body: JSON.stringify({
+                                          tipo:          "verificado",
+                                          nombre:        p.name,
+                                          numero:        String(p.nComprador).padStart(3,"0"),
+                                          remate:        remateInfo?.name || "Remate",
+                                          fecha:         remateInfo?.fecha || null,
+                                          casa:          casaInfo.nombre || session?.casaNombre || "",
+                                          logo_url:      casaInfo.logo_url || null,
+                                          email_cliente: p.email,
+                                          email_casa:    casaInfo.email || null,
+                                          modalidad:     p.modalidad || null,
+                                        }),
+                                      });
+                                    } catch(e) { /* no bloquea */ }
+                                  }
+                                }
                               }}>✓ Verificar</button>
                           )}
                           {p.estado==="verificado" && p.supabaseId && (
