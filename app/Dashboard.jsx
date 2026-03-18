@@ -1655,11 +1655,7 @@ export default function Root() {
   const handleLogin  = (user) => setSession(user);
   const handleLogout = async () => { await supabase.auth.signOut(); setSession(null); };
 
-  if (loading) return (
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",background:"#0d1117",color:"#5a7fa8",fontFamily:"Inter,sans-serif",fontSize:".85rem"}}>
-      Cargando...
-    </div>
-  );
+  if (loading) return null;
   if (!session) return <AuthScreen onLogin={handleLogin}/>;
   if (session.role === "postor")    { if (typeof window !== "undefined") window.location.href = "/postor"; return null; }
   if (session.role === "comprador") return <BuyerView user={session} onLogout={handleLogout}/>;
