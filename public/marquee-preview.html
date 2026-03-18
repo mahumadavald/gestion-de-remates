@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview Marquee</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f4f4f2; font-family: sans-serif; }
+
+  /* CTA simulada */
+  .cta-section {
+    padding: 7rem 4rem;
+    text-align: center;
+    background: #f4f4f2;
+  }
+  .cta-section h2 {
+    font-size: 2.6rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    color: #0f172a;
+    max-width: 700px;
+    margin: 0 auto 1rem;
+  }
+  .cta-section p { color: #666; font-size: 1rem; margin-bottom: 2.5rem; }
+  .btn { display: inline-block; background: #06b6d4; color: #fff; padding: .85rem 2rem; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: .95rem; }
+
+  /* ── MARQUEE ── */
+  .marquee-band {
+    background: #0f172a;
+    overflow: hidden;
+    padding: 1.4rem 0;
+    border-top: 1px solid rgba(6,182,212,.2);
+    border-bottom: 1px solid rgba(6,182,212,.2);
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 20s linear infinite;
+  }
+  .marquee-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .marquee-text {
+    font-size: 5.5rem;
+    font-weight: 900;
+    font-family: 'Poppins', sans-serif;
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(6,182,212,.4);
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    padding: 0 2rem;
+    white-space: nowrap;
+    line-height: 1;
+    user-select: none;
+  }
+  .marquee-dot {
+    color: rgba(6,182,212,.4);
+    font-size: 1.2rem;
+    padding: 0 .5rem;
+    flex-shrink: 0;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* Footer simulado */
+  footer {
+    padding: 2.5rem 4rem;
+    border-top: 1px solid #e5e5e5;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: .82rem;
+    color: #888;
+  }
+</style>
+</head>
+<body>
+
+<!-- CTA simulada -->
+<section class="cta-section">
+  <h2>¿Listo para modernizar tu casa de remates?</h2>
+  <p>Contáctanos y te configuramos todo en un día.</p>
+  <a href="#" class="btn">Solicitar demo</a>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-band">
+  <div class="marquee-track">
+    <!-- Primera copia -->
+    <div class="marquee-item"><span class="marquee-text">GR AUCTION SOFTWARE</span><span class="marquee-dot">✦</span></div>
+    <div class="marquee-item"><span class="marquee-text">GESTIÓN DE REMATES</span><span class="marquee-dot">✦</span></div>
+    <div class="marquee-item"><span class="marquee-text">GR AUCTION SOFTWARE</span><span class="marquee-dot">✦</span></div>
+    <div class="marquee-item"><span class="marquee-text">GESTIÓN DE REMATES</span><span class="marquee-dot">✦</span></div>
+    <div class="marquee-item"><span class="marquee-text">GR AUCTION SOFTWARE</span><span class="marquee-dot">✦</span></div>
+    <div class="marquee-item"><span class="marquee-text">GESTIÓN DE REMATES</span><span class="marquee-dot">✦</span></div>
+    <!-- Segunda copia (para loop continuo) -->
+    <div class="marquee-item"><span class="marquee-text">GR AUCTION SOFTWARE</span><span class="marquee-dot">✦</span></div>
+    <div class="marquee-item"><span class="marquee-text">GESTIÓN DE REMATES</span><span class="marquee-dot">✦</span></div>
+    <div class="marquee-item"><span class="marquee-text">GR AUCTION SOFTWARE</span><span class="marquee-dot">✦</span></div>
+    <div class="marquee-item"><span class="marquee-text">GESTIÓN DE REMATES</span><span class="marquee-dot">✦</span></div>
+    <div class="marquee-item"><span class="marquee-text">GR AUCTION SOFTWARE</span><span class="marquee-dot">✦</span></div>
+    <div class="marquee-item"><span class="marquee-text">GESTIÓN DE REMATES</span><span class="marquee-dot">✦</span></div>
+  </div>
+</div>
+
+<!-- Footer simulado -->
+<footer>
+  <span>© 2025 GR Auction Software · gestionderemates.cl</span>
+  <span>Características · Planes · Iniciar sesión · Contacto</span>
+</footer>
+
+</body>
+</html>
