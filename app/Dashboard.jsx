@@ -235,7 +235,6 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
   w.document.close();
 };
 const CSS = `
-${FONT}
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#f4f4f2;
