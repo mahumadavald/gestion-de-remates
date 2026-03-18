@@ -8,7 +8,6 @@ const SUPA_URL = "https://xqkfcqibukghtyfjcwfb.supabase.co";
 const SUPA_KEY = "sb_publishable_m2bABYE65JScB4oCJUBmFg_3eVzUuIR";
 const supabase = createClient(SUPA_URL, SUPA_KEY);
 
-const FONT = `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');`;
 
 // ── BRAND ─────────────────────────────────────────────────────────
 const GRLogo = ({ collapsed = false }) => (
@@ -236,7 +235,6 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
   w.document.close();
 };
 const CSS = `
-${FONT}
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#f4f4f2;

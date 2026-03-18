@@ -7,7 +7,6 @@ const SUPA_KEY = "sb_publishable_m2bABYE65JScB4oCJUBmFg_3eVzUuIR";
 const supabase = createClient(SUPA_URL, SUPA_KEY);
 
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #f4f4f2; --s2: #ffffff; --b1: #e5e7eb; --b2: #d1d5db;
