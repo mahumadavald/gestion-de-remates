@@ -108,8 +108,19 @@ const CSS = `
   .form-col::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 2px; }
 
   .hero-brand { font-family: var(--font); font-size: .82rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.6); }
-  .hero-title { font-family: var(--head); font-size: 1.85rem; font-weight: 800; color: #ffffff; line-height: 1.15; letter-spacing: -.02em; margin: .9rem 0 .55rem; }
-  .hero-sub   { font-size: .95rem; color: rgba(255,255,255,.75); line-height: 1.7; }
+  .hero-title { font-family: var(--head); font-size: clamp(2.1rem, 3.5vw, 3rem); font-weight: 800; color: #ffffff; line-height: 1.1; letter-spacing: -.03em; margin: .9rem 0 .65rem; }
+  .hero-title span { color: #67e8f9; }
+  .hero-sub   { font-size: .97rem; color: rgba(255,255,255,.78); line-height: 1.75; }
+
+  .hero-topbar { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.75rem; }
+  .hero-topbar-name { font-family: var(--font); font-weight: 700; font-size: .88rem; color: #fff; letter-spacing: -.01em; }
+  .hero-topbar-sub  { font-size: .62rem; color: rgba(255,255,255,.5); letter-spacing: .06em; text-transform: uppercase; margin-top: 1px; }
+
+  .hero-trust { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; margin-top: 2rem; }
+  .trust-item { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; padding: .75rem 1rem; display: flex; align-items: center; gap: .6rem; }
+  .trust-icon { width: 28px; height: 28px; border-radius: 7px; background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .trust-text { font-size: .78rem; color: rgba(255,255,255,.85); font-weight: 500; line-height: 1.35; }
+  .trust-text strong { display: block; font-size: .72rem; color: rgba(255,255,255,.5); font-weight: 400; }
 
   .hero-steps { margin-top: 2rem; }
   .step-item  { display: flex; align-items: flex-start; gap: .9rem; margin-bottom: 1.25rem; }
@@ -513,15 +524,33 @@ function ParticiparContent() {
           <div className="hero-orb" style={{width:200,height:200,background:"#0ea5e9",bottom:100,right:-60}}/>
         </div>
         <div style={{position:"relative",zIndex:1}}>
-          {casa?.logo_url ? (
-            <div style={{marginBottom:"1.5rem"}}>
-              <img src={casa.logo_url} alt={casa.nombre} style={{maxHeight:56,maxWidth:200,objectFit:"contain",display:"block"}}/>
+
+          {/* Logo GR + nombre plataforma */}
+          <div className="hero-topbar">
+            <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.5)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+            </svg>
+            <div>
+              <div className="hero-topbar-name">GR Auction Software</div>
+              <div className="hero-topbar-sub">gestionderemates.cl</div>
             </div>
-          ) : (
-            <div className="hero-brand">{casa?.nombre || "Casa de Remates"}</div>
+          </div>
+
+          {/* Logo de la casa si existe */}
+          {casa?.logo_url && (
+            <div style={{marginBottom:"1.25rem",paddingBottom:"1.25rem",borderBottom:"1px solid rgba(255,255,255,.12)"}}>
+              <img src={casa.logo_url} alt={casa.nombre} style={{maxHeight:48,maxWidth:180,objectFit:"contain",display:"block"}}/>
+            </div>
           )}
-          <div className="hero-title">Inscripción de Participantes</div>
-          <div className="hero-sub">Regístrate para participar en nuestros remates. El proceso toma menos de 3 minutos.</div>
+
+          {/* Eyebrow con nombre de la casa */}
+          <div className="hero-brand" style={{marginBottom:".5rem"}}>
+            {casa?.nombre ? `Remates — ${casa.nombre}` : "Portal de Inscripción"}
+          </div>
+
+          <div className="hero-title">Inscríbete y<br/><span>participa en vivo.</span></div>
+          <div className="hero-sub">Regístrate para participar en nuestros remates. El proceso toma menos de 3 minutos y es 100% online.</div>
 
           <div className="hero-steps">
             {[
@@ -545,6 +574,34 @@ function ParticiparContent() {
             <div className="hero-note-t">Importante</div>
             <div className="hero-note-b">
               Tu inscripción quedará como <strong style={{color:"rgba(255,255,255,.95)"}}>pre-inscrita</strong> hasta que {casa?.nombre} verifique el pago de la garantía. Recibirás confirmación por correo.
+            </div>
+          </div>
+
+          {/* Trust items */}
+          <div className="hero-trust">
+            <div className="trust-item">
+              <div className="trust-icon">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#67e8f9" strokeWidth="1.8" strokeLinecap="round"><path d="M8 2l1.5 3.5H13l-2.8 2 1 3.5L8 9.2l-3.2 1.8 1-3.5L3 5.5h3.5z"/></svg>
+              </div>
+              <div className="trust-text">Proceso validado<strong>RUT + garantía</strong></div>
+            </div>
+            <div className="trust-item">
+              <div className="trust-icon">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#67e8f9" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="5" width="12" height="9" rx="2"/><path d="M5 5V4a3 3 0 016 0v1"/></svg>
+              </div>
+              <div className="trust-text">Datos seguros<strong>cifrado de extremo a extremo</strong></div>
+            </div>
+            <div className="trust-item">
+              <div className="trust-icon">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#67e8f9" strokeWidth="1.8" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></svg>
+              </div>
+              <div className="trust-text">Menos de 3 min<strong>registro completo</strong></div>
+            </div>
+            <div className="trust-item">
+              <div className="trust-icon">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#67e8f9" strokeWidth="1.8" strokeLinecap="round"><path d="M2 8l4 4 8-8"/></svg>
+              </div>
+              <div className="trust-text">Confirmación inmediata<strong>por correo electrónico</strong></div>
             </div>
           </div>
 

@@ -19,8 +19,8 @@ const GRLogo = ({ collapsed = false }) => (
     </svg>
     {!collapsed && (
       <div>
-        <div style={{ fontFamily:"Inter,sans-serif", fontWeight:800, fontSize:"1.1rem", color:"#fff", letterSpacing:"-.01em", lineHeight:1 }}>GR</div>
-        <div style={{ fontFamily:"Inter,sans-serif", fontWeight:400, fontSize:".6rem", color:"#7aaec8", letterSpacing:".04em", marginTop:1 }}>Auction Software</div>
+        <div style={{ fontFamily:"Inter,sans-serif", fontWeight:600, fontSize:".82rem", color:"#fff", letterSpacing:"-.01em", lineHeight:1 }}>GR Auction Software</div>
+        <div style={{ fontFamily:"Inter,sans-serif", fontWeight:400, fontSize:".58rem", color:"#7aaec8", letterSpacing:".04em", marginTop:2 }}>gestionderemates.cl</div>
       </div>
     )}
   </div>

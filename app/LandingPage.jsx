@@ -77,13 +77,13 @@ export default function LandingPage() {
 
 <!-- FEATURES -->
 <section class="section" id="features">
-  <div class="reveal">
-    <div class="section-tag">
+  <div class="reveal" style="text-align:center">
+    <div class="section-tag" style="justify-content:center">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#14B8A6" stroke-width="1.5"/><path d="M6 3v3l2 1.5" stroke="#14B8A6" stroke-width="1.5" stroke-linecap="round"/></svg>
       Características
     </div>
-    <h2 class="section-title">Todo lo que necesita tu casa de remates</h2>
-    <p class="section-sub">Desde la inscripción del postor hasta la liquidación final — en un solo sistema.</p>
+    <h2 class="section-title" style="margin:0 auto 1rem;text-align:center">Todo lo que necesita tu casa de remates</h2>
+    <p class="section-sub" style="margin:0 auto">Desde la inscripción del postor hasta la liquidación final — en un solo sistema.</p>
   </div>
   <div class="features-grid">
     <div class="feat-card reveal">
