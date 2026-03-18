@@ -87,9 +87,10 @@ const CSS = `
     padding: 2.5rem 2.5rem 3rem;
     display: flex; flex-direction: column; gap: 0;
     height: 100vh;
-    overflow-y: auto;
+    overflow: hidden;
     position: relative;
   }
+
   .hero-col::-webkit-scrollbar { width: 4px; }
   .hero-col::-webkit-scrollbar-track { background: transparent; }
   .hero-col::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 2px; }
@@ -108,7 +109,7 @@ const CSS = `
   .form-col::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 2px; }
 
   .hero-brand { font-family: var(--font); font-size: .82rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.6); }
-  .hero-title { font-family: var(--head); font-size: clamp(2.5rem, 4vw, 3.6rem); font-weight: 800; color: #ffffff; line-height: 1.08; letter-spacing: -.03em; margin: .6rem 0 .85rem; }
+  .hero-title { font-family: var(--head); font-size: clamp(3rem, 5vw, 4.5rem); font-weight: 800; color: #ffffff; line-height: 1.05; letter-spacing: -.04em; margin: .6rem 0 .85rem; }
   .hero-title span { color: #67e8f9; }
   .hero-sub   { font-size: 1.08rem; color: rgba(255,255,255,.78); line-height: 1.8; }
 
@@ -250,10 +251,12 @@ function ParticiparContent() {
   const [countdown, setCountdown] = useState(null); // para redirect automático
 
   // Form state
-  const [rut,       setRut]       = useState("");
-  const [rutStatus, setRutStatus] = useState(null);
-  const [formReady, setFormReady] = useState(false);
-  const [nombre,    setNombre]    = useState("");
+  const [rut,          setRut]          = useState("");
+  const [rutStatus,    setRutStatus]    = useState(null);
+  const [formReady,    setFormReady]    = useState(false);
+  const [returningUser,setReturningUser]= useState(false); // postor ya existente
+  const [lookingUp,    setLookingUp]    = useState(false); // buscando en DB
+  const [nombre,       setNombre]       = useState("");
   const [email,     setEmail]     = useState("");
   const [telefono,  setTelefono]  = useState("");
   const [giro,      setGiro]      = useState("");
@@ -315,6 +318,40 @@ function ParticiparContent() {
     load();
   }, [idParam, casaSlug]);
 
+  // ── Lookup de postor existente cuando RUT es válido ─────────────
+  useEffect(() => {
+    if (rutStatus !== "ok") { setReturningUser(false); setLookingUp(false); return; }
+    let cancelled = false;
+    const lookup = async () => {
+      setLookingUp(true);
+      const { data } = await supabase
+        .from("postores")
+        .select("nombre, email, telefono, empresa, direccion, comuna, banco, tipo_cuenta, numero_cuenta")
+        .eq("rut", rut)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data) {
+        setNombre(data.nombre || "");
+        setEmail(data.email || "");
+        setTelefono(data.telefono || "");
+        setGiro(data.empresa || "");
+        setDireccion(data.direccion || "");
+        setComuna(data.comuna || "");
+        setBanco(data.banco || "");
+        setTipoCta(data.tipo_cuenta || "CUENTA CORRIENTE");
+        setNumCta(data.numero_cuenta || "");
+        setReturningUser(true);
+      } else {
+        setReturningUser(false);
+      }
+      setLookingUp(false);
+    };
+    lookup();
+    return () => { cancelled = true; };
+  }, [rutStatus, rut]);
+
   // Countdown y redirect automático tras éxito (si hay returnUrl)
   useEffect(() => {
     if (!success || !returnUrl) return;
@@ -368,17 +405,19 @@ function ParticiparContent() {
     setSubmitting(true);
 
     try {
-      // 0. Verificar que el RUT no esté ya registrado
-      const { data: rutExistente } = await supabase
-        .from("postores")
-        .select("id")
-        .eq("rut", rut.trim())
-        .limit(1)
-        .single();
-      if (rutExistente) {
-        setError("Ya tienes una cuenta registrada con este RUT. Ingresa en gestionderemates.cl/dashboard con tu correo y contraseña. Si no recuerdas tu contraseña, usa la opción '¿Olvidaste tu contraseña?' en el login.");
-        setSubmitting(false);
-        return;
+      // 0. Verificar que el RUT no esté ya inscrito en ESTE remate específico
+      if (remateId) {
+        const { data: yaInscrito } = await supabase
+          .from("postores")
+          .select("id")
+          .eq("rut", rut.trim())
+          .eq("remate_id", remateId)
+          .maybeSingle();
+        if (yaInscrito) {
+          setError(`Ya estás inscrito en este remate con el RUT ${rut}. Si tienes dudas, contacta a ${casa?.nombre}.`);
+          setSubmitting(false);
+          return;
+        }
       }
 
       // 1. Crear cuenta Supabase Auth para el postor
@@ -563,7 +602,7 @@ function ParticiparContent() {
           <div className="hero-orb" style={{width:300,height:300,background:"#1d4ed8",top:-80,left:-100}}/>
           <div className="hero-orb" style={{width:200,height:200,background:"#0ea5e9",bottom:100,right:-60}}/>
         </div>
-        <div style={{position:"relative",zIndex:1}}>
+        <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",flex:1,minHeight:0}}>
 
           {/* Logo GR + nombre plataforma */}
           <div className="hero-topbar">
@@ -576,38 +615,13 @@ function ParticiparContent() {
             </div>
           </div>
 
-          {/* Logo de la casa si existe */}
-          {casa?.logo_url && (
-            <div style={{marginBottom:"1.25rem",paddingBottom:"1.25rem",borderBottom:"1px solid rgba(255,255,255,.12)"}}>
-              <img src={casa.logo_url} alt={casa.nombre} style={{maxHeight:48,maxWidth:180,objectFit:"contain",display:"block"}}/>
-            </div>
-          )}
+          <div className="hero-title" style={{marginTop:"auto"}}>Inscríbete y<br/><span>participa<br/>en vivo.</span></div>
+          <div className="hero-sub" style={{fontSize:"1.15rem",marginTop:"1.25rem"}}>Regístrate para participar en nuestros remates. El proceso toma menos de 3 minutos y es 100% online.</div>
 
-          <div className="hero-title">Inscríbete y<br/><span>participa en vivo.</span></div>
-          <div className="hero-sub">Regístrate para participar en nuestros remates. El proceso toma menos de 3 minutos y es 100% online.</div>
-
-          <div className="hero-steps">
-            {[
-              ["Valida tu RUT", "Verificamos que tu RUT sea válido antes de continuar."],
-              ["Completa tus datos", "Nombre, contacto y datos bancarios para devolución."],
-              ["Elige el remate", "Selecciona el remate al que deseas inscribirte."],
-              ["Adjunta comprobante", "Sube el comprobante de la garantía transferida."],
-              ["Confirmación", "Recibirás un correo con tu cuenta de acceso y pre-inscripción."],
-            ].map(([ttl, txt], i) => (
-              <div className="step-item" key={i}>
-                <div className="step-num">{i+1}</div>
-                <div className="step-txt">
-                  <div className="step-ttl">{ttl}</div>
-                  {txt}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="hero-note">
+          <div className="hero-note" style={{marginTop:"2.5rem"}}>
             <div className="hero-note-t">Importante</div>
             <div className="hero-note-b">
-              Tu inscripción quedará como <strong style={{color:"rgba(255,255,255,.95)"}}>pre-inscrita</strong> hasta que {casa?.nombre} verifique el pago de la garantía. Recibirás confirmación por correo.
+              Tu inscripción quedará como <strong style={{color:"rgba(255,255,255,.95)"}}>pre-inscrita</strong> hasta que la casa de remates verifique el pago de la garantía. Recibirás confirmación por correo.
             </div>
           </div>
 
@@ -672,7 +686,6 @@ function ParticiparContent() {
               </svg>
               <div>
                 <div className="form-topbar-label">GR Auction Software</div>
-                <div className="form-topbar-sub">Portal de inscripción</div>
               </div>
             </div>
 
@@ -709,13 +722,26 @@ function ParticiparContent() {
                   maxLength={12}
                 />
               </div>
-              {rutStatus==="ok"  && <div className="rut-msg ok"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M2 7l4 4 6-7"/></svg>RUT válido — puedes continuar</div>}
+              {rutStatus==="ok" && lookingUp && <div className="rut-msg" style={{color:"var(--ac)"}}><div className="spinner" style={{width:12,height:12,borderWidth:1.5}}/>Verificando RUT...</div>}
+              {rutStatus==="ok" && !lookingUp && returningUser && <div className="rut-msg ok"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M2 7l4 4 6-7"/></svg>¡Te reconocemos! Datos completados automáticamente</div>}
+              {rutStatus==="ok" && !lookingUp && !returningUser && <div className="rut-msg ok"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M2 7l4 4 6-7"/></svg>RUT válido — completa tus datos</div>}
               {rutStatus==="err" && <div className="rut-msg err"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M2 2l10 10M12 2L2 12"/></svg>RUT inválido — verifica el número y dígito verificador</div>}
               {!rutStatus        && <div className="rut-msg" style={{color:"var(--mu)"}}>Sin puntos, con guión — ejemplo: 12345678-9</div>}
             </div>
 
             {formReady && (
               <>
+                {/* Banner postor recurrente */}
+                {returningUser && (
+                  <div className="fade-up" style={{display:"flex",alignItems:"flex-start",gap:".75rem",padding:"1rem 1.1rem",background:"rgba(20,184,166,.06)",border:"1px solid rgba(20,184,166,.25)",borderRadius:11,marginBottom:"1.25rem"}}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#14B8A6" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0,marginTop:1}}><circle cx="10" cy="10" r="8"/><path d="M7 10l2 2 4-4"/></svg>
+                    <div>
+                      <div style={{fontWeight:700,fontSize:".85rem",color:"#0d6b5e",marginBottom:".2rem"}}>¡Bienvenido de vuelta, {nombre.split(" ")[0]}!</div>
+                      <div style={{fontSize:".78rem",color:"#14B8A6",lineHeight:1.55}}>Tus datos han sido completados automáticamente. Solo elige el remate y adjunta el comprobante de garantía.</div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="sec-title fade-up">Información personal</div>
                 <div className="field-grid fade-up fade-up-1">
                   <div className="field-wrap field-full">
