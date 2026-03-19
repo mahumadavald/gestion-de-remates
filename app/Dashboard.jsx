@@ -4604,27 +4604,21 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
             if(usuarioModal==="crear") {
               if(!usuarioForm.pass||usuarioForm.pass.length<6){ notify("La contraseña debe tener al menos 6 caracteres.","inf"); return; }
 
-              // Crear usuario con signUp — requiere "Disable email confirmations" en Supabase Auth Settings
-              const {data:signData, error:signErr} = await supabase.auth.signUp({
-                email:    usuarioForm.email,
-                password: usuarioForm.pass,
-                options:  { data: { nombre: usuarioForm.nombre } }
-              });
-              if(signErr){ notify("Error: "+signErr.message,"inf"); return; }
-              const userId = signData?.user?.id;
-              if(!userId){ notify("No se pudo crear el usuario. Verifica que 'Email confirmations' esté desactivado en Supabase Auth Settings.","inf"); return; }
-
-              // Insertar perfil en tabla usuarios
               const {data:casaData} = await supabase.from("casas").select("id").eq("nombre",usuarioForm.casa).single();
-              const {error:uErr} = await supabase.from("usuarios").insert({
-                id:      userId,
-                email:   usuarioForm.email,
-                nombre:  usuarioForm.nombre,
-                casa_id: casaData?.id||null,
-                roles:   usuarioForm.roles,
-                activo:  usuarioForm.activo,
+              const res = await fetch("/api/admin/create-user", {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body: JSON.stringify({
+                  email:   usuarioForm.email,
+                  password:usuarioForm.pass,
+                  nombre:  usuarioForm.nombre,
+                  casa_id: casaData?.id||null,
+                  roles:   usuarioForm.roles,
+                  activo:  usuarioForm.activo,
+                }),
               });
-              if(uErr){ notify("Error al crear perfil: "+uErr.message,"inf"); return; }
+              const result = await res.json();
+              if(!res.ok){ notify("Error: "+result.error,"inf"); return; }
 
               // Recargar lista
               const {data:uList} = await supabase.from("usuarios").select("*, casas(nombre)").order("nombre");
@@ -4668,8 +4662,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
           };
           const eliminarUsuario = async (id) => {
             if(!window.confirm("¿Eliminar este usuario? No podrá iniciar sesión.")) return;
-            // Eliminar perfil de tabla usuarios
-            await supabase.from("usuarios").delete().eq("id", id);
+            const res = await fetch("/api/admin/delete-user", {
+              method:"POST",
+              headers:{"Content-Type":"application/json"},
+              body: JSON.stringify({ id }),
+            });
+            const result = await res.json();
+            if(!res.ok){ notify("Error al eliminar: "+result.error,"inf"); return; }
             setUsuarios(u=>u.filter(x=>x.id!==id));
             notify("Usuario eliminado.","inf");
           };
