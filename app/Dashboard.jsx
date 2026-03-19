@@ -1901,7 +1901,13 @@ function Dashboard({ session, onLogout }) {
 
   const notify = (msg, type="ok") => { setNotif({msg,type}); setTimeout(()=>setNotif(null),4000); };
 
-  // Timer removido — el lote dura hasta que el martillero adjudique manualmente
+  // bidTimer: 15s countdown después de cada puja — auto-adjudica si nadie supera
+  useEffect(() => {
+    if (bidTimer===null||aState!=="live") return;
+    if (bidTimer<=0) { doAdjudicar(); return; }
+    bidTimerRef.current = setTimeout(()=>setBidTimer(t=>t-1),1000);
+    return () => clearTimeout(bidTimerRef.current);
+  }, [bidTimer, aState]);
 
   // ── Supabase: carga inicial ──────────────────────────────────────
   useEffect(() => {
@@ -2188,10 +2194,9 @@ function Dashboard({ session, onLogout }) {
     const time = new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
     const bidder = `Paleta ${presPaleta} (Presencial)`;
     setBids(p=>{const n=[...p];const c=n[idx];n[idx]={...c,current:montoNum,count:c.count+1,history:[{bidder,amount:montoNum,time,presencial:true},...c.history.slice(0,19)],winner:bidder};return n;});
-    setLastBidder(bidder); setFlash(true); setTimeout(()=>setFlash(false),600);
+    setLastBidder(bidder); setBidTimer(BID_TIMER); setFlash(true); setTimeout(()=>setFlash(false),600);
     if(feedRef.current) feedRef.current.scrollTop=0;
     savePuja(montoNum, parseInt(presPaleta)||0);
-    setChatMsgs(p=>[...p,{id:Date.now(),from:"Sistema",text:`Paleta ${presPaleta} puja ${fmt(montoNum)} (presencial)`,time:new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}),system:true}]);
     setPresPaleta(""); setPresMonto("");
     notify(`✓ Postura presencial — Paleta ${presPaleta} · ${fmt(montoNum)}`,"sold");
   };
@@ -6131,6 +6136,15 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         <div className="ls-card"><div className="ls-v">{bid.count}</div><div className="ls-l">Pujas</div></div>
                         <div className="ls-card"><div className="ls-v">{lastBidder ? "🏆" : "—"}</div><div className="ls-l">Líder</div></div>
                       </div>
+                      {bidTimer!==null&&bidTimer>0&&aState==="live" && (
+                        <div className={`bid-ticker${bidTimer<=5?" urgent":""}${bidTimer<=2?" critical":""}`}>
+                          <div className="bt-num" style={{color:bidTimer>8?"var(--gr)":bidTimer>4?"var(--yl)":"var(--rd)",fontSize:bidTimer<=3?"1.7rem":"1.35rem"}}>{bidTimer}</div>
+                          <div>
+                            <div className="bt-info">{bidTimer<=2?"¡ADJUDICANDO AHORA!":bidTimer<=5?"⚠ Última oportunidad":"Adjudica en"}</div>
+                            <div className="bt-leader">{lastBidder||"—"} lidera · {fmt((bids[idx]?.current||0))}</div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -6144,7 +6158,10 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     </div>
                     <div className="bal">Oferta actual</div>
                     <div className={`bap${flash?" flash":""}`}>{fmt(bid.current)}</div>
-                    <div className="banl">Proxima puja: <span>{fmt(bid.current+curInc)}</span> · Incremento: <span>{fmtS(curInc)}</span></div>
+                    {aState==="live"&&bidTimer!==null&&bidTimer>0
+                      ? <BidRing seconds={bidTimer} total={BID_TIMER} nextAmount={bid.current+curInc} increment={curInc}/>
+                      : <div className="banl">Proxima puja: <span>{fmt(bid.current+curInc)}</span> · Incremento: <span>{fmtS(curInc)}</span></div>
+                    }
                     {aState==="live" && iAmWinning && (
                       <div className="bb-winning">
                         <div className="bw-icon"><div className="bw-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg></div></div>
@@ -6193,33 +6210,6 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                       ))}
                   </div>
                 </div>
-                {/* Chat online — bottom half — visible en modo hibrido/online */}
-                {(modalidad==="hibrido"||modalidad==="online") && (
-                  <div className="chat-wrap" style={{flex:"0 0 auto",height:"48%"}}>
-                    <div className="chat-hdr">
-                      <div className="chat-hdr-t">Chat postores online</div>
-                      <div className="chat-online"><div className="ldot"/>3 conectados</div>
-                    </div>
-                    <div className="chat-body" ref={chatRef}>
-                      {chatMsgs.map(m=>(
-                        <div key={m.id} className="chat-msg">
-                          <div className={`chat-from${m.martillero?" m":m.system?" s":""}`}>{m.from}</div>
-                          <div className={`chat-text${m.system?" sys":""}`}>{m.text}</div>
-                          <div className="chat-time">{m.time}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="chat-input-row">
-                      <input className="chat-inp" placeholder="Mensaje a postores online..." value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter") sendChat();}}/>
-                      <button className="chat-send" onClick={sendChat}>Enviar</button>
-                    </div>
-                  </div>
-                )}
-                {modalidad==="presencial" && (
-                  <div style={{padding:"1rem",textAlign:"center",fontSize:".7rem",color:"var(--mu)",borderTop:"1px solid var(--b1)"}}>
-                    Modo presencial — Chat desactivado
-                  </div>
-                )}
               </aside>
             </div>
           </div>
