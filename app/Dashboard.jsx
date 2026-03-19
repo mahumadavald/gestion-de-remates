@@ -1041,7 +1041,7 @@ const AUTH_CSS = `
   @media (max-width: 900px) {
     .auth-root { overflow: auto; }
     .auth-left { display: none; }
-    .auth-right { width: 100%; border-left: none; overflow-y: auto; height: auto; min-height: 100vh; padding: 2rem 1.5rem 3rem; }
+    .auth-right { flex: 1; width: 100%; max-width: 100%; border-left: none; overflow-y: auto; height: auto; min-height: 100vh; padding: 2rem 1.5rem 3rem; }
   }
 `;
 
