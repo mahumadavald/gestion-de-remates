@@ -6059,6 +6059,10 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                             <button key={v} className={`inc-btn${curInc===v?" on":""}`} onClick={()=>setCurInc(v)}>{fmtS(v)}</button>
                           ))}
                         </div>
+                        <div style={{display:"flex",gap:".5rem",marginTop:".6rem"}}>
+                          <input disabled placeholder="Monto personalizado..." style={{flex:1,padding:".4rem .7rem",borderRadius:6,border:"1px solid var(--b1)",background:"var(--s3)",color:"var(--mu)",fontSize:".8rem",cursor:"not-allowed",opacity:.6}}/>
+                          <button disabled style={{padding:".4rem .8rem",borderRadius:6,background:"var(--s3)",color:"var(--mu)",border:"1px solid var(--b1)",cursor:"not-allowed",fontWeight:600,fontSize:".8rem",opacity:.6}}>Pujar</button>
+                        </div>
                       </div>
                       <div className="ab-list">
                         <button className="ab g"  onClick={startAuction} disabled={aState==="live"}>▶ Iniciar</button>
