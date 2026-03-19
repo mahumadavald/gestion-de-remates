@@ -49,7 +49,7 @@ const LOTES_REALES = [];
 const ADJUDICACIONES = [];
 const LOTES_SALA = [];
 
-const INC_OPTIONS = [100000,200000,300000,500000,750000,1000000,1500000,2000000,3000000,5000000];
+const INC_OPTIONS = [10000,20000,50000,100000,200000,500000,1000000,2000000,5000000];
 const BID_TIMER   = 15;
 const fmt  = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n);
 const fmtS = n => n>=1000000?`$${(n/1000000).toFixed(1)}M`:n>=1000?`$${(n/1000).toFixed(0)}K`:`$${n}`;
@@ -1838,7 +1838,10 @@ function Dashboard({ session, onLogout }) {
   const [timeLeft,    setTimeLeft]    = useState(120);
   const [bidTimer,    setBidTimer]    = useState(null);
   const [lastBidder,  setLastBidder]  = useState(null);
-  const [curInc,      setCurInc]      = useState(500000);
+  const [curInc,      setCurInc]      = useState(100000);
+  const [customMonto, setCustomMonto] = useState("");
+  const [presPaleta,  setPresPaleta]  = useState("");
+  const [presMonto,   setPresMonto]   = useState("");
   const [flash,       setFlash]       = useState(false);
   const [ctrlTab,     setCtrlTab]     = useState("control");
   const [chatInput,   setChatInput]   = useState("");
@@ -1898,18 +1901,7 @@ function Dashboard({ session, onLogout }) {
 
   const notify = (msg, type="ok") => { setNotif({msg,type}); setTimeout(()=>setNotif(null),4000); };
 
-  useEffect(() => {
-    if (aState==="live" && timeLeft>0) { timerRef.current = setTimeout(()=>setTimeLeft(t=>t-1),1000); }
-    else if (aState==="live" && timeLeft===0) { doAdjudicar(); }
-    return () => clearTimeout(timerRef.current);
-  }, [aState, timeLeft]);
-
-  useEffect(() => {
-    if (bidTimer===null||aState!=="live") return;
-    if (bidTimer<=0) { doAdjudicar(); return; }
-    bidTimerRef.current = setTimeout(()=>setBidTimer(t=>t-1),1000);
-    return () => clearTimeout(bidTimerRef.current);
-  }, [bidTimer, aState]);
+  // Timer removido — el lote dura hasta que el martillero adjudique manualmente
 
   // ── Supabase: carga inicial ──────────────────────────────────────
   useEffect(() => {
@@ -2001,29 +1993,12 @@ function Dashboard({ session, onLogout }) {
     if (!error) setDbRemates(prev=>prev.map(r=>r.id===id?{...r,estado}:r));
   };
 
-  // Simulated bids from online participants
-  useEffect(() => {
-    if (aState!=="live"||!lots.length) return;
-    const onlinePostors = ["P-0318 (Online)","P-0112 (Online)","P-0067 (Online)"];
-    const iv = setInterval(() => {
-      if (Math.random()<0.3) {
-        const bidder = onlinePostors[Math.floor(Math.random()*onlinePostors.length)];
-        const amt = (bids[idx]?.current||0) + curInc;
-        setBids(p=>{const n=[...p];const c=n[idx];n[idx]={...c,current:amt,count:c.count+1,history:[{bidder,amount:amt,time:new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),online:true},...c.history.slice(0,19)],winner:bidder};return n;});
-        setLastBidder(bidder); setBidTimer(BID_TIMER); setTimeLeft(t=>Math.min(t+8,120));
-        setFlash(true); setTimeout(()=>setFlash(false),600);
-        if (feedRef.current) feedRef.current.scrollTop=0;
-        // Auto-announce in chat
-        setChatMsgs(p=>[...p,{id:Date.now(),from:"Sistema",text:`${bidder} puja ${fmt(amt)}`,time:new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}),system:true}]);
-      }
-    }, 4200);
-    return () => clearInterval(iv);
-  }, [aState, idx, lots, curInc, bids]);
+  // Pujas simuladas eliminadas — solo pujas reales de postores
 
   const placeBid = () => {
     const amt = (bids[idx]?.current||0) + curInc;
     setBids(p=>{const n=[...p];const c=n[idx];n[idx]={...c,current:amt,count:c.count+1,history:[{bidder:"Tu (P-0245)",amount:amt,time:new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),mine:true},...c.history.slice(0,19)],winner:"Tu (P-0245)"};return n;});
-    setLastBidder("me"); setBidTimer(BID_TIMER); setTimeLeft(t=>Math.min(t+10,120));
+    setLastBidder("me"); setBidTimer(BID_TIMER); 
     setFlash(true); setTimeout(()=>setFlash(false),600); notify("Puja registrada.");
   };
 
@@ -2097,7 +2072,7 @@ function Dashboard({ session, onLogout }) {
     if (!imgs || imgs.length <= 1) return;
     photoIntervalRef.current = setInterval(() => {
       setPhotoIdx(p => (p + 1) % imgs.length);
-    }, 4000);
+    }, 3000);
   };
   React.useEffect(() => {
     const imgs = lots[idx]?.imgs || [];
@@ -2189,23 +2164,37 @@ function Dashboard({ session, onLogout }) {
     setPage("liquidac");
   };
 
-  const startAuction  = () => { setAState("live"); setTimeLeft(120); setBidTimer(null); setLastBidder(null); };
+  const startAuction  = () => { setAState("live"); setBidTimer(null); setLastBidder(null); };
   const pauseAuction  = () => { setAState("paused"); setBidTimer(null); };
   const adjudicar     = () => doAdjudicar(true);
   const pasarLote     = () => {
     if(idx < lots.length-1){
       const next = idx+1;
-      setIdx(next); setAState("waiting"); setTimeLeft(120); setBidTimer(null); setLastBidder(null);
-      setCurInc(lots[next]?.inc||500000); setPhotoIdx(0);
+      setIdx(next); setAState("waiting"); setBidTimer(null); setLastBidder(null);
+      setCurInc(lots[next]?.inc||100000); setCustomMonto(""); setPhotoIdx(0);
       notify(`Lote ${next+1} — ${lots[next]?.name}`,"inf");
     } else { notify("Este es el último lote.","inf"); }
   };
   const repetirLote   = () => {
-    setAState("waiting"); setTimeLeft(120); setBidTimer(null); setLastBidder(null);
+    setAState("waiting"); setBidTimer(null); setLastBidder(null);
     setBids(prev => { const n=[...prev]; n[idx]={current:lots[idx]?.base||0,count:0,history:[],status:"waiting",winner:null}; return n; });
     notify(`Lote repetido — ${lots[idx]?.name}`,"inf");
   };
-  const resetAuction  = () => { setAState("waiting"); setTimeLeft(120); setBidTimer(null); setLastBidder(null); setBids(lots.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null}))); };
+  const resetAuction  = () => { setAState("waiting"); setBidTimer(null); setLastBidder(null); setBids(lots.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null}))); };
+
+  const registrarPresencial = () => {
+    const montoNum = parseInt((presMonto||"").replace(/\D/g,""));
+    if (!presPaleta || !montoNum) { notify("Ingresa paleta y monto","inf"); return; }
+    const time = new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    const bidder = `Paleta ${presPaleta} (Presencial)`;
+    setBids(p=>{const n=[...p];const c=n[idx];n[idx]={...c,current:montoNum,count:c.count+1,history:[{bidder,amount:montoNum,time,presencial:true},...c.history.slice(0,19)],winner:bidder};return n;});
+    setLastBidder(bidder); setFlash(true); setTimeout(()=>setFlash(false),600);
+    if(feedRef.current) feedRef.current.scrollTop=0;
+    savePuja(montoNum, parseInt(presPaleta)||0);
+    setChatMsgs(p=>[...p,{id:Date.now(),from:"Sistema",text:`Paleta ${presPaleta} puja ${fmt(montoNum)} (presencial)`,time:new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}),system:true}]);
+    setPresPaleta(""); setPresMonto("");
+    notify(`✓ Postura presencial — Paleta ${presPaleta} · ${fmt(montoNum)}`,"sold");
+  };
   const handlePhoto   = (i,e) => { const f=e.target.files[0]; if(!f) return; setLots(p=>{const n=[...p];const imgs=[...(n[i].imgs||[]),URL.createObjectURL(f)];n[i]={...n[i],imgs};return n;}); notify("Foto agregada.","inf"); };
   const removePhoto   = (loteI, photoI) => { setLots(p=>{const n=[...p];const imgs=n[loteI].imgs.filter((_,j)=>j!==photoI);n[loteI]={...n[loteI],imgs};return n;}); setPhotoIdx(0); };
 
@@ -3177,11 +3166,11 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     if(r.supabaseId){
                       const {data:lr} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
                       if(lr&&lr.length>0){
-                        const mapped=lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:[],desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
+                        const mapped=lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
                         setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
                       }
                     }
-                    setIdx(0); setAState("waiting"); setTimeLeft(120); setBidTimer(null);
+                    setIdx(0); setAState("waiting"); setBidTimer(null);
                     setPage("sala");
                   }}>Abrir sala →</button>
                 </div>
@@ -3264,11 +3253,11 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                               if(r.supabaseId){
                                 const {data:lotesRemate} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
                                 if(lotesRemate&&lotesRemate.length>0){
-                                  const mapped = lotesRemate.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:[],desc:l.descripcion||"",inc:l.incremento||Math.round((l.base||0)*0.05)||100000}));
+                                  const mapped = lotesRemate.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:l.incremento||Math.round((l.base||0)*0.05)||100000}));
                                   setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
                                 } else { setLots(LOTES_SALA); setBids(LOTES_SALA.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null}))); notify("Sin lotes asignados aún.","inf"); }
                               }
-                              setIdx(0); setAState("waiting"); setTimeLeft(120); setBidTimer(null);
+                              setIdx(0); setAState("waiting"); setBidTimer(null);
                               setPage("sala"); notify("Sala abierta.","sold");
                             }}>Abrir sala</button>
                           )}
@@ -5915,13 +5904,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     if(rid){
                       const {data:lr} = await supabase.from("lotes").select("*").eq("remate_id",rid).order("orden");
                       if(lr&&lr.length>0){
-                        const mapped = lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:[],desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
+                        const mapped = lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
                         setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
                       } else {
                         setLots(LOTES_SALA); setBids(LOTES_SALA.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
                         notify("Este remate no tiene lotes aún.","inf");
                       }
-                      setIdx(0); setAState("waiting"); setTimeLeft(120); setBidTimer(null);
+                      setIdx(0); setAState("waiting"); setBidTimer(null);
                     }
                   }}>
                   <option value="">— Seleccionar remate —</option>
@@ -6085,6 +6074,39 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                             <button key={v} className={`inc-btn${curInc===v?" on":""}`} onClick={()=>setCurInc(v)}>{fmtS(v)}</button>
                           ))}
                         </div>
+                        {/* Monto personalizado */}
+                        <div style={{display:"flex",gap:".4rem",marginTop:".5rem",alignItems:"center"}}>
+                          <input
+                            placeholder="Monto personalizado..."
+                            value={customMonto}
+                            onChange={e=>setCustomMonto(e.target.value)}
+                            onKeyDown={e=>{ if(e.key==="Enter"&&customMonto){ const n=parseInt(customMonto.replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} } }}
+                            style={{flex:1,padding:".3rem .55rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}
+                          />
+                          <button
+                            onClick={()=>{ const n=parseInt((customMonto||"").replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} }}
+                            style={{padding:".3rem .6rem",background:"var(--ac)",border:"none",borderRadius:6,color:"#fff",fontSize:".68rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+                            Usar
+                          </button>
+                        </div>
+                      </div>
+                      {/* Postura presencial */}
+                      <div style={{marginTop:".6rem",padding:".6rem .75rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:8}}>
+                        <div style={{fontSize:".68rem",fontWeight:700,color:"var(--yl)",marginBottom:".4rem",display:"flex",alignItems:"center",gap:".35rem"}}>
+                          <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
+                          Postura presencial
+                        </div>
+                        <div style={{display:"flex",gap:".4rem"}}>
+                          <input placeholder="Paleta" value={presPaleta} onChange={e=>setPresPaleta(e.target.value)}
+                            style={{width:64,padding:".3rem .5rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
+                          <input placeholder="Monto" value={presMonto} onChange={e=>setPresMonto(e.target.value)}
+                            onKeyDown={e=>e.key==="Enter"&&registrarPresencial()}
+                            style={{flex:1,padding:".3rem .5rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
+                          <button onClick={registrarPresencial}
+                            style={{padding:".3rem .6rem",background:"rgba(246,173,85,.2)",border:"1px solid rgba(246,173,85,.4)",borderRadius:6,color:"var(--yl)",fontSize:".68rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+                            ✓
+                          </button>
+                        </div>
                       </div>
                       <div className="ab-list">
                         <button className="ab g"  onClick={startAuction} disabled={aState==="live"}>▶ Iniciar</button>
@@ -6100,18 +6122,9 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                       <div className="st-row"><div className="st-dot" style={{background:sColor,boxShadow:`0 0 7px ${sColor}`}}/><div className="st-txt" style={{color:sColor}}>{sLabel}</div></div>
                       <div className="ls-grid">
                         <div className="ls-card"><div className="ls-v" style={{fontSize:".82rem"}}>{fmt(bid.current)}</div><div className="ls-l">Oferta</div></div>
-                        <div className="ls-card"><div className="ls-v">{String(Math.floor(timeLeft/60)).padStart(2,"0")}:{String(timeLeft%60).padStart(2,"0")}</div><div className="ls-l">Tiempo</div></div>
                         <div className="ls-card"><div className="ls-v">{bid.count}</div><div className="ls-l">Pujas</div></div>
+                        <div className="ls-card"><div className="ls-v">{lastBidder ? "🏆" : "—"}</div><div className="ls-l">Líder</div></div>
                       </div>
-                      {bidTimer!==null&&bidTimer>0&&aState==="live" && (
-                        <div className={`bid-ticker${bidTimer<=5?" urgent":""}${bidTimer<=2?" critical":""}`}>
-                          <div className="bt-num" style={{color:bidTimer>8?"var(--gr)":bidTimer>4?"var(--yl)":"var(--rd)",fontSize:bidTimer<=3?"1.7rem":"1.35rem"}}>{bidTimer}</div>
-                          <div>
-                            <div className="bt-info">{bidTimer<=2?"¡ADJUDICANDO AHORA!":bidTimer<=5?"⚠ Última oportunidad":"Adjudica en"}</div>
-                            <div className="bt-leader">{lastBidder||"—"} lidera · {fmt((bids[idx]?.current||0))}</div>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
                 )}
@@ -6119,20 +6132,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 {/* POSTOR */}
                 {ctrlTab==="postor" && (
                   <div className="ba-card">
-                    <div className="tm-card" style={{marginBottom:".9rem"}}>
-                      <div className="tmr">
-                        <div><div className="tml">Tiempo del remate</div>
-                          <div className="tmv" style={{color:tColor}}>{String(Math.floor(timeLeft/60)).padStart(2,"0")}:{String(timeLeft%60).padStart(2,"0")}</div></div>
-                        <div style={{textAlign:"right"}}><div className="tml">Estado</div><div className="tmst" style={{color:sColor}}>{sLabel}</div></div>
-                      </div>
-                      <div className="tmbg"><div className="tmfill" style={{width:`${(timeLeft/120)*100}%`,background:tColor}}/></div>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:".75rem",padding:".4rem .7rem",background:"var(--s1)",borderRadius:7,border:"1px solid var(--b1)"}}>
+                      <div style={{fontSize:".72rem",color:"var(--mu2)"}}>Estado</div>
+                      <div style={{fontSize:".78rem",fontWeight:700,color:sColor}}>{sLabel}</div>
                     </div>
                     <div className="bal">Oferta actual</div>
                     <div className={`bap${flash?" flash":""}`}>{fmt(bid.current)}</div>
-                    {aState==="live"&&bidTimer!==null&&bidTimer>0
-                      ? <BidRing seconds={bidTimer} total={BID_TIMER} nextAmount={bid.current+curInc} increment={curInc}/>
-                      : <div className="banl">Proxima puja: <span>{fmt(bid.current+curInc)}</span> · Incremento: <span>{fmtS(curInc)}</span></div>
-                    }
+                    <div className="banl">Proxima puja: <span>{fmt(bid.current+curInc)}</span> · Incremento: <span>{fmtS(curInc)}</span></div>
                     {aState==="live" && iAmWinning && (
                       <div className="bb-winning">
                         <div className="bw-icon"><div className="bw-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg></div></div>
@@ -6172,6 +6178,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         <div key={i} className="fdi">
                           <div style={{display:"flex",alignItems:"center",gap:".35rem"}}>
                             {b.online && <span style={{padding:".04rem .3rem",background:"rgba(56,178,246,.15)",color:"var(--ac)",borderRadius:3,fontSize:".55rem",fontWeight:700}}>WEB</span>}
+                            {b.presencial && <span style={{padding:".04rem .3rem",background:"rgba(246,173,85,.15)",color:"var(--yl)",borderRadius:3,fontSize:".55rem",fontWeight:700}}>PRES</span>}
                             <div className={`fdb${b.mine?" me":""}`}>{b.mine?"Tu (P-0245)":b.bidder}</div>
                           </div>
                           <div className="fda">{fmt(b.amount)}</div>
