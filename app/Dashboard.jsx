@@ -5914,6 +5914,19 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
           </div>
         )}
 
+        {/* ══ SALA EN VIVO — estado vacío ══ */}
+        {page==="sala" && (!item || !bid) && (
+          <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"100vh",gap:"1.2rem",color:"var(--wh2)",textAlign:"center",padding:"2rem"}}>
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{opacity:.35}}>
+              <circle cx="32" cy="32" r="28"/>
+              <path d="M32 20v12l8 4"/>
+            </svg>
+            <div style={{fontSize:"1.15rem",fontWeight:700}}>No hay ningún remate en curso</div>
+            <div style={{fontSize:".85rem",color:"var(--mu)",maxWidth:320}}>Abrí un remate desde la sección <strong>Remates</strong> para comenzar la sala en vivo.</div>
+            <button className="btn-primary" style={{marginTop:".5rem"}} onClick={()=>setPage("remates")}>Ir a Remates →</button>
+          </div>
+        )}
+
         {/* ══ SALA EN VIVO ══ */}
         {page==="sala" && item && bid && (
           <div style={{display:"flex",flexDirection:"column",height:"100vh",overflow:"hidden"}}>
