@@ -77,9 +77,8 @@ const CSS = `
   @media (max-width: 860px) {
     html, body { overflow: auto; }
     .page-wrap { grid-template-columns: 1fr; height: auto; }
-    .hero-col  { height: auto !important; overflow: visible !important; padding: .75rem 1.25rem !important; justify-content: center; }
-    .hero-col > *:not(.mobile-scroll-hint) { display: none !important; }
-    .mobile-scroll-hint { display: flex !important; margin: 0 !important; }
+    .hero-col  { height: auto !important; overflow: visible !important; padding: 1.5rem 1.25rem 1.75rem !important; }
+    .mobile-scroll-hint { display: flex !important; }
     .form-col  { height: auto !important; overflow: visible !important; }
   }
   .mobile-scroll-hint {
