@@ -5930,7 +5930,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   const bs=bids[i]; const st=bs?.status==="sold"?"sold":i===idx&&aState==="live"?"live":"wait";
                   return (
                     <div key={it.id} className={`lc${idx===i?" on":""}`} onClick={()=>setIdx(i)}>
-                      {it.img ? <img src={it.img} alt={it.name} className="lth"/> : <div className="lph">Sin foto</div>}
+                      {it.imgs?.[0] ? <img src={it.imgs[0]} alt={it.name} className="lth"/> : <div className="lph">Sin foto</div>}
                       <div className="ln">Lote {String(i+1).padStart(2,"0")}</div>
                       <div className="lnm">{it.name}</div>
                       <div className="lpr">{fmtS(bs?.current||it.base)}</div>
