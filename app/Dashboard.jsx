@@ -642,6 +642,85 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .mod-tab{padding:.26rem .65rem;border-radius:5px;border:1px solid var(--b1);background:transparent;font-size:.65rem;font-weight:600;color:var(--mu);cursor:pointer;transition:all .15s;}
 .mod-tab.on{background:rgba(56,178,246,.15);border-color:var(--ac);color:var(--ac);}
 .mod-tab:hover:not(.on){border-color:var(--b2);color:var(--mu2);}
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 768px) {
+  html,body{overflow:auto;}
+
+  /* App shell: stack sidebar on top */
+  .app{flex-direction:column;}
+  .sidebar{width:100%;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;padding:.4rem .6rem;gap:.2rem;overflow-y:visible;overflow-x:auto;}
+  .sb-logo{padding:.4rem .5rem .4rem;border-bottom:none;border-right:1px solid var(--sbB);}
+  .sb-section{display:none;}
+  .sb-item{padding:.35rem .55rem;margin:.05rem .15rem;font-size:.72rem;gap:.4rem;}
+  .sb-footer{margin-top:0;padding:.35rem .5rem;border-top:none;border-left:1px solid var(--sbB);margin-left:auto;}
+  .sb-urole{display:none;}
+
+  /* Main wrap */
+  .main-wrap{overflow:auto;}
+  .topbar{padding:0 .9rem;height:46px;flex-wrap:wrap;gap:.3rem;}
+  .topbar-title{font-size:.82rem;}
+  .page{padding:.9rem .85rem;}
+
+  /* Stat grid: 2 columns on mobile */
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:.55rem;margin-bottom:.9rem;}
+  .stat-val{font-size:1.35rem;}
+
+  /* Charts: stack */
+  .charts-row{grid-template-columns:1fr;gap:.55rem;}
+
+  /* Tables: horizontal scroll */
+  .table-card{overflow-x:auto;}
+  table{min-width:480px;}
+  th,td{padding:.5rem .75rem;font-size:.7rem;}
+
+  /* Modal: full width on mobile */
+  .ov{padding:.5rem;}
+  .modal{padding:1.2rem;border-radius:10px;}
+  .modal.wide{max-width:100%;}
+  .form-grid{grid-template-columns:1fr;}
+
+  /* SALA EN VIVO: stack columns vertically */
+  .sala-wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr auto;height:auto;overflow:visible;}
+  .sala-sb{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;border-right:none;border-bottom:1px solid var(--b1);max-height:none;padding-bottom:.3rem;}
+  .sala-sbh{flex-shrink:0;padding:.5rem .8rem;white-space:nowrap;border-bottom:none;border-right:1px solid var(--b1);}
+  .lc{min-width:100px;max-width:120px;border-bottom:none;border-right:1px solid var(--b1);flex-shrink:0;padding:.5rem .6rem;}
+  .lth{height:55px;}
+  .lph{height:55px;}
+  .sala-main{padding:.8rem .9rem;gap:.7rem;}
+  .sala-main > div:first-child{max-height:220px;}
+
+  /* Bid controls: full width */
+  .ctrl-card{padding:.9rem;}
+  .inc-btns{gap:.3rem;}
+  .inc-btn{padding:.3rem .5rem;font-size:.7rem;}
+  .ab-list{gap:.35rem;}
+  .ab{font-size:.7rem;padding:.45rem .5rem;}
+  .ls-grid{grid-template-columns:repeat(3,1fr);gap:.5rem;}
+
+  /* Bid ring responsive */
+  .ba-card{padding:.9rem 1rem;}
+  .bap{font-size:2.5rem;}
+  .bb{padding:.75rem;font-size:.9rem;}
+
+  /* Liq cards: stack body */
+  .liq-body{grid-template-columns:repeat(2,1fr);}
+
+  /* Topbar buttons: smaller */
+  .btn-primary,.btn-sec,.btn-confirm{padding:.35rem .7rem;font-size:.72rem;}
+
+  /* Notification: adjust position */
+  .notif{top:auto;bottom:1rem;right:.8rem;left:.8rem;text-align:center;}
+}
+
+@media (max-width: 480px) {
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .stat-val{font-size:1.2rem;}
+  .topbar-right{gap:.4rem;}
+  .liq-body{grid-template-columns:1fr 1fr;}
+  .bap{font-size:2rem;}
+  .sala-main > div:first-child{max-height:180px;}
+}
 `;
 
 
