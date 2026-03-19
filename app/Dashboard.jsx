@@ -5586,6 +5586,52 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
               </div>
             )}
 
+            {/* ── Tabla adjudicaciones por lote ── */}
+            {liqReview && (()=>{
+              const adjLotes = liqReview.compradores.flatMap((c,ci) =>
+                c.lotes.map((l,li) => ({
+                  nLote: ci * 100 + li, // solo para key
+                  lote: l.lote,
+                  postor: c.postorData?.nombre || c.postorData?.name || l.postor || c.key,
+                  rut: c.postorData?.rut || l.rut || "—",
+                  nPart: c.postorData?.nComprador || "—",
+                  monto: l.monto,
+                }))
+              ).map((a,i)=>({...a,nLote:i+1}));
+              return (
+              <div className="table-card" style={{marginBottom:"1.2rem"}}>
+                <div className="table-head">
+                  <div className="table-title">Adjudicaciones — {adjLotes.length} lote{adjLotes.length!==1?"s":""}</div>
+                  <div style={{fontSize:".72rem",color:"var(--mu)"}}>
+                    Total martillo <strong style={{color:"var(--ac)"}}>{fmt(adjLotes.reduce((s,a)=>s+a.monto,0))}</strong>
+                  </div>
+                </div>
+                <table>
+                  <thead><tr>
+                    <th>Lote</th>
+                    <th>Descripción</th>
+                    <th>N° Part.</th>
+                    <th>Adjudicatario</th>
+                    <th>RUT</th>
+                    <th style={{textAlign:"right"}}>Monto martillo</th>
+                  </tr></thead>
+                  <tbody>
+                    {adjLotes.map((a,i)=>(
+                      <tr key={i}>
+                        <td><span style={{fontFamily:"Inter,sans-serif",fontWeight:700,color:"var(--ac)",fontSize:".8rem"}}>{a.nLote}</span></td>
+                        <td style={{maxWidth:220,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{a.lote}</td>
+                        <td><span style={{fontWeight:700,color:"var(--wh2)"}}>{a.nPart}</span></td>
+                        <td>{a.postor}</td>
+                        <td style={{fontFamily:"Inter,sans-serif",fontSize:".75rem",color:"var(--mu2)"}}>{a.rut}</td>
+                        <td style={{textAlign:"right",fontWeight:700,color:"var(--gr)",fontFamily:"Inter,sans-serif"}}>{fmt(a.monto)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              );
+            })()}
+
             {/* ── Tabla resumen (estilo liquidar_compradores.php) ── */}
             {liqReview && (
               <div className="table-card" style={{marginBottom:"1.2rem"}}>
