@@ -1694,8 +1694,8 @@ function Dashboard({ session, onLogout }) {
   const resetUsuarioForm = () => setUsuarioForm({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
 
   // ── Formulario nuevo remate ──
-  const [remateForm, setRemateForm] = useState({nombre:"",fecha:"",hora:"10:00",modalidad:"Híbrido",tipo:"judicial",comCustom:"",estado:"borrador"});
-  const resetRemateForm = () => setRemateForm({nombre:"",fecha:"",hora:"10:00",modalidad:"Híbrido",tipo:"judicial",comCustom:"",estado:"borrador"});
+  const [remateForm, setRemateForm] = useState({nombre:"",fecha:"",hora:"10:00",modalidad:"Híbrido",tipo:"judicial",comCustom:"",estado:"activo"});
+  const resetRemateForm = () => setRemateForm({nombre:"",fecha:"",hora:"10:00",modalidad:"Híbrido",tipo:"judicial",comCustom:"",estado:"activo"});
 
   // ── Remate activo en sala en vivo ──
   const [salaRemateId, setSalaRemateId] = useState(null);
@@ -1851,10 +1851,13 @@ function Dashboard({ session, onLogout }) {
   const [photoIdx,    setPhotoIdx]    = useState(0);
   const photoIntervalRef = React.useRef(null);
   // Video martillero
-  const videoRef      = React.useRef(null);
-  const streamRef     = React.useRef(null);
+  const videoRef           = React.useRef(null);
+  const streamRef          = React.useRef(null);
+  const mediaRecorderRef   = React.useRef(null);
+  const recordedChunksRef  = React.useRef([]);
   const [camActiva,   setCamActiva]   = useState(false);
   const [camError,    setCamError]    = useState(null);
+  const [grabando,    setGrabando]    = useState(false);
   // Post-remate: liquidaciones y devoluciones generadas automáticamente
   const [liquidaciones, setLiquidaciones] = useState([]);
 
@@ -2104,6 +2107,27 @@ function Dashboard({ session, onLogout }) {
   }, [idx, lots]);
 
   // ── Cámara en vivo martillero ──
+  const guardarGrabacion = (nombreRemate) => {
+    if (!mediaRecorderRef.current || mediaRecorderRef.current.state === "inactive") return;
+    mediaRecorderRef.current.onstop = () => {
+      if (recordedChunksRef.current.length === 0) return;
+      const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      const fecha = new Date().toISOString().slice(0,10);
+      const nombre = (nombreRemate||"remate").replace(/\s+/g,"-").toLowerCase();
+      a.href     = url;
+      a.download = `grabacion-${nombre}-${fecha}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      recordedChunksRef.current = [];
+    };
+    mediaRecorderRef.current.stop();
+    setGrabando(false);
+  };
+
   const activarCamara = async () => {
     setCamError(null);
     try {
@@ -2111,11 +2135,21 @@ function Dashboard({ session, onLogout }) {
       streamRef.current = stream;
       if (videoRef.current) videoRef.current.srcObject = stream;
       setCamActiva(true);
+      // Iniciar grabación automáticamente
+      recordedChunksRef.current = [];
+      const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
+        ? "video/webm;codecs=vp9,opus" : "video/webm";
+      const mr = new MediaRecorder(stream, { mimeType });
+      mr.ondataavailable = e => { if (e.data.size > 0) recordedChunksRef.current.push(e.data); };
+      mr.start(1000);
+      mediaRecorderRef.current = mr;
+      setGrabando(true);
     } catch(e) {
       setCamError("No se pudo acceder a la cámara. Verifica los permisos del navegador.");
     }
   };
   const detenerCamara = () => {
+    guardarGrabacion(lots[idx]?.name || "remate");
     if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
     streamRef.current = null;
     if (videoRef.current) videoRef.current.srcObject = null;
@@ -2124,6 +2158,9 @@ function Dashboard({ session, onLogout }) {
 
   // Cerrar remate completo → genera todas las liquidaciones/devoluciones pendientes
   const cerrarRemateCompleto = () => {
+    // Guardar grabación si estaba activa
+    if (grabando) guardarGrabacion(lots[idx]?.name || "remate");
+    if (camActiva) detenerCamara();
     setRemateTerminado(true);
     // Agrupar todas las adjudicaciones (demo + generadas en vivo) por comprador
     const todasLiq = [...ADJUDICACIONES.map(a=>({
@@ -2464,8 +2501,9 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 </div>
                 <div className="fg"><label className="fl">Estado inicial</label>
                   <select className="fsel" value={remateForm.estado} onChange={e=>setRemateForm(f=>({...f,estado:e.target.value}))}>
-                    <option value="borrador">Borrador — no visible</option>
+                    <option value="activo">Activo — listo para operar</option>
                     <option value="publicado">Publicado — visible al público</option>
+                    <option value="borrador">Borrador — no visible</option>
                   </select>
                 </div>
                 <div className="fg full"><label className="fl">Tipo de remate</label>
@@ -2849,7 +2887,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                       hora:      remateForm.hora||"10:00",
                       modalidad: remateForm.modalidad,
                       tipo:      remateForm.tipo,
-                      estado:    remateForm.estado||"borrador",
+                      estado:    remateForm.estado||"activo",
                     });
                     if(error){notify("Error al guardar remate.","inf");console.error(error);return;}
                     const {data:remData} = await supabase.from("remates").select("*").order("created_at",{ascending:false});
@@ -5996,6 +6034,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     <div style={{padding:".5rem .75rem",borderBottom:"1px solid var(--b1)",display:"flex",alignItems:"center",gap:".4rem"}}>
                       <div style={{width:7,height:7,borderRadius:"50%",background:camActiva?"var(--gr)":"var(--rd)",boxShadow:camActiva?"0 0 6px var(--gr)":undefined,flexShrink:0}}/>
                       <span style={{fontSize:".68rem",fontWeight:700,color:"var(--wh2)"}}>Martillero en vivo</span>
+                      {grabando && <span style={{marginLeft:"auto",fontSize:".6rem",fontWeight:800,color:"var(--rd)",display:"flex",alignItems:"center",gap:3}}><span style={{width:6,height:6,borderRadius:"50%",background:"var(--rd)",animation:"pulse 1s infinite"}}/>REC</span>}
                     </div>
                     <div style={{flex:1,position:"relative",background:"#000",display:"flex",alignItems:"center",justifyContent:"center"}}>
                       <video ref={videoRef} autoPlay muted playsInline
