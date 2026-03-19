@@ -3027,6 +3027,8 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
               {page==="lotes"     && <>
                 <button className="btn-sec" style={{fontSize:".7rem"}} onClick={async()=>{
                   // Generar Bid Sheets PDF — hoja imprimible por lote
+                  if(!LOTES_MERGED.length){ notify("No hay lotes cargados para generar el PDF.","inf"); return; }
+                  try {
                   const {jsPDF} = await import("jspdf");
                   const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
                   const W = doc.internal.pageSize.getWidth();
@@ -3070,6 +3072,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   });
                   doc.save("bid-sheets.pdf");
                   notify("Bid sheets generados.","sold");
+                  } catch(e){ console.error(e); notify("Error al generar PDF: "+e.message,"inf"); }
                 }}>🖨 Bid Sheets PDF</button>
                 <label className="btn-sec" style={{fontSize:".7rem",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:".3rem"}}>
                   ↑ Importar Excel
@@ -4114,6 +4117,8 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 }}>↓ Exportar CSV</button>
                 <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async ()=>{
                   // Catálogo PDF de lotes
+                  if(!LOTES_MERGED.length){ notify("No hay lotes para generar el catálogo.","inf"); return; }
+                  try {
                   const {jsPDF} = await import("jspdf");
                   const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
                   const W = doc.internal.pageSize.getWidth();
@@ -4134,6 +4139,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   });
                   doc.save("catalogo-lotes.pdf");
                   notify("Catálogo PDF generado.","sold");
+                  } catch(e){ console.error(e); notify("Error al generar PDF: "+e.message,"inf"); }
                 }}>↓ Catálogo PDF</button>
               </div>
             </div>
