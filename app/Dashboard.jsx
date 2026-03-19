@@ -2032,7 +2032,7 @@ function Dashboard({ session, onLogout }) {
       const newLiq  = {
         id: `LIQ-${Date.now()}`,
         lote: loteNom,
-        exp: loteReal.exp || lots[idx]?.id || "",
+        exp: loteReal.exp || "",
         postor: winner,
         email: winner.includes("Online") ? "postor@email.cl" : "rfuentes@gmail.com",
         monto, gar, saldo, com, gastosAdm, totalAPagar,
@@ -2324,8 +2324,8 @@ function Dashboard({ session, onLogout }) {
     // TABLA LOTES — fiel al formato original
     // ══════════════════════════════════════════
     const rows = [];
-    l.lineas.forEach(ln => {
-      const loteLabel = ln.exp ? `LOTE ${ln.exp.replace(/[^0-9]/g,"")||ln.exp}` : "LOTE";
+    l.lineas.forEach((ln, li) => {
+      const loteLabel = `LOTE ${li + 1}`;
       rows.push([loteLabel, "1", ln.lote.toUpperCase(), "EX", fmtCLP(ln.monto), fmtCLP(ln.monto)]);
       rows.push([loteLabel, "1", `COMISION ${ln.comPct}%`, "AF", fmtCLP(ln.com), fmtCLP(ln.com)]);
       if(ln.motorizado) rows.push(["G-ADMIN", "1",
