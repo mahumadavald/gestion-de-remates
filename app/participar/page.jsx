@@ -80,6 +80,23 @@ const CSS = `
     .page-wrap { grid-template-columns: 1fr; height: auto; }
     .hero-col  { display: none; }
     .form-col  { height: auto !important; overflow: visible !important; }
+    .mobile-scroll-hint { display: flex !important; }
+  }
+  .mobile-scroll-hint {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: .65rem 1rem;
+    background: rgba(6,182,212,.07);
+    border: 1px solid rgba(6,182,212,.2);
+    border-radius: 8px;
+    margin-bottom: 1.25rem;
+    animation: hint-bounce 2s ease-in-out infinite;
+  }
+  @keyframes hint-bounce {
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(3px)}
   }
 
   .hero-col {
@@ -605,6 +622,12 @@ function ParticiparContent() {
               <div className="form-title">Inscripción de postor</div>
               <div className="form-sub">Completa el formulario para participar en nuestros remates.</div>
               <div style={{width:48,height:3,background:"linear-gradient(90deg,#06B6D4,#14B8A6)",borderRadius:2,margin:"1rem auto 0"}}/>
+            </div>
+
+            {/* Mobile scroll hint */}
+            <div className="mobile-scroll-hint">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#06B6D4" strokeWidth="1.8" strokeLinecap="round"><path d="M7.5 2v11M3.5 9l4 4 4-4"/></svg>
+              <span style={{fontSize:".78rem",fontWeight:600,color:"#06B6D4"}}>Desliza hacia abajo para completar tu inscripción</span>
             </div>
 
             {/* RUT */}
