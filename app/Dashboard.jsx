@@ -644,82 +644,74 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .mod-tab:hover:not(.on){border-color:var(--b2);color:var(--mu2);}
 
 /* ── MOBILE RESPONSIVE ── */
+.mob-hamburger{display:none;}
+.mob-overlay{display:none;}
+
 @media (max-width: 768px) {
-  html,body{overflow:auto;}
+  html,body{overflow:auto;height:auto;}
+  .app{height:auto;min-height:100vh;overflow:visible;}
 
-  /* App shell: stack sidebar on top */
-  .app{flex-direction:column;}
-  .sidebar{width:100%;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;padding:.4rem .6rem;gap:.2rem;overflow-y:visible;overflow-x:auto;}
-  .sb-logo{padding:.4rem .5rem .4rem;border-bottom:none;border-right:1px solid var(--sbB);}
-  .sb-section{display:none;}
-  .sb-item{padding:.35rem .55rem;margin:.05rem .15rem;font-size:.72rem;gap:.4rem;}
-  .sb-footer{margin-top:0;padding:.35rem .5rem;border-top:none;border-left:1px solid var(--sbB);margin-left:auto;}
-  .sb-urole{display:none;}
+  /* Sidebar: hidden by default, shown as drawer */
+  .sidebar{position:fixed;top:0;left:-280px;width:260px;height:100vh;z-index:500;transition:left .25s ease;box-shadow:4px 0 24px rgba(0,0,0,.35);}
+  .sidebar.open{left:0;}
 
-  /* Main wrap */
-  .main-wrap{overflow:auto;}
-  .topbar{padding:0 .9rem;height:46px;flex-wrap:wrap;gap:.3rem;}
-  .topbar-title{font-size:.82rem;}
-  .page{padding:.9rem .85rem;}
+  /* Overlay behind drawer */
+  .mob-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:499;opacity:0;pointer-events:none;transition:opacity .25s;}
+  .mob-overlay.open{opacity:1;pointer-events:auto;}
 
-  /* Stat grid: 2 columns on mobile */
+  /* Hamburger button */
+  .mob-hamburger{display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:transparent;border:1px solid var(--b2);border-radius:7px;cursor:pointer;flex-shrink:0;}
+
+  /* Main wrap: full width */
+  .main-wrap{width:100%;overflow:auto;height:auto;}
+  .topbar{padding:0 .9rem;height:50px;}
+  .topbar-title{font-size:.85rem;}
+  .page{padding:.9rem .85rem;overflow:auto;height:auto;}
+
+  /* Stat grid: 2 columns */
   .stat-grid{grid-template-columns:repeat(2,1fr);gap:.55rem;margin-bottom:.9rem;}
-  .stat-val{font-size:1.35rem;}
+  .stat-val{font-size:1.3rem;}
 
   /* Charts: stack */
   .charts-row{grid-template-columns:1fr;gap:.55rem;}
 
   /* Tables: horizontal scroll */
   .table-card{overflow-x:auto;}
-  table{min-width:480px;}
-  th,td{padding:.5rem .75rem;font-size:.7rem;}
+  table{min-width:500px;}
+  th,td{padding:.45rem .7rem;font-size:.7rem;}
 
-  /* Modal: full width on mobile */
-  .ov{padding:.5rem;}
-  .modal{padding:1.2rem;border-radius:10px;}
+  /* Modal: full width */
+  .ov{padding:.5rem;align-items:flex-end;}
+  .modal{padding:1.2rem;border-radius:12px 12px 0 0;max-height:90vh;overflow-y:auto;}
   .modal.wide{max-width:100%;}
   .form-grid{grid-template-columns:1fr;}
 
-  /* SALA EN VIVO: stack columns vertically */
-  .sala-wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr auto;height:auto;overflow:visible;}
-  .sala-sb{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;border-right:none;border-bottom:1px solid var(--b1);max-height:none;padding-bottom:.3rem;}
+  /* SALA EN VIVO */
+  .sala-wrap{grid-template-columns:1fr;height:auto;overflow:visible;}
+  .sala-sb{flex-direction:row;overflow-x:auto;overflow-y:hidden;border-right:none;border-bottom:1px solid var(--b1);max-height:140px;}
   .sala-sbh{flex-shrink:0;padding:.5rem .8rem;white-space:nowrap;border-bottom:none;border-right:1px solid var(--b1);}
-  .lc{min-width:100px;max-width:120px;border-bottom:none;border-right:1px solid var(--b1);flex-shrink:0;padding:.5rem .6rem;}
-  .lth{height:55px;}
-  .lph{height:55px;}
-  .sala-main{padding:.8rem .9rem;gap:.7rem;}
-  .sala-main > div:first-child{max-height:220px;}
-
-  /* Bid controls: full width */
-  .ctrl-card{padding:.9rem;}
+  .lc{min-width:95px;max-width:110px;border-bottom:none;border-right:1px solid var(--b1);flex-shrink:0;padding:.5rem .55rem;}
+  .lth{height:50px;}
+  .lph{height:50px;}
+  .sala-main{padding:.8rem;gap:.65rem;}
+  .ctrl-card{padding:.85rem;}
   .inc-btns{gap:.3rem;}
-  .inc-btn{padding:.3rem .5rem;font-size:.7rem;}
-  .ab-list{gap:.35rem;}
-  .ab{font-size:.7rem;padding:.45rem .5rem;}
-  .ls-grid{grid-template-columns:repeat(3,1fr);gap:.5rem;}
-
-  /* Bid ring responsive */
-  .ba-card{padding:.9rem 1rem;}
-  .bap{font-size:2.5rem;}
-  .bb{padding:.75rem;font-size:.9rem;}
-
-  /* Liq cards: stack body */
+  .inc-btn{padding:.28rem .45rem;font-size:.68rem;}
+  .ab-list{gap:.3rem;}
+  .ab{font-size:.68rem;padding:.4rem .45rem;}
+  .ls-grid{grid-template-columns:repeat(3,1fr);gap:.4rem;}
+  .ba-card{padding:.85rem;}
+  .bap{font-size:2.2rem;}
+  .bb{padding:.7rem;font-size:.88rem;}
   .liq-body{grid-template-columns:repeat(2,1fr);}
-
-  /* Topbar buttons: smaller */
-  .btn-primary,.btn-sec,.btn-confirm{padding:.35rem .7rem;font-size:.72rem;}
-
-  /* Notification: adjust position */
+  .btn-primary,.btn-sec,.btn-confirm{padding:.35rem .65rem;font-size:.72rem;}
   .notif{top:auto;bottom:1rem;right:.8rem;left:.8rem;text-align:center;}
 }
 
 @media (max-width: 480px) {
   .stat-grid{grid-template-columns:1fr 1fr;}
-  .stat-val{font-size:1.2rem;}
-  .topbar-right{gap:.4rem;}
-  .liq-body{grid-template-columns:1fr 1fr;}
-  .bap{font-size:2rem;}
-  .sala-main > div:first-child{max-height:180px;}
+  .stat-val{font-size:1.15rem;}
+  .bap{font-size:1.8rem;}
 }
 `;
 
@@ -1050,8 +1042,9 @@ const AUTH_CSS = `
   .role-badge.comprador { background: rgba(20,184,166,.1);  color: #14B8A6; border: 1px solid rgba(20,184,166,.22); }
 
   @media (max-width: 900px) {
+    .auth-root { overflow: auto; }
     .auth-left { display: none; }
-    .auth-right { width: 100%; border-left: none; }
+    .auth-right { width: 100%; border-left: none; overflow-y: auto; height: auto; min-height: 100vh; padding: 2rem 1.5rem 3rem; }
   }
 `;
 
@@ -1745,6 +1738,7 @@ export default function Root() {
 // ─────────────────────────────────────────────────────────────────
 function Dashboard({ session, onLogout }) {
   const [page,       setPage]       = useState("dashboard");
+  const [mobileMenu, setMobileMenu] = useState(false);
   const [notif,      setNotif]      = useState(null);
   const [modal,      setModal]      = useState(null);
   const [filterTab,  setFilterTab]  = useState("todos");
@@ -2985,8 +2979,11 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         </div>
       )}
 
+      {/* Mobile overlay */}
+      <div className={`mob-overlay${mobileMenu?" open":""}`} onClick={()=>setMobileMenu(false)}/>
+
       {/* ── SIDEBAR ── */}
-      <aside className="sidebar">
+      <aside className={`sidebar${mobileMenu?" open":""}`}>
         <div className="sb-logo"><GRLogo/></div>
         <div style={{height:".5rem"}}/>
 
@@ -2999,7 +2996,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
           {id:"postores",  icon:"postores",  label:"Postores"},
           {id:"garantias", icon:"garantia",  label:"Garantías", badge:GARANTIAS.filter(g=>g.estado==="pendiente").length||undefined},
         ].map(n => (
-          <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>setPage(n.id)}>
+          <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>{setPage(n.id);setMobileMenu(false);}}>
             <span className="sb-icon"><Icon name={n.icon}/></span>{n.label}
             {n.badge ? <span className="sb-badge">{n.badge}</span> : null}
           </div>
@@ -3007,7 +3004,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
         {/* REMATE EN VIVO */}
         <div className="sb-section">Remate en vivo</div>
-        <div className={`sb-item${page==="sala"?" on":""}`} onClick={()=>setPage("sala")}>
+        <div className={`sb-item${page==="sala"?" on":""}`} onClick={()=>{setPage("sala");setMobileMenu(false);}}>
           <span className="sb-icon"><Icon name="sala"/></span>Sala en vivo
           {aState==="live" && <div className="ldot" style={{marginLeft:"auto"}}/>}
         </div>
@@ -3042,25 +3039,25 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
         {/* SISTEMA */}
         <div className="sb-section">Sistema</div>
-        <div className={`sb-item${page==="config"?" on":""}`} onClick={()=>setPage("config")}>
+        <div className={`sb-item${page==="config"?" on":""}`} onClick={()=>{setPage("config");setMobileMenu(false);}}>
           <span className="sb-icon"><Icon name="config"/></span>Configuración
         </div>
         {session?.role==="admin" && (
-          <div className={`sb-item${page==="usuarios"?" on":""}`} onClick={()=>setPage("usuarios")}>
+          <div className={`sb-item${page==="usuarios"?" on":""}`} onClick={()=>{setPage("usuarios");setMobileMenu(false);}}>
             <span className="sb-icon">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2.2-5 5-5s5 2 5 5"/><path d="M13 7v4M11 9h4"/></svg>
             </span>Usuarios
           </div>
         )}
         {session?.role==="admin" && (
-          <div className={`sb-item${page==="licencias"?" on":""}`} onClick={()=>setPage("licencias")}>
+          <div className={`sb-item${page==="licencias"?" on":""}`} onClick={()=>{setPage("licencias");setMobileMenu(false);}}>
             <span className="sb-icon">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="2" y="4" width="12" height="9" rx="2"/><path d="M5 4V3a3 3 0 016 0v1"/><circle cx="8" cy="9" r="1.2"/></svg>
             </span>Licencias
           </div>
         )}
         {session?.role==="admin" && (
-          <div className={`sb-item${page==="casas"?" on":""}`} onClick={()=>setPage("casas")}>
+          <div className={`sb-item${page==="casas"?" on":""}`} onClick={()=>{setPage("casas");setMobileMenu(false);}}>
             <span className="sb-icon">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M2 14V7l6-5 6 5v7"/><path d="M6 14v-4h4v4"/></svg>
             </span>Casas de remates
@@ -3093,6 +3090,11 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         {page !== "sala" && (
           <div className="topbar">
             <div className="topbar-left">
+              <button className="mob-hamburger" onClick={()=>setMobileMenu(m=>!m)}>
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--mu2)" strokeWidth="1.8" strokeLinecap="round">
+                  <path d="M2 4h14M2 9h14M2 14h14"/>
+                </svg>
+              </button>
               <div className="topbar-title">{PAGE_TITLE[page]}</div>
             </div>
             <div className="topbar-right">
