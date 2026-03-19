@@ -1213,7 +1213,7 @@ function BuyerView({ user, onLogout }) {
       })
       .on("postgres_changes",{event:"UPDATE",schema:"public",table:"lotes"},(payload)=>{
         const l = payload.new;
-        if(l.estado==="en_subasta") setLoteActivo(l);
+        if(l.estado==="en_subasta") setLoteActivo({...l, fotos: Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[])});
       })
       .subscribe();
     return () => supabase.removeChannel(ch);
@@ -2800,6 +2800,20 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         const incNum  = parseInt(wizDatos.incremento.replace(/\D/g,""))||Math.round(baseNum*0.05)||100000;
                         const {data:casaData} = await supabase.from("casas").select("id").eq("slug","rematesahumada").single();
                         const codigo = `L-${String(Date.now()).slice(-5)}`;
+                        // Subir fotos a Supabase Storage
+                        const fotoFiles = wizTipo==="VEHICULOS"
+                          ? ["frente","izq","der","trasera"].map(k=>wizFotos[k]).filter(Boolean)
+                          : wizItems.map(x=>x.foto).filter(Boolean);
+                        const imagenes = [];
+                        for(const file of fotoFiles){
+                          const ext = file.name.split(".").pop()||"jpg";
+                          const path = `${codigo}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+                          const {error:upErr} = await supabase.storage.from("lotes").upload(path, file, {upsert:true});
+                          if(!upErr){
+                            const {data:urlData} = supabase.storage.from("lotes").getPublicUrl(path);
+                            if(urlData?.publicUrl) imagenes.push(urlData.publicUrl);
+                          }
+                        }
                         const {error} = await supabase.from("lotes").insert({
                           casa_id:     casaData?.id||null,
                           remate_id:   wizDatos.remateId||null,
@@ -2814,6 +2828,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           tipo_iva:    "AF",
                           estado:      "disponible",
                           orden:       dbLotes.length+1,
+                          imagenes:    imagenes.length>0 ? imagenes : null,
                         });
                         if(error){notify("Error al guardar lote: "+error.message,"inf");console.error(error);return;}
                         const {data:lotData} = await supabase.from("lotes").select("*").order("orden");
@@ -3125,7 +3140,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     if(r.supabaseId){
                       const {data:lr} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
                       if(lr&&lr.length>0){
-                        const mapped=lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:[],desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
+                        const mapped=lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
                         setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
                       }
                     }
@@ -3212,7 +3227,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                               if(r.supabaseId){
                                 const {data:lotesRemate} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
                                 if(lotesRemate&&lotesRemate.length>0){
-                                  const mapped = lotesRemate.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:[],desc:l.descripcion||"",inc:l.incremento||Math.round((l.base||0)*0.05)||100000}));
+                                  const mapped = lotesRemate.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:l.incremento||Math.round((l.base||0)*0.05)||100000}));
                                   setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
                                 } else { setLots(LOTES_SALA); setBids(LOTES_SALA.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null}))); notify("Sin lotes asignados aún.","inf"); }
                               }
@@ -5854,7 +5869,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     if(rid){
                       const {data:lr} = await supabase.from("lotes").select("*").eq("remate_id",rid).order("orden");
                       if(lr&&lr.length>0){
-                        const mapped = lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:[],desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
+                        const mapped = lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
                         setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
                       } else {
                         setLots(LOTES_SALA); setBids(LOTES_SALA.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
