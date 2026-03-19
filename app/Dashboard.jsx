@@ -2518,7 +2518,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                       <label className="fl">Remate al que pertenece</label>
                       <select className="fsel" value={wizDatos.remateId||""} onChange={e=>setWizDatos(f=>({...f,remateId:e.target.value}))}>
                         <option value="">— Sin asignar —</option>
-                        {REMATES_MERGED.filter(r=>r.estado==="activo").map(r=>(
+                        {REMATES_MERGED.filter(r=>r.estado!=="cerrado").map(r=>(
                           <option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>
                         ))}
                       </select>
