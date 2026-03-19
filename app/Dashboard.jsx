@@ -640,6 +640,77 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .mod-tab{padding:.26rem .65rem;border-radius:5px;border:1px solid var(--b1);background:transparent;font-size:.65rem;font-weight:600;color:var(--mu);cursor:pointer;transition:all .15s;}
 .mod-tab.on{background:rgba(56,178,246,.15);border-color:var(--ac);color:var(--ac);}
 .mod-tab:hover:not(.on){border-color:var(--b2);color:var(--mu2);}
+
+/* ── MOBILE RESPONSIVE ── */
+.mob-hamburger{display:none;}
+.mob-overlay{display:none;}
+
+@media (max-width: 768px) {
+  html,body{overflow:auto;height:auto;}
+  .app{height:auto;min-height:100vh;overflow:visible;}
+
+  /* Sidebar: hidden by default, shown as drawer */
+  .sidebar{position:fixed;top:0;left:-280px;width:260px;height:100vh;z-index:500;transition:left .25s ease;box-shadow:4px 0 24px rgba(0,0,0,.35);}
+  .sidebar.open{left:0;}
+
+  /* Overlay behind drawer */
+  .mob-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:499;opacity:0;pointer-events:none;transition:opacity .25s;}
+  .mob-overlay.open{opacity:1;pointer-events:auto;}
+
+  /* Hamburger button */
+  .mob-hamburger{display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:transparent;border:1px solid var(--b2);border-radius:7px;cursor:pointer;flex-shrink:0;}
+
+  /* Main wrap: full width */
+  .main-wrap{width:100%;overflow:auto;height:auto;}
+  .topbar{padding:0 .9rem;height:50px;}
+  .topbar-title{font-size:.85rem;}
+  .page{padding:.9rem .85rem;overflow:auto;height:auto;}
+
+  /* Stat grid: 2 columns */
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:.55rem;margin-bottom:.9rem;}
+  .stat-val{font-size:1.3rem;}
+
+  /* Charts: stack */
+  .charts-row{grid-template-columns:1fr;gap:.55rem;}
+
+  /* Tables: horizontal scroll */
+  .table-card{overflow-x:auto;}
+  table{min-width:500px;}
+  th,td{padding:.45rem .7rem;font-size:.7rem;}
+
+  /* Modal: full width */
+  .ov{padding:.5rem;align-items:flex-end;}
+  .modal{padding:1.2rem;border-radius:12px 12px 0 0;max-height:90vh;overflow-y:auto;}
+  .modal.wide{max-width:100%;}
+  .form-grid{grid-template-columns:1fr;}
+
+  /* SALA EN VIVO */
+  .sala-wrap{grid-template-columns:1fr;height:auto;overflow:visible;}
+  .sala-sb{flex-direction:row;overflow-x:auto;overflow-y:hidden;border-right:none;border-bottom:1px solid var(--b1);max-height:140px;}
+  .sala-sbh{flex-shrink:0;padding:.5rem .8rem;white-space:nowrap;border-bottom:none;border-right:1px solid var(--b1);}
+  .lc{min-width:95px;max-width:110px;border-bottom:none;border-right:1px solid var(--b1);flex-shrink:0;padding:.5rem .55rem;}
+  .lth{height:50px;}
+  .lph{height:50px;}
+  .sala-main{padding:.8rem;gap:.65rem;}
+  .ctrl-card{padding:.85rem;}
+  .inc-btns{gap:.3rem;}
+  .inc-btn{padding:.28rem .45rem;font-size:.68rem;}
+  .ab-list{gap:.3rem;}
+  .ab{font-size:.68rem;padding:.4rem .45rem;}
+  .ls-grid{grid-template-columns:repeat(3,1fr);gap:.4rem;}
+  .ba-card{padding:.85rem;}
+  .bap{font-size:2.2rem;}
+  .bb{padding:.7rem;font-size:.88rem;}
+  .liq-body{grid-template-columns:repeat(2,1fr);}
+  .btn-primary,.btn-sec,.btn-confirm{padding:.35rem .65rem;font-size:.72rem;}
+  .notif{top:auto;bottom:1rem;right:.8rem;left:.8rem;text-align:center;}
+}
+
+@media (max-width: 480px) {
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .stat-val{font-size:1.15rem;}
+  .bap{font-size:1.8rem;}
+}
 `;
 
 
@@ -968,8 +1039,9 @@ const AUTH_CSS = `
   .role-badge.comprador { background: rgba(20,184,166,.1);  color: #14B8A6; border: 1px solid rgba(20,184,166,.22); }
 
   @media (max-width: 900px) {
+    .auth-root { overflow: auto; }
     .auth-left { display: none; }
-    .auth-right { width: 100%; border-left: none; }
+    .auth-right { width: 100%; border-left: none; overflow-y: auto; height: auto; min-height: 100vh; padding: 2rem 1.5rem 3rem; }
   }
 `;
 
@@ -1662,6 +1734,7 @@ export default function Root() {
 // ─────────────────────────────────────────────────────────────────
 function Dashboard({ session, onLogout }) {
   const [page,       setPage]       = useState("dashboard");
+  const [mobileMenu, setMobileMenu] = useState(false);
   const [notif,      setNotif]      = useState(null);
   const [modal,      setModal]      = useState(null);
   const [filterTab,  setFilterTab]  = useState("todos");
@@ -1843,6 +1916,7 @@ function Dashboard({ session, onLogout }) {
   const [presPaleta,  setPresPaleta]  = useState("");
   const [presMonto,   setPresMonto]   = useState("");
   const [flash,       setFlash]       = useState(false);
+  const [postorCustom,setPostorCustom]= useState("");
   const [ctrlTab,     setCtrlTab]     = useState("control");
   const [chatInput,   setChatInput]   = useState("");
   const [chatMsgs,    setChatMsgs]    = useState([
@@ -2168,6 +2242,24 @@ function Dashboard({ session, onLogout }) {
     setLiqReview({ compradores, fecha: new Date().toLocaleDateString("es-CL"), remateNombre: "Remate Industrial Marzo 2026", remateId:"R-044" });
     notify("Remate cerrado. Revisando liquidaciones antes de enviar.", "sold");
     setPage("liquidac");
+
+    // Auto-borrar fotos de Supabase Storage para liberar espacio (los datos de adjudicación no llevan fotos)
+    (async () => {
+      try {
+        const allImgs = lots.flatMap(l => l.imgs || []);
+        if (!allImgs.length) return;
+        // Extraer el path dentro del bucket (después de "/lotes/")
+        const paths = allImgs
+          .map(url => { const m = url.match(/\/lotes\/(.+)$/); return m ? m[1] : null; })
+          .filter(Boolean);
+        if (paths.length) {
+          await supabase.storage.from("lotes").remove(paths);
+          // Limpiar imagenes en DB
+          const loteIds = lots.map(l => l.id).filter(Boolean);
+          if (loteIds.length) await supabase.from("lotes").update({ imagenes: null }).in("id", loteIds);
+        }
+      } catch(e) { console.warn("Error borrando fotos:", e); }
+    })();
   };
 
   const startAuction  = () => { setAState("live"); setBidTimer(null); setLastBidder(null); };
@@ -2858,11 +2950,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           const ext = file.name.split(".").pop()||"jpg";
                           const path = `${codigo}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
                           const {error:upErr} = await supabase.storage.from("lotes").upload(path, file, {upsert:true});
-                          if(!upErr){
+                          if(upErr){ notify(`Error subiendo foto: ${upErr.message}`,"inf"); console.error(upErr); }
+                          else{
                             const {data:urlData} = supabase.storage.from("lotes").getPublicUrl(path);
                             if(urlData?.publicUrl) imagenes.push(urlData.publicUrl);
                           }
                         }
+                        if(fotoFiles.length>0 && imagenes.length===0){ notify("No se pudieron subir las fotos. Verifica que el bucket 'lotes' existe en Supabase Storage.","inf"); return; }
                         const {error} = await supabase.from("lotes").insert({
                           casa_id:     casaData?.id||null,
                           remate_id:   wizDatos.remateId||null,
@@ -2934,8 +3028,11 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         </div>
       )}
 
+      {/* Mobile overlay */}
+      <div className={`mob-overlay${mobileMenu?" open":""}`} onClick={()=>setMobileMenu(false)}/>
+
       {/* ── SIDEBAR ── */}
-      <aside className="sidebar">
+      <aside className={`sidebar${mobileMenu?" open":""}`}>
         <div className="sb-logo"><GRLogo/></div>
         <div style={{height:".5rem"}}/>
 
@@ -2948,7 +3045,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
           {id:"postores",  icon:"postores",  label:"Postores"},
           {id:"garantias", icon:"garantia",  label:"Garantías", badge:GARANTIAS.filter(g=>g.estado==="pendiente").length||undefined},
         ].map(n => (
-          <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>setPage(n.id)}>
+          <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>{setPage(n.id);setMobileMenu(false);}}>
             <span className="sb-icon"><Icon name={n.icon}/></span>{n.label}
             {n.badge ? <span className="sb-badge">{n.badge}</span> : null}
           </div>
@@ -2956,7 +3053,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
         {/* REMATE EN VIVO */}
         <div className="sb-section">Remate en vivo</div>
-        <div className={`sb-item${page==="sala"?" on":""}`} onClick={()=>setPage("sala")}>
+        <div className={`sb-item${page==="sala"?" on":""}`} onClick={()=>{setPage("sala");setMobileMenu(false);}}>
           <span className="sb-icon"><Icon name="sala"/></span>Sala en vivo
           {aState==="live" && <div className="ldot" style={{marginLeft:"auto"}}/>}
         </div>
@@ -2991,25 +3088,25 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
         {/* SISTEMA */}
         <div className="sb-section">Sistema</div>
-        <div className={`sb-item${page==="config"?" on":""}`} onClick={()=>setPage("config")}>
+        <div className={`sb-item${page==="config"?" on":""}`} onClick={()=>{setPage("config");setMobileMenu(false);}}>
           <span className="sb-icon"><Icon name="config"/></span>Configuración
         </div>
         {session?.role==="admin" && (
-          <div className={`sb-item${page==="usuarios"?" on":""}`} onClick={()=>setPage("usuarios")}>
+          <div className={`sb-item${page==="usuarios"?" on":""}`} onClick={()=>{setPage("usuarios");setMobileMenu(false);}}>
             <span className="sb-icon">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2.2-5 5-5s5 2 5 5"/><path d="M13 7v4M11 9h4"/></svg>
             </span>Usuarios
           </div>
         )}
         {session?.role==="admin" && (
-          <div className={`sb-item${page==="licencias"?" on":""}`} onClick={()=>setPage("licencias")}>
+          <div className={`sb-item${page==="licencias"?" on":""}`} onClick={()=>{setPage("licencias");setMobileMenu(false);}}>
             <span className="sb-icon">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="2" y="4" width="12" height="9" rx="2"/><path d="M5 4V3a3 3 0 016 0v1"/><circle cx="8" cy="9" r="1.2"/></svg>
             </span>Licencias
           </div>
         )}
         {session?.role==="admin" && (
-          <div className={`sb-item${page==="casas"?" on":""}`} onClick={()=>setPage("casas")}>
+          <div className={`sb-item${page==="casas"?" on":""}`} onClick={()=>{setPage("casas");setMobileMenu(false);}}>
             <span className="sb-icon">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M2 14V7l6-5 6 5v7"/><path d="M6 14v-4h4v4"/></svg>
             </span>Casas de remates
@@ -3042,6 +3139,11 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         {page !== "sala" && (
           <div className="topbar">
             <div className="topbar-left">
+              <button className="mob-hamburger" onClick={()=>setMobileMenu(m=>!m)}>
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--mu2)" strokeWidth="1.8" strokeLinecap="round">
+                  <path d="M2 4h14M2 9h14M2 14h14"/>
+                </svg>
+              </button>
               <div className="topbar-title">{PAGE_TITLE[page]}</div>
             </div>
             <div className="topbar-right">
@@ -5869,7 +5971,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   const bs=bids[i]; const st=bs?.status==="sold"?"sold":i===idx&&aState==="live"?"live":"wait";
                   return (
                     <div key={it.id} className={`lc${idx===i?" on":""}`} onClick={()=>setIdx(i)}>
-                      {it.img ? <img src={it.img} alt={it.name} className="lth"/> : <div className="lph">Sin foto</div>}
+                      {it.imgs?.[0] ? <img src={it.imgs[0]} alt={it.name} className="lth"/> : <div className="lph">Sin foto</div>}
                       <div className="ln">Lote {String(i+1).padStart(2,"0")}</div>
                       <div className="lnm">{it.name}</div>
                       <div className="lpr">{fmtS(bs?.current||it.base)}</div>
@@ -6095,6 +6197,32 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     {aState==="waiting" && <button className="bb" disabled>Esperando inicio...</button>}
                     {aState==="paused"  && <button className="bb" disabled>Pausado</button>}
                     {aState==="sold"    && <button className="bb sold" disabled>Adjudicado</button>}
+                    {aState==="live" && (
+                      <div style={{display:"flex",gap:".5rem",marginTop:".5rem"}}>
+                        <input
+                          type="text"
+                          placeholder="Monto personalizado..."
+                          value={postorCustom}
+                          onChange={e=>{const v=e.target.value.replace(/\D/g,"");setPostorCustom(v?Number(v).toLocaleString("es-CL"):"")} }
+                          onKeyDown={e=>{
+                            if(e.key==="Enter"){
+                              const m=parseInt(postorCustom.replace(/\D/g,""));
+                              if(!m||m<=bid.current){notify("El monto debe ser mayor a la oferta actual","inf");return;}
+                              setCurInc(m-bid.current); placeBid(); setPostorCustom("");
+                            }
+                          }}
+                          style={{flex:1,padding:".45rem .7rem",borderRadius:6,border:"1px solid var(--b1)",background:"var(--s2)",color:"var(--tx)",fontSize:".82rem"}}
+                        />
+                        <button
+                          style={{padding:".45rem .9rem",borderRadius:6,background:"var(--ac)",color:"#fff",border:"none",cursor:"pointer",fontWeight:600,fontSize:".82rem"}}
+                          onClick={()=>{
+                            const m=parseInt(postorCustom.replace(/\D/g,""));
+                            if(!m||m<=bid.current){notify("El monto debe ser mayor a la oferta actual","inf");return;}
+                            setCurInc(m-bid.current); placeBid(); setPostorCustom("");
+                          }}
+                        >Pujar</button>
+                      </div>
+                    )}
                     <div className="bst">
                       <div className="bsc"><div className="bsv">{bid.count}</div><div className="bsl">Pujas totales</div></div>
                       <div className="bsc"><div className="bsv">{fmtS(bid.current-item.base)}</div><div className="bsl">Sobre base</div></div>
