@@ -2133,6 +2133,24 @@ function Dashboard({ session, onLogout }) {
     setLiqReview({ compradores, fecha: new Date().toLocaleDateString("es-CL"), remateNombre: "Remate Industrial Marzo 2026", remateId:"R-044" });
     notify("Remate cerrado. Revisando liquidaciones antes de enviar.", "sold");
     setPage("liquidac");
+
+    // Auto-borrar fotos de Supabase Storage para liberar espacio (los datos de adjudicación no llevan fotos)
+    (async () => {
+      try {
+        const allImgs = lots.flatMap(l => l.imgs || []);
+        if (!allImgs.length) return;
+        // Extraer el path dentro del bucket (después de "/lotes/")
+        const paths = allImgs
+          .map(url => { const m = url.match(/\/lotes\/(.+)$/); return m ? m[1] : null; })
+          .filter(Boolean);
+        if (paths.length) {
+          await supabase.storage.from("lotes").remove(paths);
+          // Limpiar imagenes en DB
+          const loteIds = lots.map(l => l.id).filter(Boolean);
+          if (loteIds.length) await supabase.from("lotes").update({ imagenes: null }).in("id", loteIds);
+        }
+      } catch(e) { console.warn("Error borrando fotos:", e); }
+    })();
   };
 
   const startAuction  = () => { setAState("live"); setTimeLeft(120); setBidTimer(null); setLastBidder(null); };
@@ -2809,11 +2827,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           const ext = file.name.split(".").pop()||"jpg";
                           const path = `${codigo}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
                           const {error:upErr} = await supabase.storage.from("lotes").upload(path, file, {upsert:true});
-                          if(!upErr){
+                          if(upErr){ notify(`Error subiendo foto: ${upErr.message}`,"inf"); console.error(upErr); }
+                          else{
                             const {data:urlData} = supabase.storage.from("lotes").getPublicUrl(path);
                             if(urlData?.publicUrl) imagenes.push(urlData.publicUrl);
                           }
                         }
+                        if(fotoFiles.length>0 && imagenes.length===0){ notify("No se pudieron subir las fotos. Verifica que el bucket 'lotes' existe en Supabase Storage.","inf"); return; }
                         const {error} = await supabase.from("lotes").insert({
                           casa_id:     casaData?.id||null,
                           remate_id:   wizDatos.remateId||null,
