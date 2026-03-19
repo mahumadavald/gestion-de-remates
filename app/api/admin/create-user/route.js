@@ -3,9 +3,11 @@ import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req) {
   try {
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceKey) return NextResponse.json({ error: "SUPABASE_SERVICE_ROLE_KEY no configurada en Vercel" }, { status: 500 });
     const supabaseAdmin = createClient(
       "https://xqkfcqibukghtyfjcwfb.supabase.co",
-      process.env.SUPABASE_SERVICE_ROLE_KEY
+      serviceKey
     );
     const { email, password, nombre, casa_id, roles, activo } = await req.json();
 
