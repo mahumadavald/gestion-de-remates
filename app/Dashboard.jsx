@@ -5296,26 +5296,24 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
         {/* ══ ADJUDICACIONES ══ */}
         {page==="adjudicac" && (()=>{
-          // Datos mock compradores de ese remate
-          const COMPRADORES_REMATE = [
-            {nPart:21, nombre:"NICOLAS PEREZ",                  garantia:0,      formaPago:"PRESENCIAL", liquidado:false, pagado:false},
-            {nPart:26, nombre:"EDUARDO MICHEL URRA BARRIOS",    garantia:250000, formaPago:"PRESENCIAL", liquidado:true,  pagado:false},
-            {nPart:28, nombre:"CAMILO MENA VENEGAS",            garantia:0,      formaPago:"PRESENCIAL", liquidado:false, pagado:true},
-            {nPart:29, nombre:"RODRIGO IBAÑEZ URIBE",           garantia:250000, formaPago:"PRESENCIAL", liquidado:true,  pagado:false},
-            {nPart:30, nombre:"ROBERTO PEÑAILILLO",             garantia:250000, formaPago:"PRESENCIAL", liquidado:true,  pagado:true},
-            {nPart:31, nombre:"LUIS CARREÑO",                   garantia:250000, formaPago:"PRESENCIAL", liquidado:false, pagado:false},
-          ];
           const NO_COMPRADORES_REMATE = noCompradoresState;
 
-          const cerrados = REMATES_MERGED.filter(r=>r.estado==="cerrado");
-          const remateActual = cerrados.find(r=>r.id===selectedRemate||r.supabaseId===selectedRemate)||cerrados[0]||null;
+          // Adjudicaciones reales del remate actual (generadas en sala)
+          const adjReal = liquidaciones.map((l,i)=>({
+            nLote: i+1,
+            lote:  l.lote,
+            postor: l.postor,
+            rut:   POSTORES_MERGED.find(p=>p.name===l.postor||p.razonSocial===l.postor)?.rut || l.rut || "—",
+            nPart: POSTORES_MERGED.find(p=>p.name===l.postor||p.razonSocial===l.postor)?.nComprador || "—",
+            monto: l.monto,
+          }));
 
-          if(cerrados.length===0) return (
+          if(adjReal.length===0) return (
             <div className="page">
               <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"60vh",gap:"1rem",color:"var(--mu)"}}>
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="6" y="6" width="36" height="36" rx="6"/><path d="M16 24h16M16 16h16M16 32h8"/></svg>
-                <div style={{fontSize:".95rem",fontWeight:600,color:"var(--wh2)"}}>No hay remates cerrados aún</div>
-                <div style={{fontSize:".78rem",textAlign:"center",maxWidth:320}}>Las adjudicaciones aparecen aquí cuando cierras un remate desde la Sala en vivo usando el botón "Cerrar remate".</div>
+                <div style={{fontSize:".95rem",fontWeight:600,color:"var(--wh2)"}}>No hay adjudicaciones aún</div>
+                <div style={{fontSize:".78rem",textAlign:"center",maxWidth:320}}>Las adjudicaciones aparecen aquí cuando adjudicas lotes desde la Sala en vivo.</div>
                 <button className="btn-primary" style={{marginTop:".5rem"}} onClick={()=>setPage("sala")}>Ir a Sala en vivo</button>
               </div>
             </div>
@@ -5344,151 +5342,48 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
           return (
             <div className="page">
-              {/* Banner selector remate */}
-              <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",padding:".75rem 1rem",background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.18)",borderRadius:9}}>
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
-                <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
-                <select value={selectedRemate||""} onChange={e=>setSelectedRemate(e.target.value||null)}
-                  style={{flex:1,maxWidth:380,padding:".4rem .7rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:7,color:"var(--wh2)",fontSize:".8rem",fontFamily:"Inter,sans-serif",cursor:"pointer"}}>
-                  <option value="">— Selecciona un remate —</option>
-                  {cerrados.map(r=><option key={r.id} value={r.id}>{r.name} · {r.fecha} · {r.casa}</option>)}
-                </select>
-                {remateActual && (
-                  <span style={{fontSize:".72rem",color:"var(--mu2)",whiteSpace:"nowrap",fontFamily:"Inter,sans-serif"}}>{remateActual.name}</span>
-                )}
-              </div>
-
-              {/* Stat cards rápidas */}
-              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:".7rem",marginBottom:"1.3rem"}}>
+              {/* Stat cards */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:".7rem",marginBottom:"1.3rem"}}>
                 {[
-                  {label:"Compradores",         val:COMPRADORES_REMATE.length,                                   color:"var(--ac)"},
-                  {label:"Liquidaciones pagas",  val:COMPRADORES_REMATE.filter(c=>c.pagado).length,              color:"var(--gr)"},
-                  {label:"Saldos pendientes",    val:COMPRADORES_REMATE.filter(c=>!c.pagado).length,             color:"var(--yl)"},
-                  {label:"Devoluciones pendientes",val:noCompradoresState.filter(c=>c.devolucion==="pendiente").length, color:"var(--rd)"},
+                  {label:"Lotes adjudicados", val:adjReal.length,                                    color:"var(--ac)"},
+                  {label:"Total martillo",     val:fmt(adjReal.reduce((s,a)=>s+a.monto,0)),           color:"var(--gr)"},
+                  {label:"Compradores únicos", val:new Set(adjReal.map(a=>a.postor)).size,            color:"var(--yl)"},
                 ].map((s,i)=>(
                   <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,padding:".8rem 1rem",borderTop:`3px solid ${s.color}`}}>
                     <div style={{fontSize:".62rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".3rem"}}>{s.label}</div>
-                    <div style={{fontFamily:"Inter,sans-serif",fontSize:"1.4rem",fontWeight:800,color:s.color}}>{s.val}</div>
+                    <div style={{fontFamily:"Inter,sans-serif",fontSize:"1.3rem",fontWeight:800,color:s.color}}>{s.val}</div>
                   </div>
                 ))}
               </div>
 
-              {/* ── 1. Listado Compradores ── */}
-              <div style={{marginBottom:"1.5rem"}}>
-                <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:".75rem"}}>
-                  <div style={{width:22,height:22,borderRadius:5,background:"rgba(56,178,246,.15)",border:"1px solid rgba(56,178,246,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:800,color:"var(--ac)"}}>1</div>
-                  <span style={{fontSize:".85rem",fontWeight:800,color:"var(--wh2)"}}>Listado Compradores</span>
-                  <span style={{fontSize:".7rem",color:"var(--mu2)",marginLeft:"auto"}}>{COMPRADORES_REMATE.length} compradores</span>
+              {/* Tabla adjudicaciones */}
+              <div className="table-card">
+                <div className="table-head">
+                  <div className="table-title">Adjudicaciones — {adjReal.length} lote{adjReal.length!==1?"s":""}</div>
+                  <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>setPage("liquidac")}>Ver liquidaciones →</button>
                 </div>
-                <div className="table-card">
-                  <table style={{width:"100%",borderCollapse:"collapse"}}>
-                    <thead>
-                      <tr style={{background:"rgba(255,255,255,.02)"}}>
-                        {["N° Part.","Nombre Cliente","Garantía","Forma Pago","Estado","Acción"].map(h=>(
-                          <th key={h} style={{padding:".5rem .9rem",textAlign:"left",fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em",borderBottom:"1px solid var(--b1)"}}>{h}</th>
-                        ))}
+                <table>
+                  <thead><tr>
+                    <th>Lote</th>
+                    <th>Descripción</th>
+                    <th>N° Part.</th>
+                    <th>Adjudicatario</th>
+                    <th>RUT</th>
+                    <th style={{textAlign:"right"}}>Monto martillo</th>
+                  </tr></thead>
+                  <tbody>
+                    {adjReal.map((a,i)=>(
+                      <tr key={i}>
+                        <td><span style={{fontFamily:"Inter,sans-serif",fontWeight:700,color:"var(--ac)"}}>{a.nLote}</span></td>
+                        <td style={{maxWidth:240,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{a.lote}</td>
+                        <td><span style={{fontWeight:700,color:"var(--wh2)"}}>{a.nPart}</span></td>
+                        <td>{a.postor}</td>
+                        <td style={{fontFamily:"Inter,sans-serif",fontSize:".75rem",color:"var(--mu2)"}}>{a.rut}</td>
+                        <td style={{textAlign:"right",fontWeight:700,color:"var(--gr)",fontFamily:"Inter,sans-serif"}}>{fmt(a.monto)}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {COMPRADORES_REMATE.map((c,i)=>(
-                        <tr key={i} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}>
-                          <td style={{padding:".6rem .9rem",fontFamily:"Inter,sans-serif",fontSize:".82rem",fontWeight:700,color:"var(--ac)"}}>{c.nPart}</td>
-                          <td style={{padding:".6rem .9rem",fontSize:".82rem",fontWeight:600,color:"var(--wh2)"}}>{c.nombre}</td>
-                          <td style={{padding:".6rem .9rem",fontFamily:"Inter,sans-serif",fontSize:".78rem",color:c.garantia>0?"var(--gr)":"var(--mu)"}}>{c.garantia>0?fmt(c.garantia):"Sin garantía"}</td>
-                          <td style={{padding:".6rem .9rem",fontSize:".72rem",color:"var(--mu2)"}}>{c.formaPago}</td>
-                          <td style={{padding:".6rem .9rem"}}>
-                            {c.pagado
-                              ? <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .45rem",borderRadius:4,background:"rgba(20,184,166,.1)",color:"var(--gr)",border:"1px solid rgba(20,184,166,.2)"}}>Pagado</span>
-                              : <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .45rem",borderRadius:4,background:"rgba(246,173,85,.1)",color:"var(--yl)",border:"1px solid rgba(246,173,85,.2)"}}>Saldo pendiente</span>
-                            }
-                          </td>
-                          <td style={{padding:".6rem .9rem"}}>
-                            <div style={{display:"flex",gap:".4rem"}}>
-                              <button className="btn-primary" style={{fontSize:".68rem",padding:".25rem .65rem"}}
-                                onClick={()=>{setPage("liquidac");notify(`Cargando liquidación de ${c.nombre}...`,"inf");}}>
-                                Ver liquidación
-                              </button>
-                              {!c.pagado && (
-                                <button className="btn-sec" style={{fontSize:".68rem",padding:".25rem .6rem"}}
-                                  onClick={()=>notify(`Pago confirmado para ${c.nombre}.`,"sold")}>
-                                  Confirmar pago
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* ── 2. Listado No Compradores (Devoluciones) ── */}
-              <div>
-                <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:".75rem"}}>
-                  <div style={{width:22,height:22,borderRadius:5,background:"rgba(246,173,85,.12)",border:"1px solid rgba(246,173,85,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:800,color:"var(--yl)"}}>2</div>
-                  <span style={{fontSize:".85rem",fontWeight:800,color:"var(--wh2)"}}>Listado No Compradores — Devoluciones</span>
-                  <span style={{fontSize:".7rem",color:"var(--mu2)",marginLeft:"auto"}}>{NO_COMPRADORES_REMATE.length} postores</span>
-                  <button className="btn-sec" style={{fontSize:".68rem",padding:".25rem .7rem"}} onClick={descargarTxt}>
-                    Descargar .txt
-                  </button>
-                </div>
-                <div className="table-card">
-                  <table style={{width:"100%",borderCollapse:"collapse"}}>
-                    <thead>
-                      <tr style={{background:"rgba(255,255,255,.02)"}}>
-                        {["N° Part.","Nombre Cliente","Garantía","Forma Pago","Devolver Garantía"].map(h=>(
-                          <th key={h} style={{padding:".5rem .9rem",textAlign:"left",fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em",borderBottom:"1px solid var(--b1)"}}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {NO_COMPRADORES_REMATE.map((c,i)=>{
-                        return (
-                          <tr key={i} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}>
-                            <td style={{padding:".6rem .9rem",fontFamily:"Inter,sans-serif",fontSize:".82rem",fontWeight:700,color:"var(--mu2)"}}>{c.nPart}</td>
-                            <td style={{padding:".6rem .9rem",fontSize:".82rem",fontWeight:600,color:"var(--wh2)"}}>{c.nombre}</td>
-                            <td style={{padding:".6rem .9rem",fontFamily:"Inter,sans-serif",fontSize:".78rem",color:c.garantia>0?"var(--yl)":"var(--mu)"}}>{c.garantia>0?fmt(c.garantia):"$0"}</td>
-                            <td style={{padding:".6rem .9rem",fontSize:".72rem",color:"var(--mu2)"}}>{c.formaPago}</td>
-                            <td style={{padding:".6rem .9rem"}}>
-                              {c.devolucion==="N/A" && (
-                                <span style={{fontSize:".72rem",color:"var(--mu)"}}>N/A</span>
-                              )}
-                              {c.devolucion==="pendiente" && (
-                                <div style={{display:"flex",alignItems:"center",gap:".4rem"}}>
-                                  <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .5rem",borderRadius:4,background:"rgba(246,173,85,.12)",color:"var(--yl)",border:"1px solid rgba(246,173,85,.25)"}}>Pendiente</span>
-                                  <select defaultValue=""
-                                    style={{fontSize:".68rem",padding:".2rem .45rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:5,color:"var(--wh2)",cursor:"pointer"}}
-                                    onChange={e=>{
-                                      if(!e.target.value) return;
-                                      marcarDevolucion(c.nPart, e.target.value);
-                                      notify(`Garantía de ${c.nombre} devuelta en ${e.target.value.toUpperCase()}.`,"sold");
-                                    }}>
-                                    <option value="">Marcar como...</option>
-                                    <option value="efectivo">EFECTIVO</option>
-                                    <option value="cheque">CHEQUE</option>
-                                    <option value="transferencia">TRANSFERENCIA</option>
-                                  </select>
-                                </div>
-                              )}
-                              {(c.devolucion==="cheque"||c.devolucion==="efectivo"||c.devolucion==="transferencia") && (
-                                <div style={{display:"flex",alignItems:"center",gap:".4rem"}}>
-                                  <span style={{fontSize:".68rem",fontWeight:700,padding:".15rem .5rem",borderRadius:4,background:"rgba(20,184,166,.1)",color:"var(--gr)",border:"1px solid rgba(20,184,166,.25)"}}>
-                                    ✓ {c.devolucion.toUpperCase()}
-                                  </span>
-                                  <button style={{fontSize:".6rem",padding:".1rem .35rem",background:"transparent",border:"1px solid var(--b2)",borderRadius:4,color:"var(--mu)",cursor:"pointer"}}
-                                    onClick={()=>marcarDevolucion(c.nPart,"pendiente")}>
-                                    Deshacer
-                                  </button>
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           );
@@ -5585,52 +5480,6 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 </div>
               </div>
             )}
-
-            {/* ── Tabla adjudicaciones por lote ── */}
-            {liqReview && (()=>{
-              const adjLotes = liqReview.compradores.flatMap((c,ci) =>
-                c.lotes.map((l,li) => ({
-                  nLote: ci * 100 + li, // solo para key
-                  lote: l.lote,
-                  postor: c.postorData?.nombre || c.postorData?.name || l.postor || c.key,
-                  rut: c.postorData?.rut || l.rut || "—",
-                  nPart: c.postorData?.nComprador || "—",
-                  monto: l.monto,
-                }))
-              ).map((a,i)=>({...a,nLote:i+1}));
-              return (
-              <div className="table-card" style={{marginBottom:"1.2rem"}}>
-                <div className="table-head">
-                  <div className="table-title">Adjudicaciones — {adjLotes.length} lote{adjLotes.length!==1?"s":""}</div>
-                  <div style={{fontSize:".72rem",color:"var(--mu)"}}>
-                    Total martillo <strong style={{color:"var(--ac)"}}>{fmt(adjLotes.reduce((s,a)=>s+a.monto,0))}</strong>
-                  </div>
-                </div>
-                <table>
-                  <thead><tr>
-                    <th>Lote</th>
-                    <th>Descripción</th>
-                    <th>N° Part.</th>
-                    <th>Adjudicatario</th>
-                    <th>RUT</th>
-                    <th style={{textAlign:"right"}}>Monto martillo</th>
-                  </tr></thead>
-                  <tbody>
-                    {adjLotes.map((a,i)=>(
-                      <tr key={i}>
-                        <td><span style={{fontFamily:"Inter,sans-serif",fontWeight:700,color:"var(--ac)",fontSize:".8rem"}}>{a.nLote}</span></td>
-                        <td style={{maxWidth:220,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{a.lote}</td>
-                        <td><span style={{fontWeight:700,color:"var(--wh2)"}}>{a.nPart}</span></td>
-                        <td>{a.postor}</td>
-                        <td style={{fontFamily:"Inter,sans-serif",fontSize:".75rem",color:"var(--mu2)"}}>{a.rut}</td>
-                        <td style={{textAlign:"right",fontWeight:700,color:"var(--gr)",fontFamily:"Inter,sans-serif"}}>{fmt(a.monto)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              );
-            })()}
 
             {/* ── Tabla resumen (estilo liquidar_compradores.php) ── */}
             {liqReview && (
