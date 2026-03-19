@@ -2216,6 +2216,7 @@ function Dashboard({ session, onLogout }) {
     const casaNombre   = casaData.nombre    || session?.casaNombre || "Remates Ahumada";
     const logoUrl      = casaData.logo_url  || null;
     const martillero   = casaData.martillero|| "";
+    const rutMart      = casaData.rut_martillero       || "";
     const dirMart      = casaData.direccion_martillero || casaData.direccion || "";
     const telMart      = casaData.telefono_martillero  || casaData.telefono  || "";
     const emailMart    = casaData.email_martillero     || casaData.email     || "";
@@ -2270,12 +2271,14 @@ function Dashboard({ session, onLogout }) {
       doc.text("MARTILLERO PÚBLICO", logoOffset, y + 11);
       doc.setFont("helvetica","normal"); doc.setTextColor(...C_GRAY);
       doc.setFontSize(7.5);
-      if(martillero) doc.text(martillero, logoOffset, y + 16);
+      doc.text(martillero, logoOffset, y + 16);
+      let rowY = y + 21;
+      if(rutMart)   { doc.text(`RUT: ${rutMart}`, logoOffset, rowY); rowY += 5; }
       let infoLine = "";
       if(telMart)   infoLine += `Fono: ${telMart}   `;
       if(emailMart) infoLine += `Email: ${emailMart}`;
-      if(infoLine)  doc.text(infoLine, logoOffset, y + 21);
-      if(dirMart)   doc.text(`Dirección: ${dirMart}`, logoOffset, y + 26);
+      if(infoLine)  { doc.text(infoLine, logoOffset, rowY); rowY += 5; }
+      if(dirMart)   doc.text(`Dirección: ${dirMart}`, logoOffset, rowY);
     }
 
     y = 46;
