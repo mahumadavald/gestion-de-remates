@@ -1823,6 +1823,7 @@ function Dashboard({ session, onLogout }) {
   const [lastBidder,  setLastBidder]  = useState(null);
   const [curInc,      setCurInc]      = useState(500000);
   const [flash,       setFlash]       = useState(false);
+  const [postorCustom,setPostorCustom]= useState("");
   const [ctrlTab,     setCtrlTab]     = useState("control");
   const [chatInput,   setChatInput]   = useState("");
   const [chatMsgs,    setChatMsgs]    = useState([
@@ -6126,6 +6127,32 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     {aState==="waiting" && <button className="bb" disabled>Esperando inicio...</button>}
                     {aState==="paused"  && <button className="bb" disabled>Pausado</button>}
                     {aState==="sold"    && <button className="bb sold" disabled>Adjudicado</button>}
+                    {aState==="live" && (
+                      <div style={{display:"flex",gap:".5rem",marginTop:".5rem"}}>
+                        <input
+                          type="text"
+                          placeholder="Monto personalizado..."
+                          value={postorCustom}
+                          onChange={e=>{const v=e.target.value.replace(/\D/g,"");setPostorCustom(v?Number(v).toLocaleString("es-CL"):"")} }
+                          onKeyDown={e=>{
+                            if(e.key==="Enter"){
+                              const m=parseInt(postorCustom.replace(/\D/g,""));
+                              if(!m||m<=bid.current){notify("El monto debe ser mayor a la oferta actual","inf");return;}
+                              setCurInc(m-bid.current); placeBid(); setPostorCustom("");
+                            }
+                          }}
+                          style={{flex:1,padding:".45rem .7rem",borderRadius:6,border:"1px solid var(--b1)",background:"var(--s2)",color:"var(--tx)",fontSize:".82rem"}}
+                        />
+                        <button
+                          style={{padding:".45rem .9rem",borderRadius:6,background:"var(--ac)",color:"#fff",border:"none",cursor:"pointer",fontWeight:600,fontSize:".82rem"}}
+                          onClick={()=>{
+                            const m=parseInt(postorCustom.replace(/\D/g,""));
+                            if(!m||m<=bid.current){notify("El monto debe ser mayor a la oferta actual","inf");return;}
+                            setCurInc(m-bid.current); placeBid(); setPostorCustom("");
+                          }}
+                        >Pujar</button>
+                      </div>
+                    )}
                     <div className="bst">
                       <div className="bsc"><div className="bsv">{bid.count}</div><div className="bsl">Pujas totales</div></div>
                       <div className="bsc"><div className="bsv">{fmtS(bid.current-item.base)}</div><div className="bsl">Sobre base</div></div>
