@@ -3521,6 +3521,14 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         {/* ══ REMATES ══ */}
         {page==="remates" && (
           <div className="page">
+            {/* PAGE HEADER */}
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+              <div>
+                <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Remates</h1>
+                <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Gestiona tus eventos de remate</p>
+              </div>
+              <button className="btn-primary" onClick={()=>setModal("nuevo-remate")}>+ Nuevo Remate</button>
+            </div>
             {/* Banner contextual según rol */}
             {session?.role==="admin"
               ? <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".7rem 1rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:8,fontSize:".74rem",color:"var(--mu2)"}}>
@@ -3614,6 +3622,14 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
           const lotesMostrar = filterTab==="todos" ? lotesDelRemate : lotesDelRemate.filter(l=>l.estado===filterTab);
           return (
           <div className="page">
+            {/* PAGE HEADER */}
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+              <div>
+                <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Lotes</h1>
+                <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Catálogo de artículos en remate</p>
+              </div>
+              <button className="btn-primary" onClick={()=>setModal("nuevo-lote")}>+ Agregar Lote</button>
+            </div>
             {/* Selector de remate */}
             <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".65rem 1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:9}}>
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="13" height="11" rx="2"/><path d="M1 6h13M5 2v4M10 2v4"/></svg>
@@ -3667,6 +3683,14 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
           const pendientes = POSTORES_MERGED.filter(p=>p.estado==="pendiente");
           return (
           <div className="page">
+            {/* PAGE HEADER */}
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+              <div>
+                <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Postores</h1>
+                <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Postores inscritos en tus remates</p>
+              </div>
+              <button className="btn-primary" onClick={()=>setModal("nuevo-postor")}>+ Agregar Postor</button>
+            </div>
             {/* Selector de remate para filtrar */}
             <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".65rem 1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:9}}>
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="13" height="11" rx="2"/><path d="M1 6h13M5 2v4M10 2v4"/></svg>
@@ -3812,17 +3836,16 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         {/* ══ FACTURACION ══ */}
         {page==="factura" && (
           <div className="page">
-            {/* ── Header con selector de remate ── */}
-            <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",marginBottom:"1.4rem",paddingBottom:"1rem",borderBottom:"2px solid var(--ac)"}}>
+            {/* PAGE HEADER */}
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
               <div>
-                <div style={{fontSize:"1.5rem",fontWeight:900,color:"var(--ac)",letterSpacing:"-.03em",textTransform:"uppercase",fontStyle:"italic",lineHeight:1}}>Balance Económico</div>
-                <div style={{fontSize:".76rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginTop:".3rem"}}>
-                  <select className="fsel" style={{fontSize:".75rem",width:"auto",background:"transparent",border:"none",color:"var(--mu2)",fontWeight:700,padding:"0",cursor:"pointer"}}>
-                    {REMATES_MERGED.map(r=><option key={r.id}>{r.name}</option>)}
-                  </select>
-                </div>
+                <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Balance Económico</h1>
+                <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Resumen financiero del remate</p>
               </div>
-              <div style={{display:"flex",gap:".5rem"}}>
+              <div style={{display:"flex",gap:".5rem",flexWrap:"wrap"}}>
+                <select className="fsel" style={{fontSize:".75rem",width:"auto"}}>
+                  {REMATES_MERGED.map(r=><option key={r.id}>{r.name}</option>)}
+                </select>
                 <button className="btn-sec" style={{fontSize:".72rem"}} onClick={()=>setPage("reportes")}>← Estadísticas</button>
                 <button className="btn-primary" style={{fontSize:".72rem"}} onClick={()=>notify("Imprimiendo balance...","inf")}>Imprimir</button>
               </div>
@@ -4034,6 +4057,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
           return (
             <div className="page">
+              {/* PAGE HEADER */}
+              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+                <div>
+                  <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Retiro de Bienes</h1>
+                  <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Control de retiro de artículos adjudicados</p>
+                </div>
+              </div>
               {/* Selector de remate */}
               <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".7rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:9}}>
                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="13" height="11" rx="2"/><path d="M1 6h13M5 2v4M10 2v4"/></svg>
@@ -4272,6 +4302,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
           return (
             <div className="page">
+              {/* PAGE HEADER */}
+              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+                <div>
+                  <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Liquidación de Vendedores</h1>
+                  <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Liquidación a mandantes y vendedores</p>
+                </div>
+              </div>
               <BannerRemate/>
               <div style={{display:"grid",gridTemplateColumns:"380px 1fr",gap:"1.2rem",alignItems:"start"}}>
 
@@ -4886,15 +4923,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
           return (
             <div className="page">
-              {/* Header */}
-              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.3rem"}}>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:"1rem",fontWeight:800,color:"var(--wh2)"}}>Gestión de Usuarios</div>
-                  <div style={{fontSize:".72rem",color:"var(--mu2)",marginTop:".15rem"}}>Solo visible para administrador GR — {usuarios.length} usuarios · puedes asignar múltiples usuarios a la misma casa</div>
+              {/* PAGE HEADER */}
+              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+                <div>
+                  <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Usuarios</h1>
+                  <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Gestión de usuarios del sistema — {usuarios.length} usuarios registrados</p>
                 </div>
-                <button className="btn-primary" onClick={()=>{resetUsuarioForm();setUsuarioModal("crear");}}>
-                  + Nuevo usuario
-                </button>
+                <button className="btn-primary" onClick={()=>{resetUsuarioForm();setUsuarioModal("crear");}}>+ Nuevo Usuario</button>
               </div>
 
               {/* Resumen por casa */}
@@ -5128,10 +5163,11 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
           return (
             <div className="page">
-              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.5rem"}}>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:"1rem",fontWeight:800,color:"var(--wh2)"}}>Control de Licencias</div>
-                  <div style={{fontSize:".72rem",color:"var(--mu2)",marginTop:".15rem"}}>Gestiona el acceso de cada casa de remates — solo visible para admin GR</div>
+              {/* PAGE HEADER */}
+              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+                <div>
+                  <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Licencias</h1>
+                  <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Gestión de licencias activas</p>
                 </div>
               </div>
 
@@ -5295,13 +5331,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
           return (
             <div className="page">
-              {/* Header */}
-              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.5rem"}}>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:"1rem",fontWeight:800,color:"var(--wh2)"}}>Casas de Remates</div>
-                  <div style={{fontSize:".72rem",color:"var(--mu2)",marginTop:".15rem"}}>Cada casa tiene su propia URL de participación y display — generadas automáticamente</div>
+              {/* PAGE HEADER */}
+              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+                <div>
+                  <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Casas de Remates</h1>
+                  <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Gestiona las casas de remates del sistema</p>
                 </div>
-                <button className="btn-primary" onClick={()=>setCasaModal(true)}>+ Nueva casa</button>
+                <button className="btn-primary" onClick={()=>setCasaModal(true)}>+ Nueva Casa</button>
               </div>
 
               {/* Lista de casas */}
@@ -5498,6 +5534,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         {/* ══ CONFIG ══ */}
         {page==="config" && (
           <div className="page">
+            {/* PAGE HEADER */}
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+              <div>
+                <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Configuración</h1>
+                <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Ajustes de tu cuenta y sistema</p>
+              </div>
+            </div>
             <div style={{maxWidth:520,display:"flex",flexDirection:"column",gap:"1.1rem"}}>
 
               {/* Perfil */}
@@ -5543,6 +5586,14 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         {/* ══ GARANTIAS ══ */}
         {page==="garantias" && (
           <div className="page">
+            {/* PAGE HEADER */}
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+              <div>
+                <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Garantías</h1>
+                <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Control de garantías y comprobantes</p>
+              </div>
+              <button className="btn-primary" onClick={()=>setModal("nueva-garantia")}>+ Registrar Garantía</button>
+            </div>
             {/* Stats */}
             <div className="gar-steps">
               {[
@@ -5657,6 +5708,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
           return (
             <div className="page">
+              {/* PAGE HEADER */}
+              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+                <div>
+                  <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Adjudicaciones</h1>
+                  <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Lotes adjudicados en tus remates</p>
+                </div>
+              </div>
               {/* Stat cards */}
               <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:".7rem",marginBottom:"1.3rem"}}>
                 {[
@@ -5707,6 +5765,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         {/* ══ LIQUIDACIONES ══ */}
         {page==="liquidac" && (
           <div className="page">
+            {/* PAGE HEADER */}
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+              <div>
+                <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Liquidaciones</h1>
+                <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Liquidaciones por comprador</p>
+              </div>
+            </div>
             {/* Banner selector de remate */}
             {(() => {
               const cerrados = REMATES_MERGED.filter(r => r.estado === "cerrado");
@@ -6056,6 +6121,13 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         {/* ══ DEVOLUCIONES ══ */}
         {page==="devoluciones" && (
           <div className="page">
+            {/* PAGE HEADER */}
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"2rem",flexWrap:"wrap",gap:"1rem"}}>
+              <div>
+                <h1 style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",margin:0,lineHeight:1.2}}>Devoluciones</h1>
+                <p style={{fontSize:".82rem",color:"var(--mu)",margin:".3rem 0 0",fontWeight:400}}>Devolución de garantías a postores</p>
+              </div>
+            </div>
             {/* Banner selector de remate */}
             {(() => {
               const cerrados = REMATES_MERGED.filter(r => r.estado === "cerrado");
