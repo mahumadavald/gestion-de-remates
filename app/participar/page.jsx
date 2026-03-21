@@ -100,8 +100,8 @@ const CSS = `
 
   /* ── Hero column — light style ── */
   .hero-col {
-    background: #eef7fa;
-    border-right: 1px solid var(--b1);
+    background: linear-gradient(145deg, #0e7490 0%, #06B6D4 60%, #14B8A6 100%);
+    border-right: none;
     padding: 2.5rem 2.5rem 3rem;
     display: flex; flex-direction: column; gap: 0;
     height: 100vh;
@@ -114,7 +114,7 @@ const CSS = `
   .hero-col::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 2px; }
 
   .hero-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-  .hero-orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .18; }
+  .hero-orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .25; }
 
   /* ── Form column ── */
   .form-col {
@@ -129,8 +129,8 @@ const CSS = `
 
   /* ── Hero text — dark on light bg ── */
   .hero-brand { font-family: var(--font); font-size: .82rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ac); }
-  .hero-title { font-family: var(--head); font-size: clamp(2.6rem, 4.5vw, 4rem); font-weight: 800; color: var(--wh); line-height: 1.08; letter-spacing: -.04em; margin: .6rem 0 .85rem; }
-  .hero-title span { color: var(--ac); }
+  .hero-title { font-family: var(--head); font-size: clamp(2.6rem, 4.5vw, 4rem); font-weight: 800; color: #fff; line-height: 1.08; letter-spacing: -.04em; margin: .6rem 0 .85rem; }
+  .hero-title span { color: rgba(255,255,255,.85); }
   .hero-sub   { font-size: 1rem; color: var(--mu); line-height: 1.8; }
 
   .hero-topbar { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.75rem; }
@@ -138,20 +138,20 @@ const CSS = `
   .hero-topbar-sub  { font-size: .62rem; color: var(--mu); letter-spacing: .06em; text-transform: uppercase; margin-top: 1px; }
 
   .hero-trust { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; margin-top: 2rem; }
-  .trust-item { background: var(--s2); border: 1px solid var(--b1); border-radius: 10px; padding: .75rem 1rem; display: flex; align-items: center; gap: .6rem; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .trust-item { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); border-radius: 10px; padding: .75rem 1rem; display: flex; align-items: center; gap: .6rem; }
   .trust-icon { width: 28px; height: 28px; border-radius: 7px; background: rgba(6,182,212,.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .trust-text { font-size: .78rem; color: var(--wh); font-weight: 500; line-height: 1.35; }
   .trust-text strong { display: block; font-size: .72rem; color: var(--mu); font-weight: 400; }
 
   .hero-steps { margin-top: 2rem; }
   .step-item  { display: flex; align-items: flex-start; gap: .9rem; margin-bottom: 1.25rem; }
-  .step-num   { width: 28px; height: 28px; border-radius: 50%; background: rgba(6,182,212,.12); border: 1px solid rgba(6,182,212,.3); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: .72rem; font-weight: 700; color: var(--ac); flex-shrink: 0; margin-top: .15rem; }
+  .step-num   { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,.25); border: 1px solid rgba(255,255,255,.4); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: .72rem; font-weight: 700; color: #fff; flex-shrink: 0; margin-top: .15rem; }
   .step-txt   { font-size: .88rem; color: var(--mu); }
   .step-ttl   { font-weight: 700; color: var(--wh); margin-bottom: .1rem; font-size: .92rem; }
 
-  .hero-note  { background: var(--s2); border: 1px solid var(--b1); border-radius: 12px; padding: .9rem 1rem; margin-top: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
-  .hero-note-t{ font-size: .72rem; font-weight: 700; color: var(--ac); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .3rem; }
-  .hero-note-b{ font-size: .84rem; color: var(--mu); line-height: 1.6; }
+  .hero-note  { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); border-radius: 12px; padding: .9rem 1rem; margin-top: 2rem; }
+  .hero-note-t{ font-size: .72rem; font-weight: 700; color: rgba(255,255,255,.9); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .3rem; }
+  .hero-note-b{ font-size: .84rem; color: rgba(255,255,255,.8); line-height: 1.6; }
 
   /* ── Form header ── */
   .form-header { margin-bottom: 1.75rem; }
