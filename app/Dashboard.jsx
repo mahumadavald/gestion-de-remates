@@ -424,7 +424,8 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .config-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:1.3rem;}
 .config-title{font-size:.78rem;font-weight:700;color:var(--wh);margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid var(--b1);}
 
-/* ── SALA EN VIVO ── */
+/* ── SALA EN VIVO — AuctionHub redesign ── */
+/* Legacy wrap kept for backward compatibility */
 .sala-wrap{display:grid;grid-template-columns:240px 1fr 260px;height:calc(100vh - 52px);overflow:hidden;}
 .sala-sb{background:var(--s1);border-right:1px solid var(--b1);overflow-y:auto;display:flex;flex-direction:column;}
 .sala-sbh{padding:.7rem 1rem;font-size:.68rem;font-weight:700;color:var(--wh2);border-bottom:1px solid var(--b1);letter-spacing:.02em;}
@@ -441,6 +442,72 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .bsd{background:rgba(56,178,246,.12);color:var(--ac);}
 .bwt{background:rgba(90,127,168,.07);color:var(--mu);}
 .sala-main{padding:1.2rem 1.5rem;display:flex;flex-direction:column;gap:.95rem;overflow-y:auto;}
+
+/* ── NEW AuctionHub layout ── */
+.sala-wrap-new{display:flex;flex-direction:column;height:calc(100vh - 52px);overflow:hidden;background:var(--bg);}
+.sala-header{display:flex;align-items:center;gap:1rem;padding:.65rem 1.25rem;background:var(--s1);border-bottom:1px solid var(--b1);flex-shrink:0;}
+.sala-header h1{font-size:1rem;font-weight:800;color:var(--wh);margin:0;white-space:nowrap;}
+.sala-body{display:grid;grid-template-columns:1fr 380px;gap:1.1rem;padding:1.1rem 1.25rem;flex:1;overflow:hidden;min-height:0;}
+
+/* Left card */
+.sala-left-card{background:var(--s2);border:1px solid var(--b1);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.sala-live-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.28rem .75rem;background:rgba(20,184,166,.15);color:var(--gr);border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.04em;margin:.85rem auto 0;width:fit-content;}
+.sala-lot-title{font-size:1.05rem;font-weight:800;color:var(--wh);text-align:center;padding:.5rem 1.1rem .3rem;line-height:1.25;}
+.sala-photo-wrap{flex:1;position:relative;background:var(--s3);margin:.4rem .85rem;border-radius:10px;overflow:hidden;min-height:0;}
+.sala-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+.sala-photo-placeholder{width:100%;height:100%;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;}
+.sala-timer{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem .85rem;border-top:1px solid var(--b1);margin-top:.4rem;background:rgba(0,0,0,.12);flex-shrink:0;}
+.sala-timer span:first-child{font-size:.72rem;font-weight:600;color:var(--mu2);}
+.sala-timer-num{font-size:1.45rem;font-weight:800;letter-spacing:.04em;font-family:'Inter',monospace;}
+.sala-timer-num.urgent{color:var(--yl);}
+.sala-timer-num.critical{color:var(--rd);animation:losepulse .5s infinite;}
+.sala-timer-num.safe{color:var(--gr);}
+
+/* Right column */
+.sala-right-col{display:flex;flex-direction:column;gap:.85rem;overflow-y:auto;min-height:0;}
+
+/* Bid card */
+.sala-bid-card{background:var(--s2);border:1px solid var(--b1);border-radius:14px;padding:1.1rem;flex-shrink:0;}
+.sala-bid-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.85rem;}
+.sala-bid-label{font-size:.65rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.2rem;}
+.sala-bid-amount{font-size:2.1rem;font-weight:800;color:var(--ac);line-height:1;letter-spacing:-.02em;transition:color .2s;}
+.sala-bid-amount.flash{color:var(--acH);text-shadow:0 0 18px rgba(56,178,246,.45);}
+.sala-livefeed-btn{display:flex;align-items:center;gap:.35rem;padding:.32rem .7rem;background:rgba(56,178,246,.1);border:1px solid rgba(56,178,246,.25);border-radius:7px;color:var(--ac);font-size:.68rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.sala-livefeed-btn:hover{background:rgba(56,178,246,.18);}
+.sala-last-bids-title{font-size:.63rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;}
+.sala-last-bids{display:flex;flex-direction:column;gap:.35rem;max-height:160px;overflow-y:auto;margin-bottom:.85rem;}
+.sala-bid-row{display:flex;align-items:center;gap:.55rem;padding:.38rem .55rem;border-radius:7px;background:rgba(255,255,255,.025);border:1px solid var(--b1);}
+.sala-bid-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#fff;flex-shrink:0;background:var(--ac);}
+.sala-bid-name{flex:1;font-size:.73rem;font-weight:600;color:var(--wh2);}
+.sala-bid-tag{padding:.03rem .28rem;border-radius:3px;font-size:.55rem;font-weight:700;}
+.sala-bid-tag.web{background:rgba(56,178,246,.15);color:var(--ac);}
+.sala-bid-tag.pres{background:rgba(246,173,85,.15);color:var(--yl);}
+.sala-bid-amount-sm{font-size:.8rem;font-weight:700;color:var(--ac);}
+.sala-bid-time{font-size:.6rem;color:var(--mu);}
+.sala-no-bids{padding:1rem;text-align:center;font-size:.72rem;color:var(--mu);}
+
+/* Place bid / adjudicar button */
+.sala-place-bid-btn{width:100%;padding:.8rem;background:var(--ac);border:none;border-radius:9px;font-size:.9rem;font-weight:700;color:#fff;cursor:pointer;transition:all .15s;letter-spacing:.01em;}
+.sala-place-bid-btn:hover:not(:disabled){background:var(--acH);transform:translateY(-1px);box-shadow:0 5px 18px rgba(56,178,246,.3);}
+.sala-place-bid-btn:disabled{opacity:.3;cursor:not-allowed;}
+.sala-place-bid-btn.adj{background:rgba(20,184,166,.15);color:var(--gr);border:1px solid rgba(20,184,166,.3);}
+.sala-place-bid-btn.adj:hover:not(:disabled){background:rgba(20,184,166,.25);}
+
+/* Quick bid row */
+.sala-quick-bids{display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;flex-shrink:0;}
+.sala-quick-card{border-radius:10px;padding:.7rem .6rem;display:flex;flex-direction:column;align-items:center;gap:.22rem;cursor:pointer;transition:all .15s;border:1px solid var(--b1);background:var(--s2);position:relative;overflow:hidden;}
+.sala-quick-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;}
+.sala-quick-card.c0::after{background:var(--ac);}
+.sala-quick-card.c1::after{background:var(--yl);}
+.sala-quick-card.c2::after{background:#a78bfa;}
+.sala-quick-card.c3::after{background:var(--mu);}
+.sala-quick-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.25);}
+.sala-quick-card:disabled{opacity:.3;cursor:not-allowed;transform:none;}
+.sala-quick-label{font-size:.58rem;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;}
+.sala-quick-amount{font-size:.88rem;font-weight:800;color:var(--wh2);}
+
+/* Lots sidebar in new layout */
+.sala-lots-sb{background:var(--s1);border-right:1px solid var(--b1);overflow-y:auto;display:flex;flex-direction:column;height:100%;}
 .pz{position:relative;width:100%;height:215px;border-radius:10px;overflow:hidden;background:var(--s3);border:1px solid var(--b2);}
 .pzimg{width:100%;height:100%;object-fit:cover;}
 .pzph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;cursor:pointer;transition:background .2s;}
@@ -733,6 +800,15 @@ tr:hover td{background:rgba(56,178,246,.04);}
 
   /* Bid feed (right panel): hidden — feed is duplicated inside sala-main ctrl-card area */
   .sala-wrap > aside:last-child{display:none;}
+
+  /* NEW AuctionHub layout — mobile */
+  .sala-wrap-new{height:auto;overflow:visible;}
+  .sala-body{grid-template-columns:1fr;overflow:visible;padding:.75rem;}
+  .sala-left-card{min-height:320px;}
+  .sala-photo-wrap{min-height:200px;}
+  .sala-quick-bids{grid-template-columns:repeat(2,1fr);}
+  .sala-right-col{overflow-y:visible;}
+  .sala-bid-amount{font-size:1.6rem;}
 
   /* Vista Postor: centered big offer, full-width bid button */
   .ba-card{padding:.85rem;}
@@ -6083,40 +6159,31 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
               </div>
             </div>
 
-            <div className="sala-wrap">
-              {/* Sidebar lotes */}
-              <aside className="sala-sb">
-                <div className="sala-sbh">{lots.length} lotes en remate</div>
-                {lots.map((it,i) => {
-                  const bs=bids[i]; const st=bs?.status==="sold"?"sold":i===idx&&aState==="live"?"live":"wait";
-                  return (
-                    <div key={it.id} className={`lc${idx===i?" on":""}`} onClick={()=>setIdx(i)}>
-                      {it.imgs?.[0] ? <img src={it.imgs[0]} alt={it.name} className="lth"/> : <div className="lph">Sin foto</div>}
-                      <div className="ln">Lote {String(i+1).padStart(2,"0")}</div>
-                      <div className="lnm">{it.name}</div>
-                      <div className="lpr">{fmtS(bs?.current||it.base)}</div>
-                      <div className={`lbdg ${st==="live"?"blv":st==="sold"?"bsd":"bwt"}`}>{st==="live"?"En vivo":st==="sold"?"Vendido":"Pendiente"}</div>
-                    </div>
-                  );
-                })}
-              </aside>
+            <div className="sala-wrap-new">
+              <div className="sala-body">
 
-              {/* Main */}
-              <main className="sala-main">
+                {/* ── LEFT CARD: foto + timer ── */}
+                <div className="sala-left-card">
+                  {/* Live badge */}
+                  <div className="sala-live-badge">
+                    <span style={{fontSize:".65rem"}}>●</span>
+                    {aState==="live" ? "Live Now" : aState==="sold" ? "Adjudicado" : "En espera"}
+                  </div>
 
-                {/* ── Carrusel fotos + Video martillero ── */}
-                <div style={{display:"grid",gridTemplateColumns:"1fr 220px",gap:"1rem",alignItems:"stretch"}}>
+                  {/* Lot title */}
+                  <div className="sala-lot-title">
+                    LOTE {String(idx+1).padStart(2,"0")} — {item.name}
+                  </div>
 
-                  {/* Carrusel */}
-                  <div style={{position:"relative",background:"var(--s2)",borderRadius:10,overflow:"hidden",minHeight:240,border:"1px solid var(--b1)"}}>
+                  {/* Photo carousel */}
+                  <div className="sala-photo-wrap">
                     {(item.imgs||[]).length > 0 ? (
                       <>
                         <img
                           src={item.imgs[photoIdx % item.imgs.length]}
                           alt={item.name}
-                          style={{width:"100%",height:240,objectFit:"cover",display:"block",transition:"opacity .3s"}}
+                          style={{width:"100%",height:"100%",objectFit:"cover",display:"block",transition:"opacity .3s"}}
                         />
-                        {/* Flechas */}
                         {item.imgs.length > 1 && (
                           <>
                             <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p-1+item.imgs.length)%item.imgs.length); startCarousel(item.imgs); }}
@@ -6127,252 +6194,320 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                               style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
                               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 2l4 4-4 4"/></svg>
                             </button>
-                            {/* Puntos indicadores */}
                             <div style={{position:"absolute",bottom:8,left:"50%",transform:"translateX(-50%)",display:"flex",gap:5}}>
                               {item.imgs.map((_,i)=>(
                                 <div key={i} onClick={()=>setPhotoIdx(i)}
                                   style={{width:i===photoIdx%item.imgs.length?18:7,height:7,borderRadius:4,background:i===photoIdx%item.imgs.length?"var(--ac)":"rgba(255,255,255,.4)",cursor:"pointer",transition:"all .2s"}}/>
                               ))}
                             </div>
-                            {/* Contador */}
                             <div style={{position:"absolute",top:8,right:8,background:"rgba(0,0,0,.6)",borderRadius:4,padding:".15rem .45rem",fontSize:".68rem",color:"#fff",fontFamily:"Inter,sans-serif"}}>
                               {(photoIdx%item.imgs.length)+1}/{item.imgs.length}
                             </div>
                           </>
                         )}
-                        {/* Botón quitar foto */}
                         <button onClick={()=>removePhoto(idx, photoIdx%item.imgs.length)}
                           style={{position:"absolute",top:8,left:8,background:"rgba(224,82,82,.7)",border:"none",borderRadius:4,padding:".15rem .4rem",fontSize:".65rem",color:"#fff",cursor:"pointer"}}>
                           Quitar
                         </button>
+                        {(item.imgs||[]).length > 0 && (
+                          <label htmlFor={`phadd${idx}`}
+                            style={{position:"absolute",bottom:8,right:8,background:"rgba(56,178,246,.85)",borderRadius:5,padding:".2rem .55rem",fontSize:".65rem",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:".25rem"}}>
+                            <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 1v8M1 5h8"/></svg>
+                            Foto
+                            <input id={`phadd${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
+                          </label>
+                        )}
                       </>
                     ) : (
-                      <label htmlFor={`ph${idx}`} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:240,cursor:"pointer",gap:".5rem"}}>
+                      <label htmlFor={`ph${idx}`} className="sala-photo-placeholder" style={{cursor:"pointer"}}>
                         <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="var(--mu)" strokeWidth="1.5"><rect x="3" y="6" width="26" height="20" rx="3"/><circle cx="16" cy="16" r="5"/><path d="M12 6l2-3h4l2 3"/></svg>
                         <div style={{fontSize:".75rem",color:"var(--mu2)"}}>Agregar fotos del lote</div>
                         <input id={`ph${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
                       </label>
                     )}
-                    {/* Botón agregar más fotos */}
-                    {(item.imgs||[]).length > 0 && (
-                      <label htmlFor={`phadd${idx}`}
-                        style={{position:"absolute",bottom:8,right:8,background:"rgba(56,178,246,.85)",borderRadius:5,padding:".2rem .55rem",fontSize:".65rem",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:".25rem"}}>
-                        <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 1v8M1 5h8"/></svg>
-                        Agregar foto
-                        <input id={`phadd${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
-                      </label>
-                    )}
                   </div>
 
-                  {/* Video martillero */}
-                  <div style={{background:"var(--s2)",borderRadius:10,border:"1px solid var(--b1)",overflow:"hidden",display:"flex",flexDirection:"column",minHeight:240}}>
-                    <div style={{padding:".5rem .75rem",borderBottom:"1px solid var(--b1)",display:"flex",alignItems:"center",gap:".4rem"}}>
-                      <div style={{width:7,height:7,borderRadius:"50%",background:camActiva?"var(--gr)":"var(--rd)",boxShadow:camActiva?"0 0 6px var(--gr)":undefined,flexShrink:0}}/>
-                      <span style={{fontSize:".68rem",fontWeight:700,color:"var(--wh2)"}}>Martillero en vivo</span>
-                      {grabando && <span style={{marginLeft:"auto",fontSize:".6rem",fontWeight:800,color:"var(--rd)",display:"flex",alignItems:"center",gap:3}}><span style={{width:6,height:6,borderRadius:"50%",background:"var(--rd)",animation:"pulse 1s infinite"}}/>REC</span>}
+                  {/* Timer */}
+                  <div className="sala-timer">
+                    <span>Tiempo restante:</span>
+                    {aState==="live" && bidTimer!==null && bidTimer>0 ? (
+                      <span className={`sala-timer-num${bidTimer<=2?" critical":bidTimer<=5?" urgent":" safe"}`}>
+                        00:00:{String(bidTimer).padStart(2,"0")}
+                      </span>
+                    ) : (
+                      <span className="sala-timer-num" style={{color:"var(--mu)"}}>—</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── RIGHT COLUMN ── */}
+                <div className="sala-right-col">
+
+                  {/* ── Top bid card ── */}
+                  <div className="sala-bid-card">
+                    <div className="sala-bid-header">
+                      <div>
+                        <div className="sala-bid-label">Oferta actual:</div>
+                        <div className={`sala-bid-amount${flash?" flash":""}`}>{fmt(bid.current)}</div>
+                      </div>
+                      {/* Camera / Live feed button */}
+                      <button
+                        className="sala-livefeed-btn"
+                        onClick={camActiva ? detenerCamara : activarCamara}
+                        title="Cámara martillero"
+                      >
+                        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M1 3h8l3 3v5H1V3z"/><circle cx="5" cy="8" r="1.5"/></svg>
+                        {camActiva ? "Detener cámara" : "Live Feed"}
+                        {camActiva && <span style={{width:6,height:6,borderRadius:"50%",background:"var(--rd)",animation:"pulse 1s infinite",flexShrink:0}}/>}
+                      </button>
                     </div>
-                    <div style={{flex:1,position:"relative",background:"#000",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                      <video ref={videoRef} autoPlay muted playsInline
-                        style={{width:"100%",height:"100%",objectFit:"cover",display:camActiva?"block":"none"}}/>
-                      {!camActiva && (
-                        <div style={{textAlign:"center",padding:"1rem",display:"flex",flexDirection:"column",alignItems:"center",gap:".6rem"}}>
-                          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--mu)" strokeWidth="1.4"><path d="M4 6h14l4 4v10H4V6z"/><circle cx="11" cy="14" r="3"/></svg>
-                          <div style={{fontSize:".68rem",color:"var(--mu2)",lineHeight:1.4}}>Cámara inactiva</div>
-                          {camError && <div style={{fontSize:".63rem",color:"var(--rd)",lineHeight:1.3,maxWidth:160}}>{camError}</div>}
-                        </div>
-                      )}
-                    </div>
-                    <div style={{padding:".5rem .6rem",borderTop:"1px solid var(--b1)",display:"flex",gap:".4rem"}}>
-                      {!camActiva
-                        ? <button onClick={activarCamara} style={{flex:1,padding:".35rem",background:"var(--ac)",border:"none",borderRadius:6,color:"#fff",fontSize:".68rem",fontWeight:700,cursor:"pointer"}}>Activar cámara</button>
-                        : <button onClick={detenerCamara} style={{flex:1,padding:".35rem",background:"rgba(224,82,82,.15)",border:"1px solid rgba(224,82,82,.3)",borderRadius:6,color:"var(--rd)",fontSize:".68rem",fontWeight:700,cursor:"pointer"}}>Detener cámara</button>
+
+                    {/* Video pequeño si cámara activa */}
+                    {camActiva && (
+                      <div style={{borderRadius:8,overflow:"hidden",marginBottom:".75rem",background:"#000",height:90,position:"relative"}}>
+                        <video ref={videoRef} autoPlay muted playsInline style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                        {grabando && <span style={{position:"absolute",top:5,right:5,fontSize:".6rem",fontWeight:800,color:"var(--rd)",display:"flex",alignItems:"center",gap:3}}><span style={{width:6,height:6,borderRadius:"50%",background:"var(--rd)",animation:"pulse 1s infinite"}}/>REC</span>}
+                      </div>
+                    )}
+
+                    {/* Last bids */}
+                    <div className="sala-last-bids-title">Últimas pujas:</div>
+                    <div className="sala-last-bids" ref={feedRef}>
+                      {bid.history.length===0
+                        ? <div className="sala-no-bids">Sin pujas aún</div>
+                        : [...bid.history].reverse().slice(0,8).map((b,i) => {
+                          const initials = (b.bidder||"?").split(" ").map(w=>w[0]||"").join("").slice(0,2).toUpperCase();
+                          const avatarColors = ["var(--ac)","#a78bfa","var(--yl)","var(--gr)"];
+                          return (
+                            <div key={i} className="sala-bid-row">
+                              <div className="sala-bid-avatar" style={{background:avatarColors[i%avatarColors.length]}}>
+                                {b.mine?"Yo":initials}
+                              </div>
+                              <div className="sala-bid-name">
+                                {b.mine?"Tu (P-0245)":b.bidder}
+                                {b.online && <span className="sala-bid-tag web" style={{marginLeft:4}}>WEB</span>}
+                                {b.presencial && <span className="sala-bid-tag pres" style={{marginLeft:4}}>PRES</span>}
+                              </div>
+                              <div>
+                                <div className="sala-bid-amount-sm">{fmt(b.amount)}</div>
+                                <div className="sala-bid-time">{b.time}</div>
+                              </div>
+                            </div>
+                          );
+                        })
                       }
                     </div>
-                  </div>
-                </div>
 
-                <div>
-                  <div className="ict">{item.cat}{item.year?` · ${item.year}`:""} · Lote {String(idx+1).padStart(2,"0")} de {lots.length}</div>
-                  <div className="itl">{item.name}</div>
-                  <div className="ids">{item.desc}</div>
-                </div>
-
-                <div className="ctrl-tabs">
-                  {[["control","Control Martillero"],["postor","Vista Postor"]].map(([k,l]) => (
-                    <button key={k} className={`ctrl-tab${ctrlTab===k?" on":""}`} onClick={()=>setCtrlTab(k)}>{l}</button>
-                  ))}
-                </div>
-
-                {/* CONTROL */}
-                {ctrlTab==="control" && (
-                  <div className="ctrl-grid">
-                    <div className="ctrl-card">
-                      <div className="ctrl-card-title">Lote activo</div>
-                      <select className="asel" value={idx} onChange={e=>{setIdx(Number(e.target.value));resetAuction();setCurInc(lots[Number(e.target.value)]?.inc||500000);}}>
-                        {lots.map((it,i) => <option key={i} value={i}>Lote {String(i+1).padStart(2,"0")} — {it.name}</option>)}
-                      </select>
-                      <div className="inc-ctrl">
-                        <div className="inc-title">Incremento por puja</div>
-                        <div className="inc-cur-lbl">Activo ahora</div>
-                        <div className="inc-cur">{fmtS(curInc)}</div>
-                        <div className="inc-btns">
-                          {INC_OPTIONS.map(v => (
-                            <button key={v} className={`inc-btn${curInc===v?" on":""}`} onClick={()=>setCurInc(v)}>{fmtS(v)}</button>
-                          ))}
-                        </div>
-                        {/* Monto personalizado */}
-                        <div style={{display:"flex",gap:".4rem",marginTop:".5rem",alignItems:"center"}}>
-                          <input
-                            placeholder="Monto personalizado..."
-                            value={customMonto}
-                            onChange={e=>setCustomMonto(e.target.value)}
-                            onKeyDown={e=>{ if(e.key==="Enter"&&customMonto){ const n=parseInt(customMonto.replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} } }}
-                            style={{flex:1,padding:".3rem .55rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}
-                          />
-                          <button
-                            onClick={()=>{ const n=parseInt((customMonto||"").replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} }}
-                            style={{padding:".3rem .6rem",background:"var(--ac)",border:"none",borderRadius:6,color:"#fff",fontSize:".68rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
-                            Usar
-                          </button>
-                        </div>
-                      </div>
-                      {/* Postura presencial */}
-                      <div style={{marginTop:".6rem",padding:".6rem .75rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:8}}>
-                        <div style={{fontSize:".68rem",fontWeight:700,color:"var(--yl)",marginBottom:".4rem",display:"flex",alignItems:"center",gap:".35rem"}}>
-                          <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
-                          Postura presencial
-                        </div>
-                        <div style={{display:"flex",gap:".4rem"}}>
-                          <input placeholder="Paleta" value={presPaleta} onChange={e=>setPresPaleta(e.target.value)}
-                            style={{width:64,padding:".3rem .5rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
-                          <input placeholder="Monto" value={presMonto} onChange={e=>setPresMonto(e.target.value)}
-                            onKeyDown={e=>e.key==="Enter"&&registrarPresencial()}
-                            style={{flex:1,padding:".3rem .5rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
-                          <button onClick={registrarPresencial}
-                            style={{padding:".3rem .6rem",background:"rgba(246,173,85,.2)",border:"1px solid rgba(246,173,85,.4)",borderRadius:6,color:"var(--yl)",fontSize:".68rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
-                            ✓
-                          </button>
-                        </div>
-                      </div>
-                      <div className="ab-list">
-                        <button className="ab g"  onClick={startAuction} disabled={aState==="live"}>▶ Iniciar</button>
-                        <button className="ab y"  onClick={pauseAuction} disabled={aState!=="live"}>⏸ Pausar</button>
-                        <button className="ab bl" onClick={adjudicar}    disabled={aState==="sold"}>✓ Adjudicar</button>
-                        <button className="ab"    onClick={repetirLote}  style={{background:"rgba(167,139,250,.1)",color:"#a78bfa",border:"1px solid rgba(167,139,250,.25)"}}>↺ Repetir lote</button>
-                        <button className="ab"    onClick={pasarLote}    style={{background:"rgba(255,255,255,.04)",color:"var(--mu2)",border:"1px solid var(--b2)"}} disabled={idx>=lots.length-1}>→ Pasar lote</button>
-                        <button className="ab r"  onClick={resetAuction}>⟳ Reiniciar todo</button>
-                      </div>
-                    </div>
-                    <div className="ctrl-card">
-                      <div className="ctrl-card-title">Estado en tiempo real</div>
-                      <div className="st-row"><div className="st-dot" style={{background:sColor,boxShadow:`0 0 7px ${sColor}`}}/><div className="st-txt" style={{color:sColor}}>{sLabel}</div></div>
-                      <div className="ls-grid">
-                        <div className="ls-card"><div className="ls-v" style={{fontSize:".82rem"}}>{fmt(bid.current)}</div><div className="ls-l">Oferta</div></div>
-                        <div className="ls-card"><div className="ls-v">{bid.count}</div><div className="ls-l">Pujas</div></div>
-                        <div className="ls-card"><div className="ls-v">{lastBidder ? "🏆" : "—"}</div><div className="ls-l">Líder</div></div>
-                      </div>
-                      {bidTimer!==null&&bidTimer>0&&aState==="live" && (
-                        <div className={`bid-ticker${bidTimer<=5?" urgent":""}${bidTimer<=2?" critical":""}`}>
-                          <div className="bt-num" style={{color:bidTimer>8?"var(--gr)":bidTimer>4?"var(--yl)":"var(--rd)",fontSize:bidTimer<=3?"1.7rem":"1.35rem"}}>{bidTimer}</div>
-                          <div>
-                            <div className="bt-info">{bidTimer<=2?"¡ADJUDICANDO AHORA!":bidTimer<=5?"⚠ Última oportunidad":"Adjudica en"}</div>
-                            <div className="bt-leader">{lastBidder||"—"} lidera · {fmt((bids[idx]?.current||0))}</div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* POSTOR */}
-                {ctrlTab==="postor" && (
-                  <div className="ba-card">
-                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:".75rem",padding:".4rem .7rem",background:"var(--s1)",borderRadius:7,border:"1px solid var(--b1)"}}>
-                      <div style={{fontSize:".72rem",color:"var(--mu2)"}}>Estado</div>
-                      <div style={{fontSize:".78rem",fontWeight:700,color:sColor}}>{sLabel}</div>
-                    </div>
-                    <div className="bal">Oferta actual</div>
-                    <div className={`bap${flash?" flash":""}`}>{fmt(bid.current)}</div>
-                    {aState==="live"&&bidTimer!==null&&bidTimer>0
-                      ? <BidRing seconds={bidTimer} total={BID_TIMER} nextAmount={bid.current+curInc} increment={curInc}/>
-                      : <div className="banl">Proxima puja: <span>{fmt(bid.current+curInc)}</span> · Incremento: <span>{fmtS(curInc)}</span></div>
-                    }
-                    {aState==="live" && iAmWinning && (
-                      <div className="bb-winning">
-                        <div className="bw-icon"><div className="bw-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg></div></div>
-                        <div className="bw-text"><div className="bw-main">Vas ganando</div><div className="bw-sub">Tu oferta de {fmt(bid.current)} es la mas alta</div></div>
-                      </div>
-                    )}
-                    {aState==="live" && lastBidder!==null && !iAmWinning && (
-                      <div className="bb-losing">
-                        <div className="bl-alert">!</div>
-                        <div className="bl-text">
-                          <div className="bl-main">Te lo estas perdiendo</div>
-                          <div className="bl-sub">Oferta actual: <span>{fmt(bid.current)}</span> — Puja <span>{fmt(bid.current+curInc)}</span> para liderar</div>
-                        </div>
-                        <button className="bl-action" onClick={placeBid}>Pujar {fmtS(bid.current+curInc)}</button>
-                      </div>
-                    )}
-                    {aState==="live"&&lastBidder===null && <button className="bb" onClick={placeBid}>Pujar {fmt(bid.current+curInc)}</button>}
-                    {aState==="waiting" && <button className="bb" disabled>Esperando inicio...</button>}
-                    {aState==="paused"  && <button className="bb" disabled>Pausado</button>}
-                    {aState==="sold"    && <button className="bb sold" disabled>Adjudicado</button>}
-                    {aState==="live" && (
-                      <div style={{display:"flex",gap:".5rem",marginTop:".5rem"}}>
-                        <input
-                          type="text"
-                          placeholder="Monto personalizado..."
-                          value={postorCustom}
-                          onChange={e=>{const v=e.target.value.replace(/\D/g,"");setPostorCustom(v?Number(v).toLocaleString("es-CL"):"")} }
-                          onKeyDown={e=>{
-                            if(e.key==="Enter"){
-                              const m=parseInt(postorCustom.replace(/\D/g,""));
-                              if(!m||m<=bid.current){notify("El monto debe ser mayor a la oferta actual","inf");return;}
-                              setCurInc(m-bid.current); placeBid(); setPostorCustom("");
-                            }
-                          }}
-                          style={{flex:1,padding:".45rem .7rem",borderRadius:6,border:"1px solid var(--b1)",background:"var(--s2)",color:"var(--tx)",fontSize:".82rem"}}
-                        />
-                        <button
-                          style={{padding:".45rem .9rem",borderRadius:6,background:"var(--ac)",color:"#fff",border:"none",cursor:"pointer",fontWeight:600,fontSize:".82rem"}}
-                          onClick={()=>{
-                            const m=parseInt(postorCustom.replace(/\D/g,""));
-                            if(!m||m<=bid.current){notify("El monto debe ser mayor a la oferta actual","inf");return;}
-                            setCurInc(m-bid.current); placeBid(); setPostorCustom("");
-                          }}
-                        >Pujar</button>
-                      </div>
-                    )}
-                    <div className="bst">
-                      <div className="bsc"><div className="bsv">{bid.count}</div><div className="bsl">Pujas totales</div></div>
-                      <div className="bsc"><div className="bsv">{fmtS(bid.current-item.base)}</div><div className="bsl">Sobre base</div></div>
-                    </div>
-                  </div>
-                )}
-              </main>
-
-              {/* Right panel: feed + chat */}
-              <aside style={{display:"flex",flexDirection:"column",background:"var(--s1)",borderLeft:"1px solid var(--b1)",overflow:"hidden"}}>
-                {/* Pujas feed — top half */}
-                <div style={{flex:1,display:"flex",flexDirection:"column",borderBottom:"1px solid var(--b1)",minHeight:0}}>
-                  <div className="fdh">Registro de pujas {aState==="live"&&<div className="ldot" style={{width:6,height:6}}/>}</div>
-                  <div className="fdl" ref={feedRef} style={{flex:1}}>
-                    {bid.history.length===0 ? <div className="fde">Sin pujas aun</div>
-                      : bid.history.map((b,i) => (
-                        <div key={i} className="fdi">
-                          <div style={{display:"flex",alignItems:"center",gap:".35rem"}}>
-                            {b.online && <span style={{padding:".04rem .3rem",background:"rgba(56,178,246,.15)",color:"var(--ac)",borderRadius:3,fontSize:".55rem",fontWeight:700}}>WEB</span>}
-                            {b.presencial && <span style={{padding:".04rem .3rem",background:"rgba(246,173,85,.15)",color:"var(--yl)",borderRadius:3,fontSize:".55rem",fontWeight:700}}>PRES</span>}
-                            <div className={`fdb${b.mine?" me":""}`}>{b.mine?"Tu (P-0245)":b.bidder}</div>
-                          </div>
-                          <div className="fda">{fmt(b.amount)}</div>
-                          <div className="fdt">{b.time}</div>
-                        </div>
+                    {/* Tabs control/postor */}
+                    <div className="ctrl-tabs" style={{marginBottom:".75rem"}}>
+                      {[["control","Control Martillero"],["postor","Vista Postor"]].map(([k,l]) => (
+                        <button key={k} className={`ctrl-tab${ctrlTab===k?" on":""}`} onClick={()=>setCtrlTab(k)}>{l}</button>
                       ))}
+                    </div>
+
+                    {/* CONTROL TAB */}
+                    {ctrlTab==="control" && (
+                      <>
+                        <div className="ctrl-grid">
+                          <div className="ctrl-card">
+                            <div className="ctrl-card-title">Lote activo</div>
+                            <select className="asel" value={idx} onChange={e=>{setIdx(Number(e.target.value));resetAuction();setCurInc(lots[Number(e.target.value)]?.inc||500000);}}>
+                              {lots.map((it,i) => <option key={i} value={i}>Lote {String(i+1).padStart(2,"0")} — {it.name}</option>)}
+                            </select>
+                            <div className="inc-ctrl">
+                              <div className="inc-title">Incremento por puja</div>
+                              <div className="inc-cur-lbl">Activo ahora</div>
+                              <div className="inc-cur">{fmtS(curInc)}</div>
+                              <div className="inc-btns">
+                                {INC_OPTIONS.map(v => (
+                                  <button key={v} className={`inc-btn${curInc===v?" on":""}`} onClick={()=>setCurInc(v)}>{fmtS(v)}</button>
+                                ))}
+                              </div>
+                              <div style={{display:"flex",gap:".4rem",marginTop:".5rem",alignItems:"center"}}>
+                                <input
+                                  placeholder="Monto personalizado..."
+                                  value={customMonto}
+                                  onChange={e=>setCustomMonto(e.target.value)}
+                                  onKeyDown={e=>{ if(e.key==="Enter"&&customMonto){ const n=parseInt(customMonto.replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} } }}
+                                  style={{flex:1,padding:".3rem .55rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}
+                                />
+                                <button
+                                  onClick={()=>{ const n=parseInt((customMonto||"").replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} }}
+                                  style={{padding:".3rem .6rem",background:"var(--ac)",border:"none",borderRadius:6,color:"#fff",fontSize:".68rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+                                  Usar
+                                </button>
+                              </div>
+                            </div>
+                            {/* Postura presencial */}
+                            <div style={{marginTop:".6rem",padding:".6rem .75rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:8}}>
+                              <div style={{fontSize:".68rem",fontWeight:700,color:"var(--yl)",marginBottom:".4rem",display:"flex",alignItems:"center",gap:".35rem"}}>
+                                <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
+                                Postura presencial
+                              </div>
+                              <div style={{display:"flex",gap:".4rem"}}>
+                                <input placeholder="Paleta" value={presPaleta} onChange={e=>setPresPaleta(e.target.value)}
+                                  style={{width:64,padding:".3rem .5rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
+                                <input placeholder="Monto" value={presMonto} onChange={e=>setPresMonto(e.target.value)}
+                                  onKeyDown={e=>e.key==="Enter"&&registrarPresencial()}
+                                  style={{flex:1,padding:".3rem .5rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
+                                <button onClick={registrarPresencial}
+                                  style={{padding:".3rem .6rem",background:"rgba(246,173,85,.2)",border:"1px solid rgba(246,173,85,.4)",borderRadius:6,color:"var(--yl)",fontSize:".68rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+                                  ✓
+                                </button>
+                              </div>
+                            </div>
+                            <div className="ab-list" style={{marginTop:".6rem"}}>
+                              <button className="ab g"  onClick={startAuction} disabled={aState==="live"}>▶ Iniciar</button>
+                              <button className="ab y"  onClick={pauseAuction} disabled={aState!=="live"}>⏸ Pausar</button>
+                              <button className="ab bl" onClick={adjudicar}    disabled={aState==="sold"}>✓ Adjudicar</button>
+                              <button className="ab"    onClick={repetirLote}  style={{background:"rgba(167,139,250,.1)",color:"#a78bfa",border:"1px solid rgba(167,139,250,.25)"}}>↺ Repetir lote</button>
+                              <button className="ab"    onClick={pasarLote}    style={{background:"rgba(255,255,255,.04)",color:"var(--mu2)",border:"1px solid var(--b2)"}} disabled={idx>=lots.length-1}>→ Pasar lote</button>
+                              <button className="ab r"  onClick={resetAuction}>⟳ Reiniciar todo</button>
+                            </div>
+                          </div>
+                          <div className="ctrl-card">
+                            <div className="ctrl-card-title">Estado en tiempo real</div>
+                            <div className="st-row"><div className="st-dot" style={{background:sColor,boxShadow:`0 0 7px ${sColor}`}}/><div className="st-txt" style={{color:sColor}}>{sLabel}</div></div>
+                            <div className="ls-grid">
+                              <div className="ls-card"><div className="ls-v" style={{fontSize:".82rem"}}>{fmt(bid.current)}</div><div className="ls-l">Oferta</div></div>
+                              <div className="ls-card"><div className="ls-v">{bid.count}</div><div className="ls-l">Pujas</div></div>
+                              <div className="ls-card"><div className="ls-v">{lastBidder ? "🏆" : "—"}</div><div className="ls-l">Líder</div></div>
+                            </div>
+                            {bidTimer!==null&&bidTimer>0&&aState==="live" && (
+                              <div className={`bid-ticker${bidTimer<=5?" urgent":""}${bidTimer<=2?" critical":""}`}>
+                                <div className="bt-num" style={{color:bidTimer>8?"var(--gr)":bidTimer>4?"var(--yl)":"var(--rd)",fontSize:bidTimer<=3?"1.7rem":"1.35rem"}}>{bidTimer}</div>
+                                <div>
+                                  <div className="bt-info">{bidTimer<=2?"¡ADJUDICANDO AHORA!":bidTimer<=5?"⚠ Última oportunidad":"Adjudica en"}</div>
+                                  <div className="bt-leader">{lastBidder||"—"} lidera · {fmt((bids[idx]?.current||0))}</div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Place Bid / Adjudicar full-width button */}
+                        <button
+                          className={`sala-place-bid-btn${aState==="live"?" adj":""}`}
+                          onClick={aState==="live" ? adjudicar : startAuction}
+                          disabled={aState==="sold"}
+                          style={{marginTop:".7rem"}}
+                        >
+                          {aState==="live" ? "✓ Adjudicar lote" : aState==="sold" ? "Lote adjudicado" : "▶ Iniciar subasta"}
+                        </button>
+                      </>
+                    )}
+
+                    {/* POSTOR TAB */}
+                    {ctrlTab==="postor" && (
+                      <div className="ba-card" style={{padding:0,background:"transparent",border:"none"}}>
+                        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:".75rem",padding:".4rem .7rem",background:"var(--s1)",borderRadius:7,border:"1px solid var(--b1)"}}>
+                          <div style={{fontSize:".72rem",color:"var(--mu2)"}}>Estado</div>
+                          <div style={{fontSize:".78rem",fontWeight:700,color:sColor}}>{sLabel}</div>
+                        </div>
+                        <div className="bal">Oferta actual</div>
+                        <div className={`bap${flash?" flash":""}`}>{fmt(bid.current)}</div>
+                        {aState==="live"&&bidTimer!==null&&bidTimer>0
+                          ? <BidRing seconds={bidTimer} total={BID_TIMER} nextAmount={bid.current+curInc} increment={curInc}/>
+                          : <div className="banl">Proxima puja: <span>{fmt(bid.current+curInc)}</span> · Incremento: <span>{fmtS(curInc)}</span></div>
+                        }
+                        {aState==="live" && iAmWinning && (
+                          <div className="bb-winning">
+                            <div className="bw-icon"><div className="bw-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg></div></div>
+                            <div className="bw-text"><div className="bw-main">Vas ganando</div><div className="bw-sub">Tu oferta de {fmt(bid.current)} es la mas alta</div></div>
+                          </div>
+                        )}
+                        {aState==="live" && lastBidder!==null && !iAmWinning && (
+                          <div className="bb-losing">
+                            <div className="bl-alert">!</div>
+                            <div className="bl-text">
+                              <div className="bl-main">Te lo estas perdiendo</div>
+                              <div className="bl-sub">Oferta actual: <span>{fmt(bid.current)}</span> — Puja <span>{fmt(bid.current+curInc)}</span> para liderar</div>
+                            </div>
+                            <button className="bl-action" onClick={placeBid}>Pujar {fmtS(bid.current+curInc)}</button>
+                          </div>
+                        )}
+                        {aState==="live"&&lastBidder===null && <button className="bb" onClick={placeBid}>Pujar {fmt(bid.current+curInc)}</button>}
+                        {aState==="waiting" && <button className="bb" disabled>Esperando inicio...</button>}
+                        {aState==="paused"  && <button className="bb" disabled>Pausado</button>}
+                        {aState==="sold"    && <button className="bb sold" disabled>Adjudicado</button>}
+                        {aState==="live" && (
+                          <div style={{display:"flex",gap:".5rem",marginTop:".5rem"}}>
+                            <input
+                              type="text"
+                              placeholder="Monto personalizado..."
+                              value={postorCustom}
+                              onChange={e=>{const v=e.target.value.replace(/\D/g,"");setPostorCustom(v?Number(v).toLocaleString("es-CL"):"")} }
+                              onKeyDown={e=>{
+                                if(e.key==="Enter"){
+                                  const m=parseInt(postorCustom.replace(/\D/g,""));
+                                  if(!m||m<=bid.current){notify("El monto debe ser mayor a la oferta actual","inf");return;}
+                                  setCurInc(m-bid.current); placeBid(); setPostorCustom("");
+                                }
+                              }}
+                              style={{flex:1,padding:".45rem .7rem",borderRadius:6,border:"1px solid var(--b1)",background:"var(--s2)",color:"var(--tx)",fontSize:".82rem"}}
+                            />
+                            <button
+                              style={{padding:".45rem .9rem",borderRadius:6,background:"var(--ac)",color:"#fff",border:"none",cursor:"pointer",fontWeight:600,fontSize:".82rem"}}
+                              onClick={()=>{
+                                const m=parseInt(postorCustom.replace(/\D/g,""));
+                                if(!m||m<=bid.current){notify("El monto debe ser mayor a la oferta actual","inf");return;}
+                                setCurInc(m-bid.current); placeBid(); setPostorCustom("");
+                              }}
+                            >Pujar</button>
+                          </div>
+                        )}
+                        <div className="bst">
+                          <div className="bsc"><div className="bsv">{bid.count}</div><div className="bsl">Pujas totales</div></div>
+                          <div className="bsc"><div className="bsv">{fmtS(bid.current-item.base)}</div><div className="bsl">Sobre base</div></div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              </aside>
-            </div>
+
+                  {/* ── Quick Bid row (increment options) ── */}
+                  <div className="sala-quick-bids">
+                    {INC_OPTIONS.slice(0,4).map((inc,i) => (
+                      <button
+                        key={inc}
+                        className={`sala-quick-card c${i}`}
+                        disabled={aState!=="live"}
+                        onClick={()=>{setCurInc(inc); placeBid();}}
+                        title={`Pujar con incremento ${fmtS(inc)}`}
+                      >
+                        <div className="sala-quick-label">Quick Bid</div>
+                        <div className="sala-quick-amount">{fmtS(inc)}</div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* ── Lotes sidebar (collapsible list) ── */}
+                  <div className="ctrl-card" style={{flexShrink:0}}>
+                    <div className="ctrl-card-title" style={{marginBottom:".6rem"}}>
+                      {lots.length} lotes en remate
+                    </div>
+                    <div style={{display:"flex",flexDirection:"column",gap:".3rem",maxHeight:220,overflowY:"auto"}}>
+                      {lots.map((it,i) => {
+                        const bs=bids[i]; const st=bs?.status==="sold"?"sold":i===idx&&aState==="live"?"live":"wait";
+                        return (
+                          <div key={it.id} className={`lc${idx===i?" on":""}`} style={{borderRadius:7,display:"flex",alignItems:"center",gap:".55rem",padding:".5rem .7rem"}} onClick={()=>setIdx(i)}>
+                            {it.imgs?.[0]
+                              ? <img src={it.imgs[0]} alt={it.name} style={{width:36,height:36,borderRadius:5,objectFit:"cover",flexShrink:0,border:"1px solid var(--b2)"}}/>
+                              : <div style={{width:36,height:36,borderRadius:5,background:"var(--s3)",border:"1px solid var(--b1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:".6rem",color:"var(--mu)"}}>—</div>
+                            }
+                            <div style={{flex:1,minWidth:0}}>
+                              <div style={{fontSize:".62rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Lote {String(i+1).padStart(2,"0")}</div>
+                              <div style={{fontSize:".76rem",fontWeight:600,color:"var(--wh2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.name}</div>
+                            </div>
+                            <div className={`lbdg ${st==="live"?"blv":st==="sold"?"bsd":"bwt"}`} style={{flexShrink:0}}>{st==="live"?"En vivo":st==="sold"?"Vendido":"Pdte."}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                </div>{/* end sala-right-col */}
+              </div>{/* end sala-body */}
+            </div>{/* end sala-wrap-new */}
           </div>
         )}
 
