@@ -3294,84 +3294,136 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
         {/* ══ DASHBOARD ══ */}
         {page==="dashboard" && (
-          <div className="page">
-            {/* Saludo contextual */}
-            <div style={{marginBottom:"1.5rem"}}>
-              <div style={{fontSize:"1.1rem",fontWeight:800,color:"var(--wh2)"}}>
-                Bienvenido, {session?.name?.split(" ")[0]||"Usuario"} 👋
+          <div className="page" style={{maxWidth:1100,margin:"0 auto"}}>
+
+            {/* ── SALUDO ── */}
+            <div style={{marginBottom:"2rem"}}>
+              <div style={{fontSize:"1.6rem",fontWeight:800,color:"var(--wh2)",lineHeight:1.2}}>
+                Bienvenido de vuelta, <span style={{color:"var(--ac)"}}>{session?.name||"Usuario"}.</span>
               </div>
-              <div style={{fontSize:".78rem",color:"var(--mu2)",marginTop:".2rem"}}>
-                {session?.casaNombre||"GR Auction Software"} · {new Date().toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long"})}
+              <div style={{fontSize:".9rem",color:"var(--mu)",marginTop:".4rem"}}>
+                Hoy es {new Date().toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}.
               </div>
             </div>
 
-            {/* Acciones rápidas */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:"1rem",marginBottom:"1.5rem"}}>
-              {[
-                {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#38B2F6" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="3" width="18" height="16" rx="3"/><path d="M7 3v3M15 3v3M2 9h18"/><path d="M11 13v4M9 15h4"/></svg>,
-                 label:"Nuevo remate", sub:"Crear y configurar", action:()=>setModal("nuevo-remate"), color:"rgba(56,178,246,.1)", border:"rgba(56,178,246,.2)"},
-                {icon:<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#14B8A6" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="2" width="16" height="18" rx="2"/><path d="M7 7h8M7 11h8M7 15h4"/><path d="M17 15v4M15 17h4"/></svg>,
-                 label:"Agregar lote", sub:"Ingresar artículo", action:()=>setModal("nuevo-lote"), color:"rgba(20,184,166,.08)", border:"rgba(20,184,166,.2)"},
-              ].map((a,i)=>(
-                <div key={i} onClick={a.action} style={{padding:"1.2rem",background:a.color,border:`1px solid ${a.border}`,borderRadius:12,cursor:"pointer",transition:"all .15s"}}
-                  onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 4px 20px rgba(0,0,0,.2)"}}
-                  onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none"}}>
-                  <div style={{marginBottom:".6rem"}}>{a.icon}</div>
-                  <div style={{fontWeight:700,fontSize:".88rem",color:"var(--wh2)",marginBottom:".15rem"}}>{a.label}</div>
-                  <div style={{fontSize:".7rem",color:"var(--mu2)"}}>{a.sub}</div>
-                </div>
-              ))}
-            </div>
+            {/* ── LAYOUT 2 COLUMNAS ── */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1.4fr",gap:"1.5rem",alignItems:"start"}}>
 
-            {/* Remates activos — lo más importante */}
-            <div style={{marginBottom:"1rem",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-              <div style={{fontSize:".78rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em"}}>Remates activos</div>
-              <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>setPage("remates")}>Ver todos</button>
-            </div>
-            <div style={{display:"flex",flexDirection:"column",gap:".6rem",marginBottom:"1.5rem"}}>
-              {REMATES_MERGED.filter(r=>r.estado==="activo").length===0 ? (
-                <div style={{padding:"1.5rem",textAlign:"center",color:"var(--mu)",fontSize:".8rem",background:"var(--s2)",borderRadius:10,border:"1px solid var(--b1)"}}>
-                  No hay remates activos. <span style={{color:"var(--ac)",cursor:"pointer"}} onClick={()=>setModal("nuevo-remate")}>Crear uno →</span>
-                </div>
-              ) : REMATES_MERGED.filter(r=>r.estado==="activo").map(r=>(
-                <div key={r.id} style={{display:"flex",alignItems:"center",gap:"1rem",padding:".85rem 1.1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,cursor:"pointer",transition:"border-color .15s"}}
-                  onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(56,178,246,.3)"}
-                  onMouseLeave={e=>e.currentTarget.style.borderColor="var(--b1)"}>
-                  <div style={{width:8,height:8,borderRadius:"50%",background:"var(--gr)",flexShrink:0,boxShadow:"0 0 6px var(--gr)"}}/>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontWeight:700,fontSize:".85rem",color:"var(--wh2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</div>
-                    <div style={{fontSize:".7rem",color:"var(--mu2)",marginTop:".1rem"}}>{r.fecha} · {r.modal}</div>
+              {/* COLUMNA IZQUIERDA */}
+              <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
+
+                {/* Cards de acción grandes */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"1rem"}}>
+                  {/* Nuevo remate */}
+                  <div onClick={()=>setModal("nuevo-remate")} style={{background:"linear-gradient(135deg,#0e7490,#06B6D4)",borderRadius:16,padding:"1.4rem",cursor:"pointer",position:"relative",overflow:"hidden",minHeight:140,display:"flex",flexDirection:"column",justifyContent:"space-between",transition:"transform .15s,box-shadow .15s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="0 8px 30px rgba(6,182,212,.35)"}}
+                    onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none"}}>
+                    <div style={{width:36,height:36,background:"rgba(255,255,255,.2)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><line x1="9" y1="2" x2="9" y2="16"/><line x1="2" y1="9" x2="16" y2="9"/></svg>
+                    </div>
+                    <div>
+                      <div style={{fontWeight:800,fontSize:"1rem",color:"#fff",marginBottom:".2rem"}}>Nuevo Remate</div>
+                      <div style={{fontSize:".75rem",color:"rgba(255,255,255,.75)"}}>Crear un nuevo evento</div>
+                    </div>
+                    <div style={{position:"absolute",right:-20,top:-20,width:90,height:90,borderRadius:"50%",background:"rgba(255,255,255,.07)"}}/>
                   </div>
-                  <button className="btn-primary" style={{fontSize:".7rem",whiteSpace:"nowrap",flexShrink:0}} onClick={async(e)=>{
-                    e.stopPropagation();
-                    setSalaRemateId(r.supabaseId||r.id);
-                    if(r.supabaseId){
-                      const {data:lr} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
-                      if(lr&&lr.length>0){
-                        const mapped=lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
-                        setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
-                      }
-                    }
-                    setIdx(0); setAState("waiting"); setBidTimer(null);
-                    setPage("sala");
-                  }}>Abrir sala →</button>
-                </div>
-              ))}
-            </div>
 
-            {/* Stats simples — solo números, sin gráficos */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:".7rem"}}>
-              {[
-                {label:"Remates activos",  val:REMATES_MERGED.filter(r=>r.estado==="activo").length,  color:"var(--ac)"},
-                {label:"Lotes publicados", val:LOTES_MERGED.filter(l=>l.estado==="publicado").length, color:"var(--gr)"},
-                {label:"Postores inscritos",val:POSTORES_MERGED.length,                               color:"var(--yl)"},
-                {label:"Remates cerrados", val:REMATES_MERGED.filter(r=>r.estado==="cerrado").length, color:"var(--mu)"},
-              ].map((s,i)=>(
-                <div key={i} style={{padding:".85rem 1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderTop:`3px solid ${s.color}`,borderRadius:10}}>
-                  <div style={{fontSize:"1.4rem",fontWeight:800,color:"var(--wh2)",lineHeight:1}}>{s.val}</div>
-                  <div style={{fontSize:".68rem",color:"var(--mu2)",marginTop:".3rem"}}>{s.label}</div>
+                  {/* Agregar lote */}
+                  <div onClick={()=>setModal("nuevo-lote")} style={{background:"linear-gradient(135deg,#92600a,#d97706)",borderRadius:16,padding:"1.4rem",cursor:"pointer",position:"relative",overflow:"hidden",minHeight:140,display:"flex",flexDirection:"column",justifyContent:"space-between",transition:"transform .15s,box-shadow .15s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="0 8px 30px rgba(217,119,6,.35)"}}
+                    onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none"}}>
+                    <div style={{width:36,height:36,background:"rgba(255,255,255,.2)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><rect x="2" y="2" width="14" height="14" rx="3"/><path d="M6 9h6M9 6v6"/></svg>
+                    </div>
+                    <div>
+                      <div style={{fontWeight:800,fontSize:"1rem",color:"#fff",marginBottom:".2rem"}}>Agregar Lote</div>
+                      <div style={{fontSize:".75rem",color:"rgba(255,255,255,.75)"}}>Catalogar artículo</div>
+                    </div>
+                    <div style={{position:"absolute",right:-20,top:-20,width:90,height:90,borderRadius:"50%",background:"rgba(255,255,255,.07)"}}/>
+                  </div>
                 </div>
-              ))}
+
+                {/* Stats cards */}
+                {[
+                  {label:"Remates activos",   val:REMATES_MERGED.filter(r=>r.estado==="activo").length,  color:"#06B6D4",
+                   icon:<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#06B6D4" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="3" width="16" height="14" rx="2"/><path d="M6 3v3M14 3v3M2 9h16"/></svg>},
+                  {label:"Lotes publicados",  val:LOTES_MERGED.length,                                    color:"#7c3aed",
+                   icon:<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="2" width="14" height="16" rx="2"/><path d="M7 7h6M7 11h6M7 15h3"/></svg>},
+                  {label:"Postores inscritos",val:POSTORES_MERGED.length,                                 color:"#db2777",
+                   icon:<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#db2777" strokeWidth="1.8" strokeLinecap="round"><circle cx="8" cy="6" r="3"/><path d="M2 18c0-3.314 2.686-6 6-6M14 14v4M12 16h4"/></svg>},
+                  {label:"Remates cerrados",  val:REMATES_MERGED.filter(r=>r.estado==="cerrado").length, color:"#6b7280",
+                   icon:<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#6b7280" strokeWidth="1.8" strokeLinecap="round"><circle cx="10" cy="10" r="8"/><path d="M7 10l2 2 4-4"/></svg>},
+                ].map((s,i)=>(
+                  <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:14,padding:"1rem 1.2rem",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:`3px solid ${s.color}`}}>
+                    <div>
+                      <div style={{fontSize:".72rem",color:"var(--mu)",marginBottom:".3rem"}}>{s.label}</div>
+                      <div style={{fontSize:"2rem",fontWeight:800,color:"var(--wh2)",lineHeight:1}}>{s.val}</div>
+                    </div>
+                    <div style={{width:40,height:40,background:`${s.color}15`,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                      {s.icon}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* COLUMNA DERECHA — Remates activos */}
+              <div>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1rem"}}>
+                  <div style={{fontSize:"1rem",fontWeight:700,color:"var(--wh2)"}}>Remates Activos</div>
+                  <button className="btn-sec" style={{fontSize:".72rem"}} onClick={()=>setPage("remates")}>Ver todos</button>
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:".85rem"}}>
+                  {REMATES_MERGED.filter(r=>r.estado==="activo").length===0 ? (
+                    <div style={{padding:"2rem",textAlign:"center",color:"var(--mu)",fontSize:".82rem",background:"var(--s2)",borderRadius:14,border:"1px solid var(--b1)"}}>
+                      No hay remates activos.<br/>
+                      <span style={{color:"var(--ac)",cursor:"pointer",fontWeight:600}} onClick={()=>setModal("nuevo-remate")}>Crear uno →</span>
+                    </div>
+                  ) : REMATES_MERGED.filter(r=>r.estado==="activo").map(r=>(
+                    <div key={r.id} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:14,padding:"1.1rem 1.3rem",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"1rem",transition:"border-color .15s,box-shadow .15s"}}
+                      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(6,182,212,.3)";e.currentTarget.style.boxShadow="0 4px 16px rgba(0,0,0,.06)"}}
+                      onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--b1)";e.currentTarget.style.boxShadow="none"}}>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontWeight:700,fontSize:".92rem",color:"var(--wh2)",marginBottom:".5rem",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</div>
+                        <div style={{display:"flex",gap:"1.5rem"}}>
+                          <div>
+                            <div style={{fontSize:".65rem",color:"var(--mu)",marginBottom:".15rem",textTransform:"uppercase",letterSpacing:".05em"}}>Estado</div>
+                            <div style={{display:"flex",alignItems:"center",gap:".3rem",fontSize:".78rem",color:"var(--gr)",fontWeight:600}}>
+                              <div style={{width:7,height:7,borderRadius:"50%",background:"var(--gr)"}}/>Activo
+                            </div>
+                          </div>
+                          <div style={{width:1,background:"var(--b1)"}}/>
+                          <div>
+                            <div style={{fontSize:".65rem",color:"var(--mu)",marginBottom:".15rem",textTransform:"uppercase",letterSpacing:".05em"}}>Fecha</div>
+                            <div style={{fontSize:".78rem",color:"var(--wh2)",fontWeight:500}}>{r.fecha||"—"}</div>
+                          </div>
+                          <div style={{width:1,background:"var(--b1)"}}/>
+                          <div>
+                            <div style={{fontSize:".65rem",color:"var(--mu)",marginBottom:".15rem",textTransform:"uppercase",letterSpacing:".05em"}}>Tipo</div>
+                            <div style={{fontSize:".78rem",color:"var(--wh2)",fontWeight:500}}>{r.modal||"—"}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <button style={{background:"var(--ac)",color:"#fff",border:"none",borderRadius:10,padding:".6rem 1.1rem",fontSize:".78rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"background .15s"}}
+                        onMouseEnter={e=>e.currentTarget.style.background="var(--acD)"}
+                        onMouseLeave={e=>e.currentTarget.style.background="var(--ac)"}
+                        onClick={async(e)=>{
+                          e.stopPropagation();
+                          setSalaRemateId(r.supabaseId||r.id);
+                          if(r.supabaseId){
+                            const {data:lr} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
+                            if(lr&&lr.length>0){
+                              const mapped=lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
+                              setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
+                            }
+                          }
+                          setIdx(0); setAState("waiting"); setBidTimer(null);
+                          setPage("sala");
+                        }}>Ingresar a la Sala →</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
           </div>
         )}
