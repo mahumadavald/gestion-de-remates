@@ -98,7 +98,7 @@ const CSS = `
   }
 
   .hero-col {
-    background: linear-gradient(160deg, #0f4c5c 0%, #0891b2 55%, #06B6D4 100%);
+    background: linear-gradient(160deg, #0e7490 0%, #06B6D4 60%, #14B8A6 100%);
     border-right: 1px solid rgba(255,255,255,.1);
     padding: 2.5rem 2.5rem 3rem;
     display: flex; flex-direction: column; gap: 0;
@@ -770,19 +770,18 @@ function ParticiparContent() {
             <div className="form-header fade-up" style={{textAlign:"center"}}>
               {/* Logo de la casa si existe */}
               {casa?.logo_url ? (
-                <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
-                  <img src={casa.logo_url} alt={casa.nombre} style={{maxHeight:110,maxWidth:300,objectFit:"contain",display:"block"}}/>
+                <div style={{display:"flex",justifyContent:"center",marginBottom:"1.5rem"}}>
+                  <img src={casa.logo_url} alt={casa.nombre} style={{maxHeight:160,maxWidth:340,objectFit:"contain",display:"block"}}/>
                 </div>
               ) : casa?.nombre ? (
-                <div style={{display:"flex",justifyContent:"center",marginBottom:"1.25rem"}}>
-                  <div style={{display:"inline-flex",alignItems:"center",gap:".4rem",padding:".45rem 1rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.18)",borderRadius:8}}>
-                    <span style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:".85rem",color:"#1a1a1a"}}>{casa.nombre}</span>
+                <div style={{display:"flex",justifyContent:"center",marginBottom:"1.5rem"}}>
+                  <div style={{display:"inline-flex",alignItems:"center",gap:".4rem",padding:".6rem 1.2rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.18)",borderRadius:10}}>
+                    <span style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:"1.1rem",color:"#1a1a1a"}}>{casa.nombre}</span>
                   </div>
                 </div>
               ) : null}
-              <div className="form-title">Inscríbete y<br/>participa en vivo.</div>
               <div className="form-sub">Completa el formulario para participar en los remates de {casa?.nombre || "esta casa"}. El proceso toma menos de 3 minutos.</div>
-              <div style={{width:48,height:3,background:"linear-gradient(90deg,#06B6D4,#14B8A6)",borderRadius:2,margin:"1.1rem auto 0"}}/>
+              <div style={{width:48,height:3,background:"linear-gradient(90deg,#06B6D4,#14B8A6)",borderRadius:2,margin:"1rem auto 0"}}/>
             </div>
 
             {/* RUT */}
