@@ -944,185 +944,139 @@ const AUTH_CSS = `
 
   .auth-root {
     min-height: 100vh;
-    background: #fff;
+    background: #f4f6f9;
     display: flex;
     font-family: 'Inter', sans-serif;
     position: relative;
     overflow: hidden;
   }
 
-  /* Background grid */
-  .auth-root::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(#e5e7eb 1px, transparent 1px),
-      linear-gradient(90deg, #e5e7eb 1px, transparent 1px);
-    background-size: 48px 48px;
-    opacity: .5;
-    pointer-events: none;
-  }
-
-  /* Glow orb */
-  .auth-root::after {
-    content: '';
-    position: absolute;
-    width: 700px; height: 700px;
-    background: radial-gradient(circle, rgba(6,182,212,.08) 0%, transparent 70%);
-    top: -200px; right: -100px;
-    border-radius: 50%;
-    pointer-events: none;
-    animation: pulse 6s ease-in-out infinite alternate;
-  }
-  @keyframes pulse { from{opacity:.6; transform:scale(1)} to{opacity:1; transform:scale(1.12)} }
-
-  /* Left branding panel */
+  /* Left branding panel — mismo gradiente turquesa que sidebar y participar */
   .auth-left {
-    flex: 0 0 50%;
+    flex: 0 0 48%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 4rem 5rem;
+    padding: 4rem 4.5rem;
     position: relative;
     z-index: 1;
+    background: linear-gradient(160deg, #0e7490 0%, #06B6D4 60%, #14B8A6 100%);
+    overflow: hidden;
   }
-  .auth-left-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    padding: .28rem .75rem;
-    background: rgba(6,182,212,.1);
-    border: 1px solid rgba(6,182,212,.25);
-    border-radius: 4px;
-    font-size: .68rem;
-    font-weight: 600;
-    color: #06B6D4;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    margin-bottom: 2.5rem;
-    width: fit-content;
+  /* Orbs decorativos en el panel izquierdo */
+  .auth-left::before {
+    content: '';
+    position: absolute;
+    width: 420px; height: 420px;
+    background: radial-gradient(circle, rgba(255,255,255,.12) 0%, transparent 70%);
+    top: -120px; right: -120px;
+    border-radius: 50%;
+    pointer-events: none;
   }
-  .auth-left-tag-dot { width: 5px; height: 5px; background: #14B8A6; border-radius: 50%; animation: blink 2s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+  .auth-left::after {
+    content: '';
+    position: absolute;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
+    bottom: -80px; left: -60px;
+    border-radius: 50%;
+    pointer-events: none;
+  }
 
   .auth-brand-title {
     font-family: 'Poppins', sans-serif;
-    font-size: 3.6rem;
+    font-size: 2.8rem;
     font-weight: 800;
-    color: #1a1a1a;
-    line-height: 1;
+    color: #fff;
+    line-height: 1.05;
     letter-spacing: -.03em;
-    margin-bottom: .6rem;
+    margin-bottom: .65rem;
+    position: relative;
   }
-  .auth-brand-title span { color: #06B6D4; }
   .auth-brand-sub {
-    font-size: 1.05rem;
-    color: #6b7280;
+    font-size: .98rem;
+    color: rgba(255,255,255,.78);
     font-weight: 400;
-    margin-bottom: 3.5rem;
-    line-height: 1.5;
+    margin-bottom: 3rem;
+    line-height: 1.55;
+    position: relative;
   }
 
-  .auth-features { display: flex; flex-direction: column; gap: .75rem; }
+  .auth-features { display: flex; flex-direction: column; gap: .6rem; position: relative; }
   .auth-feat {
     display: flex; align-items: center; gap: .75rem;
     padding: .65rem .9rem;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: .82rem; color: #6b7280;
-    transition: all .2s;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 10px;
+    font-size: .82rem; color: rgba(255,255,255,.9);
+    backdrop-filter: blur(4px);
+    transition: background .2s;
   }
-  .auth-feat:hover { background: rgba(6,182,212,.05); border-color: rgba(6,182,212,.3); color: #1a1a1a; }
-  .auth-feat-icon { color: #06B6D4; flex-shrink: 0; }
+  .auth-feat:hover { background: rgba(255,255,255,.2); }
+  .auth-feat-icon { color: #fff; flex-shrink: 0; opacity: .9; }
+  .auth-feat strong { color: #fff; font-weight: 700; }
 
   /* Right form panel */
   .auth-right {
-    flex: 0 0 50%;
+    flex: 0 0 52%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 3rem;
+    align-items: center;
+    padding: 3rem 2.5rem;
     position: relative;
     z-index: 1;
-    border-left: 1px solid #e5e7eb;
-    background: #fff;
+    background: #f4f6f9;
   }
 
   .auth-form-wrap {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 2.5rem 2.25rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.04);
     animation: slideUp .35s ease;
   }
   @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
 
   .auth-form-title {
     font-family: 'Poppins', sans-serif;
-    font-size: 1.65rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: #1a1a1a;
     margin-bottom: .3rem;
   }
-  .auth-form-sub { font-size: .8rem; color: #6b7280; margin-bottom: 2.2rem; line-height: 1.5; }
-
-  /* Role selector */
-  .role-tabs {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: .4rem;
-    margin-bottom: 2rem;
-    padding: .3rem;
-    background: #f4f4f2;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-  }
-  .role-tab {
-    padding: .6rem .4rem;
-    border: none;
-    border-radius: 7px;
-    background: transparent;
-    cursor: pointer;
-    transition: all .18s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: .25rem;
-  }
-  .role-tab.active {
-    background: #fff;
-    box-shadow: 0 0 0 1px rgba(6,182,212,.35);
-  }
-  .role-tab-icon { display:flex; align-items:center; justify-content:center; color: #6b7280; transition: color .18s; }
-  .role-tab.active .role-tab-icon { color: #06B6D4; }
-  .role-tab-label { font-size: .62rem; font-weight: 600; color: #6b7280; letter-spacing: .03em; text-transform: uppercase; transition: color .18s; }
-  .role-tab.active .role-tab-label { color: #06B6D4; }
+  .auth-form-sub { font-size: .8rem; color: #6b7280; margin-bottom: 2rem; line-height: 1.5; }
 
   /* Form fields */
   .auth-field { margin-bottom: 1.1rem; }
   .auth-label { display: block; font-size: .7rem; font-weight: 600; color: #6b7280; letter-spacing: .05em; text-transform: uppercase; margin-bottom: .45rem; }
   .auth-input {
     width: 100%;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
     color: #1a1a1a;
     font-size: .88rem;
     font-family: 'Inter', sans-serif;
-    padding: .75rem 1rem;
+    padding: .78rem 1rem;
     transition: all .18s;
     outline: none;
   }
-  .auth-input:focus { border-color: #06B6D4; background: rgba(6,182,212,.04); box-shadow: 0 0 0 3px rgba(6,182,212,.1); }
+  .auth-input:focus { border-color: #06B6D4; background: #fff; box-shadow: 0 0 0 3px rgba(6,182,212,.1); }
   .auth-input::placeholder { color: #9ca3af; }
   .auth-input.mono { font-family: 'Inter', sans-serif; font-size: .95rem; letter-spacing: .12em; text-transform: uppercase; }
-  .auth-input.error { border-color: #e05252; background: rgba(224,82,82,.05); }
+  .auth-input.error { border-color: #e05252; background: rgba(224,82,82,.04); }
 
   .auth-error {
     padding: .65rem .9rem;
-    background: rgba(224,82,82,.08);
-    border: 1px solid rgba(224,82,82,.25);
-    border-radius: 7px;
+    background: rgba(224,82,82,.07);
+    border: 1px solid rgba(224,82,82,.22);
+    border-radius: 8px;
     font-size: .77rem;
-    color: #e05252;
+    color: #dc2626;
     margin-bottom: 1.1rem;
     animation: shake .3s ease;
   }
@@ -1130,22 +1084,21 @@ const AUTH_CSS = `
 
   .auth-submit {
     width: 100%;
-    padding: .85rem;
-    background: #06B6D4;
+    padding: .88rem;
+    background: linear-gradient(135deg, #0e7490 0%, #06B6D4 60%, #14B8A6 100%);
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     color: #fff;
     font-size: .9rem;
     font-weight: 700;
     font-family: 'Inter', sans-serif;
     cursor: pointer;
     transition: all .18s;
-    position: relative;
-    overflow: hidden;
     margin-top: .4rem;
+    letter-spacing: .01em;
   }
-  .auth-submit:hover { background: #0284C7; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(6,182,212,.3); }
-  .auth-submit:active { transform: none; }
+  .auth-submit:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(6,182,212,.35); }
+  .auth-submit:active { transform: none; box-shadow: none; }
   .auth-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
   .auth-hint {
@@ -1153,7 +1106,7 @@ const AUTH_CSS = `
     padding: .75rem .9rem;
     background: rgba(6,182,212,.05);
     border: 1px solid rgba(6,182,212,.15);
-    border-radius: 7px;
+    border-radius: 8px;
     font-size: .72rem;
     color: #6b7280;
     line-height: 1.55;
@@ -1168,7 +1121,7 @@ const AUTH_CSS = `
     border-radius: 8px;
     margin-bottom: 1.2rem;
     font-size: .78rem;
-    color: #4a9a7a;
+    color: #0e7490;
     line-height: 1.6;
   }
 
@@ -1183,9 +1136,10 @@ const AUTH_CSS = `
   .role-badge.comprador { background: rgba(20,184,166,.1);  color: #14B8A6; border: 1px solid rgba(20,184,166,.22); }
 
   @media (max-width: 900px) {
-    .auth-root { overflow: auto; }
+    .auth-root { flex-direction: column; overflow: auto; }
     .auth-left { display: none; }
-    .auth-right { flex: 1; width: 100%; max-width: 100%; border-left: none; overflow-y: auto; height: auto; min-height: 100vh; padding: 2rem 1.5rem 3rem; }
+    .auth-right { flex: 1; width: 100%; max-width: 100%; border-left: none; overflow-y: auto; height: auto; min-height: 100vh; padding: 2.5rem 1.25rem; background: linear-gradient(160deg,#0e7490 0%,#06B6D4 60%,#14B8A6 100%); align-items: center; justify-content: center; }
+    .auth-form-wrap { border-radius: 16px; padding: 2rem 1.5rem; }
   }
 `;
 
@@ -1284,49 +1238,52 @@ function AuthScreen({ onLogin }) {
     <div className="auth-root">
       <style>{AUTH_CSS}</style>
 
-      {/* Left branding */}
+      {/* Left branding — gradiente turquesa */}
       <div className="auth-left">
-        {/* GR Logo — full size version */}
-        <div style={{display:"flex",alignItems:"center",gap:"18px",marginBottom:"1.5rem"}}>
-          <svg width="64" height="64" viewBox="0 0 36 36" fill="none">
-            <rect width="36" height="36" rx="8" fill="rgba(56,178,246,.1)" stroke="rgba(56,178,246,.25)" strokeWidth="1"/>
-            <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+        {/* Logo blanco */}
+        <div style={{display:"flex",alignItems:"center",gap:"14px",marginBottom:"2.2rem",position:"relative"}}>
+          <svg width="52" height="52" viewBox="0 0 36 36" fill="none">
+            <rect width="36" height="36" rx="8" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.3)" strokeWidth="1"/>
+            <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.6)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
           </svg>
-          <div style={{fontFamily:"Inter,sans-serif",fontWeight:400,fontSize:".85rem",color:"#4a6a8a",letterSpacing:".12em",textTransform:"uppercase",marginTop:2}}>Auction Software</div>
+          <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:"1rem",color:"#fff",letterSpacing:".02em"}}>Auction Software</div>
         </div>
 
-        <div className="auth-brand-sub" style={{whiteSpace:"nowrap"}}>La plataforma que moderniza los remates en Chile.</div>
+        <div className="auth-brand-title">La plataforma<br/>de remates<br/>en Chile.</div>
+        <div className="auth-brand-sub">Sala en vivo híbrida, liquidaciones automáticas y gestión completa para tu casa de remates.</div>
         <div className="auth-features">
           {[
-            ["Sala en vivo hibrida", "Presencial y online en un solo sistema"],
-            ["Liquidaciones automaticas", "Se generan al instante al adjudicar"],
-            ["Gestion de garantias", "Registro, aprobacion y devolucion"],
+            ["Sala en vivo híbrida", "Presencial y online en un solo sistema"],
+            ["Liquidaciones automáticas", "Se generan al instante al adjudicar"],
+            ["Gestión de garantías", "Registro, aprobación y devolución"],
             ["Multi-empresa", "Cada casa de remates con su acceso"],
           ].map(([t,d]) => (
             <div className="auth-feat" key={t}>
-              <svg className="auth-feat-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 7.5l4 4 7-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              <span><strong style={{color:"#8ab4d4"}}>{t}</strong> — {d}</span>
+              <svg className="auth-feat-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 7.5l4 4 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <span><strong>{t}</strong> — {d}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Right form */}
+      {/* Right form — card blanca sobre fondo gris suave */}
       <div className="auth-right">
         <div className="auth-form-wrap">
-          {/* Logo */}
-          <div style={{marginBottom:"2rem"}}>
-            <div style={{display:"flex",alignItems:"center",gap:"18px",marginBottom:".6rem"}}>
-              <svg width="64" height="64" viewBox="0 0 36 36" fill="none">
-                <rect width="36" height="36" rx="8" fill="rgba(56,178,246,.1)" stroke="rgba(56,178,246,.25)" strokeWidth="1"/>
-                <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
-              </svg>
-              <div style={{fontFamily:"Inter,sans-serif",fontWeight:400,fontSize:".85rem",color:"#4a6a8a",letterSpacing:".12em",textTransform:"uppercase",marginTop:2}}>Auction Software</div>
+          {/* Logo pequeño en el card */}
+          <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"1.6rem"}}>
+            <svg width="38" height="38" viewBox="0 0 36 36" fill="none">
+              <rect width="36" height="36" rx="8" fill="rgba(6,182,212,.1)" stroke="rgba(6,182,212,.22)" strokeWidth="1"/>
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="#0e7490" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+            </svg>
+            <div>
+              <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:".88rem",color:"#1a1a1a",letterSpacing:".01em"}}>Auction Software</div>
+              <div style={{fontSize:".7rem",color:"#9ca3af",letterSpacing:".04em",textTransform:"uppercase",marginTop:1}}>Gestión de Remates</div>
             </div>
-            <div style={{fontSize:"1.05rem",color:"#6b7280",lineHeight:1.5}}>Ingresa con tu correo y contraseña. El sistema te llevará a tu área según tu perfil.</div>
           </div>
+          <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:"1.3rem",color:"#1a1a1a",marginBottom:".3rem"}}>Iniciar sesión</div>
+          <div style={{fontSize:".82rem",color:"#6b7280",marginBottom:"1.8rem",lineHeight:1.5}}>Ingresa con tu correo y contraseña.</div>
 
           {error && <div className="auth-error">{error}</div>}
 
