@@ -62,25 +62,11 @@ const CSS = `
     --rd:   #ef4444;
     --yl:   #f59e0b;
     --font: 'Inter', sans-serif;
-    --mono: 'DM Mono', monospace;
+    --mono: 'Inter', sans-serif;
     --head: 'Poppins', sans-serif;
   }
 
   html, body { height: 100%; background: var(--bg); color: var(--wh); font-family: var(--font); font-size: 16px; line-height: 1.6; overflow: hidden; }
-
-  /* === NUMERIC STYLE — Apple Wallet / DM Mono === */
-  .num, [class*="monto"], [class*="precio"], [class*="bid"], [class*="puja"], [class*="oferta"], [class*="total"], [class*="balance"], [class*="amount"], [class*="paleta"], [class*="postura"]{
-    font-family:'DM Mono',monospace;
-    font-variant-numeric:tabular-nums;
-    font-feature-settings:"tnum";
-    letter-spacing:-.01em;
-  }
-  .num{
-    font-family:'DM Mono',monospace !important;
-    font-variant-numeric:tabular-nums !important;
-    font-feature-settings:"tnum" !important;
-    letter-spacing:-.01em;
-  }
 
   .page-wrap {
     height: 100vh;
