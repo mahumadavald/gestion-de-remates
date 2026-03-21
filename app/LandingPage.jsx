@@ -6,20 +6,16 @@ export default function LandingPage() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
         if (entry.isIntersecting) {
-          setTimeout(() => entry.target.classList.add('visible'), i * 90);
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
         }
       });
-    }, { threshold: 0.08 });
+    }, { threshold: 0.06 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
     const handleScroll = () => {
       const nav = document.getElementById('navbar');
       if (!nav) return;
-      if (window.scrollY > 60) {
-        nav.classList.add('scrolled');
-      } else {
-        nav.classList.remove('scrolled');
-      }
+      nav.classList.toggle('scrolled', window.scrollY > 60);
     };
     window.addEventListener('scroll', handleScroll);
     return () => { window.removeEventListener('scroll', handleScroll); observer.disconnect(); };
@@ -47,7 +43,7 @@ export default function LandingPage() {
     <a href="#contact">Contacto</a>
   </div>
   <div class="nav-cta">
-    <a href="${WA_DEMO}" target="_blank" class="btn-nav btn-ghost">Demo</a>
+    <a href="${WA_DEMO}" target="_blank" class="btn-nav btn-ghost">Solicitar demo</a>
     <a href="/dashboard" class="btn-nav btn-solid">Ingresar →</a>
   </div>
 </nav>
@@ -62,7 +58,7 @@ export default function LandingPage() {
   <div class="hero-inner">
     <div class="hero-badge reveal">
       <span class="badge-dot"></span>
-      PLATAFORMA DE REMATES ONLINE
+      PLATAFORMA DE REMATES ONLINE · CHILE
     </div>
 
     <h1 class="hero-title reveal">
@@ -70,33 +66,16 @@ export default function LandingPage() {
     </h1>
 
     <p class="hero-sub reveal">
-      Plataforma digital para gestionar, operar y escalar<br/>
-      remates en cualquier lugar del mundo.
+      Plataforma digital para gestionar, operar y escalar remates
+      en cualquier lugar del mundo — presencial, online o híbrido.
     </p>
 
     <div class="hero-btns reveal">
       <a href="${WA_DEMO}" target="_blank" class="btn-primary">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.553 4.103 1.518 5.829L.057 23.492a.5.5 0 00.614.611l5.783-1.517A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.947 0-3.768-.497-5.35-1.367l-.383-.215-3.434.9.916-3.352-.234-.38A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-        Solicitar demo
+        Solicitar demo gratis
       </a>
       <a href="/dashboard" class="btn-outline">Iniciar sesión →</a>
-    </div>
-
-    <div class="stats-bar reveal">
-      <div class="stat">
-        <div class="stat-num">15<span>s</span></div>
-        <div class="stat-lbl">Adjudicación automática</div>
-      </div>
-      <div class="stat-sep"></div>
-      <div class="stat">
-        <div class="stat-num">0<span> papel</span></div>
-        <div class="stat-lbl">Todo 100% digital</div>
-      </div>
-      <div class="stat-sep"></div>
-      <div class="stat">
-        <div class="stat-num">∞<span></span></div>
-        <div class="stat-lbl">Online y presencial</div>
-      </div>
     </div>
 
     <!-- Dashboard mockup -->
@@ -114,6 +93,7 @@ export default function LandingPage() {
           <div class="ds-item">  Lotes</div>
           <div class="ds-item">  Postores</div>
           <div class="ds-item">  Liquidaciones</div>
+          <div class="ds-item">  Balance</div>
         </div>
         <div class="dash-content">
           <div class="dc-header">
@@ -123,15 +103,58 @@ export default function LandingPage() {
           <div class="dc-lote">Escritorio de roble macizo</div>
           <div class="dc-price">$480.000</div>
           <div class="dc-sub">Próxima puja: $530.000 · Incremento: $50K</div>
-          <div class="dc-ring">
-            <div class="ring-inner">12s</div>
-          </div>
-          <div class="dc-bids">
-            <div class="dc-bid"><span class="bid-who">Paleta 07</span><span class="bid-amt">$480.000</span></div>
-            <div class="dc-bid muted"><span class="bid-who">Paleta 03</span><span class="bid-amt">$430.000</span></div>
-            <div class="dc-bid muted"><span class="bid-who">Online #12</span><span class="bid-amt">$380.000</span></div>
+          <div class="dc-bids-row">
+            <div class="dc-ring">
+              <svg width="52" height="52" viewBox="0 0 52 52">
+                <circle cx="26" cy="26" r="22" stroke="#30363d" stroke-width="3" fill="none"/>
+                <circle cx="26" cy="26" r="22" stroke="#38B2F6" stroke-width="3" fill="none"
+                  stroke-dasharray="138" stroke-dashoffset="46" stroke-linecap="round"
+                  transform="rotate(-90 26 26)"/>
+              </svg>
+              <span class="ring-inner">12s</span>
+            </div>
+            <div class="dc-bids">
+              <div class="dc-bid"><span class="bid-tag web">WEB</span><span class="bid-who">Online #24</span><span class="bid-amt">$480.000</span></div>
+              <div class="dc-bid muted"><span class="bid-tag pres">PRES</span><span class="bid-who">Paleta 07</span><span class="bid-amt">$430.000</span></div>
+              <div class="dc-bid muted"><span class="bid-tag web">WEB</span><span class="bid-who">Online #12</span><span class="bid-amt">$380.000</span></div>
+            </div>
           </div>
         </div>
+        <div class="dash-right-panel">
+          <div class="drp-label">INCREMENTO</div>
+          <div class="drp-inc-row">
+            <div class="drp-inc active">$50K</div>
+            <div class="drp-inc">$100K</div>
+            <div class="drp-inc">$200K</div>
+          </div>
+          <div class="drp-label" style="margin-top:1rem">POSTURA PRESENCIAL</div>
+          <div class="drp-input">Paleta 03</div>
+          <div class="drp-input">$530.000</div>
+          <div class="drp-btn">Confirmar postura</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar reveal">
+      <div class="stat">
+        <div class="stat-num">15<span>s</span></div>
+        <div class="stat-lbl">Adjudicación automática</div>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat">
+        <div class="stat-num">100<span>%</span></div>
+        <div class="stat-lbl">Digital — sin papel</div>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat">
+        <div class="stat-num">∞</div>
+        <div class="stat-lbl">Lotes por remate</div>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat">
+        <div class="stat-num">1<span> día</span></div>
+        <div class="stat-lbl">Para estar operativo</div>
       </div>
     </div>
   </div>
@@ -145,62 +168,101 @@ export default function LandingPage() {
       CARACTERÍSTICAS
     </div>
     <h2 class="section-title">Todo lo que necesita<br/>tu casa de remates</h2>
-    <p class="section-sub">Desde la inscripción del postor hasta la liquidación final — en un solo sistema.</p>
+    <p class="section-sub">Desde la inscripción del postor hasta la liquidación final — en un solo sistema completamente integrado.</p>
   </div>
 
-  <div class="feat-grid">
-    <div class="feat-card reveal">
+  <!-- Bento grid -->
+  <div class="bento-grid">
+
+    <!-- Card grande izquierda -->
+    <div class="bento-card bento-tall reveal">
       <div class="feat-icon blue-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       </div>
       <div class="feat-label">SALA EN VIVO</div>
-      <div class="feat-title">Híbrida en tiempo real</div>
-      <div class="feat-desc">Presencial, online e híbrido en la misma sala. Timer automático de 15 segundos. Feed de pujas y display para proyector incluido.</div>
-    </div>
-
-    <div class="feat-card reveal">
-      <div class="feat-icon blue-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+      <div class="feat-title">Remates híbridos<br/>en tiempo real</div>
+      <div class="feat-desc">Presencial, online e híbrido en la misma sala. Timer automático de 15 segundos. Feed de pujas en vivo con display para proyector incluido.</div>
+      <div class="bento-preview">
+        <div class="bp-row"><span class="bp-badge live">● EN VIVO</span><span class="bp-time">12s</span></div>
+        <div class="bp-price">$480.000</div>
+        <div class="bp-bids">
+          <div class="bp-bid"><span class="bp-dot blue"></span>Online #24 — $480K</div>
+          <div class="bp-bid muted"><span class="bp-dot teal"></span>Paleta 07 — $430K</div>
+          <div class="bp-bid muted"><span class="bp-dot blue"></span>Online #12 — $380K</div>
+        </div>
       </div>
-      <div class="feat-label">POST-REMATE</div>
-      <div class="feat-title">Liquidaciones automáticas</div>
-      <div class="feat-desc">Al adjudicar se genera la liquidación con comisiones, IVA y gastos. PDF con tu logo listo para enviar al instante.</div>
     </div>
 
-    <div class="feat-card reveal">
+    <!-- Grid derecho 2x2 -->
+    <div class="bento-card reveal">
       <div class="feat-icon teal-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
       </div>
       <div class="feat-label">POSTORES</div>
       <div class="feat-title">Self-service público</div>
-      <div class="feat-desc">Página pública por casa. Los postores se inscriben solos con validador RUT, suben comprobante y tú validas con un click.</div>
+      <div class="feat-desc">Los postores se inscriben solos con validador RUT, suben comprobante y tú los validas con un click.</div>
     </div>
 
-    <div class="feat-card reveal">
-      <div class="feat-icon teal-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    <div class="bento-card reveal">
+      <div class="feat-icon blue-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
       </div>
-      <div class="feat-label">DISPLAY</div>
-      <div class="feat-title">Pantalla para proyector</div>
-      <div class="feat-desc">Pantalla dedicada con foto del lote, oferta en grande, timer visual y overlay de ADJUDICADO. Conecta cualquier TV o pantalla.</div>
+      <div class="feat-label">POST-REMATE</div>
+      <div class="feat-title">Liquidaciones automáticas</div>
+      <div class="feat-desc">PDF con tu logo generado al instante. Comisiones, IVA y gastos calculados automáticamente.</div>
     </div>
 
-    <div class="feat-card reveal">
+    <div class="bento-card reveal">
       <div class="feat-icon blue-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       </div>
       <div class="feat-label">FINANZAS</div>
       <div class="feat-title">Reportes y balance</div>
-      <div class="feat-desc">Balance económico por remate, estadísticas históricas, exportación CSV. Desglose de comisiones con IVA automático.</div>
+      <div class="feat-desc">Balance por remate, estadísticas históricas, exportación CSV. Desglose con IVA automático.</div>
     </div>
 
-    <div class="feat-card reveal">
+    <div class="bento-card reveal">
+      <div class="feat-icon teal-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </div>
+      <div class="feat-label">DISPLAY</div>
+      <div class="feat-title">Pantalla para proyector</div>
+      <div class="feat-desc">Overlay ADJUDICADO, foto del lote y timer visual. Conecta cualquier TV o pantalla.</div>
+    </div>
+
+    <!-- Card ancha bottom -->
+    <div class="bento-card bento-wide reveal">
       <div class="feat-icon teal-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M2 9h20M9 21h6M12 17v4"/></svg>
       </div>
       <div class="feat-label">MULTI-TENANT</div>
-      <div class="feat-title">Varias casas, un sistema</div>
-      <div class="feat-desc">Cada casa tiene su propio acceso, logo, usuarios y datos separados. Panel de administración centralizado para todo el grupo.</div>
+      <div class="feat-title">Varias casas, un sistema centralizado</div>
+      <div class="feat-desc">Cada casa tiene su propio acceso, logo, usuarios y datos completamente separados. Panel de administración centralizado para gestionar todo el grupo desde un único lugar.</div>
+      <div class="bento-tags">
+        <span class="btag">Datos aislados por casa</span>
+        <span class="btag">Logos personalizados</span>
+        <span class="btag">Usuarios independientes</span>
+        <span class="btag">Admin centralizado</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section class="testimonial-section">
+  <div class="test-inner reveal">
+    <div class="test-quote">"</div>
+    <blockquote class="test-text">
+      Pasamos de manejar todo con planillas y papel a tener la sala en vivo corriendo en menos de un día.
+      El timer de 15 segundos cambió completamente el ritmo de nuestros remates.
+    </blockquote>
+    <div class="test-author">
+      <div class="test-avatar">MA</div>
+      <div>
+        <div class="test-name">Remates Ahumada</div>
+        <div class="test-role">Casa de remates · Santiago, Chile</div>
+      </div>
     </div>
   </div>
 </section>
@@ -213,21 +275,19 @@ export default function LandingPage() {
       CÓMO FUNCIONA
     </div>
     <h2 class="section-title" style="text-align:center;max-width:600px;margin:0 auto">Del registro al remate<br/>en minutos</h2>
-    <p class="section-sub" style="text-align:center;margin:0 auto">Flujo completo para martilleros, postores y administradores.</p>
+    <p class="section-sub" style="text-align:center;margin:0 auto;max-width:480px">Flujo completo y sin fricciones para martilleros, postores y administradores.</p>
   </div>
 
   <div class="steps-grid">
     <div class="step reveal">
       <div class="step-num">01</div>
-      <div class="step-connector"></div>
       <div class="step-body">
         <div class="step-title">Crea tu casa</div>
-        <div class="step-desc">Registra tu casa de remates con logo, datos del martillero público y configuración. Se generan tus URLs únicas al instante.</div>
+        <div class="step-desc">Registra tu casa de remates con logo, datos del martillero público y configuración. URLs únicas generadas al instante.</div>
       </div>
     </div>
     <div class="step reveal">
       <div class="step-num">02</div>
-      <div class="step-connector"></div>
       <div class="step-body">
         <div class="step-title">Inscribe postores</div>
         <div class="step-desc">Comparte el link público. Los postores se inscriben solos, suben su comprobante y tú los validas con un click desde el panel.</div>
@@ -235,10 +295,9 @@ export default function LandingPage() {
     </div>
     <div class="step reveal">
       <div class="step-num">03</div>
-      <div class="step-connector"></div>
       <div class="step-body">
         <div class="step-title">Remata en vivo</div>
-        <div class="step-desc">Carga lotes con fotos, activa la sala en vivo y adjudica. Timer automático de 15 segundos. Proyecta el display en sala.</div>
+        <div class="step-desc">Carga lotes con fotos, activa la sala en vivo y adjudica. Timer de 15 segundos automático. Proyecta en sala con un click.</div>
       </div>
     </div>
     <div class="step reveal">
@@ -325,11 +384,11 @@ export default function LandingPage() {
       CONTACTO
     </div>
     <h2 class="cta-title">¿Listo para modernizar<br/>tu casa de remates?</h2>
-    <p class="cta-sub">Contáctanos y te configuramos todo en un día.</p>
+    <p class="cta-sub">Contáctanos y te configuramos todo en un día. Sin costos de setup.</p>
     <div class="cta-btns">
-      <a href="${WA_DEMO}" target="_blank" class="btn-primary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.553 4.103 1.518 5.829L.057 23.492a.5.5 0 00.614.611l5.783-1.517A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.947 0-3.768-.497-5.35-1.367l-.383-.215-3.434.9.916-3.352-.234-.38A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-        Solicitar demo
+      <a href="${WA_DEMO}" target="_blank" class="btn-primary btn-primary-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.553 4.103 1.518 5.829L.057 23.492a.5.5 0 00.614.611l5.783-1.517A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.947 0-3.768-.497-5.35-1.367l-.383-.215-3.434.9.916-3.352-.234-.38A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        Solicitar demo por WhatsApp
       </a>
       <a href="mailto:contacto@grauction.cl" class="btn-outline">contacto@grauction.cl</a>
     </div>
@@ -379,7 +438,6 @@ export default function LandingPage() {
   --surface:#161b22;
   --surface-2:#21262d;
   --border:#30363d;
-  --border-hover:#38B2F6;
   --text:#e6edf3;
   --muted:#8b949e;
   --subtle:#484f58;
@@ -402,12 +460,16 @@ nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
   padding:1.25rem 4rem;
-  background:rgba(13,17,23,0.7);
-  backdrop-filter:blur(24px);
+  background:rgba(13,17,23,0);
+  backdrop-filter:blur(0px);
   border-bottom:1px solid transparent;
-  transition:all .3s ease;
+  transition:all .4s ease;
 }
-nav.scrolled{background:rgba(13,17,23,0.92);border-bottom-color:var(--border);}
+nav.scrolled{
+  background:rgba(13,17,23,0.92);
+  backdrop-filter:blur(24px);
+  border-bottom-color:var(--border);
+}
 .nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none;}
 .nav-logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);}
 .nav-links{display:flex;align-items:center;gap:2.5rem;}
@@ -423,7 +485,7 @@ nav.scrolled{background:rgba(13,17,23,0.92);border-bottom-color:var(--border);}
 /* HERO */
 .hero{
   min-height:100vh;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;text-align:center;padding:9rem 2rem 5rem;
+  justify-content:center;text-align:center;padding:9rem 2rem 6rem;
   position:relative;overflow:hidden;
 }
 .hero-grid{
@@ -431,62 +493,58 @@ nav.scrolled{background:rgba(13,17,23,0.92);border-bottom-color:var(--border);}
   background-image:
     linear-gradient(var(--border) 1px,transparent 1px),
     linear-gradient(90deg,var(--border) 1px,transparent 1px);
-  background-size:64px 64px;
-  opacity:.18;
+  background-size:72px 72px;
+  opacity:.15;
   pointer-events:none;
-  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,black,transparent);
 }
-.orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;animation:float 10s ease-in-out infinite alternate;}
-.orb1{width:700px;height:700px;background:rgba(56,178,246,.07);top:-200px;left:-150px;animation-duration:12s;}
-.orb2{width:500px;height:500px;background:rgba(20,184,166,.06);bottom:-150px;right:-100px;animation-duration:9s;animation-direction:alternate-reverse;}
-.orb3{width:300px;height:300px;background:rgba(56,178,246,.05);top:40%;left:50%;animation-duration:15s;}
-@keyframes float{from{transform:translate(0,0)}to{transform:translate(40px,50px)}}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);pointer-events:none;animation:float 12s ease-in-out infinite alternate;}
+.orb1{width:800px;height:800px;background:rgba(56,178,246,.06);top:-300px;left:-200px;animation-duration:14s;}
+.orb2{width:600px;height:600px;background:rgba(20,184,166,.05);bottom:-200px;right:-150px;animation-duration:10s;animation-direction:alternate-reverse;}
+.orb3{width:400px;height:400px;background:rgba(56,178,246,.04);top:35%;left:45%;animation-duration:18s;}
+@keyframes float{from{transform:translate(0,0)}to{transform:translate(50px,60px)}}
 
-.hero-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;max-width:900px;margin:0 auto;}
+.hero-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;max-width:1100px;margin:0 auto;width:100%;}
 
 .hero-badge{
   display:inline-flex;align-items:center;gap:.5rem;
-  padding:.35rem 1rem;
-  background:rgba(56,178,246,.08);
-  border:1px solid rgba(56,178,246,.2);
+  padding:.35rem 1.1rem;
+  background:rgba(56,178,246,.07);
+  border:1px solid rgba(56,178,246,.18);
   border-radius:20px;
-  font-size:.68rem;font-weight:700;color:var(--primary);
-  letter-spacing:.12em;text-transform:uppercase;
-  margin-bottom:2rem;
-  animation:fadeUp .6s ease both;
+  font-size:.66rem;font-weight:700;color:var(--primary);
+  letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:2.25rem;
 }
 .badge-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.65)}}
 
 .hero-title{
   font-family:'Syne',sans-serif;
-  font-size:clamp(3rem,7vw,6rem);
+  font-size:clamp(3.5rem,8vw,7rem);
   font-weight:800;
   color:var(--text);
-  line-height:1.02;
-  letter-spacing:-.03em;
-  margin-bottom:1.5rem;
-  animation:fadeUp .7s ease .1s both;
+  line-height:1.0;
+  letter-spacing:-.04em;
+  margin-bottom:1.75rem;
 }
 .hero-title em{
   font-style:normal;
-  background:linear-gradient(135deg,var(--primary),var(--teal));
+  background:linear-gradient(135deg,var(--primary) 20%,var(--teal) 80%);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   background-clip:text;
 }
 .hero-sub{
-  font-size:clamp(.95rem,2vw,1.15rem);
+  font-size:clamp(1rem,2vw,1.2rem);
   color:var(--muted);
-  max-width:520px;
-  line-height:1.75;
-  margin-bottom:2.5rem;
-  animation:fadeUp .7s ease .2s both;
+  max-width:540px;
+  line-height:1.8;
+  margin-bottom:2.75rem;
 }
 .hero-btns{
   display:flex;align-items:center;gap:1rem;justify-content:center;flex-wrap:wrap;
-  margin-bottom:4rem;
-  animation:fadeUp .7s ease .3s both;
+  margin-bottom:4.5rem;
 }
 .btn-primary{
   padding:.875rem 1.75rem;border-radius:8px;
@@ -494,8 +552,10 @@ nav.scrolled{background:rgba(13,17,23,0.92);border-bottom-color:var(--border);}
   font-family:'Inter',sans-serif;font-size:.9rem;font-weight:700;
   text-decoration:none;cursor:pointer;transition:all .2s;
   display:inline-flex;align-items:center;gap:.5rem;
+  letter-spacing:.01em;
 }
-.btn-primary:hover{background:var(--primary-dark);transform:translateY(-2px);}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-2px);box-shadow:0 8px 24px rgba(56,178,246,.2);}
+.btn-primary-lg{padding:1rem 2rem;font-size:.95rem;}
 .btn-outline{
   padding:.875rem 1.75rem;border-radius:8px;
   background:transparent;border:1px solid var(--border);
@@ -505,180 +565,241 @@ nav.scrolled{background:rgba(13,17,23,0.92);border-bottom-color:var(--border);}
 }
 .btn-outline:hover{border-color:var(--primary);color:var(--primary);}
 
-.stats-bar{
-  display:flex;align-items:center;gap:3rem;justify-content:center;
-  padding:2rem 3rem;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:12px;
-  margin-bottom:3.5rem;
-  animation:fadeUp .7s ease .4s both;
-  flex-wrap:wrap;gap:2rem;
-}
-.stat{text-align:center;}
-.stat-num{
-  font-family:'DM Mono',monospace;
-  font-size:1.75rem;font-weight:500;
-  color:var(--text);line-height:1;
-}
-.stat-num span{color:var(--primary);font-size:1.2rem;}
-.stat-lbl{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:.4rem;}
-.stat-sep{width:1px;height:36px;background:var(--border);}
-
 /* DASHBOARD MOCKUP */
 .dash-mockup{
-  width:100%;max-width:820px;
+  width:100%;max-width:960px;
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:16px;
   overflow:hidden;
   background:var(--surface);
-  animation:fadeUp .8s ease .5s both;
-  box-shadow:0 24px 80px rgba(0,0,0,.5);
+  box-shadow:0 32px 100px rgba(0,0,0,.6),0 0 0 1px rgba(56,178,246,.08);
+  margin-bottom:4.5rem;
 }
 .dash-bar{
   display:flex;align-items:center;gap:.5rem;
-  padding:.75rem 1rem;
+  padding:.8rem 1.25rem;
   background:var(--surface-2);
   border-bottom:1px solid var(--border);
 }
 .dash-dot{width:10px;height:10px;border-radius:50%;}
-.dash-url{
-  flex:1;text-align:center;
-  font-family:'DM Mono',monospace;
-  font-size:.72rem;color:var(--muted);
-}
-.dash-body{display:flex;min-height:280px;}
+.dash-url{flex:1;text-align:center;font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);}
+.dash-body{display:flex;min-height:300px;}
 .dash-sidebar{
-  width:160px;flex-shrink:0;
-  background:rgba(13,17,23,.6);
+  width:170px;flex-shrink:0;
+  background:rgba(13,17,23,.7);
   border-right:1px solid var(--border);
-  padding:1rem .75rem;
-  display:flex;flex-direction:column;gap:.3rem;
+  padding:1.1rem .8rem;
+  display:flex;flex-direction:column;gap:.25rem;
 }
 .ds-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;color:var(--text);margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border);}
-.ds-item{font-size:.72rem;color:var(--muted);padding:.35rem .5rem;border-radius:5px;cursor:pointer;}
+.ds-item{font-size:.72rem;color:var(--muted);padding:.35rem .5rem;border-radius:5px;}
 .ds-item.active{background:rgba(56,178,246,.1);color:var(--primary);border-left:2px solid var(--primary);}
-.dash-content{flex:1;padding:1.25rem 1.5rem;text-align:left;}
-.dc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;}
+.dash-content{flex:1;padding:1.4rem 1.6rem;text-align:left;}
+.dc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;}
 .dc-title{font-size:.65rem;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
-.dc-badge{font-size:.65rem;font-weight:700;color:var(--danger);letter-spacing:.06em;animation:pulse 2s infinite;}
-.dc-lote{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:.4rem;}
-.dc-price{font-family:'DM Mono',monospace;font-size:2rem;font-weight:500;color:var(--primary);line-height:1;margin-bottom:.3rem;}
-.dc-sub{font-size:.7rem;color:var(--muted);margin-bottom:1rem;}
-.dc-ring{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:52px;height:52px;border-radius:50%;
-  border:3px solid var(--primary);
-  margin-bottom:1rem;
-}
-.ring-inner{font-family:'DM Mono',monospace;font-size:.9rem;font-weight:500;color:var(--primary);}
-.dc-bids{display:flex;flex-direction:column;gap:.3rem;}
-.dc-bid{display:flex;justify-content:space-between;align-items:center;padding:.3rem .5rem;background:rgba(56,178,246,.06);border-radius:5px;font-size:.72rem;}
-.dc-bid.muted{background:transparent;opacity:.5;}
-.bid-who{color:var(--text);}
+.dc-badge{font-size:.65rem;font-weight:700;color:var(--danger);animation:pulse 2s infinite;}
+.dc-lote{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:.3rem;}
+.dc-price{font-family:'DM Mono',monospace;font-size:2.2rem;font-weight:500;color:var(--primary);line-height:1;margin-bottom:.3rem;}
+.dc-sub{font-size:.68rem;color:var(--muted);margin-bottom:1rem;}
+.dc-bids-row{display:flex;align-items:flex-start;gap:1.5rem;}
+.dc-ring{position:relative;width:52px;height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.ring-inner{position:absolute;font-family:'DM Mono',monospace;font-size:.85rem;font-weight:500;color:var(--primary);}
+.dc-bids{flex:1;display:flex;flex-direction:column;gap:.3rem;}
+.dc-bid{display:flex;align-items:center;gap:.4rem;padding:.28rem .45rem;background:rgba(56,178,246,.06);border-radius:5px;font-size:.7rem;}
+.dc-bid.muted{background:transparent;opacity:.45;}
+.bid-tag{font-size:.58rem;font-weight:700;padding:.1rem .35rem;border-radius:3px;letter-spacing:.06em;}
+.bid-tag.web{background:rgba(56,178,246,.15);color:var(--primary);}
+.bid-tag.pres{background:rgba(20,184,166,.15);color:var(--teal);}
+.bid-who{color:var(--text);flex:1;}
 .bid-amt{font-family:'DM Mono',monospace;color:var(--primary);}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+/* RIGHT PANEL MOCKUP */
+.dash-right-panel{
+  width:180px;flex-shrink:0;
+  border-left:1px solid var(--border);
+  padding:1.1rem 1rem;
+  display:flex;flex-direction:column;gap:.5rem;
+}
+.drp-label{font-size:.6rem;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.drp-inc-row{display:flex;gap:.35rem;flex-wrap:wrap;}
+.drp-inc{font-size:.68rem;padding:.25rem .5rem;border-radius:5px;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;}
+.drp-inc.active{border-color:var(--primary);color:var(--primary);background:rgba(56,178,246,.08);}
+.drp-input{font-size:.7rem;padding:.35rem .55rem;border-radius:5px;border:1px solid var(--border);color:var(--muted);background:var(--bg);}
+.drp-btn{font-size:.7rem;padding:.45rem .55rem;border-radius:6px;background:var(--primary);color:#fff;font-weight:700;text-align:center;margin-top:.25rem;}
 
-/* SECTION */
-.section{padding:7rem 4rem;max-width:1280px;margin:0 auto;}
-.section-header{display:flex;flex-direction:column;gap:.75rem;margin-bottom:4rem;}
-.section-tag{display:inline-flex;align-items:center;gap:.5rem;font-size:.68rem;font-weight:700;color:var(--teal);letter-spacing:.14em;text-transform:uppercase;}
-.section-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3.5vw,2.75rem);font-weight:800;color:var(--text);line-height:1.12;letter-spacing:-.02em;}
-.section-sub{font-size:.9rem;color:var(--muted);max-width:480px;line-height:1.7;}
-
-/* FEATURES */
-.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;}
-.feat-card{
-  padding:1.75rem;
+/* STATS BAR */
+.stats-bar{
+  display:flex;align-items:center;gap:0;justify-content:center;
   background:var(--surface);
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:14px;
+  width:100%;max-width:720px;
+  overflow:hidden;
+}
+.stat{flex:1;text-align:center;padding:1.5rem 1rem;}
+.stat+.stat{border-left:1px solid var(--border);}
+.stat-num{
+  font-family:'DM Mono',monospace;
+  font-size:1.8rem;font-weight:500;
+  color:var(--text);line-height:1;
+}
+.stat-num span{color:var(--primary);font-size:1.3rem;}
+.stat-lbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-top:.45rem;}
+.stat-sep{width:1px;height:36px;background:var(--border);}
+
+/* SECTION */
+.section{padding:9rem 4rem;max-width:1280px;margin:0 auto;}
+.section-header{display:flex;flex-direction:column;gap:.75rem;margin-bottom:4.5rem;}
+.section-tag{display:inline-flex;align-items:center;gap:.5rem;font-size:.66rem;font-weight:700;color:var(--teal);letter-spacing:.14em;text-transform:uppercase;}
+.section-title{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:800;color:var(--text);line-height:1.1;letter-spacing:-.025em;}
+.section-sub{font-size:.9rem;color:var(--muted);line-height:1.75;}
+
+/* BENTO GRID */
+.bento-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:auto auto;
+  gap:1.25rem;
+}
+.bento-card{
+  padding:2rem;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
   transition:all .25s ease;
   position:relative;overflow:hidden;
 }
-.feat-card::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--primary),var(--teal));
-  opacity:0;transition:opacity .25s;
+.bento-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(56,178,246,.03),transparent 60%);
+  opacity:0;transition:opacity .3s;
 }
-.feat-card:hover{border-color:rgba(56,178,246,.35);transform:translateY(-3px);}
-.feat-card:hover::after{opacity:1;}
-.feat-icon{
-  width:42px;height:42px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:1.1rem;
+.bento-card:hover{border-color:rgba(56,178,246,.3);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.3);}
+.bento-card:hover::before{opacity:1;}
+.bento-tall{grid-row:span 2;display:flex;flex-direction:column;}
+.bento-wide{grid-column:span 2;}
+.bento-preview{
+  margin-top:auto;padding-top:1.5rem;
+  border-top:1px solid var(--border);
+  margin-top:1.5rem;
 }
+.bp-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;}
+.bp-badge{font-size:.65rem;font-weight:700;color:var(--danger);letter-spacing:.06em;animation:pulse 2s infinite;}
+.bp-time{font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--primary);}
+.bp-price{font-family:'DM Mono',monospace;font-size:1.6rem;font-weight:500;color:var(--text);margin-bottom:.75rem;}
+.bp-bids{display:flex;flex-direction:column;gap:.35rem;}
+.bp-bid{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:var(--text);}
+.bp-bid.muted{color:var(--muted);}
+.bp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.bp-dot.blue{background:var(--primary);}
+.bp-dot.teal{background:var(--teal);}
+.bento-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.25rem;}
+.btag{font-size:.72rem;padding:.25rem .7rem;border-radius:20px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted);}
+
+.feat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;}
 .blue-icon{background:rgba(56,178,246,.1);border:1px solid rgba(56,178,246,.2);color:var(--primary);}
 .teal-icon{background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.2);color:var(--teal);}
-.feat-label{font-size:.65rem;font-weight:700;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem;}
-.feat-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.5rem;}
-.feat-desc{font-size:.82rem;color:var(--muted);line-height:1.65;}
+.feat-label{font-size:.63rem;font-weight:700;color:var(--muted);letter-spacing:.13em;text-transform:uppercase;margin-bottom:.4rem;}
+.feat-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:.6rem;line-height:1.25;}
+.feat-desc{font-size:.82rem;color:var(--muted);line-height:1.7;}
 
-/* HOW IT WORKS */
-.how-section{
+/* TESTIMONIAL */
+.testimonial-section{
   padding:7rem 4rem;
   background:var(--surface);
   border-top:1px solid var(--border);
   border-bottom:1px solid var(--border);
 }
-.steps-grid{
-  max-width:1280px;margin:4rem auto 0;
-  display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+.test-inner{
+  max-width:800px;margin:0 auto;
   position:relative;
 }
-.step{padding:0 2rem;position:relative;}
-.step:not(:last-child)::after{
-  content:'';position:absolute;top:20px;right:-2px;
-  width:4px;height:1px;
-  background:linear-gradient(90deg,var(--primary),var(--teal));
-  width:100%;right:auto;left:50%;width:calc(100% - 4rem);
-  top:22px;left:calc(50% + 22px);
-  display:block;height:1px;
-  background:linear-gradient(90deg,rgba(56,178,246,.4),rgba(20,184,166,.2));
+.test-quote{
+  font-family:'Syne',sans-serif;
+  font-size:6rem;line-height:.6;
+  color:var(--primary);opacity:.3;
+  margin-bottom:1rem;
+  display:block;
 }
+.test-text{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(1.3rem,2.5vw,1.85rem);
+  font-weight:600;
+  color:var(--text);
+  line-height:1.4;
+  margin-bottom:2rem;
+  font-style:normal;
+}
+.test-author{display:flex;align-items:center;gap:1rem;}
+.test-avatar{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.85rem;color:#fff;flex-shrink:0;
+}
+.test-name{font-weight:600;font-size:.9rem;color:var(--text);}
+.test-role{font-size:.78rem;color:var(--muted);margin-top:.1rem;}
+
+/* HOW IT WORKS */
+.how-section{
+  padding:9rem 4rem;
+  background:var(--bg);
+}
+.steps-grid{
+  max-width:1200px;margin:5rem auto 0;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:2rem;
+  position:relative;
+}
+.steps-grid::before{
+  content:'';
+  position:absolute;top:22px;left:calc(12.5% + 22px);
+  width:calc(75% - 44px);height:1px;
+  background:linear-gradient(90deg,rgba(56,178,246,.3),rgba(20,184,166,.15));
+}
+.step{position:relative;text-align:center;}
 .step-num{
   width:44px;height:44px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   font-family:'DM Mono',monospace;font-size:.82rem;font-weight:500;
   color:var(--primary);
-  border:2px solid rgba(56,178,246,.4);
-  background:rgba(56,178,246,.06);
-  margin:0 auto 1.5rem;
+  border:2px solid rgba(56,178,246,.35);
+  background:var(--bg);
+  margin:0 auto 1.75rem;
   position:relative;z-index:1;
 }
-.step-body{text-align:center;}
-.step-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:.5rem;}
-.step-desc{font-size:.8rem;color:var(--muted);line-height:1.65;}
+.step-body{padding:0 .5rem;}
+.step-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:.6rem;}
+.step-desc{font-size:.8rem;color:var(--muted);line-height:1.7;}
 
 /* PRICING */
 .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;align-items:start;}
 .plan-card{
-  padding:2rem 1.75rem;
+  padding:2.25rem 2rem;
   background:var(--surface);
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:16px;
   transition:all .25s;
   position:relative;
 }
-.plan-card:hover{border-color:rgba(56,178,246,.25);}
-.plan-card.featured{border-color:rgba(56,178,246,.5);background:rgba(56,178,246,.04);}
+.plan-card:hover{border-color:rgba(56,178,246,.25);transform:translateY(-2px);}
+.plan-card.featured{border-color:rgba(56,178,246,.5);background:rgba(56,178,246,.03);}
 .plan-popular{
-  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  position:absolute;top:-13px;left:50%;transform:translateX(-50%);
   background:linear-gradient(90deg,var(--primary),var(--teal));
   color:#fff;font-size:.62rem;font-weight:700;
-  padding:.22rem .85rem;border-radius:20px;
+  padding:.25rem .9rem;border-radius:20px;
   letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;
 }
-.plan-tier{font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.4rem;}
-.plan-name{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:1rem;}
+.plan-tier{font-size:.66rem;font-weight:700;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.4rem;}
+.plan-name{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:1rem;}
 .plan-price{font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--text);}
 .plan-price-sub{font-size:.75rem;color:var(--muted);margin-bottom:1.25rem;}
 .plan-divider{height:1px;background:var(--border);margin:1.25rem 0;}
-.plan-features{list-style:none;display:flex;flex-direction:column;gap:.55rem;margin-bottom:1.75rem;}
-.plan-features li{display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:var(--muted);}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.75rem;}
+.plan-features li{display:flex;align-items:center;gap:.6rem;font-size:.83rem;color:var(--muted);}
 .btn-plan-outline{
-  width:100%;padding:.75rem;border-radius:8px;
+  width:100%;padding:.8rem;border-radius:8px;
   background:transparent;border:1px solid var(--border);
   color:var(--text);font-family:'Inter',sans-serif;
   font-size:.84rem;font-weight:600;
@@ -686,32 +807,32 @@ nav.scrolled{background:rgba(13,17,23,0.92);border-bottom-color:var(--border);}
 }
 .btn-plan-outline:hover{border-color:var(--primary);color:var(--primary);}
 .btn-plan-solid{
-  width:100%;padding:.75rem;border-radius:8px;
+  width:100%;padding:.8rem;border-radius:8px;
   background:var(--primary);border:1px solid var(--primary);
   color:#fff;font-family:'Inter',sans-serif;
   font-size:.84rem;font-weight:700;
   cursor:pointer;text-align:center;text-decoration:none;display:block;transition:all .2s;
 }
-.btn-plan-solid:hover{background:var(--primary-dark);}
+.btn-plan-solid:hover{background:var(--primary-dark);transform:translateY(-1px);}
 
 /* CTA */
 .cta-section{
-  padding:8rem 4rem;text-align:center;
+  padding:10rem 4rem;text-align:center;
   position:relative;overflow:hidden;
   background:var(--surface);
   border-top:1px solid var(--border);
 }
 .cta-orb{
-  position:absolute;width:600px;height:600px;border-radius:50%;
-  background:radial-gradient(circle,rgba(56,178,246,.08),transparent 70%);
+  position:absolute;width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(56,178,246,.07),transparent 65%);
   top:50%;left:50%;transform:translate(-50%,-50%);
   pointer-events:none;
 }
 .cta-inner{position:relative;z-index:1;max-width:700px;margin:0 auto;}
-.cta-title{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3.5rem);font-weight:800;color:var(--text);line-height:1.08;letter-spacing:-.025em;margin:1rem 0 1.25rem;}
-.cta-sub{font-size:.95rem;color:var(--muted);margin-bottom:2.5rem;}
+.cta-title{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,5vw,4rem);font-weight:800;color:var(--text);line-height:1.06;letter-spacing:-.03em;margin:1rem 0 1.5rem;}
+.cta-sub{font-size:1rem;color:var(--muted);margin-bottom:3rem;line-height:1.7;}
 .cta-btns{display:flex;align-items:center;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem;}
-.contact-row{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;}
+.contact-row{display:flex;align-items:center;justify-content:center;gap:.75rem;flex-wrap:wrap;}
 .contact-chip{
   display:inline-flex;align-items:center;gap:.5rem;
   padding:.4rem .9rem;border-radius:20px;
@@ -735,28 +856,33 @@ footer{
 .footer-links a:hover{color:var(--primary);}
 
 /* REVEAL */
-.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease;}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .75s ease,transform .75s ease;}
 .reveal.visible{opacity:1;transform:none;}
 
 /* RESPONSIVE */
-@media(max-width:1024px){
-  .feat-grid{grid-template-columns:repeat(2,1fr);}
-  .steps-grid{grid-template-columns:repeat(2,1fr);gap:2rem;}
-  .step:not(:last-child)::after{display:none;}
+@media(max-width:1100px){
+  .bento-grid{grid-template-columns:repeat(2,1fr);}
+  .bento-tall{grid-row:span 1;}
+  .bento-wide{grid-column:span 2;}
+  .steps-grid{grid-template-columns:repeat(2,1fr);}
+  .steps-grid::before{display:none;}
+  .pricing-grid{grid-template-columns:repeat(3,1fr);}
+  .dash-right-panel{display:none;}
 }
 @media(max-width:768px){
   nav{padding:1rem 1.5rem;}
   .nav-links{display:none;}
-  .section,.how-section,.cta-section{padding:4rem 1.5rem;}
-  .feat-grid{grid-template-columns:1fr;}
+  .section,.how-section,.cta-section,.testimonial-section{padding:5rem 1.5rem;}
+  .bento-grid{grid-template-columns:1fr;}
+  .bento-wide{grid-column:span 1;}
   .pricing-grid{grid-template-columns:1fr;}
-  .steps-grid{grid-template-columns:1fr;}
-  .plan-card.featured{transform:none;}
+  .steps-grid{grid-template-columns:1fr;gap:2rem;}
   footer{padding:2rem 1.5rem;flex-direction:column;text-align:center;}
-  .stat-sep{display:none;}
-  .stats-bar{padding:1.5rem;}
+  .stats-bar{flex-direction:column;border-radius:12px;}
+  .stat+.stat{border-left:none;border-top:1px solid var(--border);}
   .dash-sidebar{display:none;}
   .dash-content{padding:1rem;}
+  .hero-title{font-size:clamp(2.75rem,12vw,4rem);}
 }
 `}</style>
       <div dangerouslySetInnerHTML={{__html: bodyHTML}} />
