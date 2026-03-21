@@ -456,7 +456,19 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .sala-photo-wrap{position:relative;background:var(--s3);margin:.4rem .85rem;border-radius:10px;overflow:hidden;height:220px;}
 .sala-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
 .sala-photo-placeholder{width:100%;height:100%;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;}
-.sala-timer{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem .85rem;border-top:1px solid var(--b1);margin-top:.4rem;background:rgba(0,0,0,.12);flex-shrink:0;}
+.sala-timer{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem .85rem;border-top:1px solid var(--b1);margin-top:.4rem;background:rgba(0,0,0,.04);flex-shrink:0;}
+.sala-lotes-proximos{padding:.75rem .85rem .85rem;border-top:1px solid var(--b1);}
+.sala-lotes-proximos-title{font-size:.72rem;font-weight:700;color:var(--wh2);margin-bottom:.55rem;letter-spacing:.01em;}
+.sala-lotes-proximos-list{display:flex;flex-direction:column;gap:.35rem;max-height:220px;overflow-y:auto;}
+.sala-lote-mini{display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem;border-radius:8px;background:var(--s1);border:1px solid var(--b1);transition:all .15s;}
+.sala-lote-mini.current{background:rgba(6,182,212,.07);border-color:rgba(6,182,212,.3);}
+.sala-lote-mini.adj{opacity:.55;}
+.sala-lote-mini-img{width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;}
+.sala-lote-mini-noimg{width:36px;height:36px;border-radius:6px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--mu);flex-shrink:0;}
+.sala-lote-mini-info{flex:1;min-width:0;}
+.sala-lote-mini-num{font-size:.62rem;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.sala-lote-mini-name{font-size:.75rem;font-weight:600;color:var(--wh2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sala-lote-mini-status{flex-shrink:0;}
 .sala-timer span:first-child{font-size:.72rem;font-weight:600;color:var(--mu2);}
 .sala-timer-num{font-size:1.45rem;font-weight:800;letter-spacing:.04em;font-family:'Inter',monospace;}
 .sala-timer-num.urgent{color:var(--yl);}
@@ -6237,6 +6249,38 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     ) : (
                       <span className="sala-timer-num" style={{color:"var(--mu)"}}>—</span>
                     )}
+                  </div>
+
+                  {/* ── LOTES PRÓXIMOS ── */}
+                  <div className="sala-lotes-proximos">
+                    <div className="sala-lotes-proximos-title">
+                      <span>{lots.length} lotes en remate</span>
+                      <span style={{color:"var(--mu)",fontWeight:400}}> · próximos</span>
+                    </div>
+                    <div className="sala-lotes-proximos-list">
+                      {lots.map((l,i)=>{
+                        const b = bids[i]||{};
+                        const esCurrent = i===idx;
+                        const esAdj = b.status==="adjudicado";
+                        return (
+                          <div key={i} className={`sala-lote-mini${esCurrent?" current":esAdj?" adj":""}`}>
+                            {l.imgs?.[0]
+                              ? <img src={l.imgs[0]} alt="" className="sala-lote-mini-img"/>
+                              : <div className="sala-lote-mini-img sala-lote-mini-noimg"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
+                            }
+                            <div className="sala-lote-mini-info">
+                              <div className="sala-lote-mini-num">Lote {i+1}</div>
+                              <div className="sala-lote-mini-name">{l.name}</div>
+                            </div>
+                            <div className="sala-lote-mini-status">
+                              {esAdj ? <span style={{color:"var(--gr)",fontSize:".65rem",fontWeight:700}}>✓ Adj.</span>
+                               : esCurrent ? <span style={{color:"var(--ac)",fontSize:".65rem",fontWeight:700}}>● Actual</span>
+                               : <span style={{color:"var(--mu)",fontSize:".65rem"}}>Pendiente</span>}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
