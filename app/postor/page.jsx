@@ -12,9 +12,24 @@ const CSS = `
     --bg: #f4f4f2; --s2: #ffffff; --b1: #e5e7eb; --b2: #d1d5db;
     --ac: #06B6D4; --wh: #1a1a1a; --wh2: #374151; --mu: #6b7280; --mu2: #9ca3af;
     --gr: #14B8A6; --rd: #ef4444; --yl: #f59e0b;
-    --font: 'Inter', sans-serif; --mono: 'Inter', sans-serif; --head: 'Poppins', sans-serif;
+    --font: 'Inter', sans-serif; --mono: 'DM Mono', monospace; --head: 'Poppins', sans-serif;
   }
   html, body { background: var(--bg); color: var(--wh); font-family: var(--font); min-height: 100vh; }
+
+  /* === NUMERIC STYLE — Apple Wallet / DM Mono === */
+  .num, [class*="monto"], [class*="precio"], [class*="bid"], [class*="puja"], [class*="oferta"], [class*="total"], [class*="balance"], [class*="amount"], [class*="paleta"], [class*="postura"]{
+    font-family:'DM Mono',monospace;
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum";
+    letter-spacing:-.01em;
+  }
+  .num{
+    font-family:'DM Mono',monospace !important;
+    font-variant-numeric:tabular-nums !important;
+    font-feature-settings:"tnum" !important;
+    letter-spacing:-.01em;
+  }
+
   .topbar { background: var(--s2); border-bottom: 1px solid var(--b1); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
   .topbar-brand { display: flex; align-items: center; gap: .75rem; }
   .topbar-name  { font-size: .82rem; color: var(--mu); }

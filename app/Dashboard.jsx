@@ -87,7 +87,7 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
 <meta charset="UTF-8"/>
 <title>Liquidacion — Comprador N° ${String(c.key).padStart(2,"0")}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Inter',sans-serif;font-size:11pt;color:#111;background:#fff;padding:2cm;}
   .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:3px solid #38B2F6;}
@@ -236,29 +236,44 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
 const CSS = `
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:#f4f4f2;
-  --s1:#f4f4f2;
-  --s2:#ffffff;
-  --s3:#f0f0ef;
-  --b1:#e5e7eb;
-  --b2:#d1d5db;
-  --ac:#06B6D4;
-  --acH:#22d3ee;
-  --acD:#1a8fd4;
-  --wh:#1a1a1a;
-  --wh2:#1a1a1a;
-  --mu:#6b7280;
-  --mu2:#4b5563;
-  --gr:#0d9488;
-  --rd:#dc2626;
-  --yl:#d97706;
-  --sb:#0f4c5c;
-  --sbB:#1d6a7a;
-  --sbT:#cceef4;
-  --sbM:#7ecfdc;
+  --bg:#0d1117;
+  --s1:#161b22;
+  --s2:#161b22;
+  --s3:#21262d;
+  --b1:#30363d;
+  --b2:#30363d;
+  --ac:#38B2F6;
+  --acH:#1E90D4;
+  --acD:#1E90D4;
+  --wh:#e6edf3;
+  --wh2:#e6edf3;
+  --mu:#8b949e;
+  --mu2:#8b949e;
+  --gr:#14B8A6;
+  --grH:#0D9488;
+  --rd:#f85149;
+  --yl:#d29922;
+  --sb:#161b22;
+  --sbB:#30363d;
+  --sbT:#e6edf3;
+  --sbM:#8b949e;
 }
-html,body{height:100%;background:#f4f4f2;color:#1a1a1a;font-family:'Inter',sans-serif;overflow:hidden;font-size:16px;}
+html,body{height:100%;background:#0d1117;color:#e6edf3;font-family:'Inter',sans-serif;overflow:hidden;font-size:16px;}
 button,input,select{font-family:'Inter',sans-serif;}
+
+/* === NUMERIC STYLE — Apple Wallet / DM Mono === */
+.num, [class*="monto"], [class*="precio"], [class*="bid"], [class*="puja"], [class*="oferta"], [class*="total"], [class*="balance"], [class*="amount"], [class*="paleta"], [class*="postura"]{
+  font-family:'DM Mono',monospace;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum";
+  letter-spacing:-.01em;
+}
+.num{
+  font-family:'DM Mono',monospace !important;
+  font-variant-numeric:tabular-nums !important;
+  font-feature-settings:"tnum" !important;
+  letter-spacing:-.01em;
+}
 
 /* ── APP SHELL ── */
 .app{display:flex;height:100vh;overflow:hidden;}
