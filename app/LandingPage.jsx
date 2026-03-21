@@ -6,11 +6,18 @@ export default function LandingPage() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
         if (entry.isIntersecting) {
-          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          setTimeout(() => entry.target.classList.add('visible'), i * 100);
+          observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.06 });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+
+    const initObserver = () => {
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    };
+
+    // Pequeño delay para asegurar que el DOM esté listo
+    setTimeout(initObserver, 100);
 
     const handleScroll = () => {
       const nav = document.getElementById('navbar');
@@ -389,7 +396,7 @@ export default function LandingPage() {
 <!-- FOOTER -->
 <footer>
   <div class="footer-wrap">
-    <div class="footer-card">
+    <div class="footer-card reveal">
       <div class="footer-top">
         <div class="footer-brand">
           <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
