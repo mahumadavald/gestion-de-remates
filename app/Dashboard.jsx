@@ -260,8 +260,8 @@ const CSS = `
 html,body{height:100%;background:#f4f4f2;color:#1a1a1a;font-family:'Inter',sans-serif;overflow:hidden;font-size:16px;}
 button,input,select{font-family:'Inter',sans-serif;}
 
-/* ── NUMERIC STYLE — DM Mono tabular-nums ── */
-.num,[class*="monto"],[class*="precio"],[class*="puja"],[class*="oferta"],[class*="total"],[class*="balance"],[class*="amount"],[class*="paleta"],[class*="postura"],[class*="bid-amt"],[class*="price"]{font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums;font-feature-settings:"tnum";letter-spacing:-.01em;}
+/* ── NUMERIC STYLE — SF Pro Rounded Bold ── */
+.num,[class*="monto"],[class*="precio"],[class*="puja"],[class*="oferta"],[class*="total"],[class*="balance"],[class*="amount"],[class*="paleta"],[class*="postura"],[class*="bid-amt"],[class*="price"]{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-weight:700;font-variant-numeric:tabular-nums;font-feature-settings:"tnum";letter-spacing:-.02em;}
 
 /* ── APP SHELL ── */
 .app{display:flex;height:100vh;overflow:hidden;}

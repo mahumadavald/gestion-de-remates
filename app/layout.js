@@ -16,7 +16,24 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <style>{`
+          /* SF Pro Rounded Bold — todos los números y montos del sitio */
+          .num,
+          [class*="monto"], [class*="precio"], [class*="puja"],
+          [class*="oferta"], [class*="total"], [class*="balance"],
+          [class*="amount"], [class*="bid"], [class*="price"],
+          [class*="paleta"], [class*="postura"], [class*="stat-"],
+          [class*="plan-price"], [class*="hero-stat"] {
+            font-family: ui-rounded, 'SF Pro Rounded', -apple-system, system-ui, sans-serif !important;
+            font-weight: 700 !important;
+            font-variant-numeric: tabular-nums !important;
+            font-feature-settings: "tnum" !important;
+            letter-spacing: -0.02em;
+          }
+        `}</style>
+        {children}
+      </body>
     </html>
   )
 }
