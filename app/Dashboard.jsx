@@ -689,21 +689,65 @@ tr:hover td{background:rgba(56,178,246,.04);}
 
   /* SALA EN VIVO */
   .sala-wrap{grid-template-columns:1fr;height:auto;overflow:visible;}
-  .sala-sb{flex-direction:row;overflow-x:auto;overflow-y:hidden;border-right:none;border-bottom:1px solid var(--b1);max-height:140px;}
-  .sala-sbh{flex-shrink:0;padding:.5rem .8rem;white-space:nowrap;border-bottom:none;border-right:1px solid var(--b1);}
-  .lc{min-width:95px;max-width:110px;border-bottom:none;border-right:1px solid var(--b1);flex-shrink:0;padding:.5rem .55rem;}
-  .lth{height:50px;}
-  .lph{height:50px;}
-  .sala-main{padding:.8rem;gap:.65rem;}
+  /* Hide left lotes sidebar on mobile — too much space */
+  .sala-sb{display:none;}
+  .sala-main{padding:.75rem;gap:.6rem;overflow-y:visible;}
+
+  /* Photo carousel: compact height */
+  .sala-main > div[style*="grid-template-columns"] { grid-template-columns:1fr !important; gap:.5rem !important; }
+  .sala-main > div[style*="grid-template-columns"] > div:last-child { display:none !important; }
+
+  /* Lote info: tighter */
+  .ict{font-size:.65rem;}
+  .itl{font-size:1.2rem;}
+  .ids{font-size:.72rem;}
+
+  /* Tabs: full width */
+  .ctrl-tabs{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .ctrl-tab{padding:.55rem .5rem;font-size:.76rem;text-align:center;border-radius:0;}
+  .ctrl-tab:first-child{border-radius:7px 0 0 7px;border:1px solid var(--b1);}
+  .ctrl-tab:last-child{border-radius:0 7px 7px 0;border:1px solid var(--b1);border-left:none;}
+  .ctrl-tab.on{background:rgba(56,178,246,.12);}
+
+  /* Control Martillero: single column */
+  .ctrl-grid{grid-template-columns:1fr;gap:.6rem;}
   .ctrl-card{padding:.85rem;}
-  .inc-btns{gap:.3rem;}
-  .inc-btn{padding:.28rem .45rem;font-size:.68rem;}
-  .ab-list{gap:.3rem;}
-  .ab{font-size:.68rem;padding:.4rem .45rem;}
+
+  /* Increment buttons: 3-column grid */
+  .inc-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:.3rem;}
+  .inc-btn{padding:.32rem .3rem;font-size:.68rem;text-align:center;}
+
+  /* Postura presencial: stack inputs vertically */
+  .sala-main .ctrl-card div[style*="display:\"flex\""][style*="gap:\".4rem\""],
+  .sala-main .ctrl-card > div > div[style*="display:flex"][style*="gap:.4rem"] { flex-direction:column !important; }
+
+  /* Action buttons */
+  .ab-list{display:grid;grid-template-columns:1fr 1fr;gap:.3rem;}
+  .ab{font-size:.7rem;padding:.45rem .4rem;}
+  .ab-list .ab.bl{grid-column:1/-1;}
+
+  /* Live stats grid */
   .ls-grid{grid-template-columns:repeat(3,1fr);gap:.4rem;}
+
+  /* Bid feed (right panel): hidden — feed is duplicated inside sala-main ctrl-card area */
+  .sala-wrap > aside:last-child{display:none;}
+
+  /* Vista Postor: centered big offer, full-width bid button */
   .ba-card{padding:.85rem;}
-  .bap{font-size:2.2rem;}
-  .bb{padding:.7rem;font-size:.88rem;}
+  .bap{font-size:2.4rem;text-align:center;}
+  .bal{text-align:center;}
+  .bb{padding:.82rem;font-size:.95rem;width:100%;}
+  .banl{text-align:center;font-size:.7rem;}
+
+  /* BidRing: smaller */
+  .bid-ring-wrap{padding:.55rem;}
+  .bid-ring-outer{width:44px;height:44px;}
+  .bid-ring-svg{width:44px;height:44px;}
+  .bid-ring-num{font-size:1rem;}
+  .bid-ring-next{font-size:1rem;}
+
+  /* Bid stats row */
+  .bst{grid-template-columns:1fr 1fr;gap:.35rem;}
   .liq-body{grid-template-columns:repeat(2,1fr);}
   .btn-primary,.btn-sec,.btn-confirm{padding:.35rem .65rem;font-size:.72rem;}
   .notif{top:auto;bottom:1rem;right:.8rem;left:.8rem;text-align:center;}
@@ -713,6 +757,13 @@ tr:hover td{background:rgba(56,178,246,.04);}
   .stat-grid{grid-template-columns:1fr 1fr;}
   .stat-val{font-size:1.15rem;}
   .bap{font-size:1.8rem;}
+  /* Sala: very small screens */
+  .itl{font-size:1.05rem;}
+  .inc-btns{grid-template-columns:repeat(3,1fr);}
+  .ab-list{grid-template-columns:1fr;}
+  .ab-list .ab.bl{grid-column:auto;}
+  .ctrl-tabs{grid-template-columns:1fr 1fr;}
+  .bid-ring-wrap{flex-direction:column;align-items:flex-start;gap:.4rem;}
 }
 `;
 
