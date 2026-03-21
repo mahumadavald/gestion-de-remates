@@ -433,13 +433,13 @@ export default function LandingPage() {
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:#0d1117;
-  --surface:#161b22;
-  --surface-2:#21262d;
-  --border:#30363d;
-  --text:#e6edf3;
-  --muted:#8b949e;
-  --subtle:#484f58;
+  --bg:#ffffff;
+  --surface:#f8fafc;
+  --surface-2:#eef2f7;
+  --border:#e2e8f0;
+  --text:#1a202c;
+  --muted:#64748b;
+  --subtle:#94a3b8;
   --primary:#38B2F6;
   --primary-dark:#1E90D4;
   --teal:#14B8A6;
@@ -459,13 +459,13 @@ nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
   padding:1.25rem 4rem;
-  background:rgba(13,17,23,0);
+  background:rgba(255,255,255,0);
   backdrop-filter:blur(0px);
   border-bottom:1px solid transparent;
   transition:all .4s ease;
 }
 nav.scrolled{
-  background:rgba(13,17,23,0.92);
+  background:rgba(255,255,255,0.92);
   backdrop-filter:blur(24px);
   border-bottom-color:var(--border);
 }
@@ -575,7 +575,7 @@ nav.scrolled{
 .dash-body{display:flex;min-height:300px;}
 .dash-sidebar{
   width:170px;flex-shrink:0;
-  background:rgba(13,17,23,.7);
+  background:rgba(255,255,255,.85);
   border-right:1px solid var(--border);
   padding:1.1rem .8rem;
   display:flex;flex-direction:column;gap:.25rem;
