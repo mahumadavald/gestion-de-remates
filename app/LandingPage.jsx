@@ -34,14 +34,8 @@ export default function LandingPage() {
       <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       <path d="M4 12 Q4 5 12 5 L20 5" stroke="#14B8A6" stroke-width="3" stroke-linecap="round" fill="none"/>
     </svg>
-    <span class="nav-logo-text">GR Auction</span>
+    <span class="nav-logo-text">Auction Software</span>
   </a>
-  <div class="nav-links">
-    <a href="#features">Características</a>
-    <a href="#how">Cómo funciona</a>
-    <a href="#pricing">Planes</a>
-    <a href="#contact">Contacto</a>
-  </div>
   <div class="nav-cta">
     <a href="${WA_DEMO}" target="_blank" class="btn-nav btn-ghost">Solicitar demo</a>
     <a href="/dashboard" class="btn-nav btn-solid">Ingresar →</a>
@@ -249,22 +243,6 @@ export default function LandingPage() {
 </section>
 
 <!-- TESTIMONIAL -->
-<section class="testimonial-section">
-  <div class="test-inner reveal">
-    <div class="test-quote">"</div>
-    <blockquote class="test-text">
-      Pasamos de manejar todo con planillas y papel a tener la sala en vivo corriendo en menos de un día.
-      El timer de 15 segundos cambió completamente el ritmo de nuestros remates.
-    </blockquote>
-    <div class="test-author">
-      <div class="test-avatar">MA</div>
-      <div>
-        <div class="test-name">Remates Ahumada</div>
-        <div class="test-role">Casa de remates · Santiago, Chile</div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- HOW IT WORKS -->
 <section class="how-section" id="how">
@@ -434,14 +412,14 @@ export default function LandingPage() {
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#ffffff;
-  --surface:#f8fafc;
-  --surface-2:#eef2f7;
-  --border:#e2e8f0;
-  --text:#1a202c;
-  --muted:#64748b;
-  --subtle:#94a3b8;
-  --primary:#38B2F6;
-  --primary-dark:#1E90D4;
+  --surface:#f4f4f2;
+  --surface-2:#e9e9e7;
+  --border:#e5e7eb;
+  --text:#1a1a1a;
+  --muted:#6b7280;
+  --subtle:#9ca3af;
+  --primary:#06B6D4;
+  --primary-dark:#0891b2;
   --teal:#14B8A6;
   --teal-dark:#0D9488;
   --success:#3fb950;
