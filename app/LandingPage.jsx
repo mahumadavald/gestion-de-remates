@@ -388,19 +388,48 @@ export default function LandingPage() {
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-brand">
-    <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
-      <rect width="36" height="36" rx="9" fill="rgba(56,178,246,.1)" stroke="rgba(56,178,246,.2)" stroke-width="1"/>
-      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <path d="M4 12 Q4 5 12 5 L20 5" stroke="#14B8A6" stroke-width="2.8" stroke-linecap="round" fill="none"/>
-    </svg>
-    <span class="footer-copy">© 2025 GR Auction Software · gestionderemates.cl</span>
-  </div>
-  <div class="footer-links">
-    <a href="#features">Características</a>
-    <a href="#pricing">Planes</a>
-    <a href="/dashboard">Ingresar</a>
-    <a href="mailto:contacto@grauction.cl">Contacto</a>
+  <div class="footer-wrap">
+    <div class="footer-card">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
+            <rect width="36" height="36" rx="9" fill="rgba(6,182,212,.1)" stroke="rgba(6,182,212,.25)" stroke-width="1"/>
+            <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M4 12 Q4 5 12 5 L20 5" stroke="#14B8A6" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+          </svg>
+          <span class="footer-brand-name">Auction Software</span>
+        </div>
+        <p class="footer-desc">Software profesional para gestionar, operar y escalar remates en cualquier lugar de Chile.</p>
+        <div class="footer-socials">
+          <a href="mailto:contacto@grauction.cl" class="footer-social-btn" title="Email">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </a>
+          <a href="https://wa.me/56912345678" target="_blank" class="footer-social-btn" title="WhatsApp">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.535 5.857L.057 23.215a.75.75 0 0 0 .916.938l5.453-1.431A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.667-.523-5.188-1.435l-.372-.221-3.865 1.015 1.035-3.763-.242-.389A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <div class="footer-col-title">PÁGINAS</div>
+          <a href="#features" class="footer-col-link">Características</a>
+          <a href="#how" class="footer-col-link">Cómo funciona</a>
+          <a href="#pricing" class="footer-col-link">Planes</a>
+          <a href="/dashboard" class="footer-col-link">Ingresar</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">INFORMACIÓN</div>
+          <a href="mailto:contacto@grauction.cl" class="footer-col-link">Contacto</a>
+          <a href="/participar" class="footer-col-link">Participar</a>
+          <a href="#" class="footer-col-link">Privacidad</a>
+          <a href="#" class="footer-col-link">Términos de uso</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 GR Auction Software · gestionderemates.cl</span>
+      <span>Hecho en Chile 🇨🇱</span>
+    </div>
   </div>
 </footer>`;
 
@@ -810,17 +839,41 @@ nav.scrolled{
 .contact-chip:hover{border-color:var(--primary);color:var(--primary);}
 
 /* FOOTER */
-footer{
-  padding:2.5rem 4rem;
-  border-top:1px solid var(--border);
-  background:var(--bg);
-  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+footer{background:var(--surface);padding:2.5rem 2rem 1.5rem;}
+.footer-wrap{max-width:1100px;margin:0 auto;}
+.footer-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:1rem;
+  padding:2.5rem;
+  display:flex;
+  justify-content:space-between;
+  gap:2rem;
+  flex-wrap:wrap;
 }
-.footer-brand{display:flex;align-items:center;gap:.75rem;}
-.footer-copy{font-size:.76rem;color:var(--muted);}
-.footer-links{display:flex;gap:1.5rem;}
-.footer-links a{font-size:.76rem;color:var(--muted);text-decoration:none;transition:color .2s;}
-.footer-links a:hover{color:var(--primary);}
+.footer-top{display:flex;flex-direction:column;gap:1rem;max-width:280px;}
+.footer-brand{display:flex;align-items:center;gap:.6rem;}
+.footer-brand-name{font-weight:700;font-size:1rem;color:var(--text);}
+.footer-desc{font-size:.82rem;color:var(--muted);line-height:1.6;}
+.footer-socials{display:flex;gap:.6rem;}
+.footer-social-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);text-decoration:none;
+  transition:all .2s;
+}
+.footer-social-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff;}
+.footer-cols{display:flex;gap:3rem;}
+.footer-col{display:flex;flex-direction:column;gap:.6rem;}
+.footer-col-title{font-size:.7rem;font-weight:600;letter-spacing:.1em;color:var(--subtle);margin-bottom:.25rem;text-transform:uppercase;}
+.footer-col-link{font-size:.84rem;color:var(--muted);text-decoration:none;transition:color .2s;}
+.footer-col-link:hover{color:var(--primary);}
+.footer-bottom{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1.25rem .25rem 0;
+  font-size:.76rem;color:var(--muted);
+}
 
 /* REVEAL */
 .reveal{opacity:0;transform:translateY(32px);transition:opacity .75s ease,transform .75s ease;}
