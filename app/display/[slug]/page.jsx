@@ -220,15 +220,56 @@ export default function DisplayPage({ params }) {
   const [flash,      setFlash]      = useState(false);
   const [photoIdx,   setPhotoIdx]   = useState(0);
 
+  // Ref para guardar IDs de remates de ESTA casa — usado en el filtro realtime
+  const remateIdsRef = React.useRef(new Set());
+  // Ref para el lote activo actual — para filtrar pujas
+  const loteActivoRef = React.useRef(null);
+
+  // 1. Cargar casa + remates de esta casa + lote activo inicial
   useEffect(()=>{
     supabase.from("casas").select("*").eq("slug",slug).single()
-      .then(({data})=>{ if(data) setCasa(data); });
+      .then(async ({ data: casaData }) => {
+        if (!casaData) return;
+        setCasa(casaData);
+
+        // Cargar remates de esta casa para filtrar eventos realtime
+        const { data: remates } = await supabase
+          .from("remates")
+          .select("id")
+          .eq("casa_id", casaData.id);
+        if (remates) {
+          remateIdsRef.current = new Set(remates.map(r => r.id));
+        }
+
+        // Cargar lote activo si ya hay uno en subasta (ej: display abierto a mitad del remate)
+        if (remates && remates.length > 0) {
+          const remateIds = remates.map(r => r.id);
+          const { data: loteActual } = await supabase
+            .from("lotes")
+            .select("*")
+            .in("remate_id", remateIds)
+            .eq("estado", "en_subasta")
+            .limit(1)
+            .single();
+          if (loteActual) {
+            const fotos = Array.isArray(loteActual.imagenes) ? loteActual.imagenes
+              : (loteActual.imagenes ? [loteActual.imagenes] : []);
+            const l = { ...loteActual, fotos };
+            setLoteActivo(l);
+            loteActivoRef.current = l;
+            setOferta(loteActual.base || 0);
+            setEstado("live");
+          }
+        }
+      });
   },[slug]);
 
   useEffect(()=>{
-    const ch = supabase.channel("display-live")
+    const ch = supabase.channel(`display-live-${slug}`)
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"pujas"},(p)=>{
         const puja = p.new;
+        // Solo procesar si la puja es del lote activo de ESTA casa
+        if (loteActivoRef.current && puja.lote_id !== loteActivoRef.current.id) return;
         setOferta(puja.monto);
         setGanador(`Paleta ${String(puja.numero_postor).padStart(3,"0")}`);
         setEstado("live");
@@ -241,8 +282,13 @@ export default function DisplayPage({ params }) {
       })
       .on("postgres_changes",{event:"UPDATE",schema:"public",table:"lotes"},(p)=>{
         const l = p.new;
+        // Solo procesar lotes que pertenecen a un remate de ESTA casa
+        if (!remateIdsRef.current.has(l.remate_id)) return;
         if(l.estado==="en_subasta"){
-          setLoteActivo(l);
+          const fotos = Array.isArray(l.imagenes) ? l.imagenes : (l.imagenes ? [l.imagenes] : []);
+          const loteConFotos = { ...l, fotos };
+          setLoteActivo(loteConFotos);
+          loteActivoRef.current = loteConFotos;
           setOferta(l.base||0);
           setGanador(null);
           setHistorial([]);
@@ -256,7 +302,7 @@ export default function DisplayPage({ params }) {
       })
       .subscribe();
     return ()=>supabase.removeChannel(ch);
-  },[]);
+  },[slug]);
 
   useEffect(()=>{
     if(estado!=="live") return;
@@ -265,7 +311,7 @@ export default function DisplayPage({ params }) {
     return ()=>clearTimeout(t);
   },[timer,estado]);
 
-  const imgs = loteActivo?.fotos || [];
+  const imgs = loteActivo?.fotos || (Array.isArray(loteActivo?.imagenes) ? loteActivo.imagenes : []);
   useEffect(()=>{
     if(imgs.length<=1) return;
     const iv = setInterval(()=>setPhotoIdx(p=>(p+1)%imgs.length),5000);
