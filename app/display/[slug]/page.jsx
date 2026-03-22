@@ -29,21 +29,21 @@ const CSS = `
   .disp-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: .85rem 2rem;
-    background: #fff;
-    border-bottom: 1px solid #e5e7eb;
-    box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    background: linear-gradient(160deg, #0e7490 0%, #06B6D4 60%, #14B8A6 100%);
+    box-shadow: 0 2px 12px rgba(6,182,212,.3);
   }
-  .disp-casa { font-size: .95rem; font-weight: 700; color: #1a1a1a; }
+  .disp-casa { font-size: .95rem; font-weight: 700; color: rgba(255,255,255,.9); }
   .disp-live  {
     display: flex; align-items: center; gap: .55rem;
-    font-size: .78rem; font-weight: 700; color: #fff;
-    background: linear-gradient(135deg,#0e7490,#06B6D4);
+    font-size: .78rem; font-weight: 700; color: #0e7490;
+    background: #fff;
     padding: .3rem .85rem; border-radius: 999px;
     letter-spacing: .05em; text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
   }
-  .disp-live.sold { background: linear-gradient(135deg,#14B8A6,#0d9488); }
-  .disp-live.wait { background: #e5e7eb; color: #6b7280; }
-  .disp-dot   { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.9); animation: blink 1.4s infinite; }
+  .disp-live.sold { color: #0d9488; }
+  .disp-live.wait { color: #6b7280; }
+  .disp-dot   { width: 7px; height: 7px; border-radius: 50%; background: #06B6D4; animation: blink 1.4s infinite; }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.35)} }
 
@@ -287,19 +287,19 @@ export default function DisplayPage({ params }) {
           {/* Logo GR */}
           <div style={{display:"flex",alignItems:"center",gap:".6rem",flexShrink:0}}>
             <svg width="34" height="34" viewBox="0 0 36 36" fill="none">
-              <rect width="36" height="36" rx="8" fill="rgba(6,182,212,.1)" stroke="rgba(6,182,212,.2)" strokeWidth="1"/>
-              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <path d="M4 12 Q4 5 12 5 L20 5" stroke="#0e7490" strokeWidth="3.2" strokeLinecap="round" fill="none"/>
+              <rect width="36" height="36" rx="8" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.3)" strokeWidth="1"/>
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.65)" strokeWidth="3.2" strokeLinecap="round" fill="none"/>
             </svg>
             <div>
-              <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:".82rem",color:"#1a1a1a",lineHeight:1}}>Auction Software</div>
-              <div style={{fontSize:".6rem",color:"#9ca3af",letterSpacing:".06em",textTransform:"uppercase",marginTop:1}}>Gestión de Remates</div>
+              <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:".82rem",color:"#fff",lineHeight:1}}>Auction Software</div>
+              <div style={{fontSize:".6rem",color:"rgba(255,255,255,.65)",letterSpacing:".06em",textTransform:"uppercase",marginTop:1}}>Gestión de Remates</div>
             </div>
           </div>
 
           {/* Divider + Logo casa */}
           {(casa?.logo_url || casa?.nombre) && (
-            <div style={{width:1,height:32,background:"#e5e7eb",margin:"0 .25rem"}}/>
+            <div style={{width:1,height:32,background:"rgba(255,255,255,.25)",margin:"0 .25rem"}}/>
           )}
           {casa?.logo_url ? (
             <div style={{display:"flex",alignItems:"center",gap:".65rem"}}>
