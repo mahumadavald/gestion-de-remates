@@ -1970,6 +1970,7 @@ function Dashboard({ session, onLogout }) {
     estado:     r.estado,
     recaudado:  r.total_recaudado || 0,
     casa:       r.casa_nombre || "",
+    casaSlug:   r.casas?.slug || "",
     supabaseId: r.id,
   })) : REMATES;
 
@@ -2092,7 +2093,7 @@ function Dashboard({ session, onLogout }) {
       try {
         const timeout = new Promise((_,rej) => setTimeout(()=>rej(new Error("timeout")), 5000));
         const fetches = Promise.all([
-          supabase.from("remates").select("*").order("created_at", {ascending:false}),
+          supabase.from("remates").select("*, casas(slug)").order("created_at", {ascending:false}),
           supabase.from("lotes").select("*").order("orden"),
           supabase.from("postores").select("*").order("numero"),
           supabase.from("usuarios").select("*, casas(nombre)").order("nombre"),
@@ -6080,7 +6081,12 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 </div>
                 {aState==="live" && <div className="tb-live"><div className="ldot"/>Transmitiendo</div>}
                 <button className="btn-sec" style={{fontSize:".7rem"}} title="Abrir pantalla para proyección en sala"
-                  onClick={()=>window.open(`/display/${session?.casa||"rematesahumada"}`,"_blank","width=1280,height=720")}>
+                  onClick={()=>{
+                    const rem = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===salaRemateId);
+                    const slug = session?.casa || rem?.casaSlug || "";
+                    if (!slug) { notify("Selecciona un remate primero para abrir la pantalla de sala.","inf"); return; }
+                    window.open(`/display/${slug}`,"_blank","width=1280,height=720");
+                  }}>
                   Pantalla sala
                 </button>
                 {bids.every(b=>b.status==="sold"||bids[idx].count>0) && (
