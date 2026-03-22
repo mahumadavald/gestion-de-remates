@@ -11,125 +11,199 @@ const supabase = createClient(SUPA_URL, SUPA_KEY);
 const fmt = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n);
 
 const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; overflow: hidden; background: #0d1117; }
+  html, body { height: 100%; overflow: hidden; background: #f0f2f5; }
 
   .disp-root {
     width: 100vw; height: 100vh;
-    background: #0d1117;
+    background: #f0f2f5;
     font-family: 'Inter', sans-serif;
-    color: #e0eaf4;
+    color: #1a1a1a;
     display: grid;
     grid-template-rows: auto 1fr auto;
     overflow: hidden;
   }
 
+  /* ── Header ── */
   .disp-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 1rem 2.5rem;
-    background: #1F2937;
-    border-bottom: 2px solid #2d4060;
+    padding: .85rem 2rem;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 6px rgba(0,0,0,.06);
   }
-  .disp-logo { font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 800; color: #06B6D4; letter-spacing: .05em; text-transform: uppercase; }
-  .disp-casa { font-size: .9rem; font-weight: 600; color: #7a9ab8; }
-  .disp-live  { display: flex; align-items: center; gap: .6rem; font-size: .85rem; font-weight: 700; color: #14B8A6; }
-  .disp-dot   { width: 10px; height: 10px; border-radius: 50%; background: #14B8A6; animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+  .disp-casa { font-size: .95rem; font-weight: 700; color: #1a1a1a; }
+  .disp-live  {
+    display: flex; align-items: center; gap: .55rem;
+    font-size: .78rem; font-weight: 700; color: #fff;
+    background: linear-gradient(135deg,#0e7490,#06B6D4);
+    padding: .3rem .85rem; border-radius: 999px;
+    letter-spacing: .05em; text-transform: uppercase;
+  }
+  .disp-live.sold { background: linear-gradient(135deg,#14B8A6,#0d9488); }
+  .disp-live.wait { background: #e5e7eb; color: #6b7280; }
+  .disp-dot   { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.9); animation: blink 1.4s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.35)} }
 
+  /* ── Body grid ── */
   .disp-body {
     display: grid;
-    grid-template-columns: 1fr 420px;
-    gap: 0;
+    grid-template-columns: 1fr 400px;
+    gap: 1rem;
+    padding: 1rem;
     overflow: hidden;
   }
 
+  /* ── Foto ── */
   .disp-foto {
     position: relative;
-    background: #0d1117;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
+    border: 1px solid #e5e7eb;
   }
   .disp-foto img { width: 100%; height: 100%; object-fit: contain; }
-  .disp-foto-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: #2a3d52; }
+  .disp-foto-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1rem; color: #d1d5db;
+  }
+  .disp-foto-empty svg { opacity: .4; }
 
+  /* ── Right panel ── */
   .disp-panel {
-    background: #0d1117;
-    border-left: 2px solid #2d4060;
+    background: #fff;
+    border-radius: 18px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
     display: flex; flex-direction: column;
     overflow: hidden;
   }
 
+  /* Lote info */
   .disp-lote-info {
-    padding: 1.5rem 1.75rem;
-    border-bottom: 1px solid #2d4060;
+    padding: 1.4rem 1.6rem 1.2rem;
+    border-bottom: 1px solid #f3f4f6;
     flex-shrink: 0;
   }
-  .disp-lote-num { font-family: 'Inter', sans-serif; font-size: .75rem; font-weight: 700; color: #06B6D4; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .4rem; }
-  .disp-lote-name { font-family: 'Poppins', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: .4rem; }
-  .disp-lote-cat  { font-size: .82rem; color: #4a6a8a; }
+  .disp-lote-num {
+    display: inline-flex; align-items: center; gap: .4rem;
+    font-size: .68rem; font-weight: 700; color: #06B6D4;
+    letter-spacing: .1em; text-transform: uppercase;
+    background: rgba(6,182,212,.08); border: 1px solid rgba(6,182,212,.2);
+    padding: .15rem .55rem; border-radius: 4px;
+    margin-bottom: .65rem;
+  }
+  .disp-lote-name { font-family: 'Poppins', sans-serif; font-size: 1.35rem; font-weight: 800; color: #1a1a1a; line-height: 1.2; margin-bottom: .35rem; }
+  .disp-lote-cat  { font-size: .8rem; color: #9ca3af; }
 
+  /* Oferta */
   .disp-oferta-wrap {
-    padding: 1.5rem 1.75rem;
-    border-bottom: 1px solid #2d4060;
+    padding: 1.4rem 1.6rem;
+    border-bottom: 1px solid #f3f4f6;
     flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(6,182,212,.04) 0%, rgba(20,184,166,.04) 100%);
   }
-  .disp-oferta-label { font-size: .7rem; font-weight: 700; color: #4a6a8a; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .5rem; }
-  .disp-oferta-val   { font-family: 'Poppins', sans-serif; font-size: 2.8rem; font-weight: 800; color: #14B8A6; line-height: 1; transition: color .3s; }
+  .disp-oferta-label {
+    font-size: .65rem; font-weight: 700; color: #9ca3af;
+    text-transform: uppercase; letter-spacing: .1em; margin-bottom: .5rem;
+  }
+  .disp-oferta-val {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.9rem; font-weight: 800;
+    color: #06B6D4; line-height: 1;
+    transition: color .25s;
+    font-variant-numeric: tabular-nums;
+  }
   .disp-oferta-val.flash { color: #f59e0b; }
-  .disp-paleta       { font-family: 'Inter', sans-serif; font-size: .95rem; font-weight: 700; color: #7a9ab8; margin-top: .5rem; }
+  .disp-paleta { font-size: .88rem; font-weight: 600; color: #6b7280; margin-top: .45rem; }
 
+  .disp-base-row { display: flex; gap: 1.5rem; margin-top: .85rem; }
+  .disp-base-item-label { font-size: .58rem; color: #9ca3af; text-transform: uppercase; letter-spacing: .07em; margin-bottom: .1rem; }
+  .disp-base-item-val   { font-size: .9rem; font-weight: 700; color: #374151; font-variant-numeric: tabular-nums; }
+
+  /* Timer */
   .disp-timer-wrap {
-    padding: 1rem 1.75rem;
-    border-bottom: 1px solid #2d4060;
+    padding: .9rem 1.6rem;
+    border-bottom: 1px solid #f3f4f6;
     flex-shrink: 0;
   }
-  .disp-timer-label { font-size: .7rem; font-weight: 700; color: #4a6a8a; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .4rem; }
-  .disp-timer-bar   { height: 8px; background: #2d4060; border-radius: 4px; overflow: hidden; }
+  .disp-timer-label { font-size: .65rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .45rem; }
+  .disp-timer-bar   { height: 7px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
   .disp-timer-fill  { height: 100%; border-radius: 4px; transition: width 1s linear, background .5s; }
-  .disp-timer-num   { font-family: 'Inter', sans-serif; font-size: 1.5rem; font-weight: 700; margin-top: .4rem; }
+  .disp-timer-num   { font-family: 'Poppins', sans-serif; font-size: 1.6rem; font-weight: 800; margin-top: .4rem; font-variant-numeric: tabular-nums; }
 
+  /* Historial */
   .disp-hist {
     flex: 1; overflow-y: auto;
-    padding: 1rem 1.75rem;
+    padding: 1rem 1.6rem;
   }
-  .disp-hist-title { font-size: .7rem; font-weight: 700; color: #4a6a8a; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .65rem; }
-  .disp-hist-row   { display: flex; align-items: center; justify-content: space-between; padding: .55rem 0; border-bottom: 1px solid rgba(255,255,255,.04); }
-  .disp-hist-row:last-child { border-bottom: none; }
-  .disp-hist-pal   { font-family: 'Inter', sans-serif; font-size: .82rem; color: #4a6a8a; }
-  .disp-hist-monto { font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 700; color: #e0eaf4; }
-  .disp-hist-row.top .disp-hist-monto { color: #14B8A6; }
+  .disp-hist::-webkit-scrollbar { width: 4px; }
+  .disp-hist::-webkit-scrollbar-track { background: transparent; }
+  .disp-hist::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+  .disp-hist-title { font-size: .65rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .6rem; }
+  .disp-hist-row   {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .5rem .7rem; border-radius: 8px; margin-bottom: .25rem;
+    transition: background .15s;
+  }
+  .disp-hist-row:hover { background: #f9fafb; }
+  .disp-hist-row.top   { background: rgba(6,182,212,.07); }
+  .disp-hist-pal   { font-size: .8rem; color: #6b7280; font-weight: 500; }
+  .disp-hist-monto { font-size: .9rem; font-weight: 700; color: #374151; font-variant-numeric: tabular-nums; }
+  .disp-hist-row.top .disp-hist-monto { color: #06B6D4; }
+  .disp-hist-row.top .disp-hist-pal   { color: #0e7490; font-weight: 600; }
 
+  /* Footer */
   .disp-footer {
-    padding: .65rem 2.5rem;
-    background: #1F2937;
-    border-top: 2px solid #2d4060;
+    padding: .55rem 2rem;
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
     display: flex; align-items: center; justify-content: space-between;
   }
-  .disp-footer-txt { font-size: .72rem; color: #2a4a6a; }
-  .disp-footer-url { font-family: 'Inter', sans-serif; font-size: .72rem; color: #06B6D4; }
+  .disp-footer-txt { font-size: .7rem; color: #9ca3af; }
+  .disp-footer-url { font-size: .72rem; font-weight: 600; color: #06B6D4; }
 
+  /* Waiting */
   .disp-waiting {
     grid-column: 1 / -1;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 1.5rem; text-align: center;
   }
-  .disp-waiting-title { font-family: 'Poppins', sans-serif; font-size: 2.5rem; font-weight: 800; color: #2d4060; }
-  .disp-waiting-sub   { font-size: 1rem; color: #2a3d52; }
+  .disp-waiting-icon {
+    width: 88px; height: 88px; border-radius: 50%;
+    background: linear-gradient(135deg,rgba(6,182,212,.1),rgba(20,184,166,.1));
+    border: 2px solid rgba(6,182,212,.2);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .disp-waiting-title { font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 800; color: #1a1a1a; }
+  .disp-waiting-sub   { font-size: .95rem; color: #6b7280; }
 
+  /* Sold overlay */
   .disp-sold-overlay {
     position: absolute; inset: 0;
-    background: rgba(4,11,20,.85);
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(6px);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 1rem; z-index: 10;
-    animation: fadeIn .3s ease;
+    animation: fadeIn .35s ease;
   }
-  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-  .disp-sold-badge { font-family: 'Poppins', sans-serif; font-size: 3.5rem; font-weight: 800; color: #14B8A6; }
-  .disp-sold-paleta { font-family: 'Inter', sans-serif; font-size: 1.5rem; color: #7a9ab8; }
-  .disp-sold-monto  { font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; }
+  @keyframes fadeIn { from{opacity:0;transform:scale(.96)} to{opacity:1;transform:none} }
+  .disp-sold-badge  {
+    font-family: 'Poppins', sans-serif; font-size: 3rem; font-weight: 800;
+    background: linear-gradient(135deg,#0e7490,#14B8A6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: .04em;
+  }
+  .disp-sold-paleta { font-size: 1.4rem; color: #6b7280; font-weight: 600; }
+  .disp-sold-monto  { font-family: 'Poppins', sans-serif; font-size: 2.2rem; font-weight: 800; color: #1a1a1a; font-variant-numeric: tabular-nums; }
 
+  /* Foto dots */
   .disp-foto-dots { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
-  .disp-foto-dot  { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.3); cursor: pointer; transition: all .2s; }
+  .disp-foto-dot  { width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,.18); cursor: pointer; transition: all .2s; }
   .disp-foto-dot.on { width: 22px; border-radius: 4px; background: #06B6D4; }
 `;
 
@@ -201,52 +275,62 @@ export default function DisplayPage({ params }) {
   const timerColor = timer>8?"#14B8A6":timer>4?"#f59e0b":"#ef4444";
   const timerPct   = (timer/15)*100;
 
+  const liveBadgeClass = estado==="live" ? "disp-live" : estado==="sold" ? "disp-live sold" : "disp-live wait";
+
   return (
     <div className="disp-root">
       <style>{CSS}</style>
 
+      {/* ── Header ── */}
       <div className="disp-header">
         <div style={{display:"flex",alignItems:"center",gap:"1.25rem"}}>
-          <div style={{display:"flex",alignItems:"center",gap:".65rem",flexShrink:0}}>
-            <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
-              <rect width="36" height="36" rx="8" fill="rgba(6,182,212,.15)" stroke="rgba(6,182,212,.3)" strokeWidth="1"/>
+          {/* Logo GR */}
+          <div style={{display:"flex",alignItems:"center",gap:".6rem",flexShrink:0}}>
+            <svg width="34" height="34" viewBox="0 0 36 36" fill="none">
+              <rect width="36" height="36" rx="8" fill="rgba(6,182,212,.1)" stroke="rgba(6,182,212,.2)" strokeWidth="1"/>
               <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3.2" strokeLinecap="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="#0e7490" strokeWidth="3.2" strokeLinecap="round" fill="none"/>
             </svg>
             <div>
-              <div style={{fontFamily:"'Poppins', sans-serif",fontWeight:800,fontSize:".9rem",color:"#fff",letterSpacing:"-.01em",lineHeight:1}}>GR</div>
-              <div style={{fontFamily:"'Inter',sans-serif",fontWeight:400,fontSize:".55rem",color:"#7aaec8",letterSpacing:".08em",textTransform:"uppercase",marginTop:1}}>Auction Software</div>
+              <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:".82rem",color:"#1a1a1a",lineHeight:1}}>Auction Software</div>
+              <div style={{fontSize:".6rem",color:"#9ca3af",letterSpacing:".06em",textTransform:"uppercase",marginTop:1}}>Gestión de Remates</div>
             </div>
           </div>
 
-          {casa?.logo_url && <div style={{width:1,height:32,background:"rgba(255,255,255,.12)"}}/>}
-
+          {/* Divider + Logo casa */}
+          {(casa?.logo_url || casa?.nombre) && (
+            <div style={{width:1,height:32,background:"#e5e7eb",margin:"0 .25rem"}}/>
+          )}
           {casa?.logo_url ? (
-            <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
-              <img src={casa.logo_url} alt={casa.nombre} style={{height:36,maxWidth:160,objectFit:"contain"}}/>
-              <div className="disp-casa" style={{fontSize:".78rem"}}>{casa?.nombre||slug}</div>
+            <div style={{display:"flex",alignItems:"center",gap:".65rem"}}>
+              <img src={casa.logo_url} alt={casa.nombre} style={{height:34,maxWidth:160,objectFit:"contain"}}/>
+              <div className="disp-casa">{casa?.nombre||slug}</div>
             </div>
           ) : (
             <div className="disp-casa">{casa?.nombre||slug}</div>
           )}
         </div>
 
-        <div className="disp-live">
-          <div className="disp-dot"/>
+        <div className={liveBadgeClass}>
+          {estado==="live" && <div className="disp-dot"/>}
           {estado==="live"?"EN VIVO":estado==="sold"?"ADJUDICADO":"PRÓXIMAMENTE"}
         </div>
       </div>
 
+      {/* ── Body ── */}
       <div className="disp-body">
         {!loteActivo ? (
           <div className="disp-waiting">
-            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="#2d4060" strokeWidth="2" strokeLinecap="round">
-              <circle cx="40" cy="40" r="35"/><path d="M40 22v18l12 8"/>
-            </svg>
+            <div className="disp-waiting-icon">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#06B6D4" strokeWidth="2" strokeLinecap="round">
+                <circle cx="20" cy="20" r="16"/><path d="M20 10v10l7 5"/>
+              </svg>
+            </div>
             <div className="disp-waiting-title">Esperando inicio del remate</div>
-            <div className="disp-waiting-sub">{casa?.nombre}</div>
+            <div className="disp-waiting-sub">{casa?.nombre || "El remate comenzará en breve"}</div>
           </div>
         ) : (<>
+          {/* Foto */}
           <div className="disp-foto">
             {imgs.length>0 ? (
               <>
@@ -261,8 +345,10 @@ export default function DisplayPage({ params }) {
               </>
             ) : (
               <div className="disp-foto-empty">
-                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="8" y="16" width="64" height="48" rx="6"/><circle cx="40" cy="40" r="12"/><path d="M28 16l5-10h14l5 10"/></svg>
-                <div style={{fontSize:"1rem",color:"#2a3d52"}}>Sin fotos disponibles</div>
+                <svg width="72" height="72" viewBox="0 0 80 80" fill="none" stroke="#d1d5db" strokeWidth="1.5">
+                  <rect x="8" y="16" width="64" height="48" rx="8"/><circle cx="40" cy="40" r="12"/><path d="M28 16l5-10h14l5 10"/>
+                </svg>
+                <div style={{fontSize:"1rem",color:"#d1d5db",fontWeight:500}}>Sin fotos disponibles</div>
               </div>
             )}
             {estado==="sold"&&(
@@ -274,29 +360,33 @@ export default function DisplayPage({ params }) {
             )}
           </div>
 
+          {/* Panel derecho */}
           <div className="disp-panel">
+            {/* Lote info */}
             <div className="disp-lote-info">
-              <div className="disp-lote-num">Lote {loteActivo.orden||"—"} · {loteActivo.categoria}</div>
+              <div className="disp-lote-num">Lote {loteActivo.orden||"—"}{loteActivo.categoria ? ` · ${loteActivo.categoria}` : ""}</div>
               <div className="disp-lote-name">{loteActivo.nombre}</div>
-              <div className="disp-lote-cat">{loteActivo.descripcion?.split("|")[0]?.trim()||""}</div>
+              {loteActivo.descripcion && <div className="disp-lote-cat">{loteActivo.descripcion.split("|")[0]?.trim()}</div>}
             </div>
 
+            {/* Oferta */}
             <div className="disp-oferta-wrap">
               <div className="disp-oferta-label">Oferta actual</div>
               <div className={`disp-oferta-val${flash?" flash":""}`}>{fmt(oferta||loteActivo.base||0)}</div>
               {ganador&&<div className="disp-paleta">{ganador}</div>}
-              <div style={{marginTop:".75rem",display:"flex",alignItems:"center",gap:"1rem"}}>
+              <div className="disp-base-row">
                 <div>
-                  <div style={{fontSize:".6rem",color:"#4a6a8a",marginBottom:".15rem"}}>BASE</div>
-                  <div style={{fontFamily:"'Inter', sans-serif",fontSize:".9rem",color:"#4a6a8a"}}>{fmt(loteActivo.base||0)}</div>
+                  <div className="disp-base-item-label">Base</div>
+                  <div className="disp-base-item-val">{fmt(loteActivo.base||0)}</div>
                 </div>
                 <div>
-                  <div style={{fontSize:".6rem",color:"#4a6a8a",marginBottom:".15rem"}}>PUJAS</div>
-                  <div style={{fontFamily:"'Inter', sans-serif",fontSize:".9rem",color:"#e0eaf4",fontWeight:700}}>{historial.length}</div>
+                  <div className="disp-base-item-label">Pujas</div>
+                  <div className="disp-base-item-val" style={{color:"#06B6D4"}}>{historial.length}</div>
                 </div>
               </div>
             </div>
 
+            {/* Timer */}
             {estado==="live"&&(
               <div className="disp-timer-wrap">
                 <div className="disp-timer-label">Tiempo para adjudicar</div>
@@ -307,10 +397,11 @@ export default function DisplayPage({ params }) {
               </div>
             )}
 
+            {/* Historial */}
             <div className="disp-hist">
               <div className="disp-hist-title">Historial de pujas</div>
               {historial.length===0 ? (
-                <div style={{color:"#2a3d52",fontSize:".8rem"}}>Sin pujas aún</div>
+                <div style={{color:"#d1d5db",fontSize:".82rem",marginTop:".25rem"}}>Sin pujas aún</div>
               ) : historial.map((h,i)=>(
                 <div key={i} className={`disp-hist-row${i===0?" top":""}`}>
                   <span className="disp-hist-pal">{h.pal}</span>
@@ -322,8 +413,9 @@ export default function DisplayPage({ params }) {
         </>)}
       </div>
 
+      {/* ── Footer ── */}
       <div className="disp-footer">
-        <div className="disp-footer-txt">Sigue el remate desde tu celular</div>
+        <div className="disp-footer-txt">Participa desde tu celular</div>
         <div className="disp-footer-url">gestionderemates.cl/participar/{slug}</div>
         <div className="disp-footer-txt">{new Date().toLocaleString("es-CL",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"short"})}</div>
       </div>
