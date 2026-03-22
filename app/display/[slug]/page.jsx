@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = 'force-dynamic';
@@ -283,7 +283,9 @@ const CSS = `
 `;
 
 export default function DisplayPage({ params }) {
-  const slug = params?.slug || "rematesahumada";
+  // Next.js 15: params es una Promise — usar React.use() para desempaquetar
+  const resolvedParams = use(params);
+  const slug = resolvedParams?.slug || "";
 
   const [casa,       setCasa]       = useState(null);
   const [loteActivo, setLoteActivo] = useState(null);
@@ -295,21 +297,28 @@ export default function DisplayPage({ params }) {
   const [flash,      setFlash]      = useState(false);
   const [photoIdx,   setPhotoIdx]   = useState(0);
 
-  const remateIdsRef  = React.useRef(new Set());
+  const remateIdsRef  = React.useRef(null); // null = cargando, Set = listo
   const loteActivoRef = React.useRef(null);
+
+  // Estado para disparar la suscripción realtime DESPUÉS de tener los IDs
+  const [remateIds, setRemateIds] = useState(null);
 
   /* Cargar casa + remates + lote activo inicial */
   useEffect(()=>{
+    if (!slug) return;
     supabase.from("casas").select("*").eq("slug",slug).single()
       .then(async ({ data: casaData }) => {
-        if (!casaData) return;
+        if (!casaData) { setRemateIds([]); return; }
         setCasa(casaData);
         const { data: remates } = await supabase.from("remates").select("id").eq("casa_id", casaData.id);
-        if (remates) remateIdsRef.current = new Set(remates.map(r => r.id));
-        if (remates?.length > 0) {
+        const ids = remates?.map(r => r.id) || [];
+        remateIdsRef.current = new Set(ids);
+        setRemateIds(ids); // dispara el useEffect del realtime
+
+        if (ids.length > 0) {
           const { data: loteActual } = await supabase
             .from("lotes").select("*")
-            .in("remate_id", remates.map(r=>r.id))
+            .in("remate_id", ids)
             .eq("estado","en_subasta").limit(1).single();
           if (loteActual) {
             const fotos = Array.isArray(loteActual.imagenes) ? loteActual.imagenes : (loteActual.imagenes ? [loteActual.imagenes] : []);
@@ -321,12 +330,17 @@ export default function DisplayPage({ params }) {
       });
   },[slug]);
 
-  /* Realtime — filtrado por casa */
+  /* Realtime — se suscribe SOLO después de tener remateIds cargados */
   useEffect(()=>{
+    if (remateIds === null) return; // todavía cargando, no suscribir aún
+    const remateIdsSet = new Set(remateIds);
+
     const ch = supabase.channel(`display-live-${slug}`)
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"pujas"},(p)=>{
         const puja = p.new;
-        if (loteActivoRef.current && puja.lote_id !== loteActivoRef.current.id) return;
+        // Ignorar pujas si no hay lote activo O si la puja no es de este lote
+        if (!loteActivoRef.current) return;
+        if (puja.lote_id !== loteActivoRef.current.id) return;
         setOferta(puja.monto);
         setGanador(`Paleta ${String(puja.numero_postor).padStart(3,"0")}`);
         setEstado("live"); setTimer(15);
@@ -337,7 +351,8 @@ export default function DisplayPage({ params }) {
       })
       .on("postgres_changes",{event:"UPDATE",schema:"public",table:"lotes"},(p)=>{
         const l = p.new;
-        if (!remateIdsRef.current.has(l.remate_id)) return;
+        // Filtro estricto: solo lotes de los remates de ESTA casa
+        if (!remateIdsSet.has(l.remate_id)) return;
         if (l.estado==="en_subasta") {
           const fotos = Array.isArray(l.imagenes) ? l.imagenes : (l.imagenes ? [l.imagenes] : []);
           const lc = { ...l, fotos };
@@ -349,7 +364,7 @@ export default function DisplayPage({ params }) {
       })
       .subscribe();
     return ()=>supabase.removeChannel(ch);
-  },[slug]);
+  },[slug, remateIds]);
 
   /* Countdown */
   useEffect(()=>{
