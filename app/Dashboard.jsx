@@ -635,13 +635,13 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .ctrl-card-title{font-size:.74rem;font-weight:700;color:var(--wh2);margin-bottom:.85rem;padding-bottom:.6rem;border-bottom:1px solid var(--b1);}
 .asel{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--wh);font-size:.8rem;padding:.5rem .75rem;cursor:pointer;margin-bottom:.7rem;}
 .asel:focus{outline:none;border-color:var(--ac);}
-.inc-ctrl{background:rgba(56,178,246,.05);border:1px solid rgba(56,178,246,.15);border-radius:8px;padding:.85rem;margin-bottom:.7rem;}
+.inc-ctrl{background:rgba(56,178,246,.05);border:1px solid rgba(56,178,246,.15);border-radius:8px;padding:.85rem;margin-bottom:.7rem;display:flex;flex-direction:column;height:100%;box-sizing:border-box;}
 .inc-title{font-size:.65rem;font-weight:700;color:var(--ac);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;}
 .inc-cur-lbl{font-size:.64rem;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.18rem;}
 .inc-cur{font-size:1.4rem;font-weight:800;color:var(--wh);letter-spacing:-.01em;margin-bottom:.45rem;}
-.inc-btns{display:flex;flex-wrap:wrap;gap:.28rem;}
-.inc-btn{padding:.26rem .56rem;border-radius:5px;border:1px solid var(--b1);background:transparent;font-size:.66rem;font-weight:500;color:var(--mu);cursor:pointer;transition:all .15s;}
-.inc-btn:hover{border-color:var(--ac);color:var(--ac);}
+.inc-btns{display:grid;grid-template-columns:repeat(5,1fr);gap:.3rem;flex:1;}
+.inc-btn{padding:0;border-radius:7px;border:1px solid var(--b1);background:transparent;font-size:.72rem;font-weight:500;color:var(--mu);cursor:pointer;transition:all .15s;width:100%;height:100%;min-height:2rem;}
+.inc-btn:hover{border-color:var(--ac);color:var(--ac);background:rgba(56,178,246,.05);}
 .inc-btn.on{background:rgba(56,178,246,.15);border-color:var(--ac);color:var(--ac);font-weight:700;}
 .ab-list{display:flex;flex-direction:column;gap:.33rem;}
 .ab{padding:.58rem .9rem;border-radius:7px;border:none;font-size:.74rem;font-weight:600;cursor:pointer;transition:all .15s;}
@@ -6366,7 +6366,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         </div>
 
                         {/* ── 2-col: incremento + acciones ── */}
-                        <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:".65rem",marginBottom:".6rem"}}>
+                        <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:".65rem",marginBottom:".6rem",alignItems:"stretch"}}>
                           {/* Incremento */}
                           <div className="inc-ctrl" style={{marginBottom:0}}>
                             <div style={{display:"flex",alignItems:"baseline",gap:".5rem",marginBottom:".35rem"}}>
