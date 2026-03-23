@@ -50,6 +50,17 @@ const ADJUDICACIONES = [];
 const LOTES_SALA = [];
 
 const INC_OPTIONS = [10000,20000,50000,100000,200000,500000,1000000,2000000,5000000];
+
+// Quick bids inteligentes según precio base del lote
+const getSmartIncs = (base = 0) => {
+  if (base >= 10000000) return [500000,1000000,2000000,5000000];
+  if (base >= 5000000)  return [200000,500000,1000000,2000000,5000000];
+  if (base >= 2000000)  return [100000,200000,500000,1000000,2000000];
+  if (base >= 1000000)  return [100000,200000,500000,1000000];
+  if (base >= 500000)   return [50000,100000,200000,500000,1000000];
+  if (base >= 100000)   return [10000,20000,50000,100000,200000];
+  return [5000,10000,20000,50000,100000];
+};
 const BID_TIMER   = 15;
 const fmt  = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n);
 const fmtS = n => n>=1000000?`$${(n/1000000).toFixed(1)}M`:n>=1000?`$${(n/1000).toFixed(0)}K`:`$${n}`;
@@ -493,7 +504,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .sala-right-col{display:flex;flex-direction:column;gap:.85rem;overflow-y:auto;min-height:0;}
 
 /* Bid card */
-.sala-bid-card{background:var(--s2);border:1px solid var(--b1);border-radius:14px;padding:1.1rem;flex-shrink:0;}
+.sala-bid-card{background:var(--s2);border:1px solid var(--b1);border-radius:14px;padding:1.1rem;flex:1;display:flex;flex-direction:column;min-height:0;}
 .sala-bid-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.85rem;}
 .sala-bid-label{font-size:.65rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.2rem;}
 .sala-bid-amount{font-size:2.1rem;font-weight:800;color:var(--ac);line-height:1;letter-spacing:-.02em;transition:color .2s;}
@@ -501,7 +512,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .sala-livefeed-btn{display:flex;align-items:center;gap:.35rem;padding:.32rem .7rem;background:rgba(56,178,246,.1);border:1px solid rgba(56,178,246,.25);border-radius:7px;color:var(--ac);font-size:.68rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
 .sala-livefeed-btn:hover{background:rgba(56,178,246,.18);}
 .sala-last-bids-title{font-size:.63rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;}
-.sala-last-bids{display:flex;flex-direction:column;gap:.35rem;max-height:160px;overflow-y:auto;margin-bottom:.85rem;}
+.sala-last-bids{display:flex;flex-direction:column;gap:.35rem;flex:1;min-height:80px;max-height:260px;overflow-y:auto;margin-bottom:.85rem;}
 .sala-bid-row{display:flex;align-items:center;gap:.55rem;padding:.38rem .55rem;border-radius:7px;background:rgba(255,255,255,.025);border:1px solid var(--b1);}
 .sala-bid-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#fff;flex-shrink:0;background:var(--ac);}
 .sala-bid-name{flex:1;font-size:.73rem;font-weight:600;color:var(--wh2);}
@@ -520,13 +531,14 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .sala-place-bid-btn.adj:hover:not(:disabled){background:rgba(20,184,166,.25);}
 
 /* Quick bid row */
-.sala-quick-bids{display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;flex-shrink:0;}
+.sala-quick-bids{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:.55rem;flex-shrink:0;}
 .sala-quick-card{border-radius:10px;padding:.7rem .6rem;display:flex;flex-direction:column;align-items:center;gap:.22rem;cursor:pointer;transition:all .15s;border:1px solid var(--b1);background:var(--s2);position:relative;overflow:hidden;}
 .sala-quick-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;}
 .sala-quick-card.c0::after{background:var(--ac);}
 .sala-quick-card.c1::after{background:var(--yl);}
 .sala-quick-card.c2::after{background:#a78bfa;}
 .sala-quick-card.c3::after{background:var(--mu);}
+.sala-quick-card.c4::after{background:var(--gr);}
 .sala-quick-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.25);}
 .sala-quick-card:disabled{opacity:.3;cursor:not-allowed;transform:none;}
 .sala-quick-label{font-size:.58rem;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;}
@@ -572,7 +584,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .bid-ring-inc{font-size:.66rem;color:var(--mu);margin-top:.1rem;}
 
 /* BID BUTTONS */
-.bb{width:100%;padding:.85rem;background:var(--ac);border:none;border-radius:8px;font-size:1rem;font-weight:700;color:#fff;cursor:pointer;transition:all .15s;letter-spacing:.01em;}
+.bb{width:100%;padding:1.1rem 1rem;background:var(--ac);border:none;border-radius:10px;font-size:1.15rem;font-weight:700;color:#fff;cursor:pointer;transition:all .15s;letter-spacing:.01em;}
 .bb:hover:not(:disabled){background:var(--acH);transform:translateY(-2px);box-shadow:0 6px 20px rgba(56,178,246,.35);}
 .bb:disabled{opacity:.22;cursor:not-allowed;}
 .bb.sold{background:transparent;color:var(--ac);border:1px solid rgba(56,178,246,.3);}
@@ -6491,10 +6503,10 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                                   setCurInc(m-bid.current); placeBid(); setPostorCustom("");
                                 }
                               }}
-                              style={{flex:1,padding:".45rem .7rem",borderRadius:6,border:"1px solid var(--b1)",background:"var(--s2)",color:"var(--tx)",fontSize:".82rem"}}
+                              style={{flex:1,padding:".65rem .9rem",borderRadius:8,border:"1px solid var(--b1)",background:"var(--s2)",color:"var(--tx)",fontSize:".9rem"}}
                             />
                             <button
-                              style={{padding:".45rem .9rem",borderRadius:6,background:"var(--ac)",color:"#fff",border:"none",cursor:"pointer",fontWeight:600,fontSize:".82rem"}}
+                              style={{padding:".65rem 1.1rem",borderRadius:8,background:"var(--ac)",color:"#fff",border:"none",cursor:"pointer",fontWeight:700,fontSize:".9rem"}}
                               onClick={()=>{
                                 const m=parseInt(postorCustom.replace(/\D/g,""));
                                 if(!m||m<=bid.current){notify("El monto debe ser mayor a la oferta actual","inf");return;}
@@ -6513,7 +6525,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
 
                   {/* ── Quick Bid row (increment options) ── */}
                   <div className="sala-quick-bids">
-                    {INC_OPTIONS.slice(0,4).map((inc,i) => (
+                    {getSmartIncs(item?.base||0).map((inc,i) => (
                       <button
                         key={inc}
                         className={`sala-quick-card c${i}`}
