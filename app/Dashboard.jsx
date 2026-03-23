@@ -3355,9 +3355,9 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
             </div>
 
             {/* ── LAYOUT 2 COLUMNAS ── */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1.4fr",gap:"1.5rem",alignItems:"start"}}>
+            <div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr",gap:"1.5rem",alignItems:"start"}}>
 
-              {/* COLUMNA IZQUIERDA */}
+              {/* COLUMNA IZQUIERDA — Acciones + Remates Activos */}
               <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
 
                 {/* Cards de acción grandes */}
@@ -3391,7 +3391,56 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   </div>
                 </div>
 
-                {/* Stats cards */}
+                {/* Remates Activos — debajo de los botones */}
+                <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:16,padding:"1.2rem 1.3rem"}}>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1rem"}}>
+                    <div style={{fontSize:".95rem",fontWeight:700,color:"var(--wh2)"}}>Remates Activos</div>
+                    <button className="btn-sec" style={{fontSize:".72rem"}} onClick={()=>setPage("remates")}>Ver todos</button>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",gap:".75rem"}}>
+                    {REMATES_MERGED.filter(r=>r.estado==="activo").length===0 ? (
+                      <div style={{padding:"1.5rem",textAlign:"center",color:"var(--mu)",fontSize:".82rem",background:"var(--s1)",borderRadius:10,border:"1px solid var(--b1)"}}>
+                        No hay remates activos.{" "}
+                        <span style={{color:"var(--ac)",cursor:"pointer",fontWeight:600}} onClick={()=>setModal("nuevo-remate")}>Crear uno →</span>
+                      </div>
+                    ) : REMATES_MERGED.filter(r=>r.estado==="activo").map(r=>(
+                      <div key={r.id} style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:12,padding:"1rem 1.1rem",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"1rem",transition:"border-color .15s,box-shadow .15s"}}
+                        onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(6,182,212,.3)";e.currentTarget.style.boxShadow="0 4px 16px rgba(0,0,0,.06)"}}
+                        onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--b1)";e.currentTarget.style.boxShadow="none"}}>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontWeight:700,fontSize:".9rem",color:"var(--wh2)",marginBottom:".45rem",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</div>
+                          <div style={{display:"flex",gap:"1.2rem"}}>
+                            <div style={{display:"flex",alignItems:"center",gap:".3rem",fontSize:".75rem",color:"var(--gr)",fontWeight:600}}>
+                              <div style={{width:6,height:6,borderRadius:"50%",background:"var(--gr)"}}/>Activo
+                            </div>
+                            <div style={{fontSize:".75rem",color:"var(--mu)"}}>{r.fecha||"—"}</div>
+                            <div style={{fontSize:".75rem",color:"var(--mu)"}}>{r.modal||"—"}</div>
+                          </div>
+                        </div>
+                        <button style={{background:"var(--ac)",color:"#fff",border:"none",borderRadius:9,padding:".55rem 1rem",fontSize:".76rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"background .15s"}}
+                          onMouseEnter={e=>e.currentTarget.style.background="var(--acD)"}
+                          onMouseLeave={e=>e.currentTarget.style.background="var(--ac)"}
+                          onClick={async(e)=>{
+                            e.stopPropagation();
+                            setSalaRemateId(r.supabaseId||r.id);
+                            if(r.supabaseId){
+                              const {data:lr} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
+                              if(lr&&lr.length>0){
+                                const mapped=lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
+                                setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
+                              }
+                            }
+                            setIdx(0); setAState("waiting"); setBidTimer(null);
+                            setPage("sala");
+                          }}>Entrar →</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* COLUMNA DERECHA — Stats cards */}
+              <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
                 {[
                   {label:"Remates activos",   val:REMATES_MERGED.filter(r=>r.estado==="activo").length,  color:"#06B6D4",
                    icon:<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#06B6D4" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="3" width="16" height="14" rx="2"/><path d="M6 3v3M14 3v3M2 9h16"/></svg>},
@@ -3402,74 +3451,16 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   {label:"Remates cerrados",  val:REMATES_MERGED.filter(r=>r.estado==="cerrado").length, color:"#6b7280",
                    icon:<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#6b7280" strokeWidth="1.8" strokeLinecap="round"><circle cx="10" cy="10" r="8"/><path d="M7 10l2 2 4-4"/></svg>},
                 ].map((s,i)=>(
-                  <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:14,padding:"1rem 1.2rem",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:`3px solid ${s.color}`}}>
+                  <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:16,padding:"1.2rem 1.4rem",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:`3px solid ${s.color}`}}>
                     <div>
-                      <div style={{fontSize:".72rem",color:"var(--mu)",marginBottom:".3rem"}}>{s.label}</div>
-                      <div style={{fontSize:"2rem",fontWeight:800,color:"var(--wh2)",lineHeight:1}}>{s.val}</div>
+                      <div style={{fontSize:".72rem",color:"var(--mu)",marginBottom:".35rem",textTransform:"uppercase",letterSpacing:".04em"}}>{s.label}</div>
+                      <div style={{fontSize:"2.2rem",fontWeight:800,color:"var(--wh2)",lineHeight:1}}>{s.val}</div>
                     </div>
-                    <div style={{width:40,height:40,background:`${s.color}15`,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                    <div style={{width:44,height:44,background:`${s.color}18`,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center"}}>
                       {s.icon}
                     </div>
                   </div>
                 ))}
-              </div>
-
-              {/* COLUMNA DERECHA — Remates activos */}
-              <div>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1rem"}}>
-                  <div style={{fontSize:"1rem",fontWeight:700,color:"var(--wh2)"}}>Remates Activos</div>
-                  <button className="btn-sec" style={{fontSize:".72rem"}} onClick={()=>setPage("remates")}>Ver todos</button>
-                </div>
-                <div style={{display:"flex",flexDirection:"column",gap:".85rem"}}>
-                  {REMATES_MERGED.filter(r=>r.estado==="activo").length===0 ? (
-                    <div style={{padding:"2rem",textAlign:"center",color:"var(--mu)",fontSize:".82rem",background:"var(--s2)",borderRadius:14,border:"1px solid var(--b1)"}}>
-                      No hay remates activos.<br/>
-                      <span style={{color:"var(--ac)",cursor:"pointer",fontWeight:600}} onClick={()=>setModal("nuevo-remate")}>Crear uno →</span>
-                    </div>
-                  ) : REMATES_MERGED.filter(r=>r.estado==="activo").map(r=>(
-                    <div key={r.id} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:14,padding:"1.1rem 1.3rem",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"1rem",transition:"border-color .15s,box-shadow .15s"}}
-                      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(6,182,212,.3)";e.currentTarget.style.boxShadow="0 4px 16px rgba(0,0,0,.06)"}}
-                      onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--b1)";e.currentTarget.style.boxShadow="none"}}>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontWeight:700,fontSize:".92rem",color:"var(--wh2)",marginBottom:".5rem",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</div>
-                        <div style={{display:"flex",gap:"1.5rem"}}>
-                          <div>
-                            <div style={{fontSize:".65rem",color:"var(--mu)",marginBottom:".15rem",textTransform:"uppercase",letterSpacing:".05em"}}>Estado</div>
-                            <div style={{display:"flex",alignItems:"center",gap:".3rem",fontSize:".78rem",color:"var(--gr)",fontWeight:600}}>
-                              <div style={{width:7,height:7,borderRadius:"50%",background:"var(--gr)"}}/>Activo
-                            </div>
-                          </div>
-                          <div style={{width:1,background:"var(--b1)"}}/>
-                          <div>
-                            <div style={{fontSize:".65rem",color:"var(--mu)",marginBottom:".15rem",textTransform:"uppercase",letterSpacing:".05em"}}>Fecha</div>
-                            <div style={{fontSize:".78rem",color:"var(--wh2)",fontWeight:500}}>{r.fecha||"—"}</div>
-                          </div>
-                          <div style={{width:1,background:"var(--b1)"}}/>
-                          <div>
-                            <div style={{fontSize:".65rem",color:"var(--mu)",marginBottom:".15rem",textTransform:"uppercase",letterSpacing:".05em"}}>Tipo</div>
-                            <div style={{fontSize:".78rem",color:"var(--wh2)",fontWeight:500}}>{r.modal||"—"}</div>
-                          </div>
-                        </div>
-                      </div>
-                      <button style={{background:"var(--ac)",color:"#fff",border:"none",borderRadius:10,padding:".6rem 1.1rem",fontSize:".78rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"background .15s"}}
-                        onMouseEnter={e=>e.currentTarget.style.background="var(--acD)"}
-                        onMouseLeave={e=>e.currentTarget.style.background="var(--ac)"}
-                        onClick={async(e)=>{
-                          e.stopPropagation();
-                          setSalaRemateId(r.supabaseId||r.id);
-                          if(r.supabaseId){
-                            const {data:lr} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
-                            if(lr&&lr.length>0){
-                              const mapped=lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
-                              setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
-                            }
-                          }
-                          setIdx(0); setAState("waiting"); setBidTimer(null);
-                          setPage("sala");
-                        }}>Ingresar a la Sala →</button>
-                    </div>
-                  ))}
-                </div>
               </div>
 
             </div>
