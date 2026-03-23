@@ -2104,6 +2104,7 @@ function Dashboard({ session, onLogout }) {
     setNoCompradoresState(prev => prev.map(c => c.nPart===nPart ? {...c, devolucion:metodo} : c));
   };
   const [remateTerminado, setRemateTerminado] = useState(false);
+  const [adjCountdown,    setAdjCountdown]    = useState(null); // countdown auto-avance
 
   const timerRef    = useRef(null);
   const bidTimerRef = useRef(null);
@@ -2119,6 +2120,29 @@ function Dashboard({ session, onLogout }) {
     bidTimerRef.current = setTimeout(()=>setBidTimer(t=>t-1),1000);
     return () => clearTimeout(bidTimerRef.current);
   }, [bidTimer, aState]);
+
+  // adjCountdown: 3s después de adjudicar → pasa al siguiente lote automáticamente
+  useEffect(() => {
+    if (adjCountdown===null) return;
+    if (adjCountdown<=0) {
+      setAdjCountdown(null);
+      setIdx(prev => {
+        const next = prev+1;
+        if (next < lots.length) {
+          setAState("waiting"); setBidTimer(null); setLastBidder(null);
+          setCurInc(lots[next]?.inc||100000); setCustomMonto(""); setPhotoIdx(0);
+          notify(`Lote ${next+1} — ${lots[next]?.name}`,"inf");
+          return next;
+        } else {
+          notify("Último lote adjudicado — remate finalizado","ok");
+          return prev;
+        }
+      });
+      return;
+    }
+    const t = setTimeout(()=>setAdjCountdown(c=>c-1),1000);
+    return ()=>clearTimeout(t);
+  }, [adjCountdown]);
 
   // ── Supabase: carga inicial ──────────────────────────────────────
   useEffect(() => {
@@ -2233,6 +2257,8 @@ function Dashboard({ session, onLogout }) {
 
     setBids(p=>{const n=[...p];n[idx]={...n[idx],status:"sold"};return n;});
     setAState("sold"); setBidTimer(null);
+    // Auto-avance al siguiente lote en 3 segundos
+    if (idx < lots.length-1) setAdjCountdown(3);
 
     if (winner) {
       // Liquidación automática — comisión según tipo + gastos admin si motorizado
@@ -6281,7 +6307,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                       {lots.map((l,i)=>{
                         const b = bids[i]||{};
                         const esCurrent = i===idx;
-                        const esAdj = b.status==="adjudicado";
+                        const esAdj = b.status==="sold";
                         return (
                           <div key={i} className={`sala-lote-mini${esCurrent?" current":esAdj?" adj":""}`}
                             style={{cursor:"pointer"}}
@@ -6458,6 +6484,23 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                               <div className="bt-info">{bidTimer<=2?"¡ADJUDICANDO AHORA!":bidTimer<=5?"⚠ Última oportunidad":"Adjudica en"}</div>
                               <div className="bt-leader">{lastBidder||"—"} lidera · {fmt((bids[idx]?.current||0))}</div>
                             </div>
+                          </div>
+                        )}
+                        {/* Banner auto-avance post-adjudicación */}
+                        {adjCountdown!==null && (
+                          <div style={{marginTop:".5rem",background:"rgba(20,184,166,.08)",border:"1px solid rgba(20,184,166,.3)",borderRadius:8,padding:".6rem .85rem",display:"flex",alignItems:"center",justifyContent:"space-between",gap:".5rem"}}>
+                            <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
+                              <div style={{fontSize:"1.4rem",fontWeight:800,color:"var(--gr)",minWidth:24,textAlign:"center"}}>{adjCountdown}</div>
+                              <div>
+                                <div style={{fontSize:".72rem",fontWeight:700,color:"var(--gr)"}}>✓ Lote adjudicado</div>
+                                <div style={{fontSize:".65rem",color:"var(--mu)"}}>Pasando al lote {idx+2} automáticamente…</div>
+                              </div>
+                            </div>
+                            <button
+                              onClick={()=>{ setAdjCountdown(0); }}
+                              style={{padding:".3rem .65rem",background:"rgba(20,184,166,.2)",border:"1px solid rgba(20,184,166,.4)",borderRadius:6,color:"var(--gr)",fontSize:".68rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+                              Pasar ahora →
+                            </button>
                           </div>
                         )}
                       </>
