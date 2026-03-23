@@ -6439,31 +6439,6 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     ))}
                   </div>
 
-                  {/* ── Lotes sidebar (collapsible list) ── */}
-                  <div className="ctrl-card" style={{flexShrink:0}}>
-                    <div className="ctrl-card-title" style={{marginBottom:".6rem"}}>
-                      {lots.length} lotes en remate
-                    </div>
-                    <div style={{display:"flex",flexDirection:"column",gap:".3rem",maxHeight:220,overflowY:"auto"}}>
-                      {lots.map((it,i) => {
-                        const bs=bids[i]; const st=bs?.status==="sold"?"sold":i===idx&&aState==="live"?"live":"wait";
-                        return (
-                          <div key={it.id} className={`lc${idx===i?" on":""}`} style={{borderRadius:7,display:"flex",alignItems:"center",gap:".55rem",padding:".5rem .7rem"}} onClick={()=>setIdx(i)}>
-                            {it.imgs?.[0]
-                              ? <img src={it.imgs[0]} alt={it.name} style={{width:36,height:36,borderRadius:5,objectFit:"cover",flexShrink:0,border:"1px solid var(--b2)"}}/>
-                              : <div style={{width:36,height:36,borderRadius:5,background:"var(--s3)",border:"1px solid var(--b1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:".6rem",color:"var(--mu)"}}>—</div>
-                            }
-                            <div style={{flex:1,minWidth:0}}>
-                              <div style={{fontSize:".62rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Lote {String(i+1).padStart(2,"0")}</div>
-                              <div style={{fontSize:".76rem",fontWeight:600,color:"var(--wh2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.name}</div>
-                            </div>
-                            <div className={`lbdg ${st==="live"?"blv":st==="sold"?"bsd":"bwt"}`} style={{flexShrink:0}}>{st==="live"?"En vivo":st==="sold"?"Vendido":"Pdte."}</div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
                 </div>{/* end sala-right-col */}
               </div>{/* end sala-body */}
             </div>{/* end sala-wrap-new */}
