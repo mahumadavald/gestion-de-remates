@@ -2046,12 +2046,20 @@ function Dashboard({ session, onLogout }) {
   const photoIntervalRef = React.useRef(null);
   // Video martillero
   const videoRef           = React.useRef(null);
-  const streamRef          = React.useRef(null);
+  const camStreamRef       = React.useRef(null);   // stream webcam (preview)
+  const screenStreamRef    = React.useRef(null);   // stream pantalla (grabación)
   const mediaRecorderRef   = React.useRef(null);
   const recordedChunksRef  = React.useRef([]);
   const [camActiva,   setCamActiva]   = useState(false);
   const [camError,    setCamError]    = useState(null);
   const [grabando,    setGrabando]    = useState(false);
+
+  // Fix live preview: asignar srcObject después de que el <video> esté en el DOM
+  React.useEffect(() => {
+    if (camActiva && videoRef.current && camStreamRef.current) {
+      videoRef.current.srcObject = camStreamRef.current;
+    }
+  }, [camActiva]);
   // Post-remate: liquidaciones y devoluciones generadas automáticamente
   const [liquidaciones, setLiquidaciones] = useState([]);
 
@@ -2278,7 +2286,56 @@ function Dashboard({ session, onLogout }) {
     return () => { if (photoIntervalRef.current) clearInterval(photoIntervalRef.current); };
   }, [idx, lots]);
 
-  // ── Cámara en vivo martillero ──
+  // ── Cámara en vivo martillero (solo preview, sin grabar) ──
+  const activarCamara = async () => {
+    setCamError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      camStreamRef.current = stream;
+      setCamActiva(true);
+      // srcObject se asigna via useEffect (el <video> puede no estar en DOM aún)
+    } catch(e) {
+      setCamError("No se pudo acceder a la cámara. Verifica los permisos del navegador.");
+    }
+  };
+
+  const detenerCamara = () => {
+    if (camStreamRef.current) camStreamRef.current.getTracks().forEach(t => t.stop());
+    camStreamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setCamActiva(false);
+  };
+
+  // ── Grabación de pantalla completa (se inicia al Iniciar el remate) ──
+  const iniciarGrabacionPantalla = async () => {
+    if (grabando) return;
+    try {
+      // Captura toda la pestaña incluyendo las pujas — para transparencia
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: { mediaSource: "browser", displaySurface: "browser" },
+        audio: true,
+        preferCurrentTab: true,
+      });
+      screenStreamRef.current = screenStream;
+      recordedChunksRef.current = [];
+      const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
+        ? "video/webm;codecs=vp9,opus" : "video/webm";
+      const mr = new MediaRecorder(screenStream, { mimeType });
+      mr.ondataavailable = e => { if (e.data.size > 0) recordedChunksRef.current.push(e.data); };
+      mr.start(1000);
+      mediaRecorderRef.current = mr;
+      setGrabando(true);
+      // Si el usuario detiene el share desde el navegador, parar grabación
+      screenStream.getVideoTracks()[0].onended = () => {
+        setGrabando(false);
+        screenStreamRef.current = null;
+      };
+    } catch(e) {
+      // Usuario canceló o navegador no soporta — continuar sin grabación
+      console.log("Grabación de pantalla cancelada:", e.message);
+    }
+  };
+
   const guardarGrabacion = (nombreRemate) => {
     if (!mediaRecorderRef.current || mediaRecorderRef.current.state === "inactive") return;
     mediaRecorderRef.current.onstop = () => {
@@ -2297,35 +2354,8 @@ function Dashboard({ session, onLogout }) {
       recordedChunksRef.current = [];
     };
     mediaRecorderRef.current.stop();
+    if (screenStreamRef.current) { screenStreamRef.current.getTracks().forEach(t => t.stop()); screenStreamRef.current = null; }
     setGrabando(false);
-  };
-
-  const activarCamara = async () => {
-    setCamError(null);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      streamRef.current = stream;
-      if (videoRef.current) videoRef.current.srcObject = stream;
-      setCamActiva(true);
-      // Iniciar grabación automáticamente
-      recordedChunksRef.current = [];
-      const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
-        ? "video/webm;codecs=vp9,opus" : "video/webm";
-      const mr = new MediaRecorder(stream, { mimeType });
-      mr.ondataavailable = e => { if (e.data.size > 0) recordedChunksRef.current.push(e.data); };
-      mr.start(1000);
-      mediaRecorderRef.current = mr;
-      setGrabando(true);
-    } catch(e) {
-      setCamError("No se pudo acceder a la cámara. Verifica los permisos del navegador.");
-    }
-  };
-  const detenerCamara = () => {
-    guardarGrabacion(lots[idx]?.name || "remate");
-    if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
-    streamRef.current = null;
-    if (videoRef.current) videoRef.current.srcObject = null;
-    setCamActiva(false);
   };
 
   // Cerrar remate completo → genera todas las liquidaciones/devoluciones pendientes
@@ -2379,7 +2409,11 @@ function Dashboard({ session, onLogout }) {
     })();
   };
 
-  const startAuction  = () => { setAState("live"); setBidTimer(null); setLastBidder(null); };
+  const startAuction  = () => {
+    setAState("live"); setBidTimer(null); setLastBidder(null);
+    // Iniciar grabación de pantalla completa automáticamente al arrancar el remate
+    iniciarGrabacionPantalla();
+  };
   const pauseAuction  = () => { setAState("paused"); setBidTimer(null); };
   const adjudicar     = () => doAdjudicar(true);
   const pasarLote     = () => {
@@ -6189,22 +6223,26 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                       <button
                         onClick={camActiva ? detenerCamara : activarCamara}
                         style={{position:"absolute",bottom:6,left:6,display:"flex",alignItems:"center",gap:".3rem",padding:".22rem .55rem",background:camActiva?"rgba(224,82,82,.82)":"rgba(0,0,0,.58)",border:"none",borderRadius:5,color:"#fff",fontSize:".62rem",fontWeight:700,cursor:"pointer",backdropFilter:"blur(4px)"}}
-                        title="Cámara martillero"
+                        title="Cámara martillero (solo preview)"
                       >
                         <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M1 3h8l3 3v5H1V3z"/><circle cx="5" cy="8" r="1.5"/></svg>
                         {camActiva ? "Apagar cam" : "Cámara"}
-                        {camActiva && <span style={{width:5,height:5,borderRadius:"50%",background:"#fff",animation:"pulse 1s infinite"}}/>}
                       </button>
+
+                      {/* Indicador REC grabación de pantalla */}
+                      {grabando && (
+                        <div style={{position:"absolute",bottom:6,right:6,display:"flex",alignItems:"center",gap:".3rem",padding:".22rem .55rem",background:"rgba(224,82,82,.85)",borderRadius:5,color:"#fff",fontSize:".62rem",fontWeight:800,backdropFilter:"blur(4px)"}}>
+                          <span style={{width:6,height:6,borderRadius:"50%",background:"#fff",animation:"pulse .8s infinite"}}/>
+                          REC
+                        </div>
+                      )}
                     </div>
 
                     {/* ── CÁMARA LATERAL (solo desktop) ── */}
                     {camActiva && (
                       <div className="sala-cam-side">
                         <video ref={videoRef} autoPlay muted playsInline style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
-                        <div className="sala-cam-side-label">
-                          {grabando && <span className="sala-cam-rec"/>}
-                          CAM
-                        </div>
+                        <div className="sala-cam-side-label">CAM</div>
                       </div>
                     )}
                   </div>
