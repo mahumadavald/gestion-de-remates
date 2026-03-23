@@ -479,20 +479,20 @@ tr:hover td{background:rgba(56,178,246,.04);}
 /* Timer compacto */
 .sala-timer{display:flex;align-items:center;justify-content:space-between;padding:.4rem 1rem .45rem;border-top:1px solid var(--b1);margin-top:.25rem;background:rgba(0,0,0,.04);flex-shrink:0;}
 /* Lotes próximos — ultra compacto */
-.sala-lotes-proximos{padding:.35rem .6rem .45rem;border-top:1px solid var(--b1);flex-shrink:0;}
-.sala-lotes-proximos-title{font-size:.62rem;font-weight:700;color:var(--wh2);margin-bottom:.3rem;letter-spacing:.01em;}
-.sala-lotes-proximos-list{display:flex;flex-direction:column;gap:.18rem;max-height:106px;overflow-y:auto;}
+.sala-lotes-proximos{padding:.6rem .85rem .75rem;border-top:1px solid var(--b1);flex-shrink:0;}
+.sala-lotes-proximos-title{font-size:.75rem;font-weight:700;color:var(--wh2);margin-bottom:.5rem;letter-spacing:.01em;}
+.sala-lotes-proximos-list{display:flex;flex-direction:column;gap:.32rem;max-height:180px;overflow-y:auto;}
 .sala-lotes-proximos-list::-webkit-scrollbar{width:3px;}
 .sala-lotes-proximos-list::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px;}
-.sala-lote-mini{display:flex;align-items:center;gap:.4rem;padding:.18rem .35rem;border-radius:6px;background:var(--s1);border:1px solid var(--b1);transition:all .15s;}
+.sala-lote-mini{display:flex;align-items:center;gap:.6rem;padding:.42rem .6rem;border-radius:8px;background:var(--s1);border:1px solid var(--b1);transition:all .15s;}
 .sala-lote-mini:hover{border-color:rgba(6,182,212,.25);background:rgba(6,182,212,.04);}
 .sala-lote-mini.current{background:rgba(6,182,212,.08);border-color:rgba(6,182,212,.3);}
 .sala-lote-mini.adj{opacity:.45;}
-.sala-lote-mini-img{width:24px;height:24px;border-radius:4px;object-fit:cover;flex-shrink:0;}
-.sala-lote-mini-noimg{width:24px;height:24px;border-radius:4px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--mu);flex-shrink:0;}
-.sala-lote-mini-info{flex:1;min-width:0;display:flex;align-items:center;gap:.35rem;}
-.sala-lote-mini-num{font-size:.56rem;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;flex-shrink:0;}
-.sala-lote-mini-name{font-size:.68rem;font-weight:600;color:var(--wh2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sala-lote-mini-img{width:34px;height:34px;border-radius:5px;object-fit:cover;flex-shrink:0;}
+.sala-lote-mini-noimg{width:34px;height:34px;border-radius:5px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--mu);flex-shrink:0;}
+.sala-lote-mini-info{flex:1;min-width:0;display:flex;align-items:center;gap:.45rem;}
+.sala-lote-mini-num{font-size:.65rem;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;flex-shrink:0;}
+.sala-lote-mini-name{font-size:.8rem;font-weight:600;color:var(--wh2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sala-lote-mini-status{flex-shrink:0;}
 .sala-timer span:first-child{font-size:.68rem;font-weight:600;color:var(--mu2);}
 .sala-timer-num{font-size:1.3rem;font-weight:800;letter-spacing:.04em;font-family:'Inter',monospace;}
@@ -531,7 +531,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .sala-place-bid-btn.adj:hover:not(:disabled){background:rgba(20,184,166,.25);}
 
 /* Quick bid row */
-.sala-quick-bids{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:.55rem;flex-shrink:0;}
+.sala-quick-bids{display:grid;grid-template-columns:repeat(5,1fr);gap:.45rem;flex-shrink:0;}
 .sala-quick-card{border-radius:10px;padding:.7rem .6rem;display:flex;flex-direction:column;align-items:center;gap:.22rem;cursor:pointer;transition:all .15s;border:1px solid var(--b1);background:var(--s2);position:relative;overflow:hidden;}
 .sala-quick-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;}
 .sala-quick-card.c0::after{background:var(--ac);}
@@ -6521,23 +6521,24 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         </div>
                       </div>
                     )}
-                  </div>
 
-                  {/* ── Quick Bid row (increment options) ── */}
-                  <div className="sala-quick-bids">
-                    {getSmartIncs(item?.base||0).map((inc,i) => (
-                      <button
-                        key={inc}
-                        className={`sala-quick-card c${i}`}
-                        disabled={aState!=="live"}
-                        onClick={()=>{setCurInc(inc); placeBid();}}
-                        title={`Pujar con incremento ${fmtS(inc)}`}
-                      >
-                        <div className="sala-quick-label">Quick Bid</div>
-                        <div className="sala-quick-amount">{fmtS(inc)}</div>
-                      </button>
-                    ))}
-                  </div>
+                    {/* ── Quick Bid row ── */}
+                    <div className="sala-quick-bids" style={{marginTop:"auto",paddingTop:".75rem"}}>
+                      {getSmartIncs(item?.base||0).map((inc,i) => (
+                        <button
+                          key={inc}
+                          className={`sala-quick-card c${i}`}
+                          disabled={aState!=="live"}
+                          onClick={()=>{setCurInc(inc); placeBid();}}
+                          title={`Pujar con incremento ${fmtS(inc)}`}
+                        >
+                          <div className="sala-quick-label">Quick Bid</div>
+                          <div className="sala-quick-amount">{fmtS(inc)}</div>
+                        </button>
+                      ))}
+                    </div>
+
+                  </div>{/* end sala-bid-card */}
 
                 </div>{/* end sala-right-col */}
               </div>}{/* end sala-body */}
