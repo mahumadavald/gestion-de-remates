@@ -447,41 +447,44 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .sala-wrap-new{display:flex;flex-direction:column;height:calc(100vh - 52px);overflow:hidden;background:var(--bg);}
 .sala-header{display:flex;align-items:center;gap:1rem;padding:.65rem 1.25rem;background:var(--s1);border-bottom:1px solid var(--b1);flex-shrink:0;}
 .sala-header h1{font-size:1rem;font-weight:800;color:var(--wh);margin:0;white-space:nowrap;}
-.sala-body{display:grid;grid-template-columns:1fr 380px;gap:1.1rem;padding:1.1rem 1.25rem;flex:1;overflow:hidden;min-height:0;}
+.sala-body{display:grid;grid-template-columns:1fr 460px;gap:1.1rem;padding:1rem 1.25rem;flex:1;overflow:hidden;min-height:0;}
 
 /* Left card */
 .sala-left-card{background:var(--s2);border:1px solid var(--b1);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
-.sala-live-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.28rem .75rem;background:rgba(20,184,166,.15);color:var(--gr);border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.04em;margin:.85rem auto 0;width:fit-content;}
-.sala-lot-title{font-size:1.05rem;font-weight:800;color:var(--wh);text-align:center;padding:.5rem 1.1rem .3rem;line-height:1.25;}
-.sala-photo-wrap{position:relative;background:var(--s3);margin:.4rem .85rem;border-radius:10px;overflow:hidden;height:220px;display:flex;gap:0;}
+.sala-live-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.22rem .65rem;background:rgba(20,184,166,.15);color:var(--gr);border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.04em;margin:.6rem auto 0;width:fit-content;}
+.sala-lot-title{font-size:1rem;font-weight:800;color:var(--wh);text-align:center;padding:.35rem 1.1rem .2rem;line-height:1.2;}
+/* Foto + cámara: flex:1 para llenar el espacio disponible */
+.sala-photo-wrap{position:relative;background:var(--s3);margin:.3rem .75rem;border-radius:10px;overflow:hidden;flex:1;min-height:200px;display:flex;gap:0;}
 .sala-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
 .sala-photo-placeholder{width:100%;height:100%;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;}
-/* Foto principal dentro del wrap */
+/* Foto principal */
 .sala-photo-main{flex:1;position:relative;overflow:hidden;min-width:0;}
 .sala-photo-main img{width:100%;height:100%;object-fit:cover;display:block;}
-/* Cámara lateral */
-.sala-cam-side{width:38%;flex-shrink:0;background:#000;position:relative;border-left:2px solid var(--s3);}
+/* Cámara lateral — 36% del ancho */
+.sala-cam-side{width:36%;flex-shrink:0;background:#000;position:relative;border-left:2px solid var(--s3);}
 .sala-cam-side video{width:100%;height:100%;object-fit:cover;display:block;}
 .sala-cam-side-label{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.6);border-radius:4px;padding:.12rem .4rem;font-size:.58rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:3px;}
 .sala-cam-rec{width:5px;height:5px;border-radius:50%;background:var(--rd);animation:pulse 1s infinite;}
-.sala-timer{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem .85rem;border-top:1px solid var(--b1);margin-top:.4rem;background:rgba(0,0,0,.04);flex-shrink:0;}
-.sala-lotes-proximos{padding:.5rem .75rem .65rem;border-top:1px solid var(--b1);}
-.sala-lotes-proximos-title{font-size:.68rem;font-weight:700;color:var(--wh2);margin-bottom:.4rem;letter-spacing:.01em;}
-.sala-lotes-proximos-list{display:flex;flex-direction:column;gap:.25rem;max-height:150px;overflow-y:auto;}
+/* Timer compacto */
+.sala-timer{display:flex;align-items:center;justify-content:space-between;padding:.4rem 1rem .45rem;border-top:1px solid var(--b1);margin-top:.25rem;background:rgba(0,0,0,.04);flex-shrink:0;}
+/* Lotes próximos — ultra compacto */
+.sala-lotes-proximos{padding:.35rem .6rem .45rem;border-top:1px solid var(--b1);flex-shrink:0;}
+.sala-lotes-proximos-title{font-size:.62rem;font-weight:700;color:var(--wh2);margin-bottom:.3rem;letter-spacing:.01em;}
+.sala-lotes-proximos-list{display:flex;flex-direction:column;gap:.18rem;max-height:106px;overflow-y:auto;}
 .sala-lotes-proximos-list::-webkit-scrollbar{width:3px;}
 .sala-lotes-proximos-list::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px;}
-.sala-lote-mini{display:flex;align-items:center;gap:.45rem;padding:.28rem .4rem;border-radius:7px;background:var(--s1);border:1px solid var(--b1);transition:all .15s;}
+.sala-lote-mini{display:flex;align-items:center;gap:.4rem;padding:.18rem .35rem;border-radius:6px;background:var(--s1);border:1px solid var(--b1);transition:all .15s;}
 .sala-lote-mini:hover{border-color:rgba(6,182,212,.25);background:rgba(6,182,212,.04);}
-.sala-lote-mini.current{background:rgba(6,182,212,.07);border-color:rgba(6,182,212,.3);}
-.sala-lote-mini.adj{opacity:.5;}
-.sala-lote-mini-img{width:28px;height:28px;border-radius:5px;object-fit:cover;flex-shrink:0;}
-.sala-lote-mini-noimg{width:28px;height:28px;border-radius:5px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--mu);flex-shrink:0;}
-.sala-lote-mini-info{flex:1;min-width:0;}
-.sala-lote-mini-num{font-size:.58rem;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
-.sala-lote-mini-name{font-size:.7rem;font-weight:600;color:var(--wh2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sala-lote-mini.current{background:rgba(6,182,212,.08);border-color:rgba(6,182,212,.3);}
+.sala-lote-mini.adj{opacity:.45;}
+.sala-lote-mini-img{width:24px;height:24px;border-radius:4px;object-fit:cover;flex-shrink:0;}
+.sala-lote-mini-noimg{width:24px;height:24px;border-radius:4px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--mu);flex-shrink:0;}
+.sala-lote-mini-info{flex:1;min-width:0;display:flex;align-items:center;gap:.35rem;}
+.sala-lote-mini-num{font-size:.56rem;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;flex-shrink:0;}
+.sala-lote-mini-name{font-size:.68rem;font-weight:600;color:var(--wh2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sala-lote-mini-status{flex-shrink:0;}
-.sala-timer span:first-child{font-size:.72rem;font-weight:600;color:var(--mu2);}
-.sala-timer-num{font-size:1.45rem;font-weight:800;letter-spacing:.04em;font-family:'Inter',monospace;}
+.sala-timer span:first-child{font-size:.68rem;font-weight:600;color:var(--mu2);}
+.sala-timer-num{font-size:1.3rem;font-weight:800;letter-spacing:.04em;font-family:'Inter',monospace;}
 .sala-timer-num.urgent{color:var(--yl);}
 .sala-timer-num.critical{color:var(--rd);animation:losepulse .5s infinite;}
 .sala-timer-num.safe{color:var(--gr);}
@@ -827,8 +830,8 @@ tr:hover td{background:rgba(56,178,246,.04);}
   /* NEW AuctionHub layout — mobile */
   .sala-wrap-new{height:auto;overflow:visible;}
   .sala-body{grid-template-columns:1fr;overflow:visible;padding:.75rem;}
-  .sala-left-card{min-height:280px;}
-  .sala-photo-wrap{height:160px;}
+  .sala-left-card{min-height:320px;}
+  .sala-photo-wrap{min-height:180px;max-height:220px;flex:none;height:180px;}
   .sala-cam-side{display:none;}
   .sala-quick-bids{grid-template-columns:repeat(2,1fr);}
   .sala-right-col{overflow-y:visible;}
