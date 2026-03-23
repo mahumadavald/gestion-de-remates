@@ -3053,7 +3053,8 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         const baseNum = parseInt(wizDatos.base.replace(/\D/g,""))||0;
                         const minNum  = parseInt(wizDatos.minimo.replace(/\D/g,""))||0;
                         const incNum  = parseInt(wizDatos.incremento.replace(/\D/g,""))||Math.round(baseNum*0.05)||100000;
-                        const {data:casaData} = await supabase.from("casas").select("id").eq("slug","rematesahumada").single();
+                        // Obtener casa_id del usuario actual (no hardcodeado)
+                        const casaIdActual = session?.casaId || null;
                         const codigo = `L-${String(Date.now()).slice(-5)}`;
                         // Subir fotos a Supabase Storage
                         const fotoFiles = wizTipo==="VEHICULOS"
@@ -3072,7 +3073,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         }
                         if(fotoFiles.length>0 && imagenes.length===0){ notify("No se pudieron subir las fotos. Verifica que el bucket 'lotes' existe en Supabase Storage.","inf"); return; }
                         const {error} = await supabase.from("lotes").insert({
-                          casa_id:     casaData?.id||null,
+                          casa_id:     casaIdActual,
                           remate_id:   wizDatos.remateId||null,
                           codigo,
                           nombre:      wizDatos.nombre,
@@ -3535,15 +3536,31 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                           {(r.estado==="publicado"||r.estado==="en_vivo"||r.estado==="activo") && (
                             <button className="btn-primary" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async()=>{
                               setSalaRemateId(r.supabaseId||r.id);
+                              let mapped = [];
                               if(r.supabaseId){
+                                // 1º buscar lotes asignados a este remate
                                 const {data:lotesRemate} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
                                 if(lotesRemate&&lotesRemate.length>0){
-                                  const mapped = lotesRemate.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:l.incremento||Math.round((l.base||0)*0.05)||100000}));
-                                  setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
-                                } else { setLots(LOTES_SALA); setBids(LOTES_SALA.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null}))); notify("Sin lotes asignados aún.","inf"); }
+                                  mapped = lotesRemate.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:l.incremento||Math.round((l.base||0)*0.05)||100000}));
+                                } else {
+                                  // fallback: todos los lotes disponibles de esta casa
+                                  const {data:lotesAll} = await supabase.from("lotes").select("*").eq("estado","disponible").order("orden");
+                                  if(lotesAll&&lotesAll.length>0){
+                                    mapped = lotesAll.map(l=>({id:l.id,supabaseId:l.id,remateId:r.supabaseId,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:l.incremento||Math.round((l.base||0)*0.05)||100000}));
+                                    notify("Cargados todos los lotes disponibles (sin asignación de remate).","inf");
+                                  } else {
+                                    notify("No hay lotes disponibles. Agrega lotes primero.","inf");
+                                  }
+                                }
                               }
-                              setIdx(0); setAState("waiting"); setBidTimer(null);
-                              setPage("sala"); notify("Sala abierta.","sold");
+                              if(mapped.length>0){
+                                setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
+                                setIdx(0); setAState("waiting"); setBidTimer(null);
+                                setPage("sala"); notify("Sala abierta.","sold");
+                              } else {
+                                setIdx(0); setAState("waiting"); setBidTimer(null);
+                                setPage("sala");
+                              }
                             }}>Abrir sala</button>
                           )}
                           {(r.estado==="finalizado"||r.estado==="cerrado") && (<>
