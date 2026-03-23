@@ -453,21 +453,32 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .sala-left-card{background:var(--s2);border:1px solid var(--b1);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
 .sala-live-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.28rem .75rem;background:rgba(20,184,166,.15);color:var(--gr);border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.04em;margin:.85rem auto 0;width:fit-content;}
 .sala-lot-title{font-size:1.05rem;font-weight:800;color:var(--wh);text-align:center;padding:.5rem 1.1rem .3rem;line-height:1.25;}
-.sala-photo-wrap{position:relative;background:var(--s3);margin:.4rem .85rem;border-radius:10px;overflow:hidden;height:220px;}
+.sala-photo-wrap{position:relative;background:var(--s3);margin:.4rem .85rem;border-radius:10px;overflow:hidden;height:220px;display:flex;gap:0;}
 .sala-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
 .sala-photo-placeholder{width:100%;height:100%;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;}
+/* Foto principal dentro del wrap */
+.sala-photo-main{flex:1;position:relative;overflow:hidden;min-width:0;}
+.sala-photo-main img{width:100%;height:100%;object-fit:cover;display:block;}
+/* Cámara lateral */
+.sala-cam-side{width:38%;flex-shrink:0;background:#000;position:relative;border-left:2px solid var(--s3);}
+.sala-cam-side video{width:100%;height:100%;object-fit:cover;display:block;}
+.sala-cam-side-label{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.6);border-radius:4px;padding:.12rem .4rem;font-size:.58rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:3px;}
+.sala-cam-rec{width:5px;height:5px;border-radius:50%;background:var(--rd);animation:pulse 1s infinite;}
 .sala-timer{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem .85rem;border-top:1px solid var(--b1);margin-top:.4rem;background:rgba(0,0,0,.04);flex-shrink:0;}
-.sala-lotes-proximos{padding:.75rem .85rem .85rem;border-top:1px solid var(--b1);}
-.sala-lotes-proximos-title{font-size:.72rem;font-weight:700;color:var(--wh2);margin-bottom:.55rem;letter-spacing:.01em;}
-.sala-lotes-proximos-list{display:flex;flex-direction:column;gap:.35rem;max-height:220px;overflow-y:auto;}
-.sala-lote-mini{display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem;border-radius:8px;background:var(--s1);border:1px solid var(--b1);transition:all .15s;}
+.sala-lotes-proximos{padding:.5rem .75rem .65rem;border-top:1px solid var(--b1);}
+.sala-lotes-proximos-title{font-size:.68rem;font-weight:700;color:var(--wh2);margin-bottom:.4rem;letter-spacing:.01em;}
+.sala-lotes-proximos-list{display:flex;flex-direction:column;gap:.25rem;max-height:150px;overflow-y:auto;}
+.sala-lotes-proximos-list::-webkit-scrollbar{width:3px;}
+.sala-lotes-proximos-list::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px;}
+.sala-lote-mini{display:flex;align-items:center;gap:.45rem;padding:.28rem .4rem;border-radius:7px;background:var(--s1);border:1px solid var(--b1);transition:all .15s;}
+.sala-lote-mini:hover{border-color:rgba(6,182,212,.25);background:rgba(6,182,212,.04);}
 .sala-lote-mini.current{background:rgba(6,182,212,.07);border-color:rgba(6,182,212,.3);}
-.sala-lote-mini.adj{opacity:.55;}
-.sala-lote-mini-img{width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;}
-.sala-lote-mini-noimg{width:36px;height:36px;border-radius:6px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--mu);flex-shrink:0;}
+.sala-lote-mini.adj{opacity:.5;}
+.sala-lote-mini-img{width:28px;height:28px;border-radius:5px;object-fit:cover;flex-shrink:0;}
+.sala-lote-mini-noimg{width:28px;height:28px;border-radius:5px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--mu);flex-shrink:0;}
 .sala-lote-mini-info{flex:1;min-width:0;}
-.sala-lote-mini-num{font-size:.62rem;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
-.sala-lote-mini-name{font-size:.75rem;font-weight:600;color:var(--wh2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sala-lote-mini-num{font-size:.58rem;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.sala-lote-mini-name{font-size:.7rem;font-weight:600;color:var(--wh2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sala-lote-mini-status{flex-shrink:0;}
 .sala-timer span:first-child{font-size:.72rem;font-weight:600;color:var(--mu2);}
 .sala-timer-num{font-size:1.45rem;font-weight:800;letter-spacing:.04em;font-family:'Inter',monospace;}
@@ -818,6 +829,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
   .sala-body{grid-template-columns:1fr;overflow:visible;padding:.75rem;}
   .sala-left-card{min-height:280px;}
   .sala-photo-wrap{height:160px;}
+  .sala-cam-side{display:none;}
   .sala-quick-bids{grid-template-columns:repeat(2,1fr);}
   .sala-right-col{overflow-y:visible;}
   .sala-bid-amount{font-size:1.6rem;}
@@ -6102,55 +6114,76 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     LOTE {String(idx+1).padStart(2,"0")} — {item.name}
                   </div>
 
-                  {/* Photo carousel */}
+                  {/* Photo + Camera — side by side */}
                   <div className="sala-photo-wrap">
-                    {(item.imgs||[]).length > 0 ? (
-                      <>
-                        <img
-                          src={item.imgs[photoIdx % item.imgs.length]}
-                          alt={item.name}
-                          style={{width:"100%",height:"100%",objectFit:"cover",display:"block",transition:"opacity .3s"}}
-                        />
-                        {item.imgs.length > 1 && (
-                          <>
-                            <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p-1+item.imgs.length)%item.imgs.length); startCarousel(item.imgs); }}
-                              style={{position:"absolute",left:8,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
-                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M8 2L4 6l4 4"/></svg>
-                            </button>
-                            <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p+1)%item.imgs.length); startCarousel(item.imgs); }}
-                              style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
-                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 2l4 4-4 4"/></svg>
-                            </button>
-                            <div style={{position:"absolute",bottom:8,left:"50%",transform:"translateX(-50%)",display:"flex",gap:5}}>
-                              {item.imgs.map((_,i)=>(
-                                <div key={i} onClick={()=>setPhotoIdx(i)}
-                                  style={{width:i===photoIdx%item.imgs.length?18:7,height:7,borderRadius:4,background:i===photoIdx%item.imgs.length?"var(--ac)":"rgba(255,255,255,.4)",cursor:"pointer",transition:"all .2s"}}/>
-                              ))}
-                            </div>
-                            <div style={{position:"absolute",top:8,right:8,background:"rgba(0,0,0,.6)",borderRadius:4,padding:".15rem .45rem",fontSize:".68rem",color:"#fff",fontFamily:"Inter,sans-serif"}}>
-                              {(photoIdx%item.imgs.length)+1}/{item.imgs.length}
-                            </div>
-                          </>
-                        )}
-                        <button onClick={()=>removePhoto(idx, photoIdx%item.imgs.length)}
-                          style={{position:"absolute",top:8,left:8,background:"rgba(224,82,82,.7)",border:"none",borderRadius:4,padding:".15rem .4rem",fontSize:".65rem",color:"#fff",cursor:"pointer"}}>
-                          Quitar
-                        </button>
-                        {(item.imgs||[]).length > 0 && (
+
+                    {/* ── FOTO PRINCIPAL ── */}
+                    <div className="sala-photo-main">
+                      {(item.imgs||[]).length > 0 ? (
+                        <>
+                          <img
+                            src={item.imgs[photoIdx % item.imgs.length]}
+                            alt={item.name}
+                            style={{width:"100%",height:"100%",objectFit:"cover",display:"block",transition:"opacity .3s"}}
+                          />
+                          {item.imgs.length > 1 && (
+                            <>
+                              <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p-1+item.imgs.length)%item.imgs.length); startCarousel(item.imgs); }}
+                                style={{position:"absolute",left:6,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
+                                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M8 2L4 6l4 4"/></svg>
+                              </button>
+                              <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p+1)%item.imgs.length); startCarousel(item.imgs); }}
+                                style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
+                                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 2l4 4-4 4"/></svg>
+                              </button>
+                              <div style={{position:"absolute",bottom:6,left:"50%",transform:"translateX(-50%)",display:"flex",gap:4}}>
+                                {item.imgs.map((_,i)=>(
+                                  <div key={i} onClick={()=>setPhotoIdx(i)}
+                                    style={{width:i===photoIdx%item.imgs.length?14:6,height:6,borderRadius:3,background:i===photoIdx%item.imgs.length?"var(--ac)":"rgba(255,255,255,.4)",cursor:"pointer",transition:"all .2s"}}/>
+                                ))}
+                              </div>
+                            </>
+                          )}
+                          <button onClick={()=>removePhoto(idx, photoIdx%item.imgs.length)}
+                            style={{position:"absolute",top:6,left:6,background:"rgba(224,82,82,.7)",border:"none",borderRadius:4,padding:".12rem .35rem",fontSize:".62rem",color:"#fff",cursor:"pointer"}}>
+                            Quitar
+                          </button>
                           <label htmlFor={`phadd${idx}`}
-                            style={{position:"absolute",bottom:8,right:8,background:"rgba(56,178,246,.85)",borderRadius:5,padding:".2rem .55rem",fontSize:".65rem",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:".25rem"}}>
-                            <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 1v8M1 5h8"/></svg>
+                            style={{position:"absolute",top:6,right:6,background:"rgba(56,178,246,.85)",borderRadius:5,padding:".15rem .45rem",fontSize:".62rem",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:".2rem"}}>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 1v8M1 5h8"/></svg>
                             Foto
                             <input id={`phadd${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
                           </label>
-                        )}
-                      </>
-                    ) : (
-                      <label htmlFor={`ph${idx}`} className="sala-photo-placeholder" style={{cursor:"pointer"}}>
-                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="var(--mu)" strokeWidth="1.5"><rect x="3" y="6" width="26" height="20" rx="3"/><circle cx="16" cy="16" r="5"/><path d="M12 6l2-3h4l2 3"/></svg>
-                        <div style={{fontSize:".75rem",color:"var(--mu2)"}}>Agregar fotos del lote</div>
-                        <input id={`ph${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
-                      </label>
+                        </>
+                      ) : (
+                        <label htmlFor={`ph${idx}`} className="sala-photo-placeholder" style={{cursor:"pointer"}}>
+                          <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="var(--mu)" strokeWidth="1.5"><rect x="3" y="6" width="26" height="20" rx="3"/><circle cx="16" cy="16" r="5"/><path d="M12 6l2-3h4l2 3"/></svg>
+                          <div style={{fontSize:".72rem",color:"var(--mu2)"}}>Agregar fotos del lote</div>
+                          <input id={`ph${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
+                        </label>
+                      )}
+
+                      {/* Botón cámara — overlay esquina inferior izquierda */}
+                      <button
+                        onClick={camActiva ? detenerCamara : activarCamara}
+                        style={{position:"absolute",bottom:6,left:6,display:"flex",alignItems:"center",gap:".3rem",padding:".22rem .55rem",background:camActiva?"rgba(224,82,82,.82)":"rgba(0,0,0,.58)",border:"none",borderRadius:5,color:"#fff",fontSize:".62rem",fontWeight:700,cursor:"pointer",backdropFilter:"blur(4px)"}}
+                        title="Cámara martillero"
+                      >
+                        <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M1 3h8l3 3v5H1V3z"/><circle cx="5" cy="8" r="1.5"/></svg>
+                        {camActiva ? "Apagar cam" : "Cámara"}
+                        {camActiva && <span style={{width:5,height:5,borderRadius:"50%",background:"#fff",animation:"pulse 1s infinite"}}/>}
+                      </button>
+                    </div>
+
+                    {/* ── CÁMARA LATERAL (solo desktop) ── */}
+                    {camActiva && (
+                      <div className="sala-cam-side">
+                        <video ref={videoRef} autoPlay muted playsInline style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+                        <div className="sala-cam-side-label">
+                          {grabando && <span className="sala-cam-rec"/>}
+                          CAM
+                        </div>
+                      </div>
                     )}
                   </div>
 
@@ -6211,25 +6244,8 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         <div className="sala-bid-label">Oferta actual:</div>
                         <div className={`sala-bid-amount${flash?" flash":""}`}>{fmt(bid.current)}</div>
                       </div>
-                      {/* Camera / Live feed button */}
-                      <button
-                        className="sala-livefeed-btn"
-                        onClick={camActiva ? detenerCamara : activarCamara}
-                        title="Cámara martillero"
-                      >
-                        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M1 3h8l3 3v5H1V3z"/><circle cx="5" cy="8" r="1.5"/></svg>
-                        {camActiva ? "Detener cámara" : "Live Feed"}
-                        {camActiva && <span style={{width:6,height:6,borderRadius:"50%",background:"var(--rd)",animation:"pulse 1s infinite",flexShrink:0}}/>}
-                      </button>
                     </div>
 
-                    {/* Video pequeño si cámara activa */}
-                    {camActiva && (
-                      <div style={{borderRadius:8,overflow:"hidden",marginBottom:".75rem",background:"#000",height:90,position:"relative"}}>
-                        <video ref={videoRef} autoPlay muted playsInline style={{width:"100%",height:"100%",objectFit:"cover"}}/>
-                        {grabando && <span style={{position:"absolute",top:5,right:5,fontSize:".6rem",fontWeight:800,color:"var(--rd)",display:"flex",alignItems:"center",gap:3}}><span style={{width:6,height:6,borderRadius:"50%",background:"var(--rd)",animation:"pulse 1s infinite"}}/>REC</span>}
-                      </div>
-                    )}
 
                     {/* Last bids */}
                     <div className="sala-last-bids-title">Últimas pujas:</div>
