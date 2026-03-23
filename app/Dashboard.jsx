@@ -6178,7 +6178,9 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         const esCurrent = i===idx;
                         const esAdj = b.status==="adjudicado";
                         return (
-                          <div key={i} className={`sala-lote-mini${esCurrent?" current":esAdj?" adj":""}`}>
+                          <div key={i} className={`sala-lote-mini${esCurrent?" current":esAdj?" adj":""}`}
+                            style={{cursor:"pointer"}}
+                            onClick={()=>{ if(!esCurrent){ setIdx(i); setAState("waiting"); setBidTimer(null); } }}>
                             {l.imgs?.[0]
                               ? <img src={l.imgs[0]} alt="" className="sala-lote-mini-img"/>
                               : <div className="sala-lote-mini-img sala-lote-mini-noimg"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
@@ -6324,24 +6326,6 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                               <button className="ab r"  onClick={resetAuction}>⟳ Reiniciar todo</button>
                             </div>
                           </div>
-                          <div className="ctrl-card">
-                            <div className="ctrl-card-title">Estado en tiempo real</div>
-                            <div className="st-row"><div className="st-dot" style={{background:sColor,boxShadow:`0 0 7px ${sColor}`}}/><div className="st-txt" style={{color:sColor}}>{sLabel}</div></div>
-                            <div className="ls-grid">
-                              <div className="ls-card"><div className="ls-v" style={{fontSize:".82rem"}}>{fmt(bid.current)}</div><div className="ls-l">Oferta</div></div>
-                              <div className="ls-card"><div className="ls-v">{bid.count}</div><div className="ls-l">Pujas</div></div>
-                              <div className="ls-card"><div className="ls-v">{lastBidder ? "🏆" : "—"}</div><div className="ls-l">Líder</div></div>
-                            </div>
-                            {bidTimer!==null&&bidTimer>0&&aState==="live" && (
-                              <div className={`bid-ticker${bidTimer<=5?" urgent":""}${bidTimer<=2?" critical":""}`}>
-                                <div className="bt-num" style={{color:bidTimer>8?"var(--gr)":bidTimer>4?"var(--yl)":"var(--rd)",fontSize:bidTimer<=3?"1.7rem":"1.35rem"}}>{bidTimer}</div>
-                                <div>
-                                  <div className="bt-info">{bidTimer<=2?"¡ADJUDICANDO AHORA!":bidTimer<=5?"⚠ Última oportunidad":"Adjudica en"}</div>
-                                  <div className="bt-leader">{lastBidder||"—"} lidera · {fmt((bids[idx]?.current||0))}</div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
                         </div>
 
                         {/* Place Bid / Adjudicar full-width button */}
@@ -6353,6 +6337,34 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                         >
                           {aState==="live" ? "✓ Adjudicar lote" : aState==="sold" ? "Lote adjudicado" : "▶ Iniciar subasta"}
                         </button>
+
+                        {/* Estado en tiempo real — debajo del botón principal */}
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".5rem",marginTop:".6rem"}}>
+                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:10,padding:".6rem .7rem",textAlign:"center"}}>
+                            <div style={{fontSize:".7rem",color:"var(--mu)",marginBottom:".2rem",textTransform:"uppercase",letterSpacing:".04em"}}>Oferta</div>
+                            <div style={{fontSize:".82rem",fontWeight:800,color:"var(--wh2)",fontVariantNumeric:"tabular-nums"}}>{fmt(bid.current)}</div>
+                          </div>
+                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:10,padding:".6rem .7rem",textAlign:"center"}}>
+                            <div style={{fontSize:".7rem",color:"var(--mu)",marginBottom:".2rem",textTransform:"uppercase",letterSpacing:".04em"}}>Pujas</div>
+                            <div style={{fontSize:".82rem",fontWeight:800,color:"var(--wh2)"}}>{bid.count}</div>
+                          </div>
+                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:10,padding:".6rem .7rem",textAlign:"center"}}>
+                            <div style={{fontSize:".7rem",color:"var(--mu)",marginBottom:".2rem",textTransform:"uppercase",letterSpacing:".04em"}}>Estado</div>
+                            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:".3rem"}}>
+                              <div style={{width:6,height:6,borderRadius:"50%",background:sColor,boxShadow:`0 0 5px ${sColor}`,flexShrink:0}}/>
+                              <div style={{fontSize:".76rem",fontWeight:700,color:sColor,whiteSpace:"nowrap"}}>{sLabel}</div>
+                            </div>
+                          </div>
+                        </div>
+                        {bidTimer!==null&&bidTimer>0&&aState==="live" && (
+                          <div className={`bid-ticker${bidTimer<=5?" urgent":""}${bidTimer<=2?" critical":""}`} style={{marginTop:".5rem"}}>
+                            <div className="bt-num" style={{color:bidTimer>8?"var(--gr)":bidTimer>4?"var(--yl)":"var(--rd)",fontSize:bidTimer<=3?"1.7rem":"1.35rem"}}>{bidTimer}</div>
+                            <div>
+                              <div className="bt-info">{bidTimer<=2?"¡ADJUDICANDO AHORA!":bidTimer<=5?"⚠ Última oportunidad":"Adjudica en"}</div>
+                              <div className="bt-leader">{lastBidder||"—"} lidera · {fmt((bids[idx]?.current||0))}</div>
+                            </div>
+                          </div>
+                        )}
                       </>
                     )}
 
