@@ -6048,21 +6048,8 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
           </div>
         )}
 
-        {/* ══ SALA EN VIVO — estado vacío ══ */}
-        {page==="sala" && (!item || !bid) && (
-          <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"100vh",gap:"1.2rem",color:"var(--wh2)",textAlign:"center",padding:"2rem"}}>
-            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{opacity:.35}}>
-              <circle cx="32" cy="32" r="28"/>
-              <path d="M32 20v12l8 4"/>
-            </svg>
-            <div style={{fontSize:"1.15rem",fontWeight:700}}>No hay ningún remate en curso</div>
-            <div style={{fontSize:".85rem",color:"var(--mu)",maxWidth:320}}>Abrí un remate desde la sección <strong>Remates</strong> para comenzar la sala en vivo.</div>
-            <button className="btn-primary" style={{marginTop:".5rem"}} onClick={()=>setPage("remates")}>Ir a Remates →</button>
-          </div>
-        )}
-
         {/* ══ SALA EN VIVO ══ */}
-        {page==="sala" && item && bid && (
+        {page==="sala" && (
           <div style={{display:"flex",flexDirection:"column",height:"100vh",overflow:"hidden"}}>
             <div className="topbar">
               <div className="topbar-left">
@@ -6116,7 +6103,22 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
             </div>
 
             <div className="sala-wrap-new">
-              <div className="sala-body">
+
+              {/* Sin lotes cargados */}
+              {!item && (
+                <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",flex:1,gap:"1.2rem",color:"var(--wh2)",textAlign:"center",padding:"3rem 2rem"}}>
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" style={{opacity:.3}}>
+                    <rect x="6" y="10" width="44" height="36" rx="4"/><circle cx="28" cy="28" r="8"/><path d="M22 10l3-5h6l3 5"/>
+                  </svg>
+                  <div style={{fontSize:"1.1rem",fontWeight:700}}>Selecciona un remate con lotes</div>
+                  <div style={{fontSize:".85rem",color:"var(--mu)",maxWidth:340,lineHeight:1.6}}>
+                    Elige un remate en el selector de arriba, o ve a <strong style={{color:"var(--ac)",cursor:"pointer"}} onClick={()=>setPage("remates")}>Remates</strong> y haz clic en <strong>Abrir sala</strong>.
+                  </div>
+                  <button className="btn-primary" onClick={()=>setPage("remates")}>Ir a Remates →</button>
+                </div>
+              )}
+
+              {item && <div className="sala-body">
 
                 {/* ── LEFT CARD: foto + timer ── */}
                 <div className="sala-left-card">
@@ -6485,7 +6487,7 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                   </div>
 
                 </div>{/* end sala-right-col */}
-              </div>{/* end sala-body */}
+              </div>}{/* end sala-body */}
             </div>{/* end sala-wrap-new */}
           </div>
         )}
