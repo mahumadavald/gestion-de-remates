@@ -6357,90 +6357,97 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                     {/* CONTROL TAB */}
                     {ctrlTab==="control" && (
                       <>
-                        <div className="ctrl-grid">
-                          <div className="ctrl-card">
-                            <div className="ctrl-card-title">Lote activo</div>
-                            <select className="asel" value={idx} onChange={e=>{setIdx(Number(e.target.value));resetAuction();setCurInc(lots[Number(e.target.value)]?.inc||500000);}}>
-                              {lots.map((it,i) => <option key={i} value={i}>Lote {String(i+1).padStart(2,"0")} — {it.name}</option>)}
-                            </select>
-                            <div className="inc-ctrl">
-                              <div className="inc-title">Incremento por puja</div>
-                              <div className="inc-cur-lbl">Activo ahora</div>
-                              <div className="inc-cur">{fmtS(curInc)}</div>
-                              <div className="inc-btns">
-                                {INC_OPTIONS.map(v => (
-                                  <button key={v} className={`inc-btn${curInc===v?" on":""}`} onClick={()=>setCurInc(v)}>{fmtS(v)}</button>
-                                ))}
-                              </div>
-                              <div style={{display:"flex",gap:".4rem",marginTop:".5rem",alignItems:"center"}}>
-                                <input
-                                  placeholder="Monto personalizado..."
-                                  value={customMonto}
-                                  onChange={e=>setCustomMonto(e.target.value)}
-                                  onKeyDown={e=>{ if(e.key==="Enter"&&customMonto){ const n=parseInt(customMonto.replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} } }}
-                                  style={{flex:1,padding:".3rem .55rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}
-                                />
-                                <button
-                                  onClick={()=>{ const n=parseInt((customMonto||"").replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} }}
-                                  style={{padding:".3rem .6rem",background:"var(--ac)",border:"none",borderRadius:6,color:"#fff",fontSize:".68rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
-                                  Usar
-                                </button>
-                              </div>
+                        {/* ── Lote selector ── */}
+                        <div style={{marginBottom:".6rem"}}>
+                          <div style={{fontSize:".63rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".3rem"}}>Lote activo</div>
+                          <select className="asel" style={{marginBottom:0}} value={idx} onChange={e=>{setIdx(Number(e.target.value));resetAuction();setCurInc(lots[Number(e.target.value)]?.inc||500000);}}>
+                            {lots.map((it,i) => <option key={i} value={i}>Lote {String(i+1).padStart(2,"0")} — {it.name}</option>)}
+                          </select>
+                        </div>
+
+                        {/* ── 2-col: incremento + acciones ── */}
+                        <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:".65rem",marginBottom:".6rem"}}>
+                          {/* Incremento */}
+                          <div className="inc-ctrl" style={{marginBottom:0}}>
+                            <div style={{display:"flex",alignItems:"baseline",gap:".5rem",marginBottom:".35rem"}}>
+                              <div className="inc-title" style={{marginBottom:0}}>Incremento</div>
+                              <div className="inc-cur" style={{marginBottom:0,fontSize:"1.25rem"}}>{fmtS(curInc)}</div>
                             </div>
-                            {/* Postura presencial */}
-                            <div style={{marginTop:".6rem",padding:".6rem .75rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:8}}>
-                              <div style={{fontSize:".68rem",fontWeight:700,color:"var(--yl)",marginBottom:".4rem",display:"flex",alignItems:"center",gap:".35rem"}}>
-                                <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
-                                Postura presencial
-                              </div>
-                              <div style={{display:"flex",gap:".4rem"}}>
-                                <input placeholder="Paleta" value={presPaleta} onChange={e=>setPresPaleta(e.target.value)}
-                                  style={{width:64,padding:".3rem .5rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
-                                <input placeholder="Monto" value={presMonto} onChange={e=>setPresMonto(e.target.value)}
-                                  onKeyDown={e=>e.key==="Enter"&&registrarPresencial()}
-                                  style={{flex:1,padding:".3rem .5rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
-                                <button onClick={registrarPresencial}
-                                  style={{padding:".3rem .6rem",background:"rgba(246,173,85,.2)",border:"1px solid rgba(246,173,85,.4)",borderRadius:6,color:"var(--yl)",fontSize:".68rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
-                                  ✓
-                                </button>
-                              </div>
+                            <div className="inc-btns" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:".22rem"}}>
+                              {INC_OPTIONS.map(v => (
+                                <button key={v} className={`inc-btn${curInc===v?" on":""}`} onClick={()=>setCurInc(v)}>{fmtS(v)}</button>
+                              ))}
                             </div>
-                            <div className="ab-list" style={{marginTop:".6rem"}}>
-                              <button className="ab g"  onClick={startAuction} disabled={aState==="live"}>▶ Iniciar</button>
-                              <button className="ab y"  onClick={pauseAuction} disabled={aState!=="live"}>⏸ Pausar</button>
-                              <button className="ab bl" onClick={adjudicar}    disabled={aState==="sold"}>✓ Adjudicar</button>
-                              <button className="ab"    onClick={repetirLote}  style={{background:"rgba(167,139,250,.1)",color:"#a78bfa",border:"1px solid rgba(167,139,250,.25)"}}>↺ Repetir lote</button>
-                              <button className="ab"    onClick={pasarLote}    style={{background:"rgba(255,255,255,.04)",color:"var(--mu2)",border:"1px solid var(--b2)"}} disabled={idx>=lots.length-1}>→ Pasar lote</button>
-                              <button className="ab r"  onClick={resetAuction}>⟳ Reiniciar todo</button>
+                            <div style={{display:"flex",gap:".35rem",marginTop:".4rem",alignItems:"center"}}>
+                              <input
+                                placeholder="Personalizado..."
+                                value={customMonto}
+                                onChange={e=>setCustomMonto(e.target.value)}
+                                onKeyDown={e=>{ if(e.key==="Enter"&&customMonto){ const n=parseInt(customMonto.replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} } }}
+                                style={{flex:1,padding:".28rem .5rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".7rem",fontFamily:"Inter,sans-serif"}}
+                              />
+                              <button
+                                onClick={()=>{ const n=parseInt((customMonto||"").replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} }}
+                                style={{padding:".28rem .55rem",background:"var(--ac)",border:"none",borderRadius:6,color:"#fff",fontSize:".67rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+                                Usar
+                              </button>
                             </div>
+                          </div>
+
+                          {/* Botones acción */}
+                          <div style={{display:"flex",flexDirection:"column",gap:".32rem",minWidth:108}}>
+                            <button className="ab g"  style={{flex:1}} onClick={startAuction} disabled={aState==="live"}>▶ Iniciar</button>
+                            <button className="ab y"  style={{flex:1}} onClick={pauseAuction} disabled={aState!=="live"}>⏸ Pausar</button>
+                            <button className="ab bl" style={{flex:1}} onClick={adjudicar}    disabled={aState==="sold"}>✓ Adjudicar</button>
+                            <button className="ab"    style={{flex:1,background:"rgba(167,139,250,.1)",color:"#a78bfa",border:"1px solid rgba(167,139,250,.25)"}} onClick={repetirLote}>↺ Repetir</button>
+                            <button className="ab"    style={{flex:1,background:"rgba(255,255,255,.04)",color:"var(--mu2)",border:"1px solid var(--b2)"}} onClick={pasarLote} disabled={idx>=lots.length-1}>→ Pasar</button>
+                            <button className="ab r"  style={{flex:1}} onClick={resetAuction}>⟳ Reset</button>
                           </div>
                         </div>
 
-                        {/* Place Bid / Adjudicar full-width button */}
+                        {/* ── Postura presencial ── */}
+                        <div style={{padding:".5rem .7rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:8,marginBottom:".6rem"}}>
+                          <div style={{fontSize:".65rem",fontWeight:700,color:"var(--yl)",marginBottom:".35rem",display:"flex",alignItems:"center",gap:".3rem"}}>
+                            <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
+                            Postura presencial
+                          </div>
+                          <div style={{display:"flex",gap:".35rem"}}>
+                            <input placeholder="Paleta" value={presPaleta} onChange={e=>setPresPaleta(e.target.value)}
+                              style={{width:60,padding:".28rem .45rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
+                            <input placeholder="Monto" value={presMonto} onChange={e=>setPresMonto(e.target.value)}
+                              onKeyDown={e=>e.key==="Enter"&&registrarPresencial()}
+                              style={{flex:1,padding:".28rem .45rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
+                            <button onClick={registrarPresencial}
+                              style={{padding:".28rem .55rem",background:"rgba(246,173,85,.2)",border:"1px solid rgba(246,173,85,.4)",borderRadius:6,color:"var(--yl)",fontSize:".72rem",fontWeight:700,cursor:"pointer"}}>
+                              ✓
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* ── Adjudicar / Iniciar big button ── */}
                         <button
                           className={`sala-place-bid-btn${aState==="live"?" adj":""}`}
                           onClick={aState==="live" ? adjudicar : startAuction}
                           disabled={aState==="sold"}
-                          style={{marginTop:".7rem"}}
                         >
                           {aState==="live" ? "✓ Adjudicar lote" : aState==="sold" ? "Lote adjudicado" : "▶ Iniciar subasta"}
                         </button>
 
-                        {/* Estado en tiempo real — debajo del botón principal */}
-                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".5rem",marginTop:".6rem"}}>
-                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:10,padding:".6rem .7rem",textAlign:"center"}}>
-                            <div style={{fontSize:".7rem",color:"var(--mu)",marginBottom:".2rem",textTransform:"uppercase",letterSpacing:".04em"}}>Oferta</div>
-                            <div style={{fontSize:".82rem",fontWeight:800,color:"var(--wh2)",fontVariantNumeric:"tabular-nums"}}>{fmt(bid.current)}</div>
+                        {/* ── Estado en tiempo real ── */}
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".45rem",marginTop:".55rem"}}>
+                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:9,padding:".5rem .6rem",textAlign:"center"}}>
+                            <div style={{fontSize:".62rem",color:"var(--mu)",marginBottom:".15rem",textTransform:"uppercase",letterSpacing:".04em"}}>Oferta</div>
+                            <div style={{fontSize:".8rem",fontWeight:800,color:"var(--wh2)",fontVariantNumeric:"tabular-nums"}}>{fmt(bid.current)}</div>
                           </div>
-                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:10,padding:".6rem .7rem",textAlign:"center"}}>
-                            <div style={{fontSize:".7rem",color:"var(--mu)",marginBottom:".2rem",textTransform:"uppercase",letterSpacing:".04em"}}>Pujas</div>
-                            <div style={{fontSize:".82rem",fontWeight:800,color:"var(--wh2)"}}>{bid.count}</div>
+                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:9,padding:".5rem .6rem",textAlign:"center"}}>
+                            <div style={{fontSize:".62rem",color:"var(--mu)",marginBottom:".15rem",textTransform:"uppercase",letterSpacing:".04em"}}>Pujas</div>
+                            <div style={{fontSize:".8rem",fontWeight:800,color:"var(--wh2)"}}>{bid.count}</div>
                           </div>
-                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:10,padding:".6rem .7rem",textAlign:"center"}}>
-                            <div style={{fontSize:".7rem",color:"var(--mu)",marginBottom:".2rem",textTransform:"uppercase",letterSpacing:".04em"}}>Estado</div>
+                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:9,padding:".5rem .6rem",textAlign:"center"}}>
+                            <div style={{fontSize:".62rem",color:"var(--mu)",marginBottom:".15rem",textTransform:"uppercase",letterSpacing:".04em"}}>Estado</div>
                             <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:".3rem"}}>
                               <div style={{width:6,height:6,borderRadius:"50%",background:sColor,boxShadow:`0 0 5px ${sColor}`,flexShrink:0}}/>
-                              <div style={{fontSize:".76rem",fontWeight:700,color:sColor,whiteSpace:"nowrap"}}>{sLabel}</div>
+                              <div style={{fontSize:".72rem",fontWeight:700,color:sColor,whiteSpace:"nowrap"}}>{sLabel}</div>
                             </div>
                           </div>
                         </div>
