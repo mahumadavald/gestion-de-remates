@@ -2104,6 +2104,7 @@ function Dashboard({ session, onLogout }) {
     setNoCompradoresState(prev => prev.map(c => c.nPart===nPart ? {...c, devolucion:metodo} : c));
   };
   const [remateTerminado, setRemateTerminado] = useState(false);
+  const [selectedBalanceRemate, setSelectedBalanceRemate] = useState("all");
   const [adjCountdown,    setAdjCountdown]    = useState(null); // countdown auto-avance
 
   const timerRef    = useRef(null);
@@ -2266,6 +2267,7 @@ function Dashboard({ session, onLogout }) {
       const com     = Math.round(monto * (comPct / 100));
       const saldo   = Math.max(0, monto - gar);
       const totalAPagar = saldo + com + gastosAdm;
+      const remateActivo = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===salaRemateId);
       const newLiq  = {
         id: `LIQ-${Date.now()}`,
         lote: loteNom,
@@ -2278,6 +2280,8 @@ function Dashboard({ session, onLogout }) {
         enviado: false,
         retiro: null,
         fecha: new Date().toLocaleDateString("es-CL"),
+        remateId: salaRemateId||null,
+        remateNombre: remateActivo?.name||"Sin remate",
       };
       setLiquidaciones(p => [newLiq, ...p]);
 
@@ -3866,36 +3870,106 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         {page==="factura" && (
           <div className="page">
 
-            {/* ── 3 cards hero ── */}
+            {/* ── Selector de remate ── */}
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1.25rem",padding:".8rem 1.1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,gap:"1rem",flexWrap:"wrap"}}>
+              <div>
+                <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".2rem"}}>Balance por remate</div>
+                <div style={{fontSize:"1rem",fontWeight:800,color:"var(--wh)"}}>
+                  {selectedBalanceRemate==="all" ? "Todos los remates" : REMATES_MERGED.find(r=>(r.supabaseId||r.id)===selectedBalanceRemate)?.name||"Remate seleccionado"}
+                </div>
+              </div>
+              <div style={{display:"flex",gap:".5rem",alignItems:"center",flexWrap:"wrap"}}>
+                <select
+                  className="fsel"
+                  style={{fontSize:".76rem",width:"auto"}}
+                  value={selectedBalanceRemate}
+                  onChange={e=>setSelectedBalanceRemate(e.target.value)}
+                >
+                  <option value="all">Todos los remates</option>
+                  {REMATES_MERGED.map(r=>(
+                    <option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>
+                  ))}
+                </select>
+                {/* PDF Martillero */}
+                <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async()=>{
+                  const adjFiltradas = [...ADJUDICACIONES,...liquidaciones].filter(a=>selectedBalanceRemate==="all"||a.remateId===selectedBalanceRemate);
+                  if(!adjFiltradas.length){notify("Sin adjudicaciones para este remate.","inf");return;}
+                  try {
+                    const {jsPDF} = await import("jspdf");
+                    const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+                    const W = doc.internal.pageSize.getWidth();
+                    const remateNom = selectedBalanceRemate==="all"?"Todos los remates":(REMATES_MERGED.find(r=>(r.supabaseId||r.id)===selectedBalanceRemate)?.name||"Remate");
+                    const fecha = new Date().toLocaleDateString("es-CL");
+
+                    // Header
+                    doc.setFillColor(7,15,28); doc.rect(0,0,W,32,"F");
+                    doc.setTextColor(56,178,246); doc.setFontSize(9); doc.setFont("helvetica","bold");
+                    doc.text("GR AUCTION SOFTWARE",14,10);
+                    doc.setTextColor(255,255,255); doc.setFontSize(15);
+                    doc.text("LIQUIDACIÓN AL MARTILLERO",14,20);
+                    doc.setFontSize(8); doc.setFont("helvetica","normal"); doc.setTextColor(90,127,168);
+                    doc.text(`Remate: ${remateNom}   ·   Fecha: ${fecha}`,14,28);
+
+                    let y = 42;
+                    // Tabla lotes
+                    doc.setFillColor(11,31,56); doc.rect(10,y-5,W-20,7,"F");
+                    doc.setTextColor(90,127,168); doc.setFontSize(7); doc.setFont("helvetica","bold");
+                    doc.text("LOTE",14,y); doc.text("COMPRADOR",45,y); doc.text("MONTO MARTILLO",110,y,{align:"right"}); doc.text("COMISIÓN",140,y,{align:"right"}); doc.text("G.ADM.",163,y,{align:"right"}); doc.text("TOTAL",W-14,y,{align:"right"});
+                    y+=4;
+
+                    let totalMonto=0,totalCom=0,totalGAdm=0;
+                    adjFiltradas.forEach(a=>{
+                      const com = a.com||Math.round((a.monto||0)*(a.comPct??3)/100);
+                      const gadm = a.gastosAdm||0;
+                      totalMonto+=a.monto||0; totalCom+=com; totalGAdm+=gadm;
+                      if(y>270){doc.addPage();y=20;}
+                      doc.setFillColor(255,255,255); doc.setTextColor(20,20,40); doc.setFontSize(7.5); doc.setFont("helvetica","normal");
+                      const fmtCL = n=>"$"+Math.round(n).toLocaleString("es-CL");
+                      doc.text(String(a.lote||"").slice(0,22),14,y);
+                      doc.text(String(a.postor||"").slice(0,28),45,y);
+                      doc.text(fmtCL(a.monto||0),110,y,{align:"right"});
+                      doc.setTextColor(34,197,94); doc.text(fmtCL(com),140,y,{align:"right"});
+                      doc.setTextColor(gadm?230:150,gadm?180:150,gadm?0:150); doc.text(gadm?fmtCL(gadm):"—",163,y,{align:"right"});
+                      doc.setTextColor(56,178,246); doc.setFont("helvetica","bold"); doc.text(fmtCL(com+gadm),W-14,y,{align:"right"});
+                      y+=6;
+                      doc.setDrawColor(30,40,60); doc.line(10,y-1,W-10,y-1);
+                    });
+
+                    // Totales
+                    y+=3;
+                    const iva = Math.round((totalCom+totalGAdm)*0.19);
+                    const neto = totalCom+totalGAdm-iva;
+                    doc.setFillColor(7,15,28); doc.rect(10,y,W-20,30,"F");
+                    doc.setTextColor(90,127,168); doc.setFontSize(7); doc.setFont("helvetica","normal");
+                    const fmtCL = n=>"$"+Math.round(n).toLocaleString("es-CL");
+                    doc.text("Venta total martillo:",14,y+7); doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.text(fmtCL(totalMonto),W-14,y+7,{align:"right"});
+                    doc.setTextColor(90,127,168); doc.setFont("helvetica","normal"); doc.text("Comisiones netas:",14,y+13); doc.setTextColor(34,197,94); doc.setFont("helvetica","bold"); doc.text(fmtCL(totalCom),W-14,y+13,{align:"right"});
+                    doc.setTextColor(90,127,168); doc.setFont("helvetica","normal"); doc.text("Gastos adm. motorizados:",14,y+19); doc.setTextColor(230,180,0); doc.setFont("helvetica","bold"); doc.text(fmtCL(totalGAdm),W-14,y+19,{align:"right"});
+                    doc.setTextColor(90,127,168); doc.setFont("helvetica","normal"); doc.text("IVA 19% (AF):",14,y+25); doc.setTextColor(255,100,100); doc.setFont("helvetica","bold"); doc.text(fmtCL(iva),W-14,y+25,{align:"right"});
+                    y+=33;
+                    doc.setFillColor(56,178,246); doc.rect(10,y,W-20,10,"F");
+                    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont("helvetica","bold");
+                    doc.text("TOTAL A PAGAR A GR AUCTION SOFTWARE:",14,y+7);
+                    doc.text(fmtCL(neto),W-14,y+7,{align:"right"});
+
+                    doc.save(`balance-martillero-${remateNom.replace(/\s/g,"-")}.pdf`);
+                    notify("PDF generado.","sold");
+                  } catch(e){ console.error(e); notify("Error al generar PDF: "+e.message,"inf"); }
+                }}>↓ PDF Martillero</button>
+              </div>
+            </div>
+
+            {/* ── Calcular datos filtrados ── */}
             {(()=>{
-              const adjAll = [...ADJUDICACIONES, ...liquidaciones];
+              const adjAll = [...ADJUDICACIONES, ...liquidaciones].filter(a=>selectedBalanceRemate==="all"||a.remateId===selectedBalanceRemate);
               const ventaTotal   = adjAll.reduce((s,a)=>s+(a.monto||0),0);
               const totalCom     = adjAll.reduce((s,a)=>s+(a.com||Math.round((a.monto||0)*0.03)),0);
               const totalGAdm    = adjAll.reduce((s,a)=>s+(a.gastosAdm||0),0);
               const iva          = Math.round((totalCom+totalGAdm)*0.19);
-              const ingresoBruto = totalCom + totalGAdm + iva;
+              const ingresoNeto  = totalCom + totalGAdm - iva;
               const motorizados  = adjAll.filter(a=>a.motorizado||LOTES_REALES.find(l=>l.name===a.lote)?.motorizado).length;
-              return (
-                <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:".85rem",marginBottom:"1.3rem"}}>
-                  {[
-                    {label:"Venta total martillo", val:fmt(ventaTotal),          accent:"var(--gr)",  sub:"monto adjudicado total"},
-                    {label:"Ingreso bruto empresa",val:fmt(ingresoBruto),        accent:"var(--ac)",  sub:"com. + G.adm. + IVA"},
-                    {label:"Motorizados",           val:`${motorizados} vehículos`,accent:"var(--yl)",sub:`${fmt(motorizados*GASTO_ADMIN_MOTORIZADO)} en G.adm.`},
-                  ].map((c,i)=>(
-                    <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1.1rem 1.25rem",borderBottom:`3px solid ${c.accent}`,textAlign:"center"}}>
-                      <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:".4rem"}}>{c.label}</div>
-                      <div style={{fontSize:"1.45rem",fontWeight:900,color:c.accent,lineHeight:1,marginBottom:".25rem"}}>{c.val}</div>
-                      <div style={{fontSize:".65rem",color:"var(--mu)"}}>{c.sub}</div>
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
 
-            {/* ── Dos columnas: tramos comisión + gastos e impuestos ── */}
-            {(()=>{
-              const adjAll = [...ADJUDICACIONES, ...liquidaciones];
-              // Agrupar por tramo de comisión
+              // Comisiones por tramo
               const tramos = {};
               adjAll.forEach(a=>{
                 const pct = a.comPct ?? 3;
@@ -3905,146 +3979,151 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
                 tramos[pct].subtotalCom   += a.com||Math.round((a.monto||0)*pct/100);
               });
               const tramosArr = Object.values(tramos).sort((a,b)=>b.pct-a.pct);
-              const totalComNeto = tramosArr.reduce((s,t)=>s+t.subtotalCom,0);
-              const totalGAdm    = adjAll.reduce((s,a)=>s+(a.gastosAdm||0),0);
-              const iva          = Math.round((totalComNeto+totalGAdm)*0.19);
-              const sumaExtras   = totalGAdm + iva;
 
               return (
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".85rem",marginBottom:"1.1rem"}}>
-
-                  {/* Comisiones netas por tramo */}
-                  <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,overflow:"hidden"}}>
-                    <div style={{background:"var(--s3)",padding:".6rem 1rem",fontSize:".65rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase",letterSpacing:".08em",textAlign:"center",borderBottom:"1px solid var(--b1)"}}>
-                      Comisiones netas por tramo
-                    </div>
-                    <table style={{width:"100%",borderCollapse:"collapse"}}>
-                      <thead>
-                        <tr style={{borderBottom:"1px solid var(--b1)"}}>
-                          {["Tramo","Lotes","Venta neta","Comisión"].map(h=>(
-                            <th key={h} style={{padding:".45rem .75rem",fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",textAlign:h==="Lotes"?"center":"right",letterSpacing:".04em"}}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {tramosArr.length===0 && (
-                          <tr><td colSpan={4} style={{padding:"1.5rem",textAlign:"center",color:"var(--mu)",fontSize:".75rem",fontStyle:"italic"}}>Sin comisiones registradas</td></tr>
-                        )}
-                        {tramosArr.map((t,i)=>(
-                          <tr key={i} style={{borderBottom:"1px solid var(--b1)"}}>
-                            <td style={{padding:".55rem .75rem"}}>
-                              <span style={{padding:".15rem .5rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:5,fontFamily:"Inter,sans-serif",fontSize:".72rem",fontWeight:700,color:"var(--ac)"}}>{t.pct}%</span>
-                            </td>
-                            <td style={{padding:".55rem .75rem",textAlign:"center",fontFamily:"Inter,sans-serif",fontSize:".76rem",color:"var(--mu2)"}}>{t.lotes.length}</td>
-                            <td style={{padding:".55rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".73rem",color:"var(--wh2)"}}>{fmt(t.subtotalMonto)}</td>
-                            <td style={{padding:".55rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".76rem",fontWeight:700,color:"var(--gr)"}}>{fmt(t.subtotalCom)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                      <tfoot>
-                        <tr style={{borderTop:"2px solid var(--b2)",background:"rgba(255,255,255,.02)"}}>
-                          <td colSpan={3} style={{padding:".65rem .75rem",textAlign:"right",fontSize:".72rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase",letterSpacing:".04em"}}>Total neto comisiones</td>
-                          <td style={{padding:".65rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".85rem",fontWeight:900,color:"var(--gr)"}}>{fmt(totalComNeto)}</td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-
-                  {/* Gastos e impuestos */}
-                  <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,overflow:"hidden"}}>
-                    <div style={{background:"var(--s3)",padding:".6rem 1rem",fontSize:".65rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase",letterSpacing:".08em",textAlign:"center",borderBottom:"1px solid var(--b1)"}}>
-                      Gastos e impuestos
-                    </div>
-                    <table style={{width:"100%",borderCollapse:"collapse"}}>
-                      <tbody>
-                        {[
-                          ["Comisiones netas (base AF)",    fmt(totalComNeto), "var(--gr)"],
-                          ["Gastos adm. motorizados (neto)",fmt(totalGAdm),    "var(--yl)"],
-                          ["Base afecta IVA",               fmt(totalComNeto+totalGAdm), "var(--mu2)"],
-                          ["IVA 19% s/ingresos",            fmt(iva),          "var(--mu2)"],
-                        ].map(([l,v,c],i)=>(
-                          <tr key={i} style={{borderBottom:"1px solid var(--b1)"}}>
-                            <td style={{padding:".65rem .9rem",fontSize:".76rem",fontStyle:"italic",color:"var(--mu2)"}}>{l}</td>
-                            <td style={{padding:".65rem .9rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:700,color:c,fontSize:".8rem"}}>{v}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                      <tfoot>
-                        <tr style={{borderTop:"2px solid rgba(246,173,85,.3)",background:"rgba(246,173,85,.04)"}}>
-                          <td style={{padding:".7rem .9rem",textAlign:"right",fontSize:".72rem",fontWeight:700,color:"var(--yl)",textTransform:"uppercase",letterSpacing:".04em"}}>Suma extras + IVA</td>
-                          <td style={{padding:".7rem .9rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".88rem",fontWeight:900,color:"var(--yl)"}}>{fmt(sumaExtras)}</td>
-                        </tr>
-                      </tfoot>
-                    </table>
-
-                    {/* Ingreso neto empresa — resultado final */}
-                    <div style={{margin:"1rem",padding:".85rem 1rem",background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.2)",borderRadius:9}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                        <div>
-                          <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".2rem"}}>Ingreso neto empresa</div>
-                          <div style={{fontSize:".68rem",color:"var(--mu)",lineHeight:1.4}}>Com. netas + G.adm. − IVA</div>
-                        </div>
-                        <div style={{fontFamily:"Inter,sans-serif",fontSize:"1.2rem",fontWeight:900,color:"var(--ac)"}}>
-                          {fmt(totalComNeto + totalGAdm - iva)}
-                        </div>
+                <>
+                  {/* 5 cards hero */}
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:".75rem",marginBottom:"1.1rem"}}>
+                    {[
+                      {label:"Venta total martillo",   val:fmt(ventaTotal),           accent:"var(--gr)",  sub:`${adjAll.length} lotes adjudicados`},
+                      {label:"Comisiones netas",        val:fmt(totalCom),             accent:"var(--ac)",  sub:"antes de IVA"},
+                      {label:"Gastos adm. motorizados", val:fmt(totalGAdm),            accent:"var(--yl)",  sub:`${motorizados} vehículos`},
+                      {label:"IVA 19% (AF)",            val:fmt(iva),                  accent:"#f87171",    sub:"sobre com. + G.adm."},
+                      {label:"Ingreso neto empresa",    val:fmt(ingresoNeto),          accent:"#a78bfa",    sub:"com. + G.adm. − IVA"},
+                    ].map((c,i)=>(
+                      <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1rem 1.1rem",borderBottom:`3px solid ${c.accent}`,textAlign:"center"}}>
+                        <div style={{fontSize:".6rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".35rem"}}>{c.label}</div>
+                        <div style={{fontSize:"1.25rem",fontWeight:900,color:c.accent,lineHeight:1,marginBottom:".2rem"}}>{c.val}</div>
+                        <div style={{fontSize:".62rem",color:"var(--mu)"}}>{c.sub}</div>
                       </div>
+                    ))}
+                  </div>
+
+                  {/* 2 cols: tramos comisión + gastos/IVA */}
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".85rem",marginBottom:"1.1rem"}}>
+
+                    {/* Comisiones por tramo */}
+                    <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,overflow:"hidden"}}>
+                      <div style={{background:"var(--s3)",padding:".6rem 1rem",fontSize:".65rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase",letterSpacing:".08em",borderBottom:"1px solid var(--b1)"}}>
+                        Comisiones netas por tramo
+                      </div>
+                      <table style={{width:"100%",borderCollapse:"collapse"}}>
+                        <thead>
+                          <tr style={{borderBottom:"1px solid var(--b1)"}}>
+                            {["Tramo","Lotes","Venta neta","Comisión"].map(h=>(
+                              <th key={h} style={{padding:".4rem .75rem",fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",textAlign:h==="Lotes"?"center":"right",letterSpacing:".04em"}}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {tramosArr.length===0 && (
+                            <tr><td colSpan={4} style={{padding:"1.5rem",textAlign:"center",color:"var(--mu)",fontSize:".75rem",fontStyle:"italic"}}>Sin comisiones registradas</td></tr>
+                          )}
+                          {tramosArr.map((t,i)=>(
+                            <tr key={i} style={{borderBottom:"1px solid var(--b1)"}}>
+                              <td style={{padding:".5rem .75rem"}}>
+                                <span style={{padding:".15rem .5rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:5,fontFamily:"Inter,sans-serif",fontSize:".72rem",fontWeight:700,color:"var(--ac)"}}>{t.pct}%</span>
+                              </td>
+                              <td style={{padding:".5rem .75rem",textAlign:"center",fontFamily:"Inter,sans-serif",fontSize:".76rem",color:"var(--mu2)"}}>{t.lotes.length}</td>
+                              <td style={{padding:".5rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".73rem",color:"var(--wh2)"}}>{fmt(t.subtotalMonto)}</td>
+                              <td style={{padding:".5rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".76rem",fontWeight:700,color:"var(--gr)"}}>{fmt(t.subtotalCom)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr style={{borderTop:"2px solid var(--b2)",background:"rgba(255,255,255,.02)"}}>
+                            <td colSpan={3} style={{padding:".6rem .75rem",textAlign:"right",fontSize:".72rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase",letterSpacing:".04em"}}>Total neto comisiones</td>
+                            <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".85rem",fontWeight:900,color:"var(--gr)"}}>{fmt(totalCom)}</td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+
+                    {/* Gastos e IVA */}
+                    <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,overflow:"hidden"}}>
+                      <div style={{background:"var(--s3)",padding:".6rem 1rem",fontSize:".65rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase",letterSpacing:".08em",borderBottom:"1px solid var(--b1)"}}>
+                        Gastos e impuestos
+                      </div>
+                      <table style={{width:"100%",borderCollapse:"collapse"}}>
+                        <tbody>
+                          {[
+                            ["Comisiones netas (base AF)",     fmt(totalCom),           "var(--gr)"],
+                            ["Gastos adm. motorizados (neto)", fmt(totalGAdm),           "var(--yl)"],
+                            ["Base afecta IVA",                fmt(totalCom+totalGAdm),  "var(--mu2)"],
+                            ["IVA 19% s/ingresos",             fmt(iva),                 "#f87171"],
+                          ].map(([l,v,c],i)=>(
+                            <tr key={i} style={{borderBottom:"1px solid var(--b1)"}}>
+                              <td style={{padding:".65rem .9rem",fontSize:".76rem",fontStyle:"italic",color:"var(--mu2)"}}>{l}</td>
+                              <td style={{padding:".65rem .9rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:700,color:c,fontSize:".8rem"}}>{v}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr style={{background:"rgba(167,139,250,.06)",borderTop:"2px solid rgba(167,139,250,.25)"}}>
+                            <td style={{padding:".75rem .9rem",fontSize:".72rem",fontWeight:700,color:"#a78bfa",textTransform:"uppercase",letterSpacing:".04em"}}>Ingreso neto empresa</td>
+                            <td style={{padding:".75rem .9rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".95rem",fontWeight:900,color:"#a78bfa"}}>{fmt(ingresoNeto)}</td>
+                          </tr>
+                        </tfoot>
+                      </table>
                     </div>
                   </div>
-                </div>
+
+                  {/* Detalle lote a lote */}
+                  <div className="table-card">
+                    <div className="table-head"><div className="table-title">Detalle por lote adjudicado</div></div>
+                    {adjAll.length===0
+                      ? <div style={{padding:"2rem",textAlign:"center",color:"var(--mu)",fontSize:".8rem",fontStyle:"italic"}}>Sin adjudicaciones para este remate</div>
+                      : <table>
+                          <thead><tr><th>Comprador</th><th>Lote</th><th>Tipo</th><th>Monto</th><th>Com %</th><th>Comisión</th><th>G.Adm.</th><th>Total empresa</th></tr></thead>
+                          <tbody>
+                            {adjAll.map((a,i)=>{
+                              const com     = a.com||Math.round((a.monto||0)*(a.comPct??3)/100);
+                              const gadm    = a.gastosAdm||0;
+                              const postorD = POSTORES_MERGED.find(p=>p.name===a.postor||p.razonSocial===a.postor);
+                              const loteR   = LOTES_REALES.find(l=>l.name===a.lote);
+                              return (
+                                <tr key={i}>
+                                  <td>
+                                    <div style={{display:"flex",alignItems:"center",gap:".4rem"}}>
+                                      <div style={{width:22,height:22,borderRadius:5,background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,sans-serif",fontSize:".6rem",fontWeight:800,color:"var(--ac)",flexShrink:0}}>
+                                        {String(postorD?.nComprador||"?").padStart(2,"0")}
+                                      </div>
+                                      <span style={{fontSize:".76rem",fontWeight:600}}>{a.postor}</span>
+                                    </div>
+                                  </td>
+                                  <td style={{fontSize:".73rem",color:"var(--mu2)"}}>{a.lote}</td>
+                                  <td>
+                                    {loteR?.tipoRemate && <span className="pill" style={{fontSize:".6rem",background:"rgba(56,178,246,.08)",color:"var(--ac)",border:"1px solid rgba(56,178,246,.2)"}}>{COMISIONES[loteR.tipoRemate]?.label||loteR.tipoRemate}</span>}
+                                  </td>
+                                  <td className="gt">{fmt(a.monto||0)}</td>
+                                  <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:700,color:"var(--ac)",textAlign:"center"}}>{a.comPct??3}%</td>
+                                  <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:700,color:"var(--gr)",textAlign:"right"}}>{fmt(com)}</td>
+                                  <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",color: gadm?"var(--yl)":"var(--mu)",textAlign:"right"}}>{gadm?fmt(gadm):"—"}</td>
+                                  <td style={{fontFamily:"Inter,sans-serif",fontSize:".78rem",fontWeight:800,color:"var(--wh2)",textAlign:"right"}}>{fmt(com+gadm)}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                          <tfoot>
+                            {(()=>{
+                              const tCom  = adjAll.reduce((s,a)=>s+(a.com||Math.round((a.monto||0)*(a.comPct??3)/100)),0);
+                              const tGadm = adjAll.reduce((s,a)=>s+(a.gastosAdm||0),0);
+                              return (
+                                <tr style={{borderTop:"2px solid var(--b2)",background:"rgba(255,255,255,.02)"}}>
+                                  <td colSpan={5} style={{padding:".6rem .75rem",textAlign:"right",fontSize:".7rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase"}}>Totales</td>
+                                  <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:900,color:"var(--gr)",fontSize:".82rem"}}>{fmt(tCom)}</td>
+                                  <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:700,color:"var(--yl)",fontSize:".82rem"}}>{fmt(tGadm)}</td>
+                                  <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:900,color:"var(--ac)",fontSize:".85rem"}}>{fmt(tCom+tGadm)}</td>
+                                </tr>
+                              );
+                            })()}
+                          </tfoot>
+                        </table>
+                    }
+                  </div>
+                </>
               );
             })()}
-
-            {/* ── Detalle lote a lote ── */}
-            <div className="table-card">
-              <div className="table-head"><div className="table-title">Detalle por lote adjudicado</div></div>
-              <table>
-                <thead><tr><th>Comprador</th><th>Lote</th><th>Tipo</th><th>Monto</th><th>Com %</th><th>Comisión</th><th>G.Adm.</th><th>Total empresa</th></tr></thead>
-                <tbody>
-                  {[...ADJUDICACIONES,...liquidaciones].map((a,i)=>{
-                    const com     = a.com||Math.round((a.monto||0)*(a.comPct??3)/100);
-                    const gadm    = a.gastosAdm||0;
-                    const postorD = POSTORES_MERGED.find(p=>p.name===a.postor||p.razonSocial===a.postor);
-                    const loteR   = LOTES_REALES.find(l=>l.name===a.lote);
-                    return (
-                      <tr key={i}>
-                        <td>
-                          <div style={{display:"flex",alignItems:"center",gap:".4rem"}}>
-                            <div style={{width:22,height:22,borderRadius:5,background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,sans-serif",fontSize:".6rem",fontWeight:800,color:"var(--ac)",flexShrink:0}}>
-                              {String(postorD?.nComprador||"?").padStart(2,"0")}
-                            </div>
-                            <span style={{fontSize:".76rem",fontWeight:600}}>{a.postor}</span>
-                          </div>
-                        </td>
-                        <td style={{fontSize:".73rem",color:"var(--mu2)"}}>{a.lote}</td>
-                        <td>
-                          {loteR?.tipoRemate && <span className="pill" style={{fontSize:".6rem",background:"rgba(56,178,246,.08)",color:"var(--ac)",border:"1px solid rgba(56,178,246,.2)"}}>{COMISIONES[loteR.tipoRemate]?.label||loteR.tipoRemate}</span>}
-                        </td>
-                        <td className="gt">{fmt(a.monto||0)}</td>
-                        <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:700,color:"var(--ac)",textAlign:"center"}}>{a.comPct??3}%</td>
-                        <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:700,color:"var(--gr)",textAlign:"right"}}>{fmt(com)}</td>
-                        <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",color: gadm?"var(--yl)":"var(--mu)",textAlign:"right"}}>{gadm?fmt(gadm):"—"}</td>
-                        <td style={{fontFamily:"Inter,sans-serif",fontSize:".78rem",fontWeight:800,color:"var(--wh2)",textAlign:"right"}}>{fmt(com+gadm)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot>
-                  {(()=>{
-                    const adjAll = [...ADJUDICACIONES,...liquidaciones];
-                    const tCom  = adjAll.reduce((s,a)=>s+(a.com||Math.round((a.monto||0)*(a.comPct??3)/100)),0);
-                    const tGadm = adjAll.reduce((s,a)=>s+(a.gastosAdm||0),0);
-                    return (
-                      <tr style={{borderTop:"2px solid var(--b2)",background:"rgba(255,255,255,.02)"}}>
-                        <td colSpan={5} style={{padding:".6rem .75rem",textAlign:"right",fontSize:".7rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase"}}>Totales</td>
-                        <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:900,color:"var(--gr)",fontSize:".82rem"}}>{fmt(tCom)}</td>
-                        <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:700,color:"var(--yl)",fontSize:".82rem"}}>{fmt(tGadm)}</td>
-                        <td style={{padding:".6rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:900,color:"var(--ac)",fontSize:".85rem"}}>{fmt(tCom+tGadm)}</td>
-                      </tr>
-                    );
-                  })()}
-                </tfoot>
-              </table>
-            </div>
           </div>
         )}
 
