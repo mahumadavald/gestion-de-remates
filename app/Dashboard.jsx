@@ -2105,6 +2105,9 @@ function Dashboard({ session, onLogout }) {
   };
   const [remateTerminado, setRemateTerminado] = useState(false);
   const [selectedBalanceRemate, setSelectedBalanceRemate] = useState("all");
+  const [statsView,  setStatsView]  = useState("mes");
+  const [statsAnio,  setStatsAnio]  = useState(new Date().getFullYear());
+  const [statsMes,   setStatsMes]   = useState(new Date().getMonth());
   const [adjCountdown,    setAdjCountdown]    = useState(null); // countdown auto-avance
 
   const timerRef    = useRef(null);
@@ -2280,6 +2283,7 @@ function Dashboard({ session, onLogout }) {
         enviado: false,
         retiro: null,
         fecha: new Date().toLocaleDateString("es-CL"),
+        fechaISO: new Date().toISOString(),
         remateId: salaRemateId||null,
         remateNombre: remateActivo?.name||"Sin remate",
       };
@@ -4528,383 +4532,322 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
         {/* ══ REPORTES ══ */}
         {page==="reportes" && (
           <div className="page">
-            {/* ── Selector de remate ── */}
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1.4rem",padding:".8rem 1.1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10}}>
+
+            {/* ── Header: período + controles ── */}
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1.25rem",padding:".8rem 1.1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,gap:"1rem",flexWrap:"wrap"}}>
               <div>
-                <div style={{fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".2rem"}}>Estadísticas de remate</div>
-                <div style={{fontSize:"1rem",fontWeight:800,color:"var(--wh)"}}>Remate Industrial Marzo 2026</div>
+                <div style={{fontSize:".62rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".2rem"}}>Estadísticas</div>
+                <div style={{fontSize:"1rem",fontWeight:800,color:"var(--wh)"}}>
+                  {statsView==="mes"
+                    ? `${["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"][statsMes]} ${statsAnio}`
+                    : `Año ${statsAnio}`}
+                </div>
               </div>
-              <div style={{display:"flex",gap:".5rem",alignItems:"center"}}>
-                <select className="fsel" style={{fontSize:".76rem",width:"auto"}}>
-                  {REMATES_MERGED.map(r=><option key={r.id}>{r.name}</option>)}
+              <div style={{display:"flex",gap:".45rem",alignItems:"center",flexWrap:"wrap"}}>
+                {/* Toggle Mensual/Anual */}
+                <div style={{display:"flex",border:"1px solid var(--b1)",borderRadius:7,overflow:"hidden"}}>
+                  {[["mes","Mensual"],["anio","Anual"]].map(([v,l])=>(
+                    <button key={v} onClick={()=>setStatsView(v)}
+                      style={{padding:".35rem .75rem",fontSize:".73rem",fontWeight:600,border:"none",cursor:"pointer",background:statsView===v?"var(--ac)":"transparent",color:statsView===v?"#fff":"var(--mu2)",transition:"all .15s"}}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+                {/* Año */}
+                <select className="fsel" style={{fontSize:".76rem",width:"auto"}} value={statsAnio} onChange={e=>setStatsAnio(Number(e.target.value))}>
+                  {[2023,2024,2025,2026,2027].map(y=><option key={y} value={y}>{y}</option>)}
                 </select>
-                <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async ()=>{
-                  // Exportar ventas CSV
-                  const adjAll = [...ADJUDICACIONES, ...liquidaciones];
-                  const csv = ["Postor,Lote,Monto,Comisión,IVA,Total,Estado",
+                {/* Mes (solo en vista mensual) */}
+                {statsView==="mes" && (
+                  <select className="fsel" style={{fontSize:".76rem",width:"auto"}} value={statsMes} onChange={e=>setStatsMes(Number(e.target.value))}>
+                    {["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"].map((m,i)=>(
+                      <option key={i} value={i}>{m}</option>
+                    ))}
+                  </select>
+                )}
+                {/* CSV */}
+                <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async()=>{
+                  const adjAll = [...ADJUDICACIONES,...liquidaciones];
+                  const csv = ["Postor,Lote,Monto,Comisión,IVA,Total,Estado,Fecha",
                     ...adjAll.map(a=>{
-                      const com = a.com||Math.round((a.monto||0)*0.03);
-                      const iva = Math.round(com*0.19);
-                      return `"${a.postor}","${a.lote||a.lote}",${a.monto||0},${com},${iva},${(a.monto||0)+com+iva},${a.estado||"adjudicado"}`;
+                      const com=a.com||Math.round((a.monto||0)*0.03);
+                      const iva=Math.round(com*0.19);
+                      return `"${a.postor}","${a.lote||""}",${a.monto||0},${com},${iva},${(a.monto||0)+com+iva},${a.estado||"adjudicado"},"${a.fecha||""}"`;
                     })
                   ].join("\n");
-                  const a = document.createElement("a");
-                  a.href = "data:text/csv;charset=utf-8,\uFEFF"+encodeURIComponent(csv);
-                  a.download = "ventas-remate.csv"; a.click();
+                  const el=document.createElement("a"); el.href="data:text/csv;charset=utf-8,\uFEFF"+encodeURIComponent(csv); el.download="estadisticas.csv"; el.click();
                   notify("CSV exportado.","sold");
-                }}>↓ Exportar CSV</button>
-                <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async ()=>{
-                  // Catálogo PDF de lotes
-                  if(!LOTES_MERGED.length){ notify("No hay lotes para generar el catálogo.","inf"); return; }
-                  try {
-                  const {jsPDF} = await import("jspdf");
-                  const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
-                  const W = doc.internal.pageSize.getWidth();
-                  doc.setFillColor(7,15,28); doc.rect(0,0,W,30,"F");
-                  doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont("helvetica","bold");
-                  doc.text("CATÁLOGO DE LOTES",W/2,14,{align:"center"});
-                  doc.setFontSize(9); doc.setFont("helvetica","normal");
-                  doc.text(`Generado: ${new Date().toLocaleDateString("es-CL")}`,W/2,22,{align:"center"});
-                  let y = 38;
-                  LOTES_MERGED.forEach((l,i)=>{
-                    if(y>260){doc.addPage();y=20;}
-                    doc.setFillColor(11,31,56); doc.roundedRect(10,y,W-20,22,2,2,"F");
-                    doc.setTextColor(255,255,255); doc.setFontSize(10); doc.setFont("helvetica","bold");
-                    doc.text(`Lote ${i+1} — ${l.name}`,15,y+8);
-                    doc.setFontSize(8); doc.setFont("helvetica","normal"); doc.setTextColor(90,127,168);
-                    doc.text(`Base: ${fmt(l.base||0)}   Comisión: ${l.com||3}%   Estado: ${l.estado||"disponible"}`,15,y+16);
-                    y+=26;
-                  });
-                  doc.save("catalogo-lotes.pdf");
-                  notify("Catálogo PDF generado.","sold");
-                  } catch(e){ console.error(e); notify("Error al generar PDF: "+e.message,"inf"); }
+                }}>↓ CSV</button>
+                {/* Catálogo PDF */}
+                <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async()=>{
+                  if(!LOTES_MERGED.length){notify("No hay lotes.","inf");return;}
+                  try{
+                    const {jsPDF}=await import("jspdf");
+                    const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+                    const W=doc.internal.pageSize.getWidth();
+                    doc.setFillColor(7,15,28); doc.rect(0,0,W,30,"F");
+                    doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont("helvetica","bold");
+                    doc.text("CATÁLOGO DE LOTES",W/2,14,{align:"center"});
+                    doc.setFontSize(9); doc.setFont("helvetica","normal");
+                    doc.text(`Generado: ${new Date().toLocaleDateString("es-CL")}`,W/2,22,{align:"center"});
+                    let y=38;
+                    LOTES_MERGED.forEach((l,i)=>{
+                      if(y>260){doc.addPage();y=20;}
+                      doc.setFillColor(11,31,56); doc.roundedRect(10,y,W-20,22,2,2,"F");
+                      doc.setTextColor(255,255,255); doc.setFontSize(10); doc.setFont("helvetica","bold");
+                      doc.text(`Lote ${i+1} — ${l.name}`,15,y+8);
+                      doc.setFontSize(8); doc.setFont("helvetica","normal"); doc.setTextColor(90,127,168);
+                      doc.text(`Base: ${fmt(l.base||0)}   Estado: ${l.estado||"disponible"}`,15,y+16);
+                      y+=26;
+                    });
+                    doc.save("catalogo-lotes.pdf");
+                    notify("PDF generado.","sold");
+                  }catch(e){notify("Error: "+e.message,"inf");}
                 }}>↓ Catálogo PDF</button>
               </div>
             </div>
 
-            {/* ── 5 stat cards (combinando los 2 sistemas) ── */}
+            {/* ── Calcular datos del período ── */}
             {(()=>{
-              const adjAll = [...ADJUDICACIONES, ...liquidaciones];
-              const totalVentas   = adjAll.reduce((s,a)=>s+(a.monto||0),0);
-              const totalCom      = adjAll.reduce((s,a)=>s+(a.com||Math.round((a.monto||0)*0.03)),0);
-              const ivaTotal      = Math.round(totalCom * 0.19);
-              const bruto         = totalVentas + totalCom + ivaTotal;
-              const garCount      = GARANTIAS.filter(g=>g.estado==="aprobada").length;
-              const garDev        = GARANTIAS.filter(g=>g.estado==="devuelta").length;
-              const lotesSold     = adjAll.length;
-              const lotesTotal    = LOTES_REALES.length;
-              return (
-                <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:".7rem",marginBottom:"1.1rem"}}>
-                  {[
-                    {label:"Total ventas",   val:fmt(totalVentas),  accent:"var(--ac)",  sub:"monto adjudicado"},
-                    {label:"Lotes vendidos", val:`${lotesSold} / ${lotesTotal}`,accent:"var(--gr)", sub:`${Math.round(lotesSold/Math.max(lotesTotal,1)*100)}% del remate`},
-                    {label:"Garantías",      val:`${garCount}`,     accent:"var(--yl)", sub:`${garDev} devueltas`},
-                    {label:"Comisiones",     val:fmt(totalCom),     accent:"var(--gr)", sub:"sin IVA"},
-                    {label:"Bruto total",    val:fmt(bruto),        accent:"#c084fc",   sub:"inc. IVA comisión"},
-                  ].map((c,i)=>(
-                    <div key={i} className="rep-card" style={{borderTop:`3px solid ${c.accent}`}}>
-                      <div className="rep-label">{c.label}</div>
-                      <div className="rep-metric" style={{fontSize:"1.15rem",color:c.accent}}>{c.val}</div>
-                      <div style={{fontSize:".65rem",color:"var(--mu)",marginTop:".25rem"}}>{c.sub}</div>
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
+              const parseFecha = (a) => {
+                if(a.fechaISO) return new Date(a.fechaISO);
+                if(a.fecha){
+                  const p = a.fecha.split(/[\/\-\.]/);
+                  if(p.length===3) return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));
+                }
+                return new Date();
+              };
+              const adjAll = [...ADJUDICACIONES,...liquidaciones];
+              // Filtrar por período seleccionado
+              const adjPeriodo = adjAll.filter(a=>{
+                const d = parseFecha(a);
+                if(statsView==="mes") return d.getFullYear()===statsAnio && d.getMonth()===statsMes;
+                return d.getFullYear()===statsAnio;
+              });
+              // Stats cards
+              const ventaTotal = adjPeriodo.reduce((s,a)=>s+(a.monto||0),0);
+              const totalCom   = adjPeriodo.reduce((s,a)=>s+(a.com||Math.round((a.monto||0)*0.03)),0);
+              const totalGAdm  = adjPeriodo.reduce((s,a)=>s+(a.gastosAdm||0),0);
+              const iva        = Math.round((totalCom+totalGAdm)*0.19);
+              const neto       = totalCom+totalGAdm-iva;
+              const lotesSold  = adjPeriodo.length;
+              const totalLotes = LOTES_MERGED.length;
 
-            {/* ── Fila 2: Top compradores + Resumen financiero ── */}
-            {(()=>{
-              const adjAll = [...ADJUDICACIONES, ...liquidaciones];
-              const totalVentas = adjAll.reduce((s,a)=>s+(a.monto||0),0);
-              const totalCom    = adjAll.reduce((s,a)=>s+(a.com||Math.round((a.monto||0)*0.03)),0);
-              const totalGAdm   = adjAll.reduce((s,a)=>s+(a.gastosAdm||0),0);
-              const ivaBase     = totalCom + totalGAdm;
-              const iva         = Math.round(ivaBase * 0.19);
-              const bruto       = totalVentas + totalCom + totalGAdm + iva;
-              // Top 3 compradores por monto
+              // Datos para gráfico: siempre 12 meses del año seleccionado
+              const mesesShort = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+              const chartData = mesesShort.map((mes,i)=>{
+                const v = adjAll.filter(a=>{
+                  const d=parseFecha(a);
+                  return d.getFullYear()===statsAnio && d.getMonth()===i;
+                }).reduce((s,a)=>s+(a.monto||0),0);
+                return {mes, v: Math.round(v/1000000*10)/10, highlight: statsView==="mes"&&i===statsMes};
+              });
+
+              // Top 3 compradores del período
               const byPostor = {};
-              adjAll.forEach(a=>{
-                const k = a.postor;
+              adjPeriodo.forEach(a=>{
+                const k=a.postor||"Desconocido";
                 if(!byPostor[k]) byPostor[k]={postor:k,monto:0,lotes:0};
-                byPostor[k].monto += a.monto||0;
-                byPostor[k].lotes++;
+                byPostor[k].monto+=a.monto||0; byPostor[k].lotes++;
               });
               const top3 = Object.values(byPostor).sort((a,b)=>b.monto-a.monto).slice(0,3);
               const maxMonto = top3[0]?.monto||1;
-              return (
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".85rem",marginBottom:"1.1rem"}}>
-                  {/* Top 3 compradores */}
-                  <div className="chart-card" style={{padding:"1.1rem 1.25rem"}}>
-                    <div className="chart-title">Top 3 compradores</div>
-                    <div className="chart-sub">Por monto adjudicado en este remate</div>
-                    <div style={{marginTop:"1rem",display:"flex",flexDirection:"column",gap:".75rem"}}>
-                      {top3.length===0 && <div style={{fontSize:".75rem",color:"var(--mu)",textAlign:"center",padding:"1rem"}}>Sin adjudicaciones aún</div>}
-                      {top3.map((t,i)=>{
-                        const pct = Math.round(t.monto/maxMonto*100);
-                        const posData = POSTORES_MERGED.find(p=>p.name===t.postor||p.razonSocial===t.postor);
-                        return (
-                          <div key={i}>
-                            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:".3rem"}}>
-                              <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
-                                <div style={{width:22,height:22,borderRadius:6,background:i===0?"rgba(246,173,85,.15)":i===1?"rgba(56,178,246,.1)":"rgba(255,255,255,.05)",border:`1px solid ${i===0?"rgba(246,173,85,.3)":i===1?"rgba(56,178,246,.25)":"var(--b1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".65rem",fontWeight:800,color:i===0?"var(--yl)":i===1?"var(--ac)":"var(--mu)",flexShrink:0}}>
-                                  {i+1}
-                                </div>
-                                <div>
-                                  <div style={{fontSize:".76rem",fontWeight:700,color:"var(--wh2)"}}>{t.postor}</div>
-                                  <div style={{fontSize:".62rem",color:"var(--mu)"}}>{t.lotes} lote{t.lotes>1?"s":""} · Paleta #{String(posData?.nComprador||"—").padStart(2,"0")}</div>
-                                </div>
-                              </div>
-                              <div style={{fontFamily:"Inter,sans-serif",fontSize:".8rem",fontWeight:700,color:"var(--wh2)"}}>{fmt(t.monto)}</div>
-                            </div>
-                            <div style={{height:4,borderRadius:2,background:"var(--b1)",overflow:"hidden"}}>
-                              <div style={{height:"100%",width:`${pct}%`,background:i===0?"var(--yl)":i===1?"var(--ac)":"var(--mu)",borderRadius:2,transition:"width .4s"}}/>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
 
-                  {/* Resumen financiero */}
-                  <div className="chart-card" style={{padding:"1.1rem 1.25rem"}}>
-                    <div className="chart-title">Resumen financiero</div>
-                    <div className="chart-sub">Desglose contable del remate</div>
-                    <div style={{marginTop:"1rem",display:"flex",flexDirection:"column",gap:0}}>
-                      {[
-                        ["Ventas neto (EX):",      fmt(totalVentas), "var(--wh2)", false],
-                        ["Total comisiones:",       fmt(totalCom),    "var(--gr)",  false],
-                        ["Gastos adm. motorizados:",fmt(totalGAdm),   "var(--yl)",  false],
-                        ["Base afecta IVA:",        fmt(ivaBase),     "var(--mu2)", false],
-                        ["IVA comisiones (19%):",   fmt(iva),         "var(--mu2)", false],
-                      ].map(([l,v,c,b])=>(
-                        <div key={l} style={{display:"flex",justifyContent:"space-between",padding:".52rem 0",borderBottom:"1px solid var(--b1)",fontSize:".76rem"}}>
-                          <span style={{color:"var(--mu2)"}}>{l}</span>
-                          <span style={{fontFamily:"Inter,sans-serif",fontWeight:700,color:c}}>{v}</span>
-                        </div>
-                      ))}
-                      <div style={{display:"flex",justifyContent:"space-between",padding:".7rem 0 .2rem",marginTop:".2rem"}}>
-                        <span style={{fontSize:".88rem",fontWeight:800,color:"var(--wh)"}}>BRUTO TOTAL:</span>
-                        <span style={{fontFamily:"Inter,sans-serif",fontSize:"1.05rem",fontWeight:800,color:"var(--ac)"}}>{fmt(bruto)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* ── Fila 3: Gráfico ventas + lotes sin vender ── */}
-            <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:".85rem",marginBottom:"1.1rem"}}>
-              <div className="chart-card">
-                <div className="chart-title">Ventas mensuales</div>
-                <div className="chart-sub">Millones CLP — últimos 7 meses</div>
-                <ResponsiveContainer width="100%" height={145}>
-                  <BarChart data={VENTAS_MES} barSize={18}>
-                    <XAxis dataKey="mes" tick={{fontFamily:"Inter",fontSize:9,fill:"#5a7fa8"}} axisLine={false} tickLine={false}/>
-                    <YAxis hide/><Tooltip content={<CustomTooltip/>}/>
-                    <Bar dataKey="v" fill="#38B2F6" radius={[4,4,0,0]}/>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="chart-card" style={{padding:"1.1rem 1.25rem"}}>
-                <div className="chart-title">Lotes sin vender</div>
-                <div className="chart-sub">Del remate actual</div>
-                <div style={{marginTop:".8rem",display:"flex",flexDirection:"column",gap:".5rem"}}>
-                  {LOTES_REALES.slice(0,4).map((l,i)=>(
-                    <div key={i} style={{display:"flex",alignItems:"center",gap:".5rem",padding:".42rem .6rem",background:"rgba(245,101,101,.05)",border:"1px solid rgba(245,101,101,.15)",borderRadius:6}}>
-                      <span className="exp-badge" style={{fontSize:".6rem"}}>{l.exp}</span>
-                      <span style={{flex:1,fontSize:".7rem",color:"var(--mu2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.name}</span>
-                      <span style={{fontSize:".65rem",color:"var(--rd)",fontWeight:700,flexShrink:0}}>{fmt(l.base)}</span>
-                    </div>
-                  ))}
-                  {LOTES_REALES.length>4&&<div style={{fontSize:".65rem",color:"var(--mu)",textAlign:"center"}}>+{LOTES_REALES.length-4} más</div>}
-                </div>
-              </div>
-            </div>
-
-            {/* ── Accesos rápidos (igual que estadisticas.php) ── */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:".6rem",marginBottom:"1rem"}}>
-              {[
-                {label:"Ver lotes",          page:"lotes",      color:"var(--ac)"},
-                {label:"Liq. compradores",   page:"liquidac",   color:"var(--gr)"},
-                {label:"Devoluciones",       page:"devoluciones",color:"var(--yl)"},
-                {label:"Adjudicaciones",     page:"adjudicac",  color:"#c084fc"},
-              ].map(l=>(
-                <button key={l.label} onClick={()=>setPage(l.page)} style={{padding:".7rem .5rem",background:"var(--s2)",border:`1px solid var(--b1)`,borderRadius:9,fontSize:".74rem",fontWeight:700,color:l.color,cursor:"pointer",transition:"all .15s",textAlign:"center"}}
-                  onMouseEnter={e=>{e.currentTarget.style.borderColor=l.color;e.currentTarget.style.background="rgba(255,255,255,.04)";}}
-                  onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--b1)";e.currentTarget.style.background="var(--s2)";}}>
-                  {l.label}
-                </button>
-              ))}
-            </div>
-
-            {/* ── Tabla detalle por remate ── */}
-            <div className="table-card">
-              <div className="table-head"><div className="table-title">Historial de remates</div></div>
-              <table>
-                <thead><tr><th>ID</th><th>Nombre</th><th>Lotes vendidos</th><th>Sin vender</th><th>Recaudado</th><th>Comisiones</th><th>IVA</th><th>Bruto</th><th>Estado</th></tr></thead>
-                <tbody>
-                  {REMATES_MERGED.map(r => {
-                    const com = Math.round(r.recaudado*.03);
-                    const iva = Math.round(com*.19);
-                    return (
-                      <tr key={r.id}>
-                        <td className="mono">{r.id}</td>
-                        <td style={{fontWeight:600}}>{r.name}</td>
-                        <td className="mono">{Math.round(r.lotes*.78)}</td>
-                        <td className="mono" style={{color:"var(--rd)"}}>{Math.round(r.lotes*.22)}</td>
-                        <td className="gt">{fmt(r.recaudado)}</td>
-                        <td style={{color:"var(--gr)",fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:600}}>{fmt(com)}</td>
-                        <td style={{color:"var(--mu2)",fontFamily:"Inter,sans-serif",fontSize:".73rem"}}>{fmt(iva)}</td>
-                        <td style={{color:"var(--ac)",fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:700}}>{fmt(r.recaudado+com+iva)}</td>
-                        <td><span className={`pill p-${r.estado}`}>{r.estado.charAt(0).toUpperCase()+r.estado.slice(1)}</span></td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* ── Panel admin: clientes ── */}
-            {session?.role==="admin" && (()=>{
-              const casas = [...new Set(REMATES_MERGED.map(r=>r.casa))];
-              const stats = casas.map(casa => {
-                const rematesCasa    = REMATES_MERGED.filter(r=>r.casa===casa);
-                const cerrados       = rematesCasa.filter(r=>r.estado==="cerrado");
-                const totalVendido   = cerrados.reduce((s,r)=>s+r.recaudado,0);
-                const totalLotes     = rematesCasa.reduce((s,r)=>s+r.lotes,0);
-                const lotesVend      = cerrados.reduce((s,r)=>s+r.lotes,0);
-                const promLote       = lotesVend > 0 ? Math.round(totalVendido/lotesVend) : 0;
-                const nRemates       = rematesCasa.length;
-                const postoresUnicos = casa==="Remates Ahumada" ? 38 : 14;
-                return { casa, totalVendido, totalLotes, promLote, nRemates, postoresUnicos, cerrados:cerrados.length, remates:rematesCasa };
-              }).sort((a,b)=>b.totalVendido-a.totalVendido);
-
-              const maxVendido  = Math.max(...stats.map(s=>s.totalVendido),1);
-              const clienteActivo = adminClienteSel ? stats.find(s=>s.casa===adminClienteSel) : null;
+              // Lotes sin vender del período actual
+              const lotesSinVender = LOTES_MERGED.filter(l=>l.estado==="disponible"||l.estado==="pendiente"||!l.estado).slice(0,5);
 
               return (
-                <div style={{marginTop:"1.5rem"}}>
-
-                  {/* Header con selector */}
-                  <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",paddingBottom:".8rem",borderBottom:"1px solid var(--b1)"}}>
-                    <div style={{width:28,height:28,borderRadius:7,background:"rgba(56,178,246,.12)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><path d="M3 13V7M8 13V3M13 13V9"/></svg>
-                    </div>
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:".82rem",fontWeight:800,color:"var(--wh2)"}}>Clientes GR Auction Software</div>
-                      <div style={{fontSize:".68rem",color:"var(--mu2)"}}>Solo visible para administrador — métricas por casa de remates</div>
-                    </div>
-                    {/* Selector de cliente */}
-                    <select
-                      value={adminClienteSel||""}
-                      onChange={e=>setAdminClienteSel(e.target.value||null)}
-                      style={{padding:".4rem .8rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:7,color:"var(--wh2)",fontSize:".78rem",fontFamily:"Inter,sans-serif",cursor:"pointer",minWidth:200}}>
-                      <option value="">— Vista general —</option>
-                      {stats.map(s=><option key={s.casa} value={s.casa}>{s.casa}</option>)}
-                    </select>
-                    <span style={{fontSize:".65rem",padding:".2rem .55rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:4,color:"var(--ac)",fontWeight:700,letterSpacing:".05em",flexShrink:0}}>ADMIN</span>
+                <>
+                  {/* 5 cards hero */}
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:".75rem",marginBottom:"1.1rem"}}>
+                    {[
+                      {label:"Venta total",        val:fmt(ventaTotal),  accent:"var(--gr)",  sub:`${lotesSold} lotes adjudicados`},
+                      {label:"Comisiones netas",    val:fmt(totalCom),    accent:"var(--ac)",  sub:"sin IVA"},
+                      {label:"G. adm. motorizados", val:fmt(totalGAdm),   accent:"var(--yl)",  sub:"vehículos"},
+                      {label:"IVA 19%",             val:fmt(iva),         accent:"#f87171",    sub:"sobre ingresos AF"},
+                      {label:"Ingreso neto",        val:fmt(neto),        accent:"#a78bfa",    sub:"empresa"},
+                    ].map((c,i)=>(
+                      <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1rem 1.1rem",borderBottom:`3px solid ${c.accent}`,textAlign:"center"}}>
+                        <div style={{fontSize:".6rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".35rem"}}>{c.label}</div>
+                        <div style={{fontSize:"1.2rem",fontWeight:900,color:c.accent,lineHeight:1,marginBottom:".2rem"}}>{c.val}</div>
+                        <div style={{fontSize:".62rem",color:"var(--mu)"}}>{c.sub}</div>
+                      </div>
+                    ))}
                   </div>
 
-                  {/* ── Vista general: ranking ── */}
-                  {!clienteActivo && (
-                    <div style={{display:"flex",flexDirection:"column",gap:".8rem"}}>
-                      {stats.map((s,i)=>(
-                        <div key={s.casa}
-                          onClick={()=>setAdminClienteSel(s.casa)}
-                          style={{background:"var(--s2)",border:`1px solid ${adminClienteSel===s.casa?"var(--ac)":"var(--b1)"}`,borderRadius:11,padding:"1rem 1.2rem",position:"relative",overflow:"hidden",cursor:"pointer",transition:"border .15s"}}>
-                          <div style={{position:"absolute",top:0,left:0,height:"100%",width:`${Math.round(s.totalVendido/maxVendido*100)}%`,background:"rgba(56,178,246,.04)",borderRight:"1px solid rgba(56,178,246,.08)",pointerEvents:"none"}}/>
-                          <div style={{display:"flex",alignItems:"center",gap:"1rem",position:"relative"}}>
-                            <div style={{width:32,height:32,borderRadius:8,background:i===0?"rgba(246,173,85,.15)":"rgba(255,255,255,.04)",border:`1px solid ${i===0?"rgba(246,173,85,.3)":"var(--b2)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                              <span style={{fontSize:".9rem",fontWeight:900,color:i===0?"var(--yl)":"var(--mu2)"}}>#{i+1}</span>
-                            </div>
-                            <div style={{flex:1,minWidth:0}}>
-                              <div style={{fontSize:".88rem",fontWeight:800,color:"var(--wh2)",marginBottom:".15rem"}}>{s.casa}</div>
-                              <div style={{fontSize:".68rem",color:"var(--mu)",display:"flex",gap:".5rem",flexWrap:"wrap"}}>
-                                <span>{s.nRemates} remates ({s.cerrados} cerrados)</span>
-                                <span>·</span>
-                                <span>{s.postoresUnicos} postores únicos</span>
-                              </div>
-                            </div>
-                            <div style={{display:"flex",gap:"1.5rem",flexShrink:0}}>
-                              <div style={{textAlign:"right"}}>
-                                <div style={{fontFamily:"Inter,sans-serif",fontSize:".95rem",fontWeight:700,color:"var(--ac)"}}>{fmt(s.totalVendido)}</div>
-                                <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Total vendido</div>
-                              </div>
-                              <div style={{textAlign:"right"}}>
-                                <div style={{fontFamily:"Inter,sans-serif",fontSize:".95rem",fontWeight:700,color:"var(--gr)"}}>{fmt(s.promLote)}</div>
-                                <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Prom/lote</div>
-                              </div>
-                              <div style={{textAlign:"right"}}>
-                                <div style={{fontFamily:"Inter,sans-serif",fontSize:".95rem",fontWeight:700,color:"var(--wh2)"}}>{s.totalLotes}</div>
-                                <div style={{fontSize:".6rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em"}}>Lotes totales</div>
-                              </div>
-                            </div>
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--mu)" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0}}><path d="M4 2l4 4-4 4"/></svg>
-                          </div>
+                  {/* Fila 2: gráfico + top compradores */}
+                  <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:".85rem",marginBottom:"1rem"}}>
+                    {/* Gráfico ventas mensuales */}
+                    <div className="chart-card">
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:".2rem"}}>
+                        <div>
+                          <div className="chart-title">Ventas {statsView==="mes"?"— año "+statsAnio:"— "+statsAnio}</div>
+                          <div className="chart-sub">Millones CLP por mes{statsView==="mes"?" · mes seleccionado destacado":""}</div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* ── Vista detalle cliente ── */}
-                  {clienteActivo && (
-                    <div>
-                      {/* Stat cards del cliente */}
-                      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:".7rem",marginBottom:"1.2rem"}}>
-                        {[
-                          {label:"Total vendido",      val:fmt(clienteActivo.totalVendido),          color:"var(--ac)"},
-                          {label:"Lotes rematados",    val:clienteActivo.totalLotes,                 color:"var(--gr)"},
-                          {label:"Valor prom/lote",    val:fmt(clienteActivo.promLote),              color:"#c084fc"},
-                          {label:"N° de remates",      val:clienteActivo.nRemates,                   color:"var(--yl)"},
-                          {label:"Postores únicos",    val:clienteActivo.postoresUnicos,             color:"var(--ac)"},
-                        ].map((c,i)=>(
-                          <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,padding:".85rem 1rem",borderTop:`3px solid ${c.color}`}}>
-                            <div style={{fontSize:".62rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".4rem"}}>{c.label}</div>
-                            <div style={{fontFamily:"Inter,sans-serif",fontSize:"1.1rem",fontWeight:800,color:c.color}}>{c.val}</div>
-                          </div>
-                        ))}
+                        <div style={{fontSize:".68rem",fontWeight:700,color:"var(--ac)"}}>
+                          {fmt(ventaTotal)} total período
+                        </div>
                       </div>
-
-                      {/* Remates del cliente */}
-                      <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:11,overflow:"hidden"}}>
-                        <div style={{padding:".75rem 1rem",borderBottom:"1px solid var(--b1)",fontSize:".72rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em"}}>
-                          Remates de {clienteActivo.casa}
-                        </div>
-                        <table style={{width:"100%",borderCollapse:"collapse"}}>
-                          <thead>
-                            <tr style={{background:"rgba(255,255,255,.02)"}}>
-                              {["ID","Nombre","Fecha","Lotes","Modalidad","Recaudado","Estado"].map(h=>(
-                                <th key={h} style={{padding:".5rem .85rem",textAlign:"left",fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em",borderBottom:"1px solid var(--b1)"}}>{h}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {clienteActivo.remates.map(r=>(
-                              <tr key={r.id} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}>
-                                <td style={{padding:".55rem .85rem",fontFamily:"Inter,sans-serif",fontSize:".72rem",color:"var(--mu2)"}}>{r.id}</td>
-                                <td style={{padding:".55rem .85rem",fontSize:".78rem",fontWeight:600,color:"var(--wh2)"}}>{r.name}</td>
-                                <td style={{padding:".55rem .85rem",fontFamily:"Inter,sans-serif",fontSize:".72rem",color:"var(--mu2)"}}>{r.fecha}</td>
-                                <td style={{padding:".55rem .85rem",fontFamily:"Inter,sans-serif",fontSize:".78rem",color:"var(--wh2)"}}>{r.lotes}</td>
-                                <td style={{padding:".55rem .85rem",fontSize:".72rem",color:"var(--mu2)"}}>{r.modal}</td>
-                                <td style={{padding:".55rem .85rem",fontFamily:"Inter,sans-serif",fontSize:".78rem",fontWeight:700,color:"var(--ac)"}}>{fmt(r.recaudado)}</td>
-                                <td style={{padding:".55rem .85rem"}}><span className={`pill p-${r.estado}`}>{r.estado.charAt(0).toUpperCase()+r.estado.slice(1)}</span></td>
-                              </tr>
+                      <ResponsiveContainer width="100%" height={155}>
+                        <BarChart data={chartData} barSize={18}>
+                          <XAxis dataKey="mes" tick={{fontFamily:"Inter",fontSize:9,fill:"#5a7fa8"}} axisLine={false} tickLine={false}/>
+                          <YAxis hide/>
+                          <Tooltip content={<CustomTooltip/>}/>
+                          <Bar dataKey="v" radius={[4,4,0,0]}>
+                            {chartData.map((entry,index)=>(
+                              <Cell key={index} fill={entry.highlight?"#38B2F6":statsView==="mes"?"rgba(56,178,246,.35)":"#38B2F6"}/>
                             ))}
-                          </tbody>
-                        </table>
-                      </div>
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
 
-                      <div style={{marginTop:".75rem",padding:".6rem .9rem",background:"rgba(56,178,246,.04)",border:"1px solid rgba(56,178,246,.1)",borderRadius:7,fontSize:".7rem",color:"var(--mu)",lineHeight:1.6}}>
-                        Datos basados en remates registrados. En producción con Supabase se calcularán en tiempo real con historial completo.
+                    {/* Top 3 compradores */}
+                    <div className="chart-card" style={{padding:"1.1rem 1.25rem"}}>
+                      <div className="chart-title">Top compradores</div>
+                      <div className="chart-sub">Por monto en el período</div>
+                      <div style={{marginTop:"1rem",display:"flex",flexDirection:"column",gap:".75rem"}}>
+                        {top3.length===0 && <div style={{fontSize:".75rem",color:"var(--mu)",textAlign:"center",padding:"1rem",fontStyle:"italic"}}>Sin adjudicaciones en este período</div>}
+                        {top3.map((t,i)=>{
+                          const pct=Math.round(t.monto/maxMonto*100);
+                          const posData=POSTORES_MERGED.find(p=>p.name===t.postor||p.razonSocial===t.postor);
+                          return (
+                            <div key={i}>
+                              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:".3rem"}}>
+                                <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
+                                  <div style={{width:22,height:22,borderRadius:6,background:i===0?"rgba(246,173,85,.15)":i===1?"rgba(56,178,246,.1)":"rgba(255,255,255,.05)",border:`1px solid ${i===0?"rgba(246,173,85,.3)":i===1?"rgba(56,178,246,.25)":"var(--b1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".65rem",fontWeight:800,color:i===0?"var(--yl)":i===1?"var(--ac)":"var(--mu)",flexShrink:0}}>{i+1}</div>
+                                  <div>
+                                    <div style={{fontSize:".76rem",fontWeight:700,color:"var(--wh2)"}}>{t.postor}</div>
+                                    <div style={{fontSize:".62rem",color:"var(--mu)"}}>{t.lotes} lote{t.lotes>1?"s":""}{posData?` · #${String(posData.nComprador).padStart(2,"0")}`:""}</div>
+                                  </div>
+                                </div>
+                                <div style={{fontFamily:"Inter,sans-serif",fontSize:".8rem",fontWeight:700,color:"var(--wh2)"}}>{fmt(t.monto)}</div>
+                              </div>
+                              <div style={{height:4,borderRadius:2,background:"var(--b1)",overflow:"hidden"}}>
+                                <div style={{height:"100%",width:`${pct}%`,background:i===0?"var(--yl)":i===1?"var(--ac)":"var(--mu)",borderRadius:2,transition:"width .4s"}}/>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  )}
-                </div>
+                  </div>
+
+                  {/* Fila 3: Historial remates + lotes sin vender */}
+                  <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:".85rem",marginBottom:"1rem"}}>
+                    {/* Historial de remates */}
+                    <div className="table-card">
+                      <div className="table-head"><div className="table-title">Historial de remates — {statsAnio}</div></div>
+                      <table>
+                        <thead><tr><th>Nombre</th><th>Lotes</th><th>Recaudado</th><th>Comisiones</th><th>Estado</th></tr></thead>
+                        <tbody>
+                          {REMATES_MERGED.filter(r=>{
+                            if(!r.fecha) return true;
+                            const d = new Date(r.fecha.replace(/(\d{2})\/(\d{2})\/(\d{4})/,"$3-$2-$1")||r.fecha);
+                            return isNaN(d.getFullYear()) || d.getFullYear()===statsAnio;
+                          }).map((r,i)=>{
+                            const com=Math.round((r.recaudado||0)*.03);
+                            return (
+                              <tr key={i}>
+                                <td style={{fontWeight:600,fontSize:".78rem"}}>{r.name}</td>
+                                <td className="mono">{r.lotes||0}</td>
+                                <td className="gt">{fmt(r.recaudado||0)}</td>
+                                <td style={{color:"var(--gr)",fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:600}}>{fmt(com)}</td>
+                                <td><span className={`pill p-${r.estado}`}>{r.estado?.charAt(0).toUpperCase()+(r.estado?.slice(1)||"")}</span></td>
+                              </tr>
+                            );
+                          })}
+                          {REMATES_MERGED.length===0&&<tr><td colSpan={5} style={{textAlign:"center",padding:"1.5rem",color:"var(--mu)",fontStyle:"italic",fontSize:".78rem"}}>Sin remates registrados</td></tr>}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Lotes sin vender */}
+                    <div className="chart-card" style={{padding:"1.1rem 1.25rem"}}>
+                      <div className="chart-title">Lotes sin vender</div>
+                      <div className="chart-sub">{lotesSinVender.length} lotes disponibles</div>
+                      <div style={{marginTop:".8rem",display:"flex",flexDirection:"column",gap:".45rem"}}>
+                        {lotesSinVender.length===0
+                          ? <div style={{fontSize:".75rem",color:"var(--mu)",textAlign:"center",padding:"1rem",fontStyle:"italic"}}>Sin lotes pendientes</div>
+                          : lotesSinVender.map((l,i)=>(
+                            <div key={i} style={{display:"flex",alignItems:"center",gap:".5rem",padding:".42rem .6rem",background:"rgba(245,101,101,.05)",border:"1px solid rgba(245,101,101,.15)",borderRadius:6}}>
+                              <span style={{flex:1,fontSize:".72rem",color:"var(--mu2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.name}</span>
+                              <span style={{fontSize:".65rem",color:"var(--rd)",fontWeight:700,flexShrink:0,fontFamily:"Inter,sans-serif"}}>{fmt(l.base||0)}</span>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Panel admin: casas de remates ── */}
+                  {session?.role==="admin" && (()=>{
+                    const dbCasas = [...new Set(REMATES_MERGED.map(r=>r.casa).filter(Boolean))];
+                    const casaStats = dbCasas.map(casa=>{
+                      const rematesCasa = REMATES_MERGED.filter(r=>r.casa===casa);
+                      const liqCasa = liquidaciones.filter(l=>
+                        rematesCasa.some(r=>(r.supabaseId||r.id)===l.remateId)
+                      );
+                      const ventaCasa   = liqCasa.reduce((s,l)=>s+(l.monto||0),0);
+                      const comCasa     = liqCasa.reduce((s,l)=>s+(l.com||Math.round((l.monto||0)*0.03)),0);
+                      const ivaCasa     = Math.round(comCasa*0.19);
+                      const netoCasa    = comCasa - ivaCasa;
+                      const nRemates    = rematesCasa.length;
+                      const lotesCasa   = rematesCasa.reduce((s,r)=>s+(r.lotes||0),0);
+                      return {casa, ventaCasa, comCasa, ivaCasa, netoCasa, nRemates, lotesCasa, rematesCasa};
+                    }).sort((a,b)=>b.ventaCasa-a.ventaCasa);
+
+                    if(casaStats.length===0) return null;
+                    return (
+                      <div style={{marginTop:"1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,overflow:"hidden"}}>
+                        {/* Header */}
+                        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:".85rem 1.15rem",borderBottom:"1px solid var(--b1)",background:"var(--s3)"}}>
+                          <div style={{display:"flex",alignItems:"center",gap:".65rem"}}>
+                            <div style={{width:26,height:26,borderRadius:7,background:"rgba(56,178,246,.12)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><path d="M3 13V7M8 13V3M13 13V9"/></svg>
+                            </div>
+                            <div>
+                              <div style={{fontSize:".82rem",fontWeight:800,color:"var(--wh2)"}}>Estadísticas por casa de remates</div>
+                              <div style={{fontSize:".65rem",color:"var(--mu2)"}}>Vista exclusiva administrador — {casaStats.length} casas activas</div>
+                            </div>
+                          </div>
+                          <span style={{fontSize:".63rem",padding:".2rem .55rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:4,color:"var(--ac)",fontWeight:700,letterSpacing:".05em"}}>ADMIN</span>
+                        </div>
+                        {/* Grid de casas */}
+                        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:".85rem",padding:"1rem"}}>
+                          {casaStats.map((s,i)=>(
+                            <div key={i} style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:10,padding:"1rem 1.15rem",borderLeft:`3px solid ${i===0?"var(--ac)":i===1?"var(--gr)":"var(--yl)"}`}}>
+                              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:".6rem"}}>
+                                <div style={{fontSize:".82rem",fontWeight:800,color:"var(--wh2)"}}>{s.casa}</div>
+                                <span style={{fontSize:".62rem",padding:".15rem .45rem",background:"rgba(255,255,255,.05)",border:"1px solid var(--b1)",borderRadius:4,color:"var(--mu)",fontWeight:600}}>{s.nRemates} remates</span>
+                              </div>
+                              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".45rem"}}>
+                                {[
+                                  ["Venta total",   fmt(s.ventaCasa), "var(--wh2)"],
+                                  ["Comisiones",    fmt(s.comCasa),   "var(--gr)"],
+                                  ["IVA 19%",       fmt(s.ivaCasa),   "#f87171"],
+                                  ["Ingreso neto",  fmt(s.netoCasa),  "var(--ac)"],
+                                ].map(([l,v,c])=>(
+                                  <div key={l} style={{background:"var(--s2)",borderRadius:7,padding:".5rem .65rem"}}>
+                                    <div style={{fontSize:".58rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".15rem"}}>{l}</div>
+                                    <div style={{fontFamily:"Inter,sans-serif",fontSize:".82rem",fontWeight:800,color:c}}>{v}</div>
+                                  </div>
+                                ))}
+                              </div>
+                              <div style={{marginTop:".55rem",fontSize:".65rem",color:"var(--mu)"}}>
+                                {s.lotesCasa} lotes totales
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </>
               );
             })()}
           </div>
         )}
-
         {/* ══ USUARIOS ══ */}
         {page==="usuarios" && session?.role==="admin" && (()=>{
           // Casas reales desde Supabase — incluye "GR Auction Software" para admin global
