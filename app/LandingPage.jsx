@@ -56,10 +56,7 @@ export default function LandingPage() {
   <div class="orb orb3"></div>
 
   <div class="hero-inner">
-    <div class="hero-badge reveal">
-      <span class="badge-dot"></span>
-      PLATAFORMA DE REMATES ONLINE · CHILE
-    </div>
+
 
     <h1 class="hero-title reveal">
       Los remates,<br/><em>reinventados.</em>
@@ -162,13 +159,13 @@ export default function LandingPage() {
 
 <!-- FEATURES -->
 <section class="section" id="features">
-  <div class="section-header reveal">
-    <div class="section-tag">
+  <div class="section-header reveal" style="align-items:center;text-align:center">
+    <div class="section-tag" style="justify-content:center">
       <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3.5" fill="#14B8A6"/></svg>
       CARACTERÍSTICAS
     </div>
-    <h2 class="section-title">Todo lo que necesita<br/>tu casa de remates</h2>
-    <p class="section-sub">Desde la inscripción del postor hasta la liquidación final — en un solo sistema completamente integrado.</p>
+    <h2 class="section-title" style="text-align:center;margin:0 auto">Todo lo que necesita<br/>tu casa de remates</h2>
+    <p class="section-sub" style="text-align:center;margin:0 auto;max-width:480px">Desde la inscripción del postor hasta la liquidación final — en un solo sistema completamente integrado.</p>
   </div>
 
   <!-- Bento grid -->
