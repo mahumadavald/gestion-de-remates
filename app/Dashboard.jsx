@@ -1191,6 +1191,7 @@ function AuthScreen({ onLogin }) {
 
   const handleLogin = async () => {
     setError(""); setLoading(true);
+    if (!supabase) { setError("Error de configuración. Contacta al administrador."); setLoading(false); return; }
     try {
       {
         const { data, error: authErr } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
@@ -1256,7 +1257,7 @@ function AuthScreen({ onLogin }) {
         onLogin(sessionData);
       }
     } catch(e) {
-      setError("Error de conexión. Intenta nuevamente.");
+      setError("Error de conexión: " + (e?.message || "Intenta nuevamente."));
       setLoading(false);
     }
   };
