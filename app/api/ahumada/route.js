@@ -4,8 +4,8 @@
 
 export const dynamic = 'force-dynamic';
 
-const AHUMADA_URL   = process.env.AHUMADA_API_URL   || "https://www.rematesahumada.cl/gr-api.php";
-const AHUMADA_TOKEN = process.env.AHUMADA_API_TOKEN || "gr_ahmd_2026_s3cr3t_K9pQ7mX2";
+const AHUMADA_URL   = process.env.AHUMADA_API_URL;
+const AHUMADA_TOKEN = process.env.AHUMADA_API_TOKEN;
 
 // GET /api/ahumada?rut=12345678-9  →  lookup en cliente DB de Ahumada
 export async function GET(request) {

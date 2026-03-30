@@ -6,7 +6,12 @@
  * 1. Subir este archivo a la raíz pública de www.rematesahumada.cl
  *    (mismo nivel que index.php, o en una carpeta /api/)
  * 2. Verificar que la URL quede accesible: https://www.rematesahumada.cl/gr-api.php
- * 3. No compartir este archivo públicamente — el token lo protege
+ * 3. Configurar las variables de entorno en el servidor (o en un .env fuera del webroot):
+ *      GR_API_TOKEN        — token secreto compartido con GR Auction
+ *      DB_CLIENT_USER      — usuario MySQL para rematesa_remate
+ *      DB_CLIENT_PASS      — contraseña MySQL para rematesa_remate
+ *      DB_PARTICIPAR_USER  — usuario MySQL para rematesa_participar
+ *      DB_PARTICIPAR_PASS  — contraseña MySQL para rematesa_participar
  *
  * ACCIONES DISPONIBLES:
  *   GET  ?action=lookup_rut&rut=...   → busca cliente por RUT
@@ -14,7 +19,12 @@
  */
 
 // ── Seguridad ────────────────────────────────────────────────────
-define('API_TOKEN', 'gr_ahmd_2026_s3cr3t_K9pQ7mX2');
+$apiToken = getenv('GR_API_TOKEN');
+if (!$apiToken) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Servidor no configurado: falta GR_API_TOKEN']);
+    exit;
+}
 
 // Cabeceras
 header('Content-Type: application/json; charset=utf-8');
@@ -26,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
 // Verificar token
 $authHeader = isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '';
-if (trim($authHeader) !== 'Bearer ' . API_TOKEN) {
+if (trim($authHeader) !== 'Bearer ' . $apiToken) {
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized']);
     exit;
@@ -36,13 +46,17 @@ if (trim($authHeader) !== 'Bearer ' . API_TOKEN) {
 // NOTA: En el servidor de Ahumada el host es "localhost", no el dominio externo
 
 function getClientDB() {
-    // DB de clientes (lookup y upsert de datos del postor)
+    $user = getenv('DB_CLIENT_USER');
+    $pass = getenv('DB_CLIENT_PASS');
+    if (!$user || !$pass) {
+        throw new Exception('Servidor no configurado: faltan DB_CLIENT_USER / DB_CLIENT_PASS');
+    }
     $pdo = new PDO(
         'mysql:host=localhost;dbname=rematesa_remate;charset=latin1',
-        'rematesa_nicolas',
-        'Panquehue7$',
+        $user,
+        $pass,
         [
-            PDO::ATTR_ERRMODE        => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]
     );
@@ -50,13 +64,17 @@ function getClientDB() {
 }
 
 function getParticipantDB() {
-    // DB de participantes (insert al inscribirse)
+    $user = getenv('DB_PARTICIPAR_USER');
+    $pass = getenv('DB_PARTICIPAR_PASS');
+    if (!$user || !$pass) {
+        throw new Exception('Servidor no configurado: faltan DB_PARTICIPAR_USER / DB_PARTICIPAR_PASS');
+    }
     $pdo = new PDO(
         'mysql:host=localhost;dbname=rematesa_participar;charset=latin1',
-        'rematesa_rem',
-        'Panquehue7$',
+        $user,
+        $pass,
         [
-            PDO::ATTR_ERRMODE        => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]
     );
