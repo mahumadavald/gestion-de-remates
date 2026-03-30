@@ -1817,6 +1817,7 @@ export default function Root() {
 
   // Siempre pedir login al cargar — cerrar cualquier sesión previa
   useEffect(() => {
+    if (!supabase) { setLoading(false); return; }
     supabase.auth.signOut().then(() => setLoading(false));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       if (event === "SIGNED_OUT") setSession(null);
