@@ -2502,229 +2502,208 @@ function Dashboard({ session, onLogout }) {
     const l   = c.liq;
     const num = String(c.key).padStart(2,"0");
 
-    // Datos de la casa desde Supabase o session
-    const casaData = dbLicencias.find(x => x.slug === session?.casa) || {};
-    const casaNombre   = casaData.nombre    || session?.casaNombre || "Remates Ahumada";
-    const logoUrl      = casaData.logo_url  || null;
-    const martillero   = casaData.martillero|| "";
-    const rutMart      = casaData.rut_martillero       || "";
-    const dirMart      = casaData.direccion_martillero || casaData.direccion || "";
-    const telMart      = casaData.telefono_martillero  || casaData.telefono  || "";
-    const emailMart    = casaData.email_martillero     || casaData.email     || "";
+    // Datos de la casa
+    const casaData   = dbLicencias.find(x => x.slug === session?.casa) || {};
+    const casaNombre = casaData.nombre    || session?.casaNombre || "Casa de Remates";
+    const logoUrl    = casaData.logo_url  || null;
+    const martillero = casaData.martillero|| "";
+    const rutMart    = casaData.rut_martillero       || "";
+    const telMart    = casaData.telefono_martillero  || casaData.telefono  || "";
+    const emailMart  = casaData.email_martillero     || casaData.email     || "";
+    const remNombre  = liqReview?.remateNombre || "Remate";
 
-    // Colores corporativos GR
-    const C_AZUL   = [31, 41, 55];    // #1F2937 secundario
-    const C_PRIMARY= [56, 178, 246];  // #38B2F6 primario
-    const C_TEAL   = [20, 184, 166];  // #14B8A6 acento
-    const C_GRAY   = [100, 116, 139];
-    const C_LIGHT  = [248, 250, 252];
-    const C_BORDER = [226, 232, 240];
+    // Paleta — consistente con la app
+    const TEAL   = [20,  184, 166];
+    const NAVY   = [30,  58,  95 ];
+    const CYAN   = [6,   182, 212];
+    const GRAY   = [100, 116, 139];
+    const LTGRAY = [248, 250, 252];
+    const BORDER = [226, 232, 240];
+    const GREEN  = [22,  163, 74 ];
+    const WHITE  = [255, 255, 255];
 
     const fmtCLP = v => "$ " + Math.round(v).toLocaleString("es-CL");
 
     const doc = new jsPDF({ orientation:"portrait", unit:"mm", format:"letter" });
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
-    let y = 14;
+    let y = 0;
 
-    // ══════════════════════════════════════════
-    // HEADER — logo + datos casa + título centrado
-    // ══════════════════════════════════════════
+    // Barra superior teal
+    doc.setFillColor(...TEAL);
+    doc.rect(0, 0, W, 3.5, "F");
+    y = 10;
 
-    // Franja superior color primario
-    doc.setFillColor(...C_PRIMARY);
-    doc.rect(0, 0, W, 2, "F");
-
-    // Bloque logo e info casa (izquierda)
-    if(logoUrl) {
+    // Header: logo + datos casa (izquierda) | título (derecha)
+    let logoEndX = 14;
+    if (logoUrl) {
       try {
-        // Intentar cargar imagen — si falla usa texto
         const img = new Image();
         img.crossOrigin = "anonymous";
-        await new Promise((res) => { img.onload = res; img.onerror = res; img.src = logoUrl; });
-        if(img.naturalWidth > 0) {
-          doc.addImage(img, "PNG", 14, y, 36, 18, undefined, "FAST");
-          y += 2;
+        await new Promise(res => { img.onload = res; img.onerror = res; img.src = logoUrl; });
+        if (img.naturalWidth > 0) {
+          const ratio = img.naturalWidth / img.naturalHeight;
+          const lw = Math.min(38, 22 * ratio);
+          doc.addImage(img, "PNG", 14, y, lw, 22, undefined, "FAST");
+          logoEndX = 14 + lw + 5;
         }
-      } catch(e) { /* logo failed, use text */ }
+      } catch {}
     }
 
-    // Nombre casa en negrita
-    doc.setFont("helvetica","bold");
-    doc.setFontSize(12);
-    doc.setTextColor(...C_AZUL);
-    const logoOffset = logoUrl ? 56 : 14;
-    doc.text(casaNombre.toUpperCase(), logoOffset, y + 5);
-
-    // Datos martillero
-    if(martillero) {
-      doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...C_PRIMARY);
-      doc.text("MARTILLERO PÚBLICO", logoOffset, y + 11);
-      doc.setFont("helvetica","normal"); doc.setTextColor(...C_GRAY);
-      doc.setFontSize(7.5);
-      doc.text(martillero, logoOffset, y + 16);
-      let rowY = y + 21;
-      if(rutMart)   { doc.text(`RUT: ${rutMart}`, logoOffset, rowY); rowY += 5; }
-      let infoLine = "";
-      if(telMart)   infoLine += `Fono: ${telMart}   `;
-      if(emailMart) infoLine += `Email: ${emailMart}`;
-      if(infoLine)  { doc.text(infoLine, logoOffset, rowY); rowY += 5; }
-      if(dirMart)   doc.text(`Dirección: ${dirMart}`, logoOffset, rowY);
+    doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor(...NAVY);
+    doc.text(casaNombre.toUpperCase(), logoEndX, y + 7);
+    if (martillero) {
+      doc.setFont("helvetica","bold"); doc.setFontSize(7); doc.setTextColor(...TEAL);
+      doc.text("MARTILLERO PÚBLICO", logoEndX, y + 13);
+      doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
+      doc.text(martillero, logoEndX, y + 18);
+      let iY = y + 23;
+      const info = [rutMart && `RUT: ${rutMart}`, telMart && `Tel: ${telMart}`, emailMart && `Email: ${emailMart}`].filter(Boolean);
+      info.forEach(line => { doc.text(line, logoEndX, iY); iY += 4; });
     }
 
-    y = 46;
+    // Título — derecha
+    doc.setFont("helvetica","bold"); doc.setFontSize(19); doc.setTextColor(...TEAL);
+    doc.text("LIQUIDACIÓN", W - 14, y + 9, { align:"right" });
+    doc.setFontSize(11); doc.setTextColor(...NAVY);
+    doc.text("COMPRADOR", W - 14, y + 16, { align:"right" });
+    doc.setFontSize(22); doc.setTextColor(...CYAN);
+    doc.text(`N° ${num}`, W - 14, y + 26, { align:"right" });
+    doc.setFont("helvetica","normal"); doc.setFontSize(6.5); doc.setTextColor(...GRAY);
+    doc.text("Powered by GR Auction Software", W - 14, y + 32, { align:"right" });
 
-    // Línea separadora
-    doc.setDrawColor(...C_PRIMARY);
-    doc.setLineWidth(0.6);
-    doc.line(14, y, W-14, y);
-    y += 6;
+    y = 42;
 
-    // ── Título centrado ──
-    doc.setFont("helvetica","bold");
-    doc.setFontSize(15);
-    doc.setTextColor(...C_AZUL);
-    doc.text("LIQUIDACIÓN REMATE", W/2, y, {align:"center"});
-    y += 7;
-    doc.setFontSize(13);
-    doc.setTextColor(...C_PRIMARY);
-    doc.text(`COMPRADOR N° : ${num}`, W/2, y, {align:"center"});
-    y += 9;
+    // Separador
+    doc.setDrawColor(...TEAL); doc.setLineWidth(0.5);
+    doc.line(14, y, W - 14, y);
+    y += 5;
 
-    // ══════════════════════════════════════════
-    // DATOS DEL COMPRADOR — formato fiel al original
-    // ══════════════════════════════════════════
-    const datosComp = [
-      ["FECHA",     fechaRemate],
-      ["R.U.T",     p?.rut||"—"],
-      ["SEÑOR(ES)", p?.razonSocial||p?.nombre||"—"],
-      ["GIRO",      p?.giro||"—"],
-      ["DIRECCIÓN", p?.direccion||"—"],
-      ["TELÉFONO",  p?.tel||"—"],
-      ["MAIL",      p?.email||"—"],
-      ["COMUNA",    p?.comuna||"—"],
+    // Banner remate
+    doc.setFillColor(236, 253, 245);
+    doc.setDrawColor(...TEAL); doc.setLineWidth(0.3);
+    doc.roundedRect(14, y, W - 28, 9, 2, 2, "FD");
+    doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(...NAVY);
+    doc.text(remNombre, 19, y + 6);
+    doc.setFont("helvetica","normal"); doc.setTextColor(...GRAY);
+    doc.text(`Fecha: ${fechaRemate}`, W - 18, y + 6, { align:"right" });
+    y += 14;
+
+    // Datos comprador
+    const datos = [
+      ["SEÑOR(ES)", p?.razonSocial || p?.nombre || "—"],
+      ["R.U.T.",    p?.rut         || "—"],
+      ["GIRO",      p?.giro        || "—"],
+      ["DIRECCIÓN", p?.direccion   || "—"],
+      ["TELÉFONO",  p?.tel         || "—"],
+      ["MAIL",      p?.email       || "—"],
+      ["COMUNA",    p?.comuna      || "—"],
     ];
-
-    datosComp.forEach(([k, v]) => {
-      doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(...C_GRAY);
-      doc.text(k, 14, y);
-      doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30);
-      doc.text(String(v||"—"), 52, y);
-      y += 6;
+    const datosH = datos.length * 6 + 8;
+    doc.setFillColor(...LTGRAY); doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
+    doc.roundedRect(14, y, W - 28, datosH, 2, 2, "FD");
+    let dy = y + 7;
+    datos.forEach(([k, v]) => {
+      doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.setTextColor(...GRAY);
+      doc.text(k, 18, dy);
+      doc.setFont("helvetica","normal"); doc.setTextColor(30, 30, 30);
+      doc.text(String(v || "—"), 56, dy);
+      dy += 6;
     });
-    y += 3;
+    y = dy + 5;
 
-    // ══════════════════════════════════════════
-    // TABLA LOTES — fiel al formato original
-    // ══════════════════════════════════════════
+    // Tabla lotes
     const rows = [];
     l.lineas.forEach((ln, li) => {
-      const loteLabel = `LOTE ${li + 1}`;
-      rows.push([loteLabel, "1", ln.lote.toUpperCase(), "EX", fmtCLP(ln.monto), fmtCLP(ln.monto)]);
-      rows.push([loteLabel, "1", `COMISION ${ln.comPct}%`, "AF", fmtCLP(ln.com), fmtCLP(ln.com)]);
-      if(ln.motorizado) rows.push(["G-ADMIN", "1",
-        `GASTOS ADMINISTRATIVOS
-VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
-        fmtCLP(ln.gastosAdm), fmtCLP(ln.gastosAdm)]);
+      const label = `LOTE ${li + 1}`;
+      rows.push([label, "1", ln.lote.toUpperCase(), "EX", fmtCLP(ln.monto), fmtCLP(ln.monto)]);
+      rows.push([label, "1", `Comisión ${ln.comPct}%`, "AF", fmtCLP(ln.com), fmtCLP(ln.com)]);
+      if (ln.motorizado) rows.push(["G-ADM", "1", `Gastos Adm. Vehículo (${label})`, "AF", fmtCLP(ln.gastosAdm), fmtCLP(ln.gastosAdm)]);
     });
 
     autoTable(doc, {
       startY: y,
-      head: [["LOTE","CANTIDAD","DESCRIPCIÓN","ND","UNITARIO","TOTAL"]],
+      head: [["LOTE","CANT.","DESCRIPCIÓN","ND","UNITARIO","TOTAL"]],
       body: rows,
       styles: { fontSize:8, cellPadding:2.8, textColor:[30,30,30], font:"helvetica" },
-      headStyles: { fillColor:C_AZUL, textColor:[255,255,255], fontStyle:"bold", fontSize:7.5, halign:"center" },
+      headStyles: { fillColor:NAVY, textColor:WHITE, fontStyle:"bold", fontSize:7.5, halign:"center" },
       columnStyles: {
-        0: { cellWidth:18, halign:"center", textColor:C_GRAY, fontSize:7.5 },
-        1: { cellWidth:14, halign:"center" },
+        0: { cellWidth:18, halign:"center", textColor:GRAY, fontSize:7.5 },
+        1: { cellWidth:12, halign:"center" },
         2: { cellWidth:"auto" },
         3: { cellWidth:13, halign:"center" },
-        4: { cellWidth:26, halign:"right", fontStyle:"normal" },
+        4: { cellWidth:26, halign:"right" },
         5: { cellWidth:26, halign:"right", fontStyle:"bold" },
       },
-      alternateRowStyles: { fillColor:[248,250,252] },
-      tableLineColor: C_BORDER,
-      tableLineWidth: 0.2,
+      alternateRowStyles: { fillColor:LTGRAY },
+      tableLineColor:BORDER, tableLineWidth:0.2,
       didDrawCell: (data) => {
-        if(data.section==="body" && data.column.index===3) {
+        if (data.section==="body" && data.column.index===3) {
           const txt = data.cell.raw;
           const x=data.cell.x+1.5, cy=data.cell.y+1.8, w=data.cell.width-3, h=data.cell.height-3.5;
-          if(txt==="EX") { doc.setFillColor(220,252,231); doc.setDrawColor(134,239,172); }
-          else           { doc.setFillColor(219,234,254); doc.setDrawColor(147,197,253); }
+          if (txt==="EX") { doc.setFillColor(220,252,231); doc.setDrawColor(134,239,172); }
+          else            { doc.setFillColor(204,251,241); doc.setDrawColor(94,234,212); }
           doc.roundedRect(x,cy,w,h,1,1,"FD");
-          doc.setFontSize(6.5);
-          doc.setTextColor(txt==="EX"?22:30, txt==="EX"?163:64, txt==="EX"?74:175);
-          doc.setFont("helvetica","bold");
+          doc.setFontSize(6.5); doc.setFont("helvetica","bold");
+          doc.setTextColor(txt==="EX"?22:15, txt==="EX"?163:118, txt==="EX"?74:110);
           doc.text(txt, x+w/2, cy+h-1.2, {align:"center"});
         }
       },
     });
 
-    y = doc.lastAutoTable.finalY + 6;
+    y = doc.lastAutoTable.finalY + 8;
 
-    // ══════════════════════════════════════════
-    // TOTALES — lado izquierdo
-    // GARANTÍA + TOTAL A PAGAR — lado derecho
-    // ══════════════════════════════════════════
+    // Totales — izquierda
+    const colW = (W - 28) / 2 - 4;
     const totalesY = y;
-    const colW = (W-28)/2 - 4;
-
-    // Columna izquierda: totales
-    const totales = [
-      ["TOTAL COMPRAS EXENTAS:", l.totalEx],
-      ["TOTAL COMPRAS AFECTAS:", l.totalAf],
-      ["TOTAL COMISION:", l.totalCom],
-      ["19% IVA:", l.iva],
+    const totItems = [
+      ["TOTAL COMPRAS EXENTAS", l.totalEx],
+      ["TOTAL COMPRAS AFECTAS", l.totalAf],
+      ["TOTAL COMISIÓN",        l.totalCom],
+      ["IVA 19%",               l.iva],
     ];
     let ty = totalesY;
-    totales.forEach(([k,v]) => {
-      doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...C_GRAY);
+    totItems.forEach(([k, v]) => {
+      doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...GRAY);
       doc.text(k, 14, ty);
-      doc.setFont("helvetica","bold"); doc.setTextColor(30,30,30);
-      doc.text(fmtCLP(v), 14+colW, ty, {align:"right"});
-      doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.2);
-      doc.line(14, ty+2, 14+colW, ty+2);
+      doc.setFont("helvetica","bold"); doc.setTextColor(30, 30, 30);
+      doc.text(fmtCLP(v), 14 + colW, ty, { align:"right" });
+      doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
+      doc.line(14, ty + 2, 14 + colW, ty + 2);
       ty += 6.5;
     });
-    // Total final
-    doc.setDrawColor(...C_PRIMARY); doc.setLineWidth(0.6);
-    doc.line(14, ty, 14+colW, ty);
-    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...C_PRIMARY);
-    doc.text("TOTAL:", 14, ty+6);
-    doc.setFontSize(11);
-    doc.text(fmtCLP(l.total), 14+colW, ty+6, {align:"right"});
+    doc.setDrawColor(...TEAL); doc.setLineWidth(0.6);
+    doc.line(14, ty, 14 + colW, ty);
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...NAVY);
+    doc.text("TOTAL:", 14, ty + 7);
+    doc.setFontSize(11); doc.setTextColor(...TEAL);
+    doc.text(fmtCLP(l.total), 14 + colW, ty + 7, { align:"right" });
 
-    // Columna derecha: garantía + total a pagar
-    const bx = W/2 + 6, bw = W/2 - 20, bh = 28;
-    const by2 = totalesY;
-    doc.setFillColor(239,246,255);
-    doc.setDrawColor(...C_PRIMARY); doc.setLineWidth(0.6);
-    doc.roundedRect(bx, by2, bw, bh, 3, 3, "FD");
+    // Box garantía + total a pagar — derecha
+    const bx = W / 2 + 6, bw = W / 2 - 20, bh = 34;
+    doc.setFillColor(236, 253, 245);
+    doc.setDrawColor(...TEAL); doc.setLineWidth(0.6);
+    doc.roundedRect(bx, totalesY, bw, bh, 3, 3, "FD");
+    doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...GRAY);
+    doc.text("GARANTÍA:", bx + 5, totalesY + 10);
+    doc.setFont("helvetica","bold"); doc.setTextColor(...GREEN);
+    doc.text(fmtCLP(l.garantia), bx + bw - 5, totalesY + 10, { align:"right" });
+    doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
+    doc.line(bx + 5, totalesY + 14, bx + bw - 5, totalesY + 14);
+    doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...NAVY);
+    doc.text("TOTAL A PAGAR:", bx + 5, totalesY + 24);
+    doc.setFontSize(14); doc.setTextColor(...TEAL);
+    doc.text(fmtCLP(l.totalAPagar), bx + bw - 5, totalesY + 25, { align:"right" });
 
-    doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...C_GRAY);
-    doc.text("GARANTÍA:", bx+4, by2+8);
-    doc.setFont("helvetica","bold"); doc.setTextColor(22,163,74);
-    doc.text(fmtCLP(l.garantia), bx+bw-4, by2+8, {align:"right"});
-
-    doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.2);
-    doc.line(bx+4, by2+12, bx+bw-4, by2+12);
-
-    doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...C_AZUL);
-    doc.text("TOTAL A PAGAR:", bx+4, by2+20);
-    doc.setFontSize(13); doc.setTextColor(...C_PRIMARY);
-    doc.text(fmtCLP(l.totalAPagar), bx+bw-4, by2+21, {align:"right"});
-
-    // ══════════════════════════════════════════
-    // FOOTER
-    // ══════════════════════════════════════════
+    // Footer
     const fy = H - 12;
-    doc.setFillColor(...C_PRIMARY);
-    doc.rect(0, H-4, W, 4, "F");
-    doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.2);
-    doc.line(14, fy-3, W-14, fy-3);
-    doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(...C_GRAY);
-    doc.text(`${casaNombre} · Powered by GR Auction Software · gestionderemates.cl`, 14, fy+1);
-    doc.text(`Remate ${fechaRemate} · Comprador N° ${num}`, W-14, fy+1, {align:"right"});
+    doc.setFillColor(...TEAL);
+    doc.rect(0, H - 5, W, 5, "F");
+    doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
+    doc.line(14, fy - 3, W - 14, fy - 3);
+    doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
+    doc.text(`${casaNombre} · Powered by GR Auction Software · gestionderemates.cl`, 14, fy + 1);
+    doc.text(`Remate ${fechaRemate} · Comprador N° ${num}`, W - 14, fy + 1, { align:"right" });
 
     doc.save(`liquidacion-comprador-${num}-${fechaRemate.replace(/\//g,"-")}.pdf`);
   };
@@ -4297,99 +4276,179 @@ VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
           const generarPDFVendedor = async () => {
             const { jsPDF } = await import("jspdf");
             const { default: autoTable } = await import("jspdf-autotable");
-            const casaNombre = session?.casaNombre || "Remates Ahumada";
+
+            // Datos de la casa — igual que PDF comprador
+            const casaData   = dbLicencias.find(x => x.slug === session?.casa) || {};
+            const casaNombre = casaData.nombre    || session?.casaNombre || "Casa de Remates";
+            const logoUrl    = casaData.logo_url  || null;
+            const martillero = casaData.martillero|| "";
+            const rutMart    = casaData.rut_martillero       || "";
+            const telMart    = casaData.telefono_martillero  || casaData.telefono  || "";
+            const emailMart  = casaData.email_martillero     || casaData.email     || "";
+
+            // Paleta
+            const TEAL   = [20,  184, 166];
+            const NAVY   = [30,  58,  95 ];
+            const GRAY   = [100, 116, 139];
+            const LTGRAY = [248, 250, 252];
+            const BORDER = [226, 232, 240];
+            const RED    = [239, 68,  68 ];
+            const WHITE  = [255, 255, 255];
+
+            const fmtCLP = v => "$ " + Math.round(v).toLocaleString("es-CL");
             const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"letter"});
             const W = doc.internal.pageSize.getWidth();
-            let y = 18;
-            const fmtCLP = v => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(v);
+            const H = doc.internal.pageSize.getHeight();
+            let y = 0;
 
-            // Cabecera
-            doc.setFillColor(47,128,237);
-            doc.rect(14,y-6,W-28,0.8,"F");
-            doc.setFont("helvetica","bold"); doc.setFontSize(18); doc.setTextColor(47,128,237);
-            doc.text("LIQUIDACIÓN DE VENDEDOR",14,y+4);
-            doc.setFontSize(9); doc.setTextColor(100,100,100);
-            doc.text(casaNombre.toUpperCase(),14,y+10);
-            doc.setFontSize(10); doc.setTextColor(50,50,50);
-            doc.text(`Fecha: ${new Date().toLocaleDateString("es-CL")}`,W-14,y+4,{align:"right"});
-            doc.setFontSize(9); doc.setTextColor(120,120,120);
-            doc.text(`Remate: ${REMATES_MERGED[0]?.name||"—"}`,W-14,y+10,{align:"right"});
-            y+=18;
+            // Barra superior teal
+            doc.setFillColor(...TEAL);
+            doc.rect(0, 0, W, 3.5, "F");
+            y = 10;
+
+            // Header: logo + datos casa (izquierda) | título (derecha)
+            let logoEndX = 14;
+            if (logoUrl) {
+              try {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                await new Promise(res => { img.onload = res; img.onerror = res; img.src = logoUrl; });
+                if (img.naturalWidth > 0) {
+                  const ratio = img.naturalWidth / img.naturalHeight;
+                  const lw = Math.min(38, 22 * ratio);
+                  doc.addImage(img, "PNG", 14, y, lw, 22, undefined, "FAST");
+                  logoEndX = 14 + lw + 5;
+                }
+              } catch {}
+            }
+
+            doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor(...NAVY);
+            doc.text(casaNombre.toUpperCase(), logoEndX, y + 7);
+            if (martillero) {
+              doc.setFont("helvetica","bold"); doc.setFontSize(7); doc.setTextColor(...TEAL);
+              doc.text("MARTILLERO PÚBLICO", logoEndX, y + 13);
+              doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
+              doc.text(martillero, logoEndX, y + 18);
+              let iY = y + 23;
+              const info = [rutMart && `RUT: ${rutMart}`, telMart && `Tel: ${telMart}`, emailMart && `Email: ${emailMart}`].filter(Boolean);
+              info.forEach(line => { doc.text(line, logoEndX, iY); iY += 4; });
+            }
+
+            doc.setFont("helvetica","bold"); doc.setFontSize(19); doc.setTextColor(...TEAL);
+            doc.text("LIQUIDACIÓN", W - 14, y + 9, {align:"right"});
+            doc.setFontSize(11); doc.setTextColor(...NAVY);
+            doc.text("VENDEDOR", W - 14, y + 16, {align:"right"});
+            doc.setFont("helvetica","normal"); doc.setFontSize(6.5); doc.setTextColor(...GRAY);
+            doc.text("Powered by GR Auction Software", W - 14, y + 32, {align:"right"});
+
+            y = 42;
+            doc.setDrawColor(...TEAL); doc.setLineWidth(0.5);
+            doc.line(14, y, W - 14, y);
+            y += 5;
+
+            // Banner remate
+            doc.setFillColor(236, 253, 245);
+            doc.setDrawColor(...TEAL); doc.setLineWidth(0.3);
+            doc.roundedRect(14, y, W - 28, 9, 2, 2, "FD");
+            doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(...NAVY);
+            doc.text(REMATES_MERGED[0]?.name || "Remate", 19, y + 6);
+            doc.setFont("helvetica","normal"); doc.setTextColor(...GRAY);
+            doc.text(`Fecha: ${new Date().toLocaleDateString("es-CL")}`, W - 18, y + 6, {align:"right"});
+            y += 14;
 
             // Datos vendedor
-            doc.setFillColor(247,249,252); doc.setDrawColor(221,227,240);
-            doc.roundedRect(14,y,W-28,26,2,2,"FD");
-            const datosV = [["Propietario/Vendedor:",vd?.nombre||"—"],["R.U.T:",vd?.rut||"—"],["Giro:",vd?.giro||"—"],["Dirección:",vd?.direccion||"—"],["Comuna:",vd?.comuna||"—"],["Email:",vd?.email||"—"]];
-            let dy=y+6;
-            datosV.slice(0,3).forEach(([k,v])=>{
-              doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(140,140,140); doc.text(k,18,dy);
-              doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30); doc.text(v,52,dy); dy+=7;
+            const datosV = [
+              ["PROPIETARIO", vd?.nombre    || "—"],
+              ["R.U.T.",      vd?.rut       || "—"],
+              ["GIRO",        vd?.giro      || "—"],
+              ["DIRECCIÓN",   vd?.direccion || "—"],
+              ["COMUNA",      vd?.comuna    || "—"],
+              ["MAIL",        vd?.email     || "—"],
+            ];
+            const datosH = datosV.length * 6 + 8;
+            doc.setFillColor(...LTGRAY); doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
+            doc.roundedRect(14, y, W - 28, datosH, 2, 2, "FD");
+            let dvy = y + 7;
+            datosV.forEach(([k, v]) => {
+              doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.setTextColor(...GRAY);
+              doc.text(k, 18, dvy);
+              doc.setFont("helvetica","normal"); doc.setTextColor(30, 30, 30);
+              doc.text(String(v || "—"), 56, dvy);
+              dvy += 6;
             });
-            dy=y+6;
-            datosV.slice(3).forEach(([k,v])=>{
-              doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(140,140,140); doc.text(k,W/2+4,dy);
-              doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30); doc.text(v,W/2+22,dy); dy+=7;
-            });
-            y+=31;
+            y = dvy + 5;
 
             // Tabla lotes vendidos
-            doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(26,37,64);
-            doc.text("Lotes vendidos",14,y); y+=4;
-            autoTable(doc,{
-              startY:y,
-              head:[["Expediente","Descripción","Precio martillo"]],
-              body: adjVendedor.map(a=>[lotesVendedor.find(l=>l.name===a.lote)?.exp||"—", a.lote, fmtCLP(a.monto||0)]),
-              styles:{fontSize:9,cellPadding:2.5},
-              headStyles:{fillColor:[26,37,64],textColor:255,fontStyle:"bold",fontSize:8},
-              columnStyles:{2:{halign:"right",font:"courier",fontStyle:"bold"}},
-              alternateRowStyles:{fillColor:[250,251,253]},
-            });
-            y=doc.lastAutoTable.finalY+6;
+            if (adjVendedor.length > 0) {
+              doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...NAVY);
+              doc.text("Lotes vendidos", 14, y); y += 4;
+              autoTable(doc, {
+                startY: y,
+                head: [["Expediente","Descripción","Precio martillo"]],
+                body: adjVendedor.map(a => [lotesVendedor.find(l=>l.name===a.lote)?.exp||"—", a.lote, fmtCLP(a.monto||0)]),
+                styles: { fontSize:8.5, cellPadding:2.8 },
+                headStyles: { fillColor:NAVY, textColor:WHITE, fontStyle:"bold", fontSize:8 },
+                columnStyles: { 2: { halign:"right", fontStyle:"bold" } },
+                alternateRowStyles: { fillColor:LTGRAY },
+                tableLineColor:BORDER, tableLineWidth:0.2,
+              });
+              y = doc.lastAutoTable.finalY + 6;
+            }
 
             // Tabla lotes no vendidos
-            if(lotesNoVendidos.length>0){
-              doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(26,37,64);
-              doc.text("Lotes no vendidos (base para comisión defensa)",14,y); y+=4;
-              autoTable(doc,{
-                startY:y,
-                head:[["Expediente","Descripción","Base"]],
-                body:lotesNoVendidos.map(l=>[l.exp||"—",l.name,fmtCLP(l.base||0)]),
-                styles:{fontSize:9,cellPadding:2.5},
-                headStyles:{fillColor:[100,100,100],textColor:255,fontStyle:"bold",fontSize:8},
-                columnStyles:{2:{halign:"right",font:"courier"}},
+            if (lotesNoVendidos.length > 0) {
+              doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...NAVY);
+              doc.text("Lotes no vendidos (base comisión defensa)", 14, y); y += 4;
+              autoTable(doc, {
+                startY: y,
+                head: [["Expediente","Descripción","Base"]],
+                body: lotesNoVendidos.map(l => [l.exp||"—", l.name, fmtCLP(l.base||0)]),
+                styles: { fontSize:8.5, cellPadding:2.8 },
+                headStyles: { fillColor:GRAY, textColor:WHITE, fontStyle:"bold", fontSize:8 },
+                columnStyles: { 2: { halign:"right" } },
+                alternateRowStyles: { fillColor:LTGRAY },
+                tableLineColor:BORDER, tableLineWidth:0.2,
               });
-              y=doc.lastAutoTable.finalY+6;
+              y = doc.lastAutoTable.finalY + 6;
             }
 
             // Liquidación financiera
             const items = [
-              ["Total ventas martillo:", totalVentas, false],
-              [`Comisión ventas ${vendedorForm.comVenta}%:`, -comVentaMonto, true],
-              [`Comisión defensa ${vendedorForm.comDefensa}%:`, -comDefensaMonto, true],
-              ["Avisos publicitarios:", -Number(vendedorForm.publicidad||0), true],
-              ["IVA 19% s/comisiones:", -iva, true],
+              ["Total ventas martillo",               totalVentas,                        false],
+              [`Comisión ventas ${vendedorForm.comVenta}%`,   -comVentaMonto,             true],
+              [`Comisión defensa ${vendedorForm.comDefensa}%`,-comDefensaMonto,            true],
+              ["Avisos publicitarios",                -Number(vendedorForm.publicidad||0), true],
+              ["IVA 19% s/comisiones",               -iva,                               true],
             ];
-            items.forEach(([k,v,desc])=>{
-              doc.setFont("helvetica",desc?"normal":"bold"); doc.setFontSize(9.5);
-              doc.setTextColor(desc?80:30,desc?80:30,desc?80:30);
-              doc.text(k,14,y);
-              doc.setFont("helvetica","bold"); doc.setTextColor(desc?200:47, desc?80:128, desc?80:237);
-              doc.text(fmtCLP(v),W-14,y,{align:"right"});
-              doc.setDrawColor(238,240,245); doc.line(14,y+2,W-14,y+2);
-              y+=8;
+            doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...NAVY);
+            doc.text("Liquidación financiera", 14, y); y += 7;
+            items.forEach(([k, v, esDesc]) => {
+              doc.setFont("helvetica", esDesc ? "normal" : "bold");
+              doc.setFontSize(9); doc.setTextColor(...(esDesc ? GRAY : [30,30,30]));
+              doc.text(k, 14, y);
+              doc.setFont("helvetica","bold");
+              doc.setTextColor(...(v < 0 ? RED : [30,30,30]));
+              doc.text(fmtCLP(v), W - 14, y, {align:"right"});
+              doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
+              doc.line(14, y + 2, W - 14, y + 2);
+              y += 8;
             });
-            // Línea total
-            doc.setDrawColor(47,128,237); doc.setLineWidth(0.8); doc.line(14,y-2,W-14,y-2);
-            doc.setFont("helvetica","bold"); doc.setFontSize(13); doc.setTextColor(47,128,237);
-            doc.text("Líquido a pagar al vendedor:",14,y+6);
-            doc.setFontSize(15); doc.text(fmtCLP(liquidoAPagar),W-14,y+6,{align:"right"});
+            doc.setDrawColor(...TEAL); doc.setLineWidth(0.8);
+            doc.line(14, y - 2, W - 14, y - 2);
+            doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(...NAVY);
+            doc.text("Líquido a pagar al vendedor:", 14, y + 8);
+            doc.setFontSize(14); doc.setTextColor(...TEAL);
+            doc.text(fmtCLP(liquidoAPagar), W - 14, y + 8, {align:"right"});
 
             // Footer
-            const fy=doc.internal.pageSize.getHeight()-12;
-            doc.setDrawColor(221,227,240); doc.setLineWidth(0.3); doc.line(14,fy-3,W-14,fy-3);
-            doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(170,170,170);
-            doc.text(`${casaNombre} — Liquidación generada por GR Auction Software`,14,fy+2);
-            doc.text(new Date().toLocaleDateString("es-CL"),W-14,fy+2,{align:"right"});
+            const fy = H - 12;
+            doc.setFillColor(...TEAL);
+            doc.rect(0, H - 5, W, 5, "F");
+            doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
+            doc.line(14, fy - 3, W - 14, fy - 3);
+            doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
+            doc.text(`${casaNombre} · Powered by GR Auction Software · gestionderemates.cl`, 14, fy + 1);
+            doc.text(new Date().toLocaleDateString("es-CL"), W - 14, fy + 1, {align:"right"});
             doc.save(`liquidacion-vendedor-${(vd?.nombre||"vendedor").replace(/\s+/g,"-").toLowerCase()}.pdf`);
           };
 
