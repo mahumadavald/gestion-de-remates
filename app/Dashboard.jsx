@@ -2548,6 +2548,25 @@ function Dashboard({ session, onLogout }) {
           logoEndX = 14 + lw + 5;
         }
       } catch {}
+    } else {
+      // Fallback: logo SVG de GR como imagen canvas
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = 72; canvas.height = 72;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#EBF8FF"; ctx.beginPath();
+        ctx.roundRect(0,0,72,72,14); ctx.fill();
+        ctx.strokeStyle = "#38B2F6"; ctx.lineWidth = 7;
+        ctx.lineCap = "round"; ctx.lineJoin = "round";
+        ctx.beginPath(); ctx.moveTo(16,24); ctx.quadraticCurveTo(16,14,28,14);
+        ctx.lineTo(44,14); ctx.quadraticCurveTo(60,14,60,28);
+        ctx.quadraticCurveTo(60,38,48,40); ctx.lineTo(60,56); ctx.stroke();
+        ctx.strokeStyle = "#1E3A5F";
+        ctx.beginPath(); ctx.moveTo(8,24); ctx.quadraticCurveTo(8,10,24,10);
+        ctx.lineTo(40,10); ctx.stroke();
+        doc.addImage(canvas.toDataURL("image/png"), "PNG", 14, y, 18, 18, undefined, "FAST");
+        logoEndX = 37;
+      } catch {}
     }
 
     doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor(...NAVY);
@@ -2653,18 +2672,27 @@ function Dashboard({ session, onLogout }) {
 
     y = doc.lastAutoTable.finalY + 8;
 
-    // Totales — izquierda
+    // Page break si no hay espacio para totales + box
+    if (y + 70 > H - 20) {
+      doc.addPage();
+      y = 20;
+    }
+
+    // Totales — izquierda (desglose claro EX / AF / IVA)
     const colW = (W - 28) / 2 - 4;
     const totalesY = y;
+    const ivaBase = l.totalCom + l.totalAf;
     const totItems = [
-      ["TOTAL COMPRAS EXENTAS", l.totalEx],
-      ["TOTAL COMPRAS AFECTAS", l.totalAf],
-      ["TOTAL COMISIÓN",        l.totalCom],
-      ["IVA 19%",               l.iva],
+      ["PRECIO MARTILLO (EX)",   l.totalEx,  false],
+      ["COMISIONES MARTILLERO (AF)", l.totalCom, false],
+      ...(l.totalAf > 0 ? [["GASTOS ADM. (AF)", l.totalAf, false]] : []),
+      ["BASE AFECTA IVA",        ivaBase,    true],
+      ["IVA 19%",                l.iva,      false],
     ];
     let ty = totalesY;
-    totItems.forEach(([k, v]) => {
-      doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...GRAY);
+    totItems.forEach(([k, v, bold]) => {
+      doc.setFont("helvetica", bold ? "bold" : "normal"); doc.setFontSize(8.5);
+      doc.setTextColor(...(bold ? NAVY : GRAY));
       doc.text(k, 14, ty);
       doc.setFont("helvetica","bold"); doc.setTextColor(30, 30, 30);
       doc.text(fmtCLP(v), 14 + colW, ty, { align:"right" });
