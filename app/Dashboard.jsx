@@ -2242,8 +2242,9 @@ function Dashboard({ session, onLogout }) {
 
   // Pujas simuladas eliminadas — solo pujas reales de postores
 
-  const placeBid = () => {
-    const amt = (bids[idx]?.current||0) + curInc;
+  const placeBid = (overrideInc) => {
+    const inc = overrideInc ?? curInc;
+    const amt = (bids[idx]?.current||0) + inc;
     setBids(p=>{const n=[...p];const c=n[idx];n[idx]={...c,current:amt,count:c.count+1,history:[{bidder:"Tu (P-0245)",amount:amt,time:new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),mine:true},...c.history.slice(0,19)],winner:"Tu (P-0245)"};return n;});
     setLastBidder("me"); setBidTimer(BID_TIMER); 
     setFlash(true); setTimeout(()=>setFlash(false),600); notify("Puja registrada.");
@@ -2534,8 +2535,9 @@ function Dashboard({ session, onLogout }) {
     doc.rect(0, 0, W, 3.5, "F");
     y = 10;
 
-    // Header: logo + datos casa (izquierda) | título (derecha)
-    let logoEndX = 14;
+    // Header: logo casa (izquierda) | título centrado | logo GR (derecha)
+
+    // Logo casa (izquierda)
     if (logoUrl) {
       try {
         const img = new Image();
@@ -2543,60 +2545,58 @@ function Dashboard({ session, onLogout }) {
         await new Promise(res => { img.onload = res; img.onerror = res; img.src = logoUrl; });
         if (img.naturalWidth > 0) {
           const ratio = img.naturalWidth / img.naturalHeight;
-          const lw = Math.min(38, 22 * ratio);
-          doc.addImage(img, "PNG", 14, y, lw, 22, undefined, "FAST");
-          logoEndX = 14 + lw + 5;
+          const lw = Math.min(36, 24 * ratio);
+          doc.addImage(img, "PNG", 14, y, lw, 24, undefined, "FAST");
         }
       } catch {}
-    } else {
-      // Fallback: logo SVG de GR como imagen canvas
-      try {
-        const canvas = document.createElement("canvas");
-        canvas.width = 72; canvas.height = 72;
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#EBF8FF"; ctx.beginPath();
-        ctx.roundRect(0,0,72,72,14); ctx.fill();
-        ctx.strokeStyle = "#38B2F6"; ctx.lineWidth = 7;
-        ctx.lineCap = "round"; ctx.lineJoin = "round";
-        ctx.beginPath(); ctx.moveTo(16,24); ctx.quadraticCurveTo(16,14,28,14);
-        ctx.lineTo(44,14); ctx.quadraticCurveTo(60,14,60,28);
-        ctx.quadraticCurveTo(60,38,48,40); ctx.lineTo(60,56); ctx.stroke();
-        ctx.strokeStyle = "#1E3A5F";
-        ctx.beginPath(); ctx.moveTo(8,24); ctx.quadraticCurveTo(8,10,24,10);
-        ctx.lineTo(40,10); ctx.stroke();
-        doc.addImage(canvas.toDataURL("image/png"), "PNG", 14, y, 18, 18, undefined, "FAST");
-        logoEndX = 37;
-      } catch {}
     }
 
-    doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor(...NAVY);
-    doc.text(casaNombre.toUpperCase(), logoEndX, y + 7);
-    if (martillero) {
-      doc.setFont("helvetica","bold"); doc.setFontSize(7); doc.setTextColor(...TEAL);
-      doc.text("MARTILLERO PÚBLICO", logoEndX, y + 13);
-      doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
-      doc.text(martillero, logoEndX, y + 18);
-      let iY = y + 23;
-      const info = [rutMart && `RUT: ${rutMart}`, telMart && `Tel: ${telMart}`, emailMart && `Email: ${emailMart}`].filter(Boolean);
-      info.forEach(line => { doc.text(line, logoEndX, iY); iY += 4; });
-    }
+    // Logo GR Auction Software (derecha, pequeño)
+    try {
+      const grCanvas = document.createElement("canvas");
+      grCanvas.width = 72; grCanvas.height = 72;
+      const ctx2 = grCanvas.getContext("2d");
+      ctx2.fillStyle = "#EBF8FF"; ctx2.beginPath();
+      ctx2.roundRect(0,0,72,72,14); ctx2.fill();
+      ctx2.strokeStyle = "#38B2F6"; ctx2.lineWidth = 7;
+      ctx2.lineCap = "round"; ctx2.lineJoin = "round";
+      ctx2.beginPath(); ctx2.moveTo(16,24); ctx2.quadraticCurveTo(16,14,28,14);
+      ctx2.lineTo(44,14); ctx2.quadraticCurveTo(60,14,60,28);
+      ctx2.quadraticCurveTo(60,38,48,40); ctx2.lineTo(60,56); ctx2.stroke();
+      ctx2.strokeStyle = "#1E3A5F";
+      ctx2.beginPath(); ctx2.moveTo(8,24); ctx2.quadraticCurveTo(8,10,24,10);
+      ctx2.lineTo(40,10); ctx2.stroke();
+      doc.addImage(grCanvas.toDataURL("image/png"), "PNG", W - 14 - 16, y + 1, 16, 16, undefined, "FAST");
+      doc.setFont("helvetica","normal"); doc.setFontSize(5.5); doc.setTextColor(...GRAY);
+      doc.text("GR Auction Software", W - 14 - 8, y + 20, { align:"center" });
+    } catch {}
 
-    // Título — derecha
-    doc.setFont("helvetica","bold"); doc.setFontSize(19); doc.setTextColor(...TEAL);
-    doc.text("LIQUIDACIÓN", W - 14, y + 9, { align:"right" });
+    // Título centrado
+    doc.setFont("helvetica","bold"); doc.setFontSize(20); doc.setTextColor(...TEAL);
+    doc.text("LIQUIDACIÓN", W / 2, y + 9, { align:"center" });
     doc.setFontSize(11); doc.setTextColor(...NAVY);
-    doc.text("COMPRADOR", W - 14, y + 16, { align:"right" });
+    doc.text("COMPRADOR", W / 2, y + 16, { align:"center" });
     doc.setFontSize(22); doc.setTextColor(...CYAN);
-    doc.text(`N° ${num}`, W - 14, y + 26, { align:"right" });
-    doc.setFont("helvetica","normal"); doc.setFontSize(6.5); doc.setTextColor(...GRAY);
-    doc.text("Powered by GR Auction Software", W - 14, y + 32, { align:"right" });
+    doc.text(`N° ${num}`, W / 2, y + 26, { align:"center" });
 
     y = 42;
 
     // Separador
     doc.setDrawColor(...TEAL); doc.setLineWidth(0.5);
     doc.line(14, y, W - 14, y);
-    y += 5;
+    y += 2;
+
+    // Banda de identificación de la casa de remates
+    doc.setFillColor(...NAVY);
+    doc.rect(14, y, W - 28, martillero ? 14 : 8, "F");
+    doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(...WHITE);
+    doc.text(casaNombre.toUpperCase(), W / 2, y + 6, { align:"center" });
+    if (martillero) {
+      const infoLine = [martillero, rutMart && `RUT: ${rutMart}`, telMart && `Tel: ${telMart}`].filter(Boolean).join("  ·  ");
+      doc.setFont("helvetica","normal"); doc.setFontSize(6.5); doc.setTextColor(180, 220, 240);
+      doc.text(infoLine, W / 2, y + 11.5, { align:"center" });
+    }
+    y += (martillero ? 14 : 8) + 5;
 
     // Banner remate
     doc.setFillColor(236, 253, 245);
@@ -6716,7 +6716,7 @@ function Dashboard({ session, onLogout }) {
                           key={inc}
                           className={`sala-quick-card c${i}`}
                           disabled={aState!=="live"}
-                          onClick={()=>{setCurInc(inc); placeBid();}}
+                          onClick={()=>{ setCurInc(inc); placeBid(inc); }}
                           title={`Pujar con incremento ${fmtS(inc)}`}
                         >
                           <div className="sala-quick-label">Quick Bid</div>
