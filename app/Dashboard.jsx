@@ -4348,6 +4348,24 @@ function Dashboard({ session, onLogout }) {
                   logoEndX = 14 + lw + 5;
                 }
               } catch {}
+            } else {
+              try {
+                const canvas = document.createElement("canvas");
+                canvas.width = 72; canvas.height = 72;
+                const ctx = canvas.getContext("2d");
+                ctx.fillStyle = "#EBF8FF"; ctx.beginPath();
+                ctx.roundRect(0,0,72,72,14); ctx.fill();
+                ctx.strokeStyle = "#38B2F6"; ctx.lineWidth = 7;
+                ctx.lineCap = "round"; ctx.lineJoin = "round";
+                ctx.beginPath(); ctx.moveTo(16,24); ctx.quadraticCurveTo(16,14,28,14);
+                ctx.lineTo(44,14); ctx.quadraticCurveTo(60,14,60,28);
+                ctx.quadraticCurveTo(60,38,48,40); ctx.lineTo(60,56); ctx.stroke();
+                ctx.strokeStyle = "#1E3A5F";
+                ctx.beginPath(); ctx.moveTo(8,24); ctx.quadraticCurveTo(8,10,24,10);
+                ctx.lineTo(40,10); ctx.stroke();
+                doc.addImage(canvas.toDataURL("image/png"), "PNG", 14, y, 18, 18, undefined, "FAST");
+                logoEndX = 37;
+              } catch {}
             }
 
             doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor(...NAVY);
@@ -4441,18 +4459,26 @@ function Dashboard({ session, onLogout }) {
             }
 
             // Liquidación financiera
+            // Page break si no cabe
+            if (y + 80 > H - 20) { doc.addPage(); y = 20; }
+
+            const baseAfectaIva = comVentaMonto + comDefensaMonto + Number(vendedorForm.publicidad||0);
             const items = [
-              ["Total ventas martillo",               totalVentas,                        false],
-              [`Comisión ventas ${vendedorForm.comVenta}%`,   -comVentaMonto,             true],
-              [`Comisión defensa ${vendedorForm.comDefensa}%`,-comDefensaMonto,            true],
-              ["Avisos publicitarios",                -Number(vendedorForm.publicidad||0), true],
-              ["IVA 19% s/comisiones",               -iva,                               true],
+              { k: "TOTAL VENTAS MARTILLO",                          v: totalVentas,                          desc: false, bold: true  },
+              { k: `COMISIÓN VENTA ${vendedorForm.comVenta}% (AF)`,  v: -comVentaMonto,                       desc: true,  bold: false },
+              { k: `COMISIÓN DEFENSA ${vendedorForm.comDefensa}% (AF)`, v: -comDefensaMonto,                  desc: true,  bold: false },
+              ...(Number(vendedorForm.publicidad||0) > 0
+                ? [{ k: "AVISOS PUBLICITARIOS (AF)",                 v: -Number(vendedorForm.publicidad||0),  desc: true,  bold: false }]
+                : []),
+              { k: "BASE AFECTA IVA",                                v: baseAfectaIva,                        desc: false, bold: true  },
+              { k: "IVA 19% S/COMISIONES",                           v: -iva,                                 desc: true,  bold: false },
+              { k: "TOTAL DESCUENTOS",                               v: -totalDescuentos,                     desc: true,  bold: true  },
             ];
             doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...NAVY);
             doc.text("Liquidación financiera", 14, y); y += 7;
-            items.forEach(([k, v, esDesc]) => {
-              doc.setFont("helvetica", esDesc ? "normal" : "bold");
-              doc.setFontSize(9); doc.setTextColor(...(esDesc ? GRAY : [30,30,30]));
+            items.forEach(({ k, v, desc, bold }) => {
+              doc.setFont("helvetica", bold ? "bold" : "normal");
+              doc.setFontSize(9); doc.setTextColor(...(desc && !bold ? GRAY : [30,30,30]));
               doc.text(k, 14, y);
               doc.setFont("helvetica","bold");
               doc.setTextColor(...(v < 0 ? RED : [30,30,30]));
@@ -4464,7 +4490,7 @@ function Dashboard({ session, onLogout }) {
             doc.setDrawColor(...TEAL); doc.setLineWidth(0.8);
             doc.line(14, y - 2, W - 14, y - 2);
             doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(...NAVY);
-            doc.text("Líquido a pagar al vendedor:", 14, y + 8);
+            doc.text("LÍQUIDO A PAGAR AL VENDEDOR:", 14, y + 8);
             doc.setFontSize(14); doc.setTextColor(...TEAL);
             doc.text(fmtCLP(liquidoAPagar), W - 14, y + 8, {align:"right"});
 
