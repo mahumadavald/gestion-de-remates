@@ -278,9 +278,11 @@ function ParticiparContent() {
   const [giro,      setGiro]      = useState("");
   const [direccion, setDireccion] = useState("");
   const [comuna,    setComuna]    = useState("");
-  const [banco,     setBanco]     = useState("");
-  const [tipoCta,   setTipoCta]   = useState("CUENTA CORRIENTE");
-  const [numCta,    setNumCta]    = useState("");
+  const [banco,          setBanco]          = useState("");
+  const [tipoCta,        setTipoCta]        = useState("CUENTA CORRIENTE");
+  const [numCta,         setNumCta]         = useState("");
+  const [cuentasGuardadas, setCuentasGuardadas] = useState([]);
+  const [cuentaSelIdx,   setCuentaSelIdx]   = useState(""); // "" = nueva / índice
   const [remateId,  setRemateId]  = useState("");
   const [modalidad, setModalidad] = useState("PRESENCIAL");
   const [comprobante, setComprobante] = useState(null);
@@ -351,7 +353,7 @@ function ParticiparContent() {
       // 1. Buscar en Supabase (base de datos de GR Auction Software)
       const { data } = await supabase
         .from("postores")
-        .select("nombre, email, telefono, empresa, direccion, comuna, banco, tipo_cuenta, numero_cuenta")
+        .select("nombre, email, telefono, empresa, direccion, comuna, banco, tipo_cuenta, numero_cuenta, cuentas_banco")
         .eq("rut", rut)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -365,9 +367,22 @@ function ParticiparContent() {
         setGiro(data.empresa || "");
         setDireccion(data.direccion || "");
         setComuna(data.comuna || "");
-        setBanco(data.banco || "");
-        setTipoCta(data.tipo_cuenta || "CUENTA CORRIENTE");
-        setNumCta(data.numero_cuenta || "");
+        // Cargar cuentas guardadas si existen
+        const savedCuentas = data.cuentas_banco || [];
+        setCuentasGuardadas(savedCuentas);
+        if (savedCuentas.length > 0) {
+          // Pre-seleccionar la primera cuenta guardada
+          const first = savedCuentas[0];
+          setBanco(first.banco || "");
+          setTipoCta(first.tipoCuenta || "CUENTA CORRIENTE");
+          setNumCta(first.nCuenta || "");
+          setCuentaSelIdx("0");
+        } else {
+          setBanco(data.banco || "");
+          setTipoCta(data.tipo_cuenta || "CUENTA CORRIENTE");
+          setNumCta(data.numero_cuenta || "");
+          setCuentaSelIdx("");
+        }
         setReturningUser(true);
         setLookingUp(false);
         return;
@@ -851,6 +866,35 @@ function ParticiparContent() {
                 </div>
 
                 <div className="sec-title fade-up">Datos para devolución de garantía</div>
+
+                {/* Dropdown cuentas guardadas — solo si el postor ya tiene cuentas */}
+                {cuentasGuardadas.length > 0 && (
+                  <div className="field-grid fade-up" style={{marginBottom:"1rem"}}>
+                    <div className="field-wrap field-full">
+                      <label className="field-label">¿A qué cuenta quieres recibir tu garantía?</label>
+                      <select className="field-select" value={cuentaSelIdx}
+                        onChange={e => {
+                          const v = e.target.value;
+                          setCuentaSelIdx(v);
+                          if (v === "") { setBanco(""); setTipoCta("CUENTA CORRIENTE"); setNumCta(""); }
+                          else {
+                            const c = cuentasGuardadas[Number(v)];
+                            setBanco(c.banco || ""); setTipoCta(c.tipoCuenta || "CUENTA CORRIENTE"); setNumCta(c.nCuenta || "");
+                          }
+                        }}>
+                        {cuentasGuardadas.map((c, i) => (
+                          <option key={c.id || i} value={String(i)}>
+                            {c.banco} · {c.tipoCuenta} · {c.nCuenta}{c.titular ? ` (${c.titular})` : ""}
+                          </option>
+                        ))}
+                        <option value="">+ Ingresar otra cuenta manualmente</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {/* Campos manuales — siempre visibles si no hay cuentas guardadas, o si elige "otra" */}
+                {(cuentasGuardadas.length === 0 || cuentaSelIdx === "") && (
                 <div className="field-grid fade-up fade-up-1">
                   <div className="field-wrap">
                     <label className="field-label">Banco *</label>
@@ -872,6 +916,7 @@ function ParticiparContent() {
                     <input className="field-input" style={{fontFamily:"var(--mono)"}} placeholder="123456789" value={numCta} onChange={e=>setNumCta(e.target.value)}/>
                   </div>
                 </div>
+                )}
 
                 <div className="sec-title fade-up">Selección de remate *</div>
                 <div className="remate-grid fade-up fade-up-1">
