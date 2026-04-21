@@ -2128,28 +2128,31 @@ function Dashboard({ session, onLogout }) {
     return () => clearTimeout(bidTimerRef.current);
   }, [bidTimer, aState]);
 
-  // adjCountdown: 3s después de adjudicar → pasa al siguiente lote automáticamente
-  useEffect(() => {
-    if (adjCountdown===null) return;
-    if (adjCountdown<=0) {
-      setAdjCountdown(null);
-      setIdx(prev => {
-        const next = prev+1;
-        if (next < lots.length) {
-          setAState("waiting"); setBidTimer(null); setLastBidder(null);
-          setCurInc(lots[next]?.inc||100000); setCustomMonto(""); setPhotoIdx(0);
-          notify(`Lote ${next+1} — ${lots[next]?.name}`,"inf");
-          return next;
-        } else {
-          notify("Último lote adjudicado — remate finalizado","ok");
-          return prev;
-        }
-      });
-      return;
-    }
-    const t = setTimeout(()=>setAdjCountdown(c=>c-1),1000);
-    return ()=>clearTimeout(t);
-  }, [adjCountdown]);
+  // adjCountdown: se activa al adjudicar — avance MANUAL por el martillero
+  const avanzarSiguienteLote = () => {
+    setAdjCountdown(null);
+    setIdx(prev => {
+      const next = prev + 1;
+      if (next < lots.length) {
+        setAState("waiting"); setBidTimer(null); setLastBidder(null);
+        setCurInc(lots[next]?.inc||100000); setCustomMonto(""); setPhotoIdx(0);
+        notify(`Lote ${next+1} — ${lots[next]?.name}`, "inf");
+        return next;
+      } else {
+        notify("Último lote adjudicado — remate finalizado", "ok");
+        return prev;
+      }
+    });
+  };
+
+  const revertirAdjudicacion = () => {
+    setBids(p => { const n=[...p]; n[idx]={...n[idx], status:"live", winner: n[idx].history?.[0]?.bidder||null}; return n; });
+    setAState("live"); setBidTimer(BID_TIMER);
+    setAdjCountdown(null);
+    // Eliminar la liquidación auto-creada para este lote
+    setLiquidaciones(p => p.filter(l => !(l.lote===lots[idx]?.name && l.id.startsWith("LIQ-"))));
+    notify("Adjudicación revertida — lote en vivo nuevamente", "inf");
+  };
 
   // ── Supabase: carga inicial ──────────────────────────────────────
   useEffect(() => {
@@ -2265,8 +2268,8 @@ function Dashboard({ session, onLogout }) {
 
     setBids(p=>{const n=[...p];n[idx]={...n[idx],status:"sold"};return n;});
     setAState("sold"); setBidTimer(null);
-    // Auto-avance al siguiente lote en 3 segundos
-    if (idx < lots.length-1) setAdjCountdown(3);
+    // Mostrar panel de control manual — el martillero decide cuándo avanzar
+    setAdjCountdown(true);
 
     if (winner) {
       // Liquidación automática — comisión según tipo + gastos admin si motorizado
@@ -6624,21 +6627,29 @@ function Dashboard({ session, onLogout }) {
                             </div>
                           </div>
                         )}
-                        {/* Banner auto-avance post-adjudicación */}
-                        {adjCountdown!==null && (
-                          <div style={{marginTop:".5rem",background:"rgba(20,184,166,.08)",border:"1px solid rgba(20,184,166,.3)",borderRadius:8,padding:".6rem .85rem",display:"flex",alignItems:"center",justifyContent:"space-between",gap:".5rem"}}>
+                        {/* Panel post-adjudicación — control manual del martillero */}
+                        {adjCountdown && (
+                          <div style={{marginTop:".5rem",background:"rgba(20,184,166,.07)",border:"1px solid rgba(20,184,166,.35)",borderRadius:10,padding:".75rem .9rem",display:"flex",flexDirection:"column",gap:".5rem"}}>
                             <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
-                              <div style={{fontSize:"1.4rem",fontWeight:800,color:"var(--gr)",minWidth:24,textAlign:"center"}}>{adjCountdown}</div>
-                              <div>
-                                <div style={{fontSize:".72rem",fontWeight:700,color:"var(--gr)"}}>✓ Lote adjudicado</div>
-                                <div style={{fontSize:".65rem",color:"var(--mu)"}}>Pasando al lote {idx+2} automáticamente…</div>
-                              </div>
+                              <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="var(--gr)" strokeWidth="1.5"/><path d="M5 8l2 2 4-4" stroke="var(--gr)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                              <div style={{fontSize:".75rem",fontWeight:700,color:"var(--gr)"}}>Lote adjudicado correctamente</div>
                             </div>
-                            <button
-                              onClick={()=>{ setAdjCountdown(0); }}
-                              style={{padding:".3rem .65rem",background:"rgba(20,184,166,.2)",border:"1px solid rgba(20,184,166,.4)",borderRadius:6,color:"var(--gr)",fontSize:".68rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
-                              Pasar ahora →
-                            </button>
+                            <div style={{display:"flex",gap:".45rem"}}>
+                              <button
+                                onClick={avanzarSiguienteLote}
+                                disabled={idx >= lots.length-1}
+                                style={{flex:1,padding:".5rem",background:"var(--gr)",border:"none",borderRadius:7,color:"#fff",fontSize:".78rem",fontWeight:700,cursor:"pointer",opacity:idx>=lots.length-1?.4:1}}>
+                                Siguiente lote →
+                              </button>
+                              <button
+                                onClick={revertirAdjudicacion}
+                                style={{padding:".5rem .75rem",background:"rgba(239,68,68,.1)",border:"1px solid rgba(239,68,68,.3)",borderRadius:7,color:"#f87171",fontSize:".75rem",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>
+                                ↩ Revertir
+                              </button>
+                            </div>
+                            {idx >= lots.length-1 && (
+                              <div style={{fontSize:".65rem",color:"var(--mu)",textAlign:"center"}}>Último lote — remate finalizado</div>
+                            )}
                           </div>
                         )}
                       </>
