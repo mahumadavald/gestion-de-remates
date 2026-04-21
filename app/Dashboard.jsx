@@ -458,21 +458,21 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .sala-wrap-new{display:flex;flex-direction:column;height:calc(100vh - 52px);overflow:hidden;background:var(--bg);}
 .sala-header{display:flex;align-items:center;gap:1rem;padding:.65rem 1.25rem;background:var(--s1);border-bottom:1px solid var(--b1);flex-shrink:0;}
 .sala-header h1{font-size:1rem;font-weight:800;color:var(--wh);margin:0;white-space:nowrap;}
-.sala-body{display:grid;grid-template-columns:1fr 460px;gap:1.1rem;padding:1rem 1.25rem;flex:1;overflow:hidden;min-height:0;}
+.sala-body{display:grid;grid-template-columns:1fr 360px;gap:1rem;padding:.85rem 1.1rem;flex:1;overflow:hidden;min-height:0;}
 
 /* Left card */
 .sala-left-card{background:var(--s2);border:1px solid var(--b1);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
 .sala-live-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.22rem .65rem;background:rgba(20,184,166,.15);color:var(--gr);border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.04em;margin:.6rem auto 0;width:fit-content;}
 .sala-lot-title{font-size:1rem;font-weight:800;color:var(--wh);text-align:center;padding:.35rem 1.1rem .2rem;line-height:1.2;}
 /* Foto + cámara: flex:1 para llenar el espacio disponible */
-.sala-photo-wrap{position:relative;background:var(--s3);margin:.3rem .75rem;border-radius:10px;overflow:hidden;flex:1;min-height:200px;display:flex;gap:0;}
+.sala-photo-wrap{position:relative;background:var(--s3);margin:.3rem .75rem;border-radius:10px;overflow:hidden;flex:1;min-height:300px;display:flex;gap:0;}
 .sala-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
 .sala-photo-placeholder{width:100%;height:100%;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;}
 /* Foto principal */
 .sala-photo-main{flex:1;position:relative;overflow:hidden;min-width:0;}
 .sala-photo-main img{width:100%;height:100%;object-fit:cover;display:block;}
-/* Cámara lateral — 36% del ancho */
-.sala-cam-side{width:36%;flex-shrink:0;background:#000;position:relative;border-left:2px solid var(--s3);}
+/* Cámara lateral martillero — pequeña, 20% del ancho */
+.sala-cam-side{width:20%;flex-shrink:0;background:#000;position:relative;border-left:2px solid var(--s3);border-radius:0 10px 10px 0;}
 .sala-cam-side video{width:100%;height:100%;object-fit:cover;display:block;}
 .sala-cam-side-label{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.6);border-radius:4px;padding:.12rem .4rem;font-size:.58rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:3px;}
 .sala-cam-rec{width:5px;height:5px;border-radius:50%;background:var(--rd);animation:pulse 1s infinite;}
@@ -841,9 +841,10 @@ tr:hover td{background:rgba(56,178,246,.04);}
 
   /* NEW AuctionHub layout — mobile */
   .sala-wrap-new{height:auto;overflow:visible;}
-  .sala-body{grid-template-columns:1fr;overflow:visible;padding:.75rem;}
-  .sala-left-card{min-height:320px;}
-  .sala-photo-wrap{min-height:180px;max-height:220px;flex:none;height:180px;}
+  .sala-body{grid-template-columns:1fr;overflow:visible;padding:.6rem;}
+  .sala-left-card{min-height:420px;}
+  .sala-photo-wrap{min-height:280px;max-height:340px;flex:none;height:300px;}
+  .sala-cam-side{width:26%;}
   .sala-cam-side{display:none;}
   .sala-quick-bids{grid-template-columns:repeat(2,1fr);}
   .sala-right-col{overflow-y:visible;}
@@ -3238,8 +3239,8 @@ function Dashboard({ session, onLogout }) {
       {/* Mobile overlay */}
       <div className={`mob-overlay${mobileMenu?" open":""}`} onClick={()=>setMobileMenu(false)}/>
 
-      {/* ── SIDEBAR ── */}
-      <aside className={`sidebar${mobileMenu?" open":""}`}>
+      {/* ── SIDEBAR ── oculto en sala en vivo para maximizar espacio */}
+      <aside className={`sidebar${mobileMenu?" open":""}`} style={page==="sala"?{display:"none"}:undefined}>
         <div className="sb-logo"><GRLogo/></div>
         <div style={{height:".5rem"}}/>
 
