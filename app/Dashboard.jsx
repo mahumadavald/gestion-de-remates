@@ -1883,6 +1883,23 @@ export default function Root() {
 
   const fetchPerfil = async (uid) => {
     try {
+      // Usuarios de Google → siempre rol postor (cliente), sin excepción
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const isGoogle = authUser?.app_metadata?.provider === "google" ||
+                       authUser?.identities?.some(i => i.provider === "google");
+      if (isGoogle) {
+        return {
+          id:         uid,
+          email:      authUser.email,
+          name:       authUser.user_metadata?.full_name || authUser.email,
+          role:       "postor",
+          roles:      ["postor"],
+          casa:       null,
+          casaNombre: "",
+          activo:     true,
+        };
+      }
+
       const { data } = await supabase
         .from("usuarios")
         .select("*, casas(slug, nombre)")
@@ -1900,7 +1917,6 @@ export default function Root() {
         activo:     data.activo,
       };
     } catch(e) {
-      // Si falla Supabase, dar acceso igual con rol admin
       return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"Pecker", activo:true };
     }
   };
