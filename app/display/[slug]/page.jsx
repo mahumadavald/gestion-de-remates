@@ -393,7 +393,7 @@ export default function DisplayPage({ params }) {
       {/* ── Header turquesa ── */}
       <div className="disp-header">
         <div style={{display:"flex",alignItems:"center",gap:"1.1rem"}}>
-          {/* Logo GR blanco */}
+          {/* Logo Pecker blanco — TODO: reemplazar por logo final de Pecker */}
           <div style={{display:"flex",alignItems:"center",gap:".55rem",flexShrink:0}}>
             <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
               <rect width="36" height="36" rx="8" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.3)" strokeWidth="1"/>
@@ -402,7 +402,7 @@ export default function DisplayPage({ params }) {
             </svg>
             <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:".82rem",color:"#fff",lineHeight:1.2}}>
               Auction Software
-              <div style={{fontSize:".58rem",color:"rgba(255,255,255,.65)",fontWeight:400,letterSpacing:".05em",textTransform:"uppercase",marginTop:1}}>Gestión de Remates</div>
+              <div style={{fontSize:".58rem",color:"rgba(255,255,255,.65)",fontWeight:400,letterSpacing:".05em",textTransform:"uppercase",marginTop:1}}>Pecker</div>
             </div>
           </div>
 
@@ -549,7 +549,7 @@ export default function DisplayPage({ params }) {
       {/* ── Footer ── */}
       <div className="disp-footer">
         <div className="disp-footer-txt">Participa desde tu celular</div>
-        <div className="disp-footer-url">gestionderemates.cl/participar/{slug}</div>
+        <div className="disp-footer-url">pecker.cl/participar/{slug}</div>
         <div className="disp-footer-txt">{new Date().toLocaleString("es-CL",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"short"})}</div>
       </div>
     </div>

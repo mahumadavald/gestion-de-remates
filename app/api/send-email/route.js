@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL     = process.env.FROM_EMAIL || "noreply@gestionderemates.cl";
+const FROM_EMAIL     = process.env.FROM_EMAIL || "noreply@pecker.cl";
 
 async function sendMail({ to, subject, html }) {
   if (!RESEND_API_KEY) return { ok: false, error: "RESEND_API_KEY not set" };
@@ -51,14 +51,14 @@ function tr(label, value) {
   `;
 }
 
-// ── Footer con logo GR ────────────────────────────────────────────
+// ── Footer con logo Pecker ────────────────────────────────────────────
 const FOOTER = `
   <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 36px;text-align:center;">
     <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:6px;">
-      <div style="display:inline-block;background:rgba(6,182,212,.15);border:1.5px solid rgba(6,182,212,.35);border-radius:8px;width:30px;height:30px;line-height:30px;text-align:center;font-size:13px;font-weight:800;color:#0891b2;font-family:Arial,sans-serif;">GR</div>
-      <span style="font-size:13px;font-weight:700;color:#374151;letter-spacing:-.01em;">GR Auction Software</span>
+      <div style="display:inline-block;background:rgba(6,182,212,.15);border:1.5px solid rgba(6,182,212,.35);border-radius:8px;width:30px;height:30px;line-height:30px;text-align:center;font-size:13px;font-weight:800;color:#0891b2;font-family:Arial,sans-serif;">P</div>
+      <span style="font-size:13px;font-weight:700;color:#374151;letter-spacing:-.01em;">Pecker</span>
     </div>
-    <div style="font-size:11px;color:#9ca3af;margin-top:2px;"><a href="https://gestionderemates.cl" style="color:#9ca3af;text-decoration:none;">gestionderemates.cl</a></div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:2px;"><a href="https://pecker.cl" style="color:#9ca3af;text-decoration:none;">pecker.cl</a></div>
   </div>
 `;
 
@@ -265,7 +265,7 @@ export async function POST(req) {
               Al ingresar por primera vez debes cambiarla. Es personal e intransferible.
             </div>
 
-            <a href="https://gestionderemates.cl/dashboard" style="display:block;text-align:center;background:linear-gradient(135deg,#06B6D4,#14B8A6);color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 24px;border-radius:10px;margin-bottom:16px;">Ingresar a mi portal →</a>
+            <a href="https://pecker.cl/dashboard" style="display:block;text-align:center;background:linear-gradient(135deg,#06B6D4,#14B8A6);color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 24px;border-radius:10px;margin-bottom:16px;">Ingresar a mi portal →</a>
 
             <p style="font-size:12px;color:#9ca3af;text-align:center;margin:0;">En caso de no poder ingresar, contacta a ${casa}.</p>
           </div>

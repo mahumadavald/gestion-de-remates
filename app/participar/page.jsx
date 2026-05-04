@@ -350,7 +350,7 @@ function ParticiparContent() {
     const lookup = async () => {
       setLookingUp(true);
 
-      // 1. Buscar en Supabase (base de datos de GR Auction Software)
+      // 1. Buscar en Supabase (base de datos de Pecker)
       const { data } = await supabase
         .from("postores")
         .select("nombre, email, telefono, empresa, direccion, comuna, banco, tipo_cuenta, numero_cuenta, cuentas_banco")
@@ -652,7 +652,7 @@ function ParticiparContent() {
       <style>{CSS}</style>
       <div style={{textAlign:"center"}}>
         <div style={{fontSize:"1.2rem",fontWeight:700,color:"var(--wh)",marginBottom:".5rem"}}>Casa de remates no encontrada</div>
-        <div style={{fontSize:".85rem",color:"var(--mu)"}}>Verifica la URL o contacta a GR Auction Software.</div>
+        <div style={{fontSize:".85rem",color:"var(--mu)"}}>Verifica la URL o contacta a Pecker.</div>
       </div>
     </div>
   );
@@ -697,14 +697,14 @@ function ParticiparContent() {
         </div>
         <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",flex:1,minHeight:0}}>
 
-          {/* Logo GR + nombre plataforma */}
+          {/* Logo Pecker + nombre plataforma */}
           <div className="hero-topbar">
             <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
               <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
               <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.5)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
             </svg>
             <div>
-              <div className="hero-topbar-name">GR Auction Software</div>
+              <div className="hero-topbar-name">Pecker</div>
             </div>
           </div>
 
@@ -725,7 +725,7 @@ function ParticiparContent() {
               <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.4)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
             </svg>
             <span style={{fontFamily:"'Inter',sans-serif",fontSize:".7rem",color:"rgba(255,255,255,.6)",letterSpacing:".04em"}}>
-              Powered by <strong style={{color:"rgba(255,255,255,.9)"}}>GR Auction Software</strong> · gestionderemates.cl
+              Powered by <strong style={{color:"rgba(255,255,255,.9)"}}>Pecker</strong> · pecker.cl
             </span>
           </div>
         </div>
@@ -771,14 +771,14 @@ function ParticiparContent() {
           </div>
         ) : (
           <>
-            {/* Logo GR Auction Software — visible en todas las pantallas */}
+            {/* Logo Pecker — visible en todas las pantallas */}
             <div className="form-topbar">
               <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
                 <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
                 <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1a1a1a" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
               </svg>
               <div>
-                <div className="form-topbar-label">GR Auction Software</div>
+                <div className="form-topbar-label">Pecker</div>
               </div>
             </div>
 

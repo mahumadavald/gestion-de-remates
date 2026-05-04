@@ -234,7 +234,7 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
 </div>
 
 <div class="footer">
-  Documento generado por GR Auction Software · ${new Date().toLocaleDateString("es-CL")} · gestionderemates.cl
+  Documento generado por Pecker · ${new Date().toLocaleDateString("es-CL")} · pecker.cl
 </div>
 
 <script>window.onload=()=>{window.print();}<\/script>
@@ -953,7 +953,7 @@ const Icon = ({ name }) => {
 
 // Mock credentials — replace with Supabase Auth in production
 const USERS = [
-  { id:"u1", email:"admin@grauction.cl",       password:"admin2026",      role:"admin",      name:"Max Ahumada",        casa:null,            casaNombre:"GR Auction Software" },
+  { id:"u1", email:"admin@pecker.cl",           password:"admin2026",      role:"admin",      name:"Max Ahumada",        casa:null,            casaNombre:"Pecker" },
   { id:"u2", email:"martillero@rematesahumada.cl", password:"remates2026", role:"martillero", name:"Remates Ahumada",    casa:"remates-ahumada", casaNombre:"Remates Ahumada" },
   { id:"u3", email:"demo@casaderemates.cl",     password:"demo2026",       role:"martillero", name:"Casa Demo",          casa:"casa-demo",       casaNombre:"Casa Demo S.A." },
 ];
@@ -1184,7 +1184,7 @@ function AuthScreen({ onLogin }) {
     if (!forgotEmail.trim()) { setError("Ingresa tu correo."); return; }
     setLoading(true); setError("");
     await supabase.auth.resetPasswordForEmail(forgotEmail.trim(), {
-      redirectTo: "https://gestionderemates.cl/reset-password",
+      redirectTo: "https://pecker.cl/reset-password",
     });
     setForgotSent(true);
     setLoading(false);
@@ -1198,7 +1198,7 @@ function AuthScreen({ onLogin }) {
         const { data, error: authErr } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (authErr) { setError("Credenciales incorrectas."); setLoading(false); return; }
         // Buscar perfil — con fallback si no existe en tabla usuarios
-        let sessionData = { id:data.user.id, email:data.user.email, name:"Admin", role:"admin", roles:["admin"], casa:null, casaNombre:"GR Auction Software", activo:true };
+        let sessionData = { id:data.user.id, email:data.user.email, name:"Admin", role:"admin", roles:["admin"], casa:null, casaNombre:"Pecker", activo:true };
         try {
           const { data: perfil } = await supabase
             .from("usuarios")
@@ -1214,11 +1214,11 @@ function AuthScreen({ onLogin }) {
               const vence = perfil.casas.licencia_vence ? new Date(perfil.casas.licencia_vence) : null;
               const vencida = vence && vence < new Date();
               if (lic === "bloqueado") {
-                setError("Acceso bloqueado. Contacta a GR Auction Software: contacto@gestionderemates.cl");
+                setError("Acceso bloqueado. Contacta a Pecker: contacto@pecker.cl");
                 await supabase.auth.signOut(); setLoading(false); return;
               }
               if (lic === "suspendido" || vencida) {
-                setError("Tu licencia está suspendida o venció. Contacta a GR Auction Software para renovar.");
+                setError("Tu licencia está suspendida o venció. Contacta a Pecker para renovar.");
                 await supabase.auth.signOut(); setLoading(false); return;
               }
             }
@@ -1226,7 +1226,7 @@ function AuthScreen({ onLogin }) {
               id: data.user.id, email: data.user.email, name: perfil.nombre, role: r,
               roles: perfil.roles||[r], casa: perfil.casas?.slug||null,
               casaId: perfil.casas?.id||null,
-              casaNombre: perfil.casas?.nombre||"GR Auction Software",
+              casaNombre: perfil.casas?.nombre||"Pecker",
               licencia: perfil.casas?.licencia_estado||"activo",
               licenciaPlan: perfil.casas?.licencia_plan||"trial",
               licenciaVence: perfil.casas?.licencia_vence||null,
@@ -1308,7 +1308,7 @@ function AuthScreen({ onLogin }) {
             </svg>
             <div>
               <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:".88rem",color:"#1a1a1a",letterSpacing:".01em"}}>Auction Software</div>
-              <div style={{fontSize:".7rem",color:"#9ca3af",letterSpacing:".04em",textTransform:"uppercase",marginTop:1}}>Gestión de Remates</div>
+              <div style={{fontSize:".7rem",color:"#9ca3af",letterSpacing:".04em",textTransform:"uppercase",marginTop:1}}>by GR Gestión de Remates</div>
             </div>
           </div>
           <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:"1.3rem",color:"#1a1a1a",marginBottom:".3rem"}}>Iniciar sesión</div>
@@ -1834,7 +1834,7 @@ export default function Root() {
         .select("*, casas(slug, nombre)")
         .eq("id", uid)
         .single();
-      if (!data) return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"GR Auction Software", activo:true };
+      if (!data) return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"Pecker", activo:true };
       const role = Array.isArray(data.roles) && data.roles.length > 0 ? data.roles[0] : "martillero";
       return {
         id:         uid,
@@ -1842,12 +1842,12 @@ export default function Root() {
         role:       role,
         roles:      data.roles || [],
         casa:       data.casas?.slug   || null,
-        casaNombre: data.casas?.nombre || "GR Auction Software",
+        casaNombre: data.casas?.nombre || "Pecker",
         activo:     data.activo,
       };
     } catch(e) {
       // Si falla Supabase, dar acceso igual con rol admin
-      return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"GR Auction Software", activo:true };
+      return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"Pecker", activo:true };
     }
   };
 
@@ -2652,7 +2652,7 @@ function Dashboard({ session, onLogout }) {
       } catch {}
     }
 
-    // Logo GR Auction Software (derecha, pequeño)
+    // Logo Pecker (derecha, pequeño) — TODO: reemplazar por logo final de Pecker
     try {
       const grCanvas = document.createElement("canvas");
       grCanvas.width = 72; grCanvas.height = 72;
@@ -2669,7 +2669,7 @@ function Dashboard({ session, onLogout }) {
       ctx2.lineTo(40,10); ctx2.stroke();
       doc.addImage(grCanvas.toDataURL("image/png"), "PNG", W - 14 - 16, y + 1, 16, 16, undefined, "FAST");
       doc.setFont("helvetica","normal"); doc.setFontSize(5.5); doc.setTextColor(...GRAY);
-      doc.text("GR Auction Software", W - 14 - 8, y + 20, { align:"center" });
+      doc.text("Pecker", W - 14 - 8, y + 20, { align:"center" });
     } catch {}
 
     // Título centrado
@@ -2831,7 +2831,7 @@ function Dashboard({ session, onLogout }) {
     doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
     doc.line(14, fy - 3, W - 14, fy - 3);
     doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
-    doc.text(`${casaNombre} · Powered by GR Auction Software · gestionderemates.cl`, 14, fy + 1);
+    doc.text(`${casaNombre} · Powered by Pecker · pecker.cl`, 14, fy + 1);
     doc.text(`Remate ${fechaRemate} · Comprador N° ${num}`, W - 14, fy + 1, { align:"right" });
 
     doc.save(`liquidacion-comprador-${num}-${fechaRemate.replace(/\//g,"-")}.pdf`);
@@ -3425,7 +3425,7 @@ function Dashboard({ session, onLogout }) {
             <div className="sb-ava">{session?.name?.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()||"??"}</div>
             <div style={{flex:1,minWidth:0}}>
               <div className="sb-uname">{session?.name||"Usuario"}</div>
-              <div className="sb-urole">{session?.casaNombre||"GR Auction Software"}</div>
+              <div className="sb-urole">{session?.casaNombre||"Pecker"}</div>
             </div>
             <button title="Cerrar sesion" onClick={onLogout} style={{background:"transparent",border:"none",cursor:"pointer",color:"#364d70",padding:".2rem",borderRadius:4,flexShrink:0,transition:"color .15s"}}
               onMouseEnter={e=>e.target.style.color="#e05252"} onMouseLeave={e=>e.target.style.color="#364d70"}>
@@ -3941,10 +3941,10 @@ function Dashboard({ session, onLogout }) {
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M4 7h6M7 4l3 3-3 3"/></svg>
               <span style={{fontSize:".75rem",color:"var(--mu2)"}}>Link de inscripción pública:</span>
               <code style={{fontSize:".73rem",color:"var(--ac)",fontFamily:"Inter,sans-serif",flex:1}}>
-                gestionderemates.cl/participar?id={session?.casaId||session?.casa||"—"}
+                pecker.cl/participar?id={session?.casaId||session?.casa||"—"}
               </code>
               <button className="btn-sec" style={{fontSize:".68rem"}} onClick={()=>{
-                navigator.clipboard.writeText(`https://gestionderemates.cl/participar?id=${session?.casaId||session?.casa||""}`);
+                navigator.clipboard.writeText(`https://pecker.cl/participar?id=${session?.casaId||session?.casa||""}`);
                 notify("Link copiado al portapapeles.","sold");
               }}>Copiar link</button>
             </div>
@@ -4035,7 +4035,7 @@ function Dashboard({ session, onLogout }) {
                     y+=33;
                     doc.setFillColor(56,178,246); doc.rect(10,y,W-20,10,"F");
                     doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont("helvetica","bold");
-                    doc.text("TOTAL A PAGAR A GR AUCTION SOFTWARE:",14,y+7);
+                    doc.text("TOTAL A PAGAR A PECKER:",14,y+7);
                     doc.text(fmtCL(neto),W-14,y+7,{align:"right"});
 
                     doc.save(`balance-martillero-${remateNom.replace(/\s/g,"-")}.pdf`);
@@ -4458,7 +4458,7 @@ function Dashboard({ session, onLogout }) {
             doc.setFontSize(11); doc.setTextColor(...NAVY);
             doc.text("VENDEDOR", W - 14, y + 16, {align:"right"});
             doc.setFont("helvetica","normal"); doc.setFontSize(6.5); doc.setTextColor(...GRAY);
-            doc.text("Powered by GR Auction Software", W - 14, y + 32, {align:"right"});
+            doc.text("Powered by Pecker", W - 14, y + 32, {align:"right"});
 
             y = 42;
             doc.setDrawColor(...TEAL); doc.setLineWidth(0.5);
@@ -4574,7 +4574,7 @@ function Dashboard({ session, onLogout }) {
             doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
             doc.line(14, fy - 3, W - 14, fy - 3);
             doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
-            doc.text(`${casaNombre} · Powered by GR Auction Software · gestionderemates.cl`, 14, fy + 1);
+            doc.text(`${casaNombre} · Powered by Pecker · pecker.cl`, 14, fy + 1);
             doc.text(new Date().toLocaleDateString("es-CL"), W - 14, fy + 1, {align:"right"});
             doc.save(`liquidacion-vendedor-${(vd?.nombre||"vendedor").replace(/\s+/g,"-").toLowerCase()}.pdf`);
           };
@@ -5038,8 +5038,8 @@ function Dashboard({ session, onLogout }) {
         )}
         {/* ══ USUARIOS ══ */}
         {page==="usuarios" && session?.role==="admin" && (()=>{
-          // Casas reales desde Supabase — incluye "GR Auction Software" para admin global
-          const CASAS_LISTA_REAL = [{ id: null, nombre: "GR Auction Software (Admin global)" }, ...dbLicencias];
+          // Casas reales desde Supabase — incluye "Pecker" para admin global
+          const CASAS_LISTA_REAL = [{ id: null, nombre: "Pecker (Admin global)" }, ...dbLicencias];
           const toggleRol = (rol) => {
             setUsuarioForm(f=>({...f, roles: f.roles.includes(rol) ? f.roles.filter(r=>r!==rol) : [...f.roles, rol]}));
           };
@@ -5478,7 +5478,7 @@ function Dashboard({ session, onLogout }) {
 
         {/* ══ CASAS DE REMATES ══ */}
         {page==="casas" && session?.role==="admin" && (()=>{
-          const BASE_URL = "https://gestionderemates.cl";
+          const BASE_URL = "https://pecker.cl";
 
           const toSlug = (nombre) => nombre.toLowerCase()
             .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
@@ -5651,7 +5651,7 @@ function Dashboard({ session, onLogout }) {
                         {casaForm.nombre && (
                           <div style={{marginTop:".4rem",fontSize:".7rem",color:"var(--mu2)",fontFamily:"Inter,sans-serif"}}>
                             Slug: <span style={{color:"var(--ac)"}}>{toSlug(casaForm.nombre)}</span>
-                            <span style={{color:"var(--mu)",marginLeft:".5rem"}}>→ gestionderemates.cl/participar/{toSlug(casaForm.nombre)}</span>
+                            <span style={{color:"var(--mu)",marginLeft:".5rem"}}>→ pecker.cl/participar/{toSlug(casaForm.nombre)}</span>
                           </div>
                         )}
                       </div>

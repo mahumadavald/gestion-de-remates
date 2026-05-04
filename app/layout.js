@@ -1,6 +1,11 @@
 export const metadata = {
-  title: 'Gestión de Remates',
-  description: 'Plataforma de remates online',
+  title: 'Pecker — Auction Software',
+  description: 'Plataforma digital para gestionar, operar y escalar remates en cualquier lugar.',
+  openGraph: {
+    title: 'Pecker — Auction Software',
+    description: 'Plataforma digital para gestionar, operar y escalar remates en cualquier lugar.',
+    siteName: 'Pecker',
+  },
 }
 
 export default function RootLayout({ children }) {

@@ -78,7 +78,7 @@ export default function ResetPasswordPage() {
               <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
               <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1a1a1a" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
             </svg>
-            <span style={{fontWeight:700,fontSize:".88rem",color:"#374151",letterSpacing:"-.01em"}}>GR Auction Software</span>
+            <span style={{fontWeight:700,fontSize:".88rem",color:"#374151",letterSpacing:"-.01em"}}>Pecker</span>
           </div>
 
           {done ? (

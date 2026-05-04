@@ -179,7 +179,7 @@ export default function PostorPage() {
             <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
             <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1a1a1a" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
           </svg>
-          <span style={{fontWeight:700,fontSize:".95rem",color:"var(--wh)"}}>GR Auction Software</span>
+          <span style={{fontWeight:700,fontSize:".95rem",color:"var(--wh)"}}>Pecker</span>
         </div>
         <div className="topbar-user">
           <span className="topbar-name">{postor?.nombre || authUser?.email}</span>
@@ -366,7 +366,7 @@ export default function PostorPage() {
           <svg width="16" height="16" viewBox="0 0 36 36" fill="none">
             <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#9ca3af" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
           </svg>
-          <span style={{fontSize:".72rem",color:"var(--mu2)"}}>GR Auction Software · <a href="https://gestionderemates.cl" style={{color:"var(--mu2)",textDecoration:"none"}}>gestionderemates.cl</a></span>
+          <span style={{fontSize:".72rem",color:"var(--mu2)"}}>Pecker · <a href="https://pecker.cl" style={{color:"var(--mu2)",textDecoration:"none"}}>pecker.cl</a></span>
         </div>
       </div>
     </div>

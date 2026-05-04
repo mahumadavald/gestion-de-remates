@@ -81,11 +81,11 @@ export default function LandingPage() {
         <div class="dash-dot" style="background:#f85149"></div>
         <div class="dash-dot" style="background:#d29922"></div>
         <div class="dash-dot" style="background:#3fb950"></div>
-        <span class="dash-url">gestionderemates.cl/sala</span>
+        <span class="dash-url">pecker.cl/sala</span>
       </div>
       <div class="dash-body">
         <div class="dash-sidebar">
-          <div class="ds-logo">GR Auction</div>
+          <div class="ds-logo">Pecker</div>
           <div class="ds-item active">● Sala en vivo</div>
           <div class="ds-item">  Lotes</div>
           <div class="ds-item">  Postores</div>
@@ -371,20 +371,20 @@ export default function LandingPage() {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.553 4.103 1.518 5.829L.057 23.492a.5.5 0 00.614.611l5.783-1.517A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.947 0-3.768-.497-5.35-1.367l-.383-.215-3.434.9.916-3.352-.234-.38A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
         Solicitar demo por WhatsApp
       </a>
-      <a href="mailto:contacto@grauction.cl" class="btn-outline">contacto@grauction.cl</a>
+      <a href="mailto:contacto@pecker.cl" class="btn-outline">contacto@pecker.cl</a>
     </div>
     <div class="contact-row">
       <a href="https://wa.me/56991453680" target="_blank" class="contact-chip">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.02 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
         +56 9 9145 3680
       </a>
-      <a href="mailto:contacto@grauction.cl" class="contact-chip">
+      <a href="mailto:contacto@pecker.cl" class="contact-chip">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        contacto@grauction.cl
+        contacto@pecker.cl
       </a>
       <span class="contact-chip">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-        gestionderemates.cl
+        pecker.cl
       </span>
     </div>
   </div>
@@ -405,7 +405,7 @@ export default function LandingPage() {
         </div>
         <p class="footer-desc">Software profesional para gestionar, operar y escalar remates en cualquier lugar de Chile.</p>
         <div class="footer-socials">
-          <a href="mailto:contacto@grauction.cl" class="footer-social-btn" title="Email">
+          <a href="mailto:contacto@pecker.cl" class="footer-social-btn" title="Email">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
           </a>
           <a href="https://wa.me/56912345678" target="_blank" class="footer-social-btn" title="WhatsApp">
@@ -423,7 +423,7 @@ export default function LandingPage() {
         </div>
         <div class="footer-col">
           <div class="footer-col-title">INFORMACIÓN</div>
-          <a href="mailto:contacto@grauction.cl" class="footer-col-link">Contacto</a>
+          <a href="mailto:contacto@pecker.cl" class="footer-col-link">Contacto</a>
           <a href="/participar" class="footer-col-link">Participar</a>
           <a href="#" class="footer-col-link">Privacidad</a>
           <a href="#" class="footer-col-link">Términos de uso</a>
@@ -431,7 +431,7 @@ export default function LandingPage() {
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2025 GR Auction Software · gestionderemates.cl</span>
+      <span>© 2025 Pecker — Auction Software · pecker.cl · <small style="opacity:.65">by GR Gestión de Remates</small></span>
       <span>Hecho en Chile 🇨🇱</span>
     </div>
   </div>
