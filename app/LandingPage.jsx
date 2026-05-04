@@ -303,56 +303,94 @@ export default function LandingPage() {
   </div>
 
   <div class="pricing-grid">
+
+    <!-- ── Pecker Básico ── -->
     <div class="plan-card reveal">
-      <div class="plan-tier">BÁSICO</div>
-      <div class="plan-name">Para comenzar</div>
+      <div class="plan-bird plan-bird--basic">
+        <!-- TODO: reemplazar por logo final de Pecker (pájaro) en color turquesa -->
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <ellipse cx="20" cy="30" rx="13" ry="10" fill="#06B6D4"/>
+          <circle cx="33" cy="18" r="8" fill="#06B6D4"/>
+          <path d="M41 15 L48 13 L41 20Z" fill="#06B6D4"/>
+          <path d="M8 28 L1 35 L9 37Z" fill="#06B6D4" opacity=".65"/>
+          <ellipse cx="20" cy="28" rx="9" ry="6" fill="white" opacity=".15"/>
+          <circle cx="35" cy="16" r="2" fill="white" opacity=".9"/>
+        </svg>
+      </div>
+      <div class="plan-tier" style="color:#06B6D4">BÁSICO</div>
+      <div class="plan-name">Pecker Básico</div>
       <div class="plan-price">Consulta con nosotros</div>
       <div class="plan-price-sub">Adaptado a tu volumen</div>
       <div class="plan-divider"></div>
       <ul class="plan-features">
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#14B8A6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Remates mensuales limitados</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#14B8A6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Sala en vivo + display</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#14B8A6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Liquidaciones PDF con logo</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#14B8A6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Postores self-service</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#14B8A6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Hasta 2 usuarios</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#06B6D4" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Remates mensuales limitados</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#06B6D4" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Sala en vivo + display</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#06B6D4" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Liquidaciones PDF con logo</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#06B6D4" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Postores self-service</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#06B6D4" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Hasta 2 usuarios</li>
       </ul>
       <a href="${WA_DEMO}" target="_blank" class="btn-plan-outline">Consultar precio →</a>
     </div>
 
-    <div class="plan-card featured reveal">
-      <div class="plan-popular">Más popular</div>
-      <div class="plan-tier" style="color:#38B2F6">PROFESIONAL</div>
-      <div class="plan-name">Para casas activas</div>
+    <!-- ── Pecker Gold ── -->
+    <div class="plan-card plan-card--gold featured reveal">
+      <div class="plan-popular plan-popular--gold">Más popular</div>
+      <div class="plan-bird plan-bird--gold">
+        <!-- TODO: reemplazar por logo final de Pecker (pájaro) en color dorado -->
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <ellipse cx="20" cy="30" rx="13" ry="10" fill="#F59E0B"/>
+          <circle cx="33" cy="18" r="8" fill="#F59E0B"/>
+          <path d="M41 15 L48 13 L41 20Z" fill="#D97706"/>
+          <path d="M8 28 L1 35 L9 37Z" fill="#F59E0B" opacity=".65"/>
+          <ellipse cx="20" cy="28" rx="9" ry="6" fill="white" opacity=".15"/>
+          <circle cx="35" cy="16" r="2" fill="white" opacity=".9"/>
+        </svg>
+      </div>
+      <div class="plan-tier" style="color:#F59E0B">GOLD</div>
+      <div class="plan-name">Pecker Gold</div>
       <div class="plan-price">Consulta con nosotros</div>
       <div class="plan-price-sub">Adaptado a tu volumen</div>
       <div class="plan-divider"></div>
       <ul class="plan-features">
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#38B2F6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Remates ilimitados</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#38B2F6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Lotes ilimitados</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#38B2F6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Hasta 5 usuarios</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#38B2F6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Todos los módulos</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#38B2F6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Reportes avanzados + CSV</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#38B2F6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Soporte prioritario</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Remates ilimitados</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Lotes ilimitados</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Hasta 5 usuarios</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Todos los módulos</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Reportes avanzados + CSV</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Soporte prioritario</li>
       </ul>
-      <a href="${WA_DEMO}" target="_blank" class="btn-plan-solid">Consultar precio →</a>
+      <a href="${WA_DEMO}" target="_blank" class="btn-plan-gold">Consultar precio →</a>
     </div>
 
-    <div class="plan-card reveal">
-      <div class="plan-tier" style="color:#14B8A6">ENTERPRISE</div>
-      <div class="plan-name">Para grupos</div>
+    <!-- ── Pecker Platinum ── -->
+    <div class="plan-card plan-card--platinum reveal">
+      <div class="plan-bird plan-bird--platinum">
+        <!-- TODO: reemplazar por logo final de Pecker (pájaro) en color platinum -->
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <ellipse cx="20" cy="30" rx="13" ry="10" fill="#8B5CF6"/>
+          <circle cx="33" cy="18" r="8" fill="#8B5CF6"/>
+          <path d="M41 15 L48 13 L41 20Z" fill="#7C3AED"/>
+          <path d="M8 28 L1 35 L9 37Z" fill="#8B5CF6" opacity=".65"/>
+          <ellipse cx="20" cy="28" rx="9" ry="6" fill="white" opacity=".15"/>
+          <circle cx="35" cy="16" r="2" fill="white" opacity=".9"/>
+        </svg>
+      </div>
+      <div class="plan-tier" style="color:#8B5CF6">PLATINUM</div>
+      <div class="plan-name">Pecker Platinum</div>
       <div class="plan-price">A convenir</div>
       <div class="plan-price-sub">Cotización personalizada</div>
       <div class="plan-divider"></div>
       <ul class="plan-features">
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#14B8A6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Múltiples casas de remates</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#14B8A6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Usuarios ilimitados</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#14B8A6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Onboarding personalizado</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#14B8A6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Panel admin dedicado</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#14B8A6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>SLA garantizado</li>
-        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#14B8A6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Soporte 24/7</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Múltiples casas de remates</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Usuarios ilimitados</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Onboarding personalizado</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Panel admin dedicado</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>SLA garantizado</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Soporte 24/7</li>
       </ul>
-      <a href="${WA_DEMO}" target="_blank" class="btn-plan-outline">Cotizar ahora →</a>
+      <a href="${WA_DEMO}" target="_blank" class="btn-plan-platinum">Cotizar ahora →</a>
     </div>
+
   </div>
 </section>
 
@@ -784,6 +822,11 @@ nav.scrolled{
 }
 .plan-card:hover{border-color:rgba(56,178,246,.25);transform:translateY(-2px);}
 .plan-card.featured{border-color:rgba(56,178,246,.5);background:rgba(56,178,246,.03);}
+.plan-card--gold{border-color:rgba(245,158,11,.4)!important;background:rgba(245,158,11,.03)!important;}
+.plan-card--gold:hover{border-color:rgba(245,158,11,.65)!important;transform:translateY(-2px);}
+.plan-card--platinum{border-color:rgba(139,92,246,.35)!important;background:rgba(139,92,246,.03)!important;}
+.plan-card--platinum:hover{border-color:rgba(139,92,246,.6)!important;transform:translateY(-2px);}
+.plan-bird{margin-bottom:1.1rem;}
 .plan-popular{
   position:absolute;top:-13px;left:50%;transform:translateX(-50%);
   background:linear-gradient(90deg,var(--primary),var(--teal));
@@ -791,6 +834,7 @@ nav.scrolled{
   padding:.25rem .9rem;border-radius:20px;
   letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;
 }
+.plan-popular--gold{background:linear-gradient(90deg,#F59E0B,#D97706);}
 .plan-tier{font-size:.66rem;font-weight:700;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.4rem;}
 .plan-name{font-family:'Poppins',sans-serif;font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:1rem;}
 .plan-price{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-size:1rem;font-weight:500;color:var(--text);}
@@ -814,6 +858,22 @@ nav.scrolled{
   cursor:pointer;text-align:center;text-decoration:none;display:block;transition:all .2s;
 }
 .btn-plan-solid:hover{background:var(--primary-dark);transform:translateY(-1px);}
+.btn-plan-gold{
+  width:100%;padding:.8rem;border-radius:8px;
+  background:#F59E0B;border:1px solid #F59E0B;
+  color:#fff;font-family:'Poppins',sans-serif;
+  font-size:.84rem;font-weight:700;
+  cursor:pointer;text-align:center;text-decoration:none;display:block;transition:all .2s;
+}
+.btn-plan-gold:hover{background:#D97706;transform:translateY(-1px);}
+.btn-plan-platinum{
+  width:100%;padding:.8rem;border-radius:8px;
+  background:transparent;border:1px solid #8B5CF6;
+  color:#8B5CF6;font-family:'Poppins',sans-serif;
+  font-size:.84rem;font-weight:600;
+  cursor:pointer;text-align:center;text-decoration:none;display:block;transition:all .2s;
+}
+.btn-plan-platinum:hover{background:#8B5CF6;color:#fff;transform:translateY(-1px);}
 
 /* CTA */
 .cta-section{
