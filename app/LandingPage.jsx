@@ -519,7 +519,7 @@ nav.scrolled{
   border-bottom-color:var(--border);
 }
 .nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none;}
-.nav-logo-text{font-family:'Poppins',sans-serif;font-weight:800;font-size:1.1rem;color:#06B6D4;}
+.nav-logo-text{font-family:'Poppins',sans-serif;font-weight:800;font-size:1.5rem;color:#06B6D4;}
 .nav-links{display:flex;align-items:center;gap:2.5rem;}
 .nav-links a{font-size:.82rem;font-weight:500;color:var(--muted);text-decoration:none;letter-spacing:.02em;transition:color .2s;}
 .nav-links a:hover{color:var(--text);}
@@ -917,7 +917,7 @@ footer{background:var(--surface);padding:2.5rem 2rem 1.5rem;}
 }
 .footer-top{display:flex;flex-direction:column;gap:1rem;max-width:280px;}
 .footer-brand{display:flex;align-items:center;gap:.6rem;}
-.footer-brand-name{font-weight:700;font-size:1rem;color:#06B6D4;}
+.footer-brand-name{font-weight:800;font-size:1.5rem;color:#06B6D4;}
 .footer-desc{font-size:.82rem;color:var(--muted);line-height:1.6;}
 .footer-socials{display:flex;gap:.6rem;}
 .footer-social-btn{
