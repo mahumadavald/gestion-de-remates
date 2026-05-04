@@ -1868,6 +1868,10 @@ function Dashboard({ session, onLogout }) {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [notif,      setNotif]      = useState(null);
   const [modal,      setModal]      = useState(null);
+  const [importModal,  setImportModal]  = useState(false); // modal importar excel
+  const [importRows,   setImportRows]   = useState([]);    // filas parseadas
+  const [importSaving, setImportSaving] = useState(false);
+  const [importDone,   setImportDone]   = useState(null);  // {ok, errors}
   const [filterTab,  setFilterTab]  = useState("todos");
   // Nuevo lote form state
   const [loteForm,   setLoteForm]   = useState({ tipoRemate:"judicial", motorizado:false, comCustom:"" });
@@ -2497,6 +2501,99 @@ function Dashboard({ session, onLogout }) {
     notify(`✓ Postura presencial — Paleta ${presPaleta} · ${fmt(montoNum)}`,"sold");
   };
   const handlePhoto   = (i,e) => { const f=e.target.files[0]; if(!f) return; setLots(p=>{const n=[...p];const imgs=[...(n[i].imgs||[]),URL.createObjectURL(f)];n[i]={...n[i],imgs};return n;}); notify("Foto agregada.","inf"); };
+
+  // ── Import Excel: descargar plantilla ──
+  const descargarPlantillaExcel = async () => {
+    const XLSX = await import("xlsx");
+    const headers = [
+      "Nombre del artículo *","Expediente / N° causa","Mandante",
+      "Categoría (Vehículo / Inmueble / Muebles / Enseres)",
+      "Año","Patente (si es vehículo)","Precio base *",
+      "Precio mínimo","Incremento mínimo",
+      "Comisión % (vacío = judicial 10% / concursal 7%)",
+      "Tipo de remate (judicial / concursal / privado)","Descripción"
+    ];
+    const ejemplo = [
+      "Suzuki Baleno GLX HB 1.4 AUT Siniestrado","RGSL-74-2024","Banco Estado",
+      "Vehículo","2021","ABCD12","400000","350000","50000","10","judicial",
+      "Vehículo recupero de robo, sin motor, con llaves y arranque"
+    ];
+    const ws = XLSX.utils.aoa_to_sheet([headers, ejemplo]);
+    ws["!cols"] = headers.map(h => ({ wch: Math.max(h.length, 18) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Lotes");
+    XLSX.writeFile(wb, "plantilla-lotes-gr.xlsx");
+  };
+
+  // ── Import Excel: parsear archivo ──
+  const handleImportFile = async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const XLSX = await import("xlsx");
+    const buf  = await file.arrayBuffer();
+    const wb   = XLSX.read(buf);
+    const ws   = wb.Sheets[wb.SheetNames[0]];
+    const raw  = XLSX.utils.sheet_to_json(ws, { header:1, defval:"" });
+    const dataRows = raw.slice(1).filter(r => r.some(c => String(c).trim() !== ""));
+    const parsed = dataRows.map((r, i) => {
+      const nombre   = String(r[0]  || "").trim();
+      const exp      = String(r[1]  || "").trim();
+      const mandante = String(r[2]  || "").trim();
+      const cat      = String(r[3]  || "Muebles").trim() || "Muebles";
+      const anio     = String(r[4]  || "").trim();
+      const patente  = String(r[5]  || "").trim();
+      const base     = parseInt(String(r[6]  || "0").replace(/\D/g,"")) || 0;
+      const minimo   = parseInt(String(r[7]  || "0").replace(/\D/g,"")) || 0;
+      const incr     = parseInt(String(r[8]  || "0").replace(/\D/g,"")) || 0;
+      const comStr   = String(r[9]  || "").trim();
+      const com      = comStr !== "" ? parseFloat(comStr.replace(",",".")) : null;
+      const tipo     = String(r[10] || "judicial").trim().toLowerCase() || "judicial";
+      const desc     = String(r[11] || "").trim();
+      const errors   = [];
+      if (!nombre) errors.push("Nombre obligatorio");
+      if (!base)   errors.push("Precio base obligatorio");
+      return { _row:i+2, nombre, exp, mandante, cat, anio, patente, base, minimo, incr, com, tipo, desc, errors };
+    });
+    setImportRows(parsed);
+    setImportDone(null);
+    setImportModal(true);
+    e.target.value = "";
+  };
+
+  // ── Import Excel: confirmar y guardar en Supabase ──
+  const confirmarImport = async () => {
+    setImportSaving(true);
+    const validas  = importRows.filter(r => r.errors.length === 0);
+    const errCount = importRows.filter(r => r.errors.length > 0).length;
+    let ok = 0;
+    const { data: casaData } = await supabase.from("casas").select("id").eq("slug", session?.casa).single();
+    for (const r of validas) {
+      const comFinal = r.com != null ? r.com
+        : (r.tipo === "concursal" ? 7 : 10);
+      const { error } = await supabase.from("lotes").insert({
+        casa_id:     casaData?.id || null,
+        codigo:      `L-${String(Date.now()+ok).slice(-5)}`,
+        nombre:      r.nombre,
+        descripcion: r.desc,
+        expediente:  r.exp  || null,
+        mandante:    r.mandante || null,
+        categoria:   r.cat  || "Muebles",
+        anio:        r.anio ? parseInt(r.anio) : null,
+        patente:     r.patente || null,
+        base:        r.base,
+        minimo:      r.minimo || null,
+        incremento:  r.incr || Math.round(r.base * 0.05) || 50000,
+        comision:    comFinal,
+        tipo_remate: r.tipo,
+        estado:      "disponible",
+        orden:       dbLotes.length + ok + 1,
+      });
+      if (!error) ok++;
+    }
+    const { data: lotData } = await supabase.from("lotes").select("*").order("orden");
+    if (lotData) setDbLotes(lotData);
+    setImportDone({ ok, errors: errCount + (validas.length - ok) });
+    setImportSaving(false);
+  };
   const removePhoto   = (loteI, photoI) => { setLots(p=>{const n=[...p];const imgs=n[loteI].imgs.filter((_,j)=>j!==photoI);n[loteI]={...n[loteI],imgs};return n;}); setPhotoIdx(0); };
 
   // Genera e imprime PDF de liquidación de un comprador
@@ -3410,37 +3507,9 @@ function Dashboard({ session, onLogout }) {
                   notify("Bid sheets generados.","sold");
                   } catch(e){ console.error(e); notify("Error al generar PDF: "+e.message,"inf"); }
                 }}>🖨 Bid Sheets PDF</button>
-                <label className="btn-sec" style={{fontSize:".7rem",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:".3rem"}}>
+                <button className="btn-sec" style={{fontSize:".7rem",display:"inline-flex",alignItems:"center",gap:".3rem"}} onClick={()=>{setImportModal(true);setImportRows([]);setImportDone(null);}}>
                   ↑ Importar Excel
-                  <input type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={async e=>{
-                    const file = e.target.files[0]; if(!file) return;
-                    const text = await file.text();
-                    const rows = text.split("\n").slice(1).filter(r=>r.trim());
-                    let ok=0;
-                    const {data:casaData} = await supabase.from("casas").select("id").eq("slug","rematesahumada").single();
-                    for(const row of rows){
-                      const cols = row.split(",").map(c=>c.replace(/"/g,"").trim());
-                      if(!cols[0]) continue;
-                      const {error} = await supabase.from("lotes").insert({
-                        casa_id: casaData?.id||null,
-                        codigo:  `L-${String(Date.now()+ok).slice(-5)}`,
-                        nombre:  cols[0]||"Sin nombre",
-                        descripcion: cols[1]||"",
-                        base:    parseInt(cols[2])||0,
-                        minimo:  parseInt(cols[3])||0,
-                        incremento: parseInt(cols[4])||0,
-                        comision: parseFloat(cols[5])||3,
-                        estado:  "disponible",
-                        orden:   dbLotes.length+ok+1,
-                      });
-                      if(!error) ok++;
-                    }
-                    const {data:lotData} = await supabase.from("lotes").select("*").order("orden");
-                    if(lotData) setDbLotes(lotData);
-                    notify(`${ok} lotes importados desde Excel.`,"sold");
-                    e.target.value="";
-                  }}/>
-                </label>
+                </button>
                 <button className="btn-primary" onClick={()=>setModal("nuevo-lote")}>+ Agregar lote</button>
               </>}
               {page==="postores"  && <button className="btn-primary" onClick={()=>setModal("nuevo-postor")}>+ Agregar postor</button>}
@@ -6746,6 +6815,185 @@ function Dashboard({ session, onLogout }) {
         )}
 
       </div>
+
+      {/* ══ MODAL IMPORTAR EXCEL ══ */}
+      {importModal && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",zIndex:9000,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}
+          onClick={e=>{ if(e.target===e.currentTarget && !importSaving){ setImportModal(false); setImportRows([]); setImportDone(null); } }}>
+          <div style={{background:"#fff",borderRadius:16,width:"100%",maxWidth:900,maxHeight:"92vh",overflowY:"auto",boxShadow:"0 24px 80px rgba(0,0,0,.5)",display:"flex",flexDirection:"column"}}>
+
+            {/* Header */}
+            <div style={{padding:"1.4rem 1.75rem 1rem",borderBottom:"1px solid #e5e7eb",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
+              <div>
+                <div style={{fontSize:"1.1rem",fontWeight:800,color:"#0f172a"}}>Importar lotes desde Excel</div>
+                <div style={{fontSize:".78rem",color:"#6b7280",marginTop:".15rem"}}>Carga tu archivo .xlsx o .csv con los datos de los lotes</div>
+              </div>
+              <button onClick={()=>{ if(!importSaving){ setImportModal(false); setImportRows([]); setImportDone(null); } }}
+                style={{background:"none",border:"1px solid #e5e7eb",borderRadius:8,padding:".3rem .7rem",fontSize:".8rem",color:"#6b7280",cursor:"pointer"}}>✕ Cerrar</button>
+            </div>
+
+            <div style={{padding:"1.5rem 1.75rem",flex:1}}>
+
+              {/* ── ESTADO: resultado final ── */}
+              {importDone && (
+                <div style={{textAlign:"center",padding:"2rem 1rem"}}>
+                  <div style={{fontSize:"3rem",marginBottom:".75rem"}}>
+                    {importDone.errors === 0 ? "✅" : "⚠️"}
+                  </div>
+                  <div style={{fontSize:"1.2rem",fontWeight:800,color:"#0f172a",marginBottom:".5rem"}}>
+                    {importDone.ok} lote{importDone.ok!==1?"s":""} importado{importDone.ok!==1?"s":""} correctamente
+                  </div>
+                  {importDone.errors > 0 && (
+                    <div style={{fontSize:".88rem",color:"#ef4444",marginBottom:".5rem"}}>
+                      {importDone.errors} fila{importDone.errors!==1?"s":""} con errores — no fueron importadas
+                    </div>
+                  )}
+                  <div style={{marginTop:"1.25rem",padding:"1rem 1.25rem",background:"rgba(6,182,212,.07)",border:"1px solid rgba(6,182,212,.2)",borderRadius:10,fontSize:".84rem",color:"#0f172a",lineHeight:1.6}}>
+                    💡 <strong>Lotes importados.</strong> Puedes agregar fotos a cada lote desde el módulo de <strong>Lotes</strong>.
+                  </div>
+                  <div style={{display:"flex",gap:".75rem",justifyContent:"center",marginTop:"1.5rem"}}>
+                    <button onClick={()=>{ setImportModal(false); setImportRows([]); setImportDone(null); setPage("lotes"); }}
+                      style={{padding:".6rem 1.4rem",background:"#06B6D4",border:"none",borderRadius:9,color:"#fff",fontWeight:700,fontSize:".9rem",cursor:"pointer"}}>
+                      Ir a Lotes →
+                    </button>
+                    <button onClick={()=>{ setImportModal(false); setImportRows([]); setImportDone(null); }}
+                      style={{padding:".6rem 1.2rem",background:"none",border:"1px solid #d1d5db",borderRadius:9,color:"#6b7280",fontSize:".9rem",cursor:"pointer"}}>
+                      Cerrar
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ── ESTADO: preview de filas ── */}
+              {!importDone && importRows.length > 0 && (
+                <>
+                  {/* Resumen validación */}
+                  <div style={{display:"flex",gap:".75rem",marginBottom:"1rem",flexWrap:"wrap"}}>
+                    <div style={{padding:".45rem .9rem",background:"rgba(20,184,166,.1)",border:"1px solid rgba(20,184,166,.25)",borderRadius:8,fontSize:".78rem",fontWeight:600,color:"#0f766e"}}>
+                      ✓ {importRows.filter(r=>r.errors.length===0).length} lotes válidos
+                    </div>
+                    {importRows.filter(r=>r.errors.length>0).length > 0 && (
+                      <div style={{padding:".45rem .9rem",background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",borderRadius:8,fontSize:".78rem",fontWeight:600,color:"#dc2626"}}>
+                        ✕ {importRows.filter(r=>r.errors.length>0).length} con errores (no se importarán)
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Tabla preview */}
+                  <div style={{overflowX:"auto",border:"1px solid #e5e7eb",borderRadius:10,marginBottom:"1.25rem"}}>
+                    <table style={{width:"100%",borderCollapse:"collapse",fontSize:".78rem"}}>
+                      <thead>
+                        <tr style={{background:"#1e3a5f",color:"#fff"}}>
+                          {["Fila","Nombre","Categoría","Tipo remate","Base","Comisión","Estado"].map(h=>(
+                            <th key={h} style={{padding:".55rem .7rem",textAlign:"left",fontWeight:700,whiteSpace:"nowrap",fontSize:".72rem",letterSpacing:".04em"}}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {importRows.map((r, i) => (
+                          <tr key={i} style={{borderTop:"1px solid #f1f5f9",background:r.errors.length>0?"#fff5f5":i%2===0?"#fff":"#f8fafc"}}>
+                            <td style={{padding:".45rem .7rem",color:"#6b7280",fontWeight:600}}>{r._row}</td>
+                            <td style={{padding:".45rem .7rem",maxWidth:200}}>
+                              <div style={{fontWeight:600,color:"#0f172a",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:180}}>{r.nombre || <span style={{color:"#ef4444",fontStyle:"italic"}}>— vacío —</span>}</div>
+                              {r.exp && <div style={{fontSize:".68rem",color:"#6b7280"}}>{r.exp}</div>}
+                            </td>
+                            <td style={{padding:".45rem .7rem",color:"#374151"}}>{r.cat}</td>
+                            <td style={{padding:".45rem .7rem"}}>
+                              <span style={{padding:".15rem .5rem",borderRadius:5,fontSize:".68rem",fontWeight:700,
+                                background:r.tipo==="judicial"?"rgba(6,182,212,.1)":r.tipo==="concursal"?"rgba(167,139,250,.1)":"rgba(246,173,85,.1)",
+                                color:r.tipo==="judicial"?"#0891b2":r.tipo==="concursal"?"#7c3aed":"#b45309"}}>
+                                {r.tipo}
+                              </span>
+                            </td>
+                            <td style={{padding:".45rem .7rem",fontWeight:700,color:r.base?"#0f172a":"#ef4444"}}>
+                              {r.base ? `$ ${r.base.toLocaleString("es-CL")}` : <span style={{fontStyle:"italic"}}>— vacío —</span>}
+                            </td>
+                            <td style={{padding:".45rem .7rem",color:"#374151"}}>
+                              {r.com != null ? `${r.com}%` : <span style={{color:"#6b7280",fontSize:".7rem"}}>auto ({r.tipo==="concursal"?"7":"10"}%)</span>}
+                            </td>
+                            <td style={{padding:".45rem .7rem"}}>
+                              {r.errors.length === 0
+                                ? <span style={{color:"#059669",fontWeight:600,fontSize:".72rem"}}>✓ OK</span>
+                                : <span style={{color:"#dc2626",fontSize:".7rem",lineHeight:1.4}}>{r.errors.join(" · ")}</span>}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Acciones */}
+                  <div style={{display:"flex",gap:".75rem",justifyContent:"flex-end",alignItems:"center"}}>
+                    <label style={{padding:".55rem 1rem",border:"1px solid #d1d5db",borderRadius:9,fontSize:".82rem",color:"#6b7280",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:".4rem"}}>
+                      ↑ Cambiar archivo
+                      <input type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={handleImportFile}/>
+                    </label>
+                    <button onClick={()=>{ setImportRows([]); setImportDone(null); }}
+                      style={{padding:".55rem 1rem",border:"1px solid #d1d5db",borderRadius:9,fontSize:".82rem",color:"#6b7280",background:"none",cursor:"pointer"}}>
+                      Cancelar
+                    </button>
+                    <button onClick={confirmarImport} disabled={importSaving || importRows.filter(r=>r.errors.length===0).length===0}
+                      style={{padding:".55rem 1.4rem",background: importRows.filter(r=>r.errors.length===0).length===0?"#d1d5db":"#06B6D4",border:"none",borderRadius:9,color:"#fff",fontWeight:700,fontSize:".88rem",cursor:"pointer",display:"flex",alignItems:"center",gap:".4rem",opacity:importSaving?.6:1}}>
+                      {importSaving ? <><span style={{width:14,height:14,border:"2px solid rgba(255,255,255,.4)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/> Guardando...</> : `Confirmar importación (${importRows.filter(r=>r.errors.length===0).length} lotes) →`}
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* ── ESTADO: pantalla inicial ── */}
+              {!importDone && importRows.length === 0 && (
+                <div style={{display:"flex",flexDirection:"column",gap:"1.25rem"}}>
+                  {/* Paso 1: descargar plantilla */}
+                  <div style={{padding:"1.25rem",background:"rgba(6,182,212,.05)",border:"1px solid rgba(6,182,212,.2)",borderRadius:12}}>
+                    <div style={{fontWeight:700,color:"#0f172a",marginBottom:".4rem",display:"flex",alignItems:"center",gap:".5rem"}}>
+                      <span style={{background:"#06B6D4",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:".72rem",fontWeight:800,flexShrink:0}}>1</span>
+                      Descarga la plantilla (recomendado)
+                    </div>
+                    <div style={{fontSize:".82rem",color:"#6b7280",marginBottom:".85rem",lineHeight:1.6}}>
+                      Usa nuestra plantilla Excel con las columnas correctas: nombre, expediente, mandante, categoría, precio base, comisión, tipo de remate y más.
+                    </div>
+                    <button onClick={descargarPlantillaExcel}
+                      style={{padding:".55rem 1.2rem",background:"#06B6D4",border:"none",borderRadius:9,color:"#fff",fontWeight:700,fontSize:".84rem",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:".4rem"}}>
+                      ⬇ Descargar plantilla .xlsx
+                    </button>
+                  </div>
+
+                  {/* Paso 2: subir archivo */}
+                  <div style={{padding:"1.25rem",background:"#f8fafc",border:"2px dashed #d1d5db",borderRadius:12,textAlign:"center"}}>
+                    <div style={{fontWeight:700,color:"#0f172a",marginBottom:".4rem",display:"flex",alignItems:"center",justifyContent:"center",gap:".5rem"}}>
+                      <span style={{background:"#1e3a5f",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:".72rem",fontWeight:800,flexShrink:0}}>2</span>
+                      Sube tu archivo Excel o CSV
+                    </div>
+                    <div style={{fontSize:".8rem",color:"#9ca3af",marginBottom:"1rem"}}>Formatos aceptados: .xlsx, .xls, .csv</div>
+                    <label style={{padding:".65rem 1.6rem",background:"#1e3a5f",border:"none",borderRadius:9,color:"#fff",fontWeight:700,fontSize:".88rem",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:".5rem"}}>
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M8 11V3M5 6l3-3 3 3"/><path d="M3 13h10"/></svg>
+                      Seleccionar archivo
+                      <input type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={handleImportFile}/>
+                    </label>
+                  </div>
+
+                  {/* Columnas disponibles */}
+                  <div style={{padding:"1rem 1.25rem",background:"#f8fafc",border:"1px solid #e5e7eb",borderRadius:10}}>
+                    <div style={{fontSize:".72rem",fontWeight:700,color:"#6b7280",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".65rem"}}>Columnas de la plantilla</div>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:".35rem"}}>
+                      {["Nombre *","Expediente","Mandante","Categoría","Año","Patente","Precio base *","Precio mínimo","Incremento","Comisión %","Tipo de remate","Descripción"].map((c,i)=>(
+                        <span key={i} style={{padding:".2rem .55rem",borderRadius:5,fontSize:".7rem",fontWeight:600,
+                          background:c.includes("*")?"rgba(6,182,212,.12)":"rgba(0,0,0,.05)",
+                          color:c.includes("*")?"#0891b2":"#374151",
+                          border:c.includes("*")?"1px solid rgba(6,182,212,.25)":"1px solid #e5e7eb"}}>
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                    <div style={{fontSize:".7rem",color:"#9ca3af",marginTop:".6rem"}}>* campos obligatorios</div>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ══ MODAL IA: Descripción de lote ══ */}
       {aiLoteModal && (
