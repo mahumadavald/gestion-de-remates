@@ -10,7 +10,7 @@ const supabase = SUPA_URL ? createClient(SUPA_URL, SUPA_KEY) : null;
 
 
 // ── BRAND ─────────────────────────────────────────────────────────
-const GRLogo = ({ collapsed = false }) => (
+const PeckerLogo = ({ collapsed = false }) => (
   <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
     <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
       <path d="M18 3C9.716 3 3 9.716 3 18s6.716 15 15 15 15-6.716 15-15S26.284 3 18 3z" fill="none"/>
@@ -1208,7 +1208,7 @@ function AuthScreen({ onLogin }) {
           if (perfil) {
             const r = Array.isArray(perfil.roles) && perfil.roles.length > 0 ? perfil.roles[0] : "admin";
             if (!perfil.activo) { setError("Usuario inactivo. Contacta al administrador."); await supabase.auth.signOut(); setLoading(false); return; }
-            // ── Verificar licencia (solo para no-admin GR) ──
+            // ── Verificar licencia (solo para no-admin Pecker) ──
             if (perfil.casas && r !== "admin") {
               const lic = perfil.casas.licencia_estado;
               const vence = perfil.casas.licencia_vence ? new Date(perfil.casas.licencia_vence) : null;
@@ -1308,7 +1308,7 @@ function AuthScreen({ onLogin }) {
             </svg>
             <div>
               <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:".88rem",color:"#1a1a1a",letterSpacing:".01em"}}>Auction Software</div>
-              <div style={{fontSize:".7rem",color:"#9ca3af",letterSpacing:".04em",textTransform:"uppercase",marginTop:1}}>by GR Gestión de Remates</div>
+              <div style={{fontSize:".7rem",color:"#9ca3af",letterSpacing:".04em",textTransform:"uppercase",marginTop:1}}>Auction Software</div>
             </div>
           </div>
           <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:"1.3rem",color:"#1a1a1a",marginBottom:".3rem"}}>Iniciar sesión</div>
@@ -1503,7 +1503,7 @@ function BuyerView({ user, onLogout }) {
       {/* Header */}
       <div className="bv-header">
         <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
-          <GRLogo/>
+          <PeckerLogo/>
           <div style={{width:1,height:24,background:"rgba(255,255,255,.1)"}}/>
           <div className="bv-casa">{user.casaNombre}</div>
           <div className="bv-paleta">Paleta {user.token||user.numero||"—"}</div>
@@ -1754,7 +1754,7 @@ function SpotterView({ user, onLogout }) {
 
       <div className="sp-header">
         <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
-          <GRLogo/>
+          <PeckerLogo/>
           <span style={{fontSize:".78rem",fontWeight:700,color:"#7a9ab8"}}>Digitador de sala</span>
         </div>
         <button style={{background:"transparent",border:"1px solid rgba(255,255,255,.1)",color:"#4a6a8a",fontSize:".72rem",padding:".3rem .7rem",borderRadius:5,cursor:"pointer"}} onClick={onLogout}>Salir</button>
@@ -1894,7 +1894,7 @@ function Dashboard({ session, onLogout }) {
   const [selectedRemate, setSelectedRemate] = useState(null); // remate seleccionado en post-remate
   const [adminClienteSel, setAdminClienteSel] = useState(null); // cliente seleccionado en panel admin
 
-  // ── Usuarios (solo admin GR) ──
+  // ── Usuarios (solo admin) ──
   const ROLES_DISPONIBLES = ["admin","martillero","spotter","postremate","garantias","solo lectura"];
   const [usuarios, setUsuarios] = useState([]);
   const [usuarioForm, setUsuarioForm] = useState({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
@@ -1928,9 +1928,9 @@ function Dashboard({ session, onLogout }) {
   const [aiRemateResult,  setAiRemateResult]  = useState(null);  // { resumen, destacados, conclusion }
   const [aiRemateLoading, setAiRemateLoading] = useState(false);
 
-  // ── Licencias (solo admin GR) ──
+  // ── Licencias (solo admin) ──
   const [dbLicencias, setDbLicencias] = useState([]);
-  // ── Casas (solo admin GR) ──
+  // ── Casas (solo admin) ──
   const [casaForm, setCasaForm] = useState({nombre:"",email:"",telefono:"",direccion:"",logoFile:null,logoUrl:null,martillero:"",rutMartillero:"",telefonoMartillero:"",emailMartillero:"",direccionMartillero:""});
   const [casaModal, setCasaModal] = useState(false);
   const [logoUploading, setLogoUploading] = useState(null); // casa.id mientras sube
@@ -2636,7 +2636,7 @@ function Dashboard({ session, onLogout }) {
     doc.rect(0, 0, W, 3.5, "F");
     y = 10;
 
-    // Header: logo casa (izquierda) | título centrado | logo GR (derecha)
+    // Header: logo casa (izquierda) | título centrado | logo Pecker (derecha)
 
     // Logo casa (izquierda)
     if (logoUrl) {
@@ -3341,7 +3341,7 @@ function Dashboard({ session, onLogout }) {
 
       {/* ── SIDEBAR ── oculto en sala en vivo para maximizar espacio */}
       <aside className={`sidebar${mobileMenu?" open":""}`} style={page==="sala"?{display:"none"}:undefined}>
-        <div className="sb-logo"><GRLogo/></div>
+        <div className="sb-logo"><PeckerLogo/></div>
         <div style={{height:".5rem"}}/>
 
         {/* GESTIÓN */}
@@ -3434,7 +3434,7 @@ function Dashboard({ session, onLogout }) {
           </div>
           {session?.role && (
             <div style={{marginTop:".5rem",paddingTop:".5rem",borderTop:"1px solid var(--b1)"}}>
-              <span className={`role-badge ${session.role}`}>{session.role==="admin"?"Admin GR":session.role==="martillero"?"Martillero":"Postor"}</span>
+              <span className={`role-badge ${session.role}`}>{session.role==="admin"?"Admin":session.role==="martillero"?"Martillero":"Postor"}</span>
             </div>
           )}
         </div>
@@ -3990,7 +3990,7 @@ function Dashboard({ session, onLogout }) {
                     // Header
                     doc.setFillColor(7,15,28); doc.rect(0,0,W,32,"F");
                     doc.setTextColor(56,178,246); doc.setFontSize(9); doc.setFont("helvetica","bold");
-                    doc.text("GR AUCTION SOFTWARE",14,10);
+                    doc.text("PECKER",14,10);
                     doc.setTextColor(255,255,255); doc.setFontSize(15);
                     doc.text("LIQUIDACIÓN AL MARTILLERO",14,20);
                     doc.setFontSize(8); doc.setFont("helvetica","normal"); doc.setTextColor(90,127,168);
@@ -5141,7 +5141,7 @@ function Dashboard({ session, onLogout }) {
                   {/* Admins globales */}
                   {usuarios.filter(u=>!u.casa).length > 0 && (
                     <div style={{padding:".75rem 1rem",background:"rgba(224,82,82,.06)",border:"1px solid rgba(224,82,82,.15)",borderRadius:10}}>
-                      <div style={{fontSize:".68rem",fontWeight:700,color:"var(--rd)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".4rem"}}>Admin GR</div>
+                      <div style={{fontSize:".68rem",fontWeight:700,color:"var(--rd)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".4rem"}}>Admin</div>
                       <div style={{fontSize:"1.2rem",fontWeight:800,color:"var(--wh2)"}}>{usuarios.filter(u=>!u.casa).length}</div>
                       <div style={{fontSize:".68rem",color:"var(--mu)",marginTop:".1rem"}}>Sin casa asignada</div>
                     </div>

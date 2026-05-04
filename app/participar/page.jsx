@@ -343,7 +343,7 @@ function ParticiparContent() {
   );
 
   // ── Lookup de postor existente cuando RUT es válido ─────────────
-  // Prioridad: 1) Supabase (GR)  →  2) MySQL Ahumada (si es su casa)
+  // Prioridad: 1) Supabase  →  2) MySQL Ahumada (si es su casa)
   useEffect(() => {
     if (rutStatus !== "ok") { setReturningUser(false); setLookingUp(false); return; }
     let cancelled = false;
@@ -622,7 +622,7 @@ function ParticiparContent() {
             suscribir:       suscribir,
             comprobante_url: comprobanteUrl || "",
           }),
-        }).catch(() => {}); // No bloquear si falla — GR ya guardó en Supabase
+        }).catch(() => {}); // No bloquear si falla — ya guardó en Supabase
       }
 
       setSuccess({

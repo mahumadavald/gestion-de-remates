@@ -28,7 +28,7 @@ export default function LandingPage() {
     return () => { window.removeEventListener('scroll', handleScroll); observer.disconnect(); };
   }, []);
 
-  const WA_DEMO = "https://wa.me/56991453680?text=Hola%2C%20me%20interesa%20GR%20Auction%20Software.%20Mi%20nombre%20es%20____%20y%20soy%20de%20la%20casa%20de%20remates%20____";
+  const WA_DEMO = "https://wa.me/56991453680?text=Hola%2C%20me%20interesa%20Pecker.%20Mi%20nombre%20es%20____%20y%20soy%20de%20la%20casa%20de%20remates%20____";
 
   const bodyHTML = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -431,7 +431,7 @@ export default function LandingPage() {
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2025 Pecker — Auction Software · pecker.cl · <small style="opacity:.65">by GR Gestión de Remates</small></span>
+      <span>© 2025 Pecker — Auction Software · pecker.cl</span>
       <span>Hecho en Chile 🇨🇱</span>
     </div>
   </div>
