@@ -1869,14 +1869,22 @@ export default function Root() {
       if (event === "SIGNED_OUT") { setSession(null); }
     });
 
-    // Detectar sesión existente — necesario para el redirect de Google OAuth
-    supabase.auth.getSession().then(async ({ data: { session: s } }) => {
-      if (s?.user) {
-        const perfil = await fetchPerfil(s.user.id);
-        setSession(perfil);
-      }
-      setLoading(false);
-    });
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const isOAuthRedirect = url.includes("code=") || url.includes("access_token=");
+
+    if (isOAuthRedirect) {
+      // Viene del redirect de Google — detectar sesión OAuth
+      supabase.auth.getSession().then(async ({ data: { session: s } }) => {
+        if (s?.user) {
+          const perfil = await fetchPerfil(s.user.id);
+          setSession(perfil);
+        }
+        setLoading(false);
+      });
+    } else {
+      // Carga normal — siempre pedir login
+      supabase.auth.signOut().then(() => setLoading(false));
+    }
 
     return () => subscription.unsubscribe();
   }, []);
