@@ -949,14 +949,14 @@ function DemoForm({ waNum }) {
   const [err,     setErr]     = useState("");
   const [f, setF] = useState({
     nombre:"", correo:"", casa:"", tel:"",
-    remates:"", lotes:"", sistema:"",
+    registro:"", remates:"", lotes:"", sistema:"",
   });
 
   const set = (k, v) => setF(p => ({...p, [k]: v}));
 
   const next = () => {
-    if (!f.nombre.trim() || !f.correo.trim() || !f.casa.trim() || !f.tel.trim()) {
-      setErr("Completa todos los campos obligatorios."); return;
+    if (!f.nombre.trim() || !f.correo.trim() || !f.casa.trim() || !f.tel.trim() || !f.registro.trim()) {
+      setErr("Completa todos los campos obligatorios, incluido el N° de registro de martillero."); return;
     }
     setErr(""); setStep(2);
   };
@@ -964,7 +964,7 @@ function DemoForm({ waNum }) {
   const submit = () => {
     const msg = encodeURIComponent(
       `Hola! Me interesa Pecker — Auction Software.\n` +
-      `Nombre: ${f.nombre}\nEmpresa: ${f.casa}\nCorreo: ${f.correo}\nWhatsApp: +56 ${f.tel}\n` +
+      `Nombre: ${f.nombre}\nEmpresa: ${f.casa}\nCorreo: ${f.correo}\nWhatsApp: +56 ${f.tel}\nN° Registro Martillero: ${f.registro}\n` +
       (f.remates ? `Remates/mes: ${f.remates}\n` : "") +
       (f.lotes   ? `Lotes/remate: ${f.lotes}\n`  : "") +
       (f.sistema ? `Sistema actual: ${f.sistema}` : "")
@@ -1016,7 +1016,7 @@ function DemoForm({ waNum }) {
                   onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}/>
               </div>
             </div>
-            <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"1rem", marginBottom:"2rem"}}>
+            <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"1rem", marginBottom:"1rem"}}>
               <div>
                 <label style={LABEL}>¿Nombre de tu casa de remates? *</label>
                 <input style={INPUT} placeholder="Remates García Ltda." value={f.casa} onChange={e=>set("casa",e.target.value)}
@@ -1028,6 +1028,20 @@ function DemoForm({ waNum }) {
                   <span style={{padding:"0 .85rem", color:"rgba(255,255,255,.6)", fontSize:".85rem", borderRight:"1px solid rgba(255,255,255,.1)", display:"flex", alignItems:"center", whiteSpace:"nowrap", gap:".3rem"}}>🇨🇱 +56</span>
                   <input style={{...INPUT, border:"none", background:"transparent", flex:1}} placeholder="9 8765 4321" value={f.tel} onChange={e=>set("tel",e.target.value)}/>
                 </div>
+              </div>
+            </div>
+
+            {/* Registro de martillero — campo destacado */}
+            <div style={{marginBottom:"2rem", padding:"1.1rem 1.25rem", background:"rgba(6,182,212,.06)", border:"1.5px solid rgba(6,182,212,.2)", borderRadius:12}}>
+              <label style={{...LABEL, color:"#06B6D4", fontWeight:700, fontSize:".8rem", letterSpacing:".04em", textTransform:"uppercase", marginBottom:".6rem"}}>
+                N° Registro Nacional de Martilleros *
+              </label>
+              <input style={{...INPUT, background:"rgba(255,255,255,.05)", borderColor:"rgba(6,182,212,.25)"}}
+                placeholder="Ej: 1234 — Solo martilleros oficialmente registrados"
+                value={f.registro} onChange={e=>set("registro",e.target.value)}
+                onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="rgba(6,182,212,.25)"}/>
+              <div style={{fontSize:".72rem", color:"rgba(255,255,255,.3)", marginTop:".5rem"}}>
+                Puedes verificar tu número en el Registro de Martilleros del Ministerio de Justicia de Chile.
               </div>
             </div>
 
