@@ -454,6 +454,17 @@ function ParticiparContent() {
 
   const remateSeleccionado = remates.find(r => r.id === remateId);
 
+  const isInscripcionCerrada = (r) => {
+    if (!r.hora || !r.fecha) return false;
+    try {
+      const [h, m] = r.hora.split(":").map(Number);
+      const remateDate = new Date(r.fecha);
+      remateDate.setHours(h, m, 0, 0);
+      const cutoff = new Date(remateDate.getTime() - 60 * 60 * 1000); // 1 hora antes
+      return new Date() >= cutoff;
+    } catch { return false; }
+  };
+
   const handleSubmit = async () => {
     setError("");
     if (!rut || rutStatus !== "ok")   { setError("RUT inválido. Verifica el formato."); return; }
@@ -464,6 +475,11 @@ function ParticiparContent() {
     if (!banco)                       { setError("Selecciona el banco para la devolución de garantía."); return; }
     if (!numCta.trim())               { setError("El número de cuenta es obligatorio para devolver la garantía."); return; }
     if (!remateId)                    { setError("Selecciona un remate para inscribirte."); return; }
+    const remateSelObj = remates.find(r => r.id === remateId);
+    if (remateSelObj && isInscripcionCerrada(remateSelObj)) {
+      setError("Las inscripciones online para este remate están cerradas (menos de 1 hora para el inicio). Para participar de forma presencial, dirígete directamente a la sala.");
+      return;
+    }
     if (!comprobante)                 { setError("Debes adjuntar el comprobante de transferencia."); return; }
 
     setSubmitting(true);
@@ -924,22 +940,40 @@ function ParticiparContent() {
                     <div style={{padding:"1.5rem",textAlign:"center",color:"var(--mu)",fontSize:".82rem",background:"var(--s1)",borderRadius:10,border:"1px solid var(--b1)"}}>
                       No hay remates activos en este momento.
                     </div>
-                  ) : remates.map(r => (
-                    <div key={r.id} className={`remate-card${remateId===r.id?" sel":""}`} onClick={()=>setRemateId(r.id)}>
-                      <div className="remate-card-radio"><div className="remate-card-dot"/></div>
-                      <div className="remate-card-info">
-                        <div className="remate-card-name">{r.nombre}</div>
-                        <div className="remate-card-meta">
-                          {new Date(r.fecha).toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
-                          {r.hora && ` · ${r.hora}`}
-                          {" · "}{r.modalidad}
+                  ) : remates.map(r => {
+                    const cerrada = isInscripcionCerrada(r);
+                    return (
+                      <div key={r.id}
+                        className={`remate-card${!cerrada && remateId===r.id?" sel":""}${cerrada?" disabled":""}`}
+                        onClick={cerrada ? undefined : ()=>setRemateId(r.id)}
+                        style={cerrada ? {opacity:.7,cursor:"not-allowed"} : undefined}
+                      >
+                        <div className="remate-card-radio"><div className="remate-card-dot"/></div>
+                        <div className="remate-card-info">
+                          <div className="remate-card-name">{r.nombre}</div>
+                          <div className="remate-card-meta">
+                            {new Date(r.fecha).toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+                            {r.hora && ` · ${r.hora}`}
+                            {" · "}{r.modalidad}
+                          </div>
+                          {cerrada && (
+                            <div style={{fontSize:".71rem",color:"#b45309",marginTop:".3rem"}}>
+                              Inscripciones online cerradas — el remate comienza pronto
+                            </div>
+                          )}
                         </div>
+                        {cerrada ? (
+                          <span className="remate-card-badge" style={{background:"rgba(245,158,11,.15)",color:"#b45309",border:"1px solid rgba(245,158,11,.35)"}}>
+                            ⏰ Inscripciones cerradas
+                          </span>
+                        ) : (
+                          <span className={`remate-card-badge ${r.estado==="en_vivo"||r.estado==="activo"?"rb-activo":"rb-publicado"}`}>
+                            {r.estado==="en_vivo"||r.estado==="activo"?"● En vivo":"Próximo"}
+                          </span>
+                        )}
                       </div>
-                      <span className={`remate-card-badge ${r.estado==="en_vivo"||r.estado==="activo"?"rb-activo":"rb-publicado"}`}>
-                        {r.estado==="en_vivo"||r.estado==="activo"?"● En vivo":"Próximo"}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {remateSeleccionado && (

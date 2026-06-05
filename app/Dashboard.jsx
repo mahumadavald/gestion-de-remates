@@ -2189,6 +2189,7 @@ function Dashboard({ session, onLogout }) {
     setNoCompradoresState(prev => prev.map(c => c.nPart===nPart ? {...c, devolucion:metodo} : c));
   };
   const [remateTerminado, setRemateTerminado] = useState(false);
+  const [notifNcLoading, setNotifNcLoading] = useState(false);
   const [selectedBalanceRemate, setSelectedBalanceRemate] = useState("all");
   const [statsView,  setStatsView]  = useState("mes");
   const [statsAnio,  setStatsAnio]  = useState(new Date().getFullYear());
@@ -3044,6 +3045,9 @@ function Dashboard({ session, onLogout }) {
                     <div className="fg"><label className="fl">Mandante</label>
                       <input className="fi" placeholder="Tanner / Judicial / Particular" value={wizDatos.mandante} onChange={e=>setWizDatos(f=>({...f,mandante:e.target.value}))}/>
                     </div>
+                    <div className="fg"><label className="fl">Propietario / Vendedor</label>
+                      <input className="fi" placeholder="Nombre del consignatario o vendedor" value={wizDatos.propietario} onChange={e=>setWizDatos(f=>({...f,propietario:e.target.value}))}/>
+                    </div>
                     {wizTipo==="VEHICULOS" && <>
                       <div className="fg"><label className="fl">Patente</label>
                         <input className="fi" placeholder="ABCD-12" style={{fontFamily:"Inter,sans-serif",fontWeight:700}} value={wizDatos.patente} onChange={e=>setWizDatos(f=>({...f,patente:e.target.value}))}/>
@@ -3348,6 +3352,7 @@ function Dashboard({ session, onLogout }) {
                           remate_id:   wizDatos.remateId||null,
                           codigo,
                           nombre:      wizDatos.nombre,
+                          propietario: wizDatos.propietario||null,
                           descripcion: [wizDatos.descripcion, wizDatos.exp&&`Exp: ${wizDatos.exp}`, wizDatos.mandante&&`Mandante: ${wizDatos.mandante}`, wizDatos.patente&&`Patente: ${wizDatos.patente}`, wizDatos.year&&`Año: ${wizDatos.year}`, wizDatos.km&&`Km: ${wizDatos.km}`].filter(Boolean).join(" | "),
                           categoria:   wizTipo==="VEHICULOS"?"Vehículo":wizTipo==="INMUEBLES"?"Inmueble":"Muebles",
                           base:        baseNum,
@@ -3885,6 +3890,119 @@ function Dashboard({ session, onLogout }) {
 
         {/* ══ POSTORES ══ */}
         {page==="postores" && (()=>{
+          const generarBoleta = async (postor) => {
+            const { jsPDF } = await import("jspdf");
+            const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [148, 210] });
+            const W = 148, H = 210;
+            const TEAL = [20, 184, 166];
+            const NAVY = [30, 58, 95];
+            const GRAY = [100, 116, 139];
+
+            // Top bar
+            doc.setFillColor(...TEAL);
+            doc.rect(0, 0, W, 4, "F");
+
+            const casaData = dbLicencias.find(x => x.slug === session?.casa) || {};
+            const logoUrl = casaData.logo_url || null;
+            const casaNombre = casaData.nombre || session?.casaNombre || "Casa de Remates";
+
+            let y = 10;
+
+            // Load and add logo
+            if (logoUrl) {
+              try {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                await new Promise(res => { img.onload = res; img.onerror = res; img.src = logoUrl; });
+                if (img.naturalWidth > 0) {
+                  const ratio = img.naturalWidth / img.naturalHeight;
+                  const lw = Math.min(30, 18 * ratio);
+                  doc.addImage(img, "PNG", 10, y, lw, 18, undefined, "FAST");
+                }
+              } catch {}
+            }
+
+            // Casa name top right
+            doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(...GRAY);
+            doc.text(casaNombre.toUpperCase(), W - 10, y + 6, { align: "right" });
+
+            // Big number
+            y = 36;
+            doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(...GRAY);
+            doc.text("NÚMERO GANADOR", W/2, y, { align: "center" });
+            doc.setFont("helvetica", "bold"); doc.setFontSize(48); doc.setTextColor(...NAVY);
+            doc.text(String(postor.nComprador || postor.numero || "—"), W/2, y + 22, { align: "center" });
+
+            // Divider
+            y = 68;
+            doc.setDrawColor(...TEAL); doc.setLineWidth(0.5);
+            doc.line(10, y, W - 10, y);
+            y += 6;
+
+            // Client info
+            const rows = [
+              ["CLIENTE", postor.name || postor.nombre || "—"],
+              ["RUT", postor.rut || "—"],
+              ["MONTO", postor.garantia ? `$ ${Number(postor.garantia).toLocaleString("es-CL")}` : "$ 0"],
+              ["FECHA", new Date().toLocaleDateString("es-CL")],
+              ["TIPO DE PAGO", postor.modalidad || postor.tipo_pago || "TRANSFERENCIA"],
+            ];
+            rows.forEach(([k, v]) => {
+              doc.setFont("helvetica", "bold"); doc.setFontSize(6.5); doc.setTextColor(...GRAY);
+              doc.text(k, 10, y);
+              doc.setFont("helvetica", "normal"); doc.setTextColor(...NAVY);
+              doc.text(String(v), 50, y);
+              y += 6;
+            });
+
+            // Divider
+            y += 2;
+            doc.setDrawColor(...TEAL); doc.setLineWidth(0.3);
+            doc.line(10, y, W - 10, y);
+            y += 6;
+
+            // QR codes side by side
+            const BASE = "https://gestionderemates.cl";
+            const catUrl = `${BASE}/catalogo/${postor.remate_id || postor.remateId || ""}`;
+            const devUrl = `${BASE}/devoluciones?p=${postor.supabaseId || postor.id}`;
+            const qrApiBase = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=";
+
+            const loadQR = (url) => new Promise(res => {
+              const img = new Image();
+              img.crossOrigin = "anonymous";
+              img.onload = () => res(img);
+              img.onerror = () => res(null);
+              img.src = qrApiBase + encodeURIComponent(url);
+            });
+
+            const [qrCat, qrDev] = await Promise.all([loadQR(catUrl), loadQR(devUrl)]);
+
+            const qrSize = 45;
+            const leftX = W/2 - qrSize - 5;
+            const rightX = W/2 + 5;
+
+            // QR labels
+            doc.setFont("helvetica", "bold"); doc.setFontSize(6); doc.setTextColor(...GRAY);
+            doc.text("CATÁLOGO", leftX + qrSize/2, y, { align: "center" });
+            doc.text("DEVOLUCIÓN", rightX + qrSize/2, y, { align: "center" });
+            y += 3;
+
+            if (qrCat) doc.addImage(qrCat, "PNG", leftX, y, qrSize, qrSize, undefined, "FAST");
+            else { doc.setFillColor(240,240,240); doc.rect(leftX, y, qrSize, qrSize, "F"); }
+
+            if (qrDev) doc.addImage(qrDev, "PNG", rightX, y, qrSize, qrSize, undefined, "FAST");
+            else { doc.setFillColor(240,240,240); doc.rect(rightX, y, qrSize, qrSize, "F"); }
+
+            y += qrSize + 5;
+
+            // Bottom bar
+            doc.setFillColor(...TEAL);
+            doc.rect(0, H - 4, W, 4, "F");
+            doc.setFont("helvetica", "normal"); doc.setFontSize(5.5); doc.setTextColor(...GRAY);
+            doc.text("Powered by Pecker · pecker.cl", W/2, H - 6, { align: "center" });
+
+            doc.save(`boleta-postor-${postor.nComprador || postor.numero || postor.supabaseId || postor.id}.pdf`);
+          };
           const pendientes = POSTORES_MERGED.filter(p=>p.estado==="pendiente");
           return (
           <div className="page">
@@ -4005,6 +4123,11 @@ function Dashboard({ session, onLogout }) {
                                 if(!error){ const {data} = await supabase.from("postores").select("*").order("numero"); if(data) setDbPostores(data); notify(`${p.name} eliminado.`,"inf"); }
                                 else notify("Error al eliminar postor.","inf");
                               }}>🗑</button>
+                          )}
+                          {p.supabaseId && (
+                            <button className="btn-sec" style={{fontSize:".65rem",padding:".22rem .55rem"}}
+                              onClick={()=>generarBoleta(p)}
+                              title="Imprimir boleta">🖨️ Boleta</button>
                           )}
                         </div>
                       </td>
@@ -4420,7 +4543,6 @@ function Dashboard({ session, onLogout }) {
 
         {/* ══ VENDEDORES / CONSIGNATARIOS ══ */}
         {page==="vendedores" && (()=>{
-          const vd = VENDEDORES_MOCK.find(v=>v.id===vendedorSel);
           // Banner selector remate (inline)
           const BannerRemate = () => {
             const cerrados = REMATES_MERGED.filter(r => r.estado === "cerrado");
@@ -4437,13 +4559,21 @@ function Dashboard({ session, onLogout }) {
               </div>
             );
           };
-          // Calcular lotes del vendedor seleccionado (mock: todos los lotes reales)
-          const lotesVendedor = LOTES_REALES.filter((_,i)=>i<4); // mock: primeros 4 lotes
+          // Lotes del remate seleccionado (o todos si no hay selección)
+          const lotesDelRemate = dbLotes.filter(l => !selectedRemate || l.remate_id === selectedRemate);
+          // Propietarios únicos extraídos de los lotes reales
+          const propietariosUnicos = [...new Set(
+            lotesDelRemate.map(l => l.propietario).filter(p => p && p.trim())
+          )].sort();
+          // Lotes del vendedor seleccionado
+          const lotesVendedor = vendedorSel
+            ? lotesDelRemate.filter(l => l.propietario === vendedorSel)
+            : [];
           const adjVendedor   = [...ADJUDICACIONES,...liquidaciones].filter(a=>
-            lotesVendedor.find(l=>l.name===a.lote)
+            lotesVendedor.find(l=>l.nombre===a.lote||l.id===a.loteId)
           );
           const totalVentas   = adjVendedor.reduce((s,a)=>s+(a.monto||0),0);
-          const lotesNoVendidos = lotesVendedor.filter(l=>!adjVendedor.find(a=>a.lote===l.name));
+          const lotesNoVendidos = lotesVendedor.filter(l=>!adjVendedor.find(a=>a.lote===l.nombre||a.loteId===l.id));
           const totalNoVendido  = lotesNoVendidos.reduce((s,l)=>s+(l.base||0),0);
           const comVentaMonto  = Math.round(totalVentas * (vendedorForm.comVenta/100));
           const comDefensaMonto= Math.round(totalNoVendido * (vendedorForm.comDefensa/100));
@@ -4544,33 +4674,31 @@ function Dashboard({ session, onLogout }) {
             y += 5;
 
             // Banner remate
+            const remateSelObj = REMATES_MERGED.find(r => r.id === selectedRemate);
+            const remNombreV   = remateSelObj?.name || REMATES_MERGED[0]?.name || "Remate";
             doc.setFillColor(236, 253, 245);
             doc.setDrawColor(...TEAL); doc.setLineWidth(0.3);
             doc.roundedRect(14, y, W - 28, 9, 2, 2, "FD");
             doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(...NAVY);
-            doc.text(REMATES_MERGED[0]?.name || "Remate", 19, y + 6);
+            doc.text(remNombreV, 19, y + 6);
             doc.setFont("helvetica","normal"); doc.setTextColor(...GRAY);
             doc.text(`Fecha: ${new Date().toLocaleDateString("es-CL")}`, W - 18, y + 6, {align:"right"});
             y += 14;
 
-            // Datos vendedor
+            // Datos vendedor — sólo propietario y remate (sin RUT/giro/dirección)
             const datosV = [
-              ["PROPIETARIO", vd?.nombre    || "—"],
-              ["R.U.T.",      vd?.rut       || "—"],
-              ["GIRO",        vd?.giro      || "—"],
-              ["DIRECCIÓN",   vd?.direccion || "—"],
-              ["COMUNA",      vd?.comuna    || "—"],
-              ["MAIL",        vd?.email     || "—"],
+              ["PROPIETARIO", vendedorSel || "—"],
+              ["REMATE",      remNombreV],
             ];
             const datosH = datosV.length * 6 + 8;
             doc.setFillColor(...LTGRAY); doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
             doc.roundedRect(14, y, W - 28, datosH, 2, 2, "FD");
             let dvy = y + 7;
-            datosV.forEach(([k, v]) => {
+            datosV.forEach(([k, val]) => {
               doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.setTextColor(...GRAY);
               doc.text(k, 18, dvy);
               doc.setFont("helvetica","normal"); doc.setTextColor(30, 30, 30);
-              doc.text(String(v || "—"), 56, dvy);
+              doc.text(String(val || "—"), 56, dvy);
               dvy += 6;
             });
             y = dvy + 5;
@@ -4581,11 +4709,21 @@ function Dashboard({ session, onLogout }) {
               doc.text("Lotes vendidos", 14, y); y += 4;
               autoTable(doc, {
                 startY: y,
-                head: [["Expediente","Descripción","Precio martillo"]],
-                body: adjVendedor.map(a => [lotesVendedor.find(l=>l.name===a.lote)?.exp||"—", a.lote, fmtCLP(a.monto||0)]),
+                head: [["Lote", "Cant.", "Descripción", "Mínimo", "Defensa", "Valor"]],
+                body: adjVendedor.map(a => {
+                  const lote = lotesVendedor.find(l => l.nombre === a.lote || l.id === a.loteId);
+                  return [
+                    lote?.orden || a.lote || "—",
+                    lote?.cantidad || 1,
+                    lote?.nombre || a.lote || "—",
+                    fmtCLP(lote?.minimo || 0),
+                    fmtCLP(lote?.defensa || 0),
+                    fmtCLP(a.monto || 0),
+                  ];
+                }),
                 styles: { fontSize:8.5, cellPadding:2.8 },
                 headStyles: { fillColor:NAVY, textColor:WHITE, fontStyle:"bold", fontSize:8 },
-                columnStyles: { 2: { halign:"right", fontStyle:"bold" } },
+                columnStyles: { 0:{halign:"center"}, 1:{halign:"center"}, 3:{halign:"right"}, 4:{halign:"right"}, 5:{halign:"right",fontStyle:"bold"} },
                 alternateRowStyles: { fillColor:LTGRAY },
                 tableLineColor:BORDER, tableLineWidth:0.2,
               });
@@ -4598,11 +4736,11 @@ function Dashboard({ session, onLogout }) {
               doc.text("Lotes no vendidos (base comisión defensa)", 14, y); y += 4;
               autoTable(doc, {
                 startY: y,
-                head: [["Expediente","Descripción","Base"]],
-                body: lotesNoVendidos.map(l => [l.exp||"—", l.name, fmtCLP(l.base||0)]),
+                head: [["Lote","Cant.","Descripción","Base"]],
+                body: lotesNoVendidos.map(l => [l.orden||"—", l.cantidad||1, l.nombre||"—", fmtCLP(l.base||0)]),
                 styles: { fontSize:8.5, cellPadding:2.8 },
                 headStyles: { fillColor:GRAY, textColor:WHITE, fontStyle:"bold", fontSize:8 },
-                columnStyles: { 2: { halign:"right" } },
+                columnStyles: { 0:{halign:"center"}, 1:{halign:"center"}, 3:{halign:"right"} },
                 alternateRowStyles: { fillColor:LTGRAY },
                 tableLineColor:BORDER, tableLineWidth:0.2,
               });
@@ -4613,17 +4751,16 @@ function Dashboard({ session, onLogout }) {
             // Page break si no cabe
             if (y + 80 > H - 20) { doc.addPage(); y = 20; }
 
-            const baseAfectaIva = comVentaMonto + comDefensaMonto + Number(vendedorForm.publicidad||0);
+            const ivaComVenta    = Math.round(comVentaMonto * 0.19);
+            const ivaComDefensa  = Math.round(comDefensaMonto * 0.19);
+            const ivaPublicidad  = Math.round(Number(vendedorForm.publicidad||0) * 0.19);
             const items = [
-              { k: "TOTAL VENTAS MARTILLO",                          v: totalVentas,                          desc: false, bold: true  },
-              { k: `COMISIÓN VENTA ${vendedorForm.comVenta}% (AF)`,  v: -comVentaMonto,                       desc: true,  bold: false },
-              { k: `COMISIÓN DEFENSA ${vendedorForm.comDefensa}% (AF)`, v: -comDefensaMonto,                  desc: true,  bold: false },
-              ...(Number(vendedorForm.publicidad||0) > 0
-                ? [{ k: "AVISOS PUBLICITARIOS (AF)",                 v: -Number(vendedorForm.publicidad||0),  desc: true,  bold: false }]
-                : []),
-              { k: "BASE AFECTA IVA",                                v: baseAfectaIva,                        desc: false, bold: true  },
-              { k: "IVA 19% S/COMISIONES",                           v: -iva,                                 desc: true,  bold: false },
-              { k: "TOTAL DESCUENTOS",                               v: -totalDescuentos,                     desc: true,  bold: true  },
+              { k: "Total Ventas",                                      v: totalVentas,                          desc: false, bold: true  },
+              { k: `Comisión Ventas ${vendedorForm.comVenta}%`,         v: -comVentaMonto,                       desc: true,  bold: false },
+              { k: "IVA Comisión Ventas",                               v: -ivaComVenta,                         desc: true,  bold: false },
+              { k: `Comisión Defensas ${vendedorForm.comDefensa}%`,     v: -comDefensaMonto,                     desc: true,  bold: false },
+              { k: "IVA Comisión Defensas",                             v: -ivaComDefensa,                       desc: true,  bold: false },
+              { k: "Avisos Publicitarios",                               v: -Number(vendedorForm.publicidad||0),  desc: true,  bold: false },
             ];
             doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...NAVY);
             doc.text("Liquidación financiera", 14, y); y += 7;
@@ -4641,7 +4778,7 @@ function Dashboard({ session, onLogout }) {
             doc.setDrawColor(...TEAL); doc.setLineWidth(0.8);
             doc.line(14, y - 2, W - 14, y - 2);
             doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(...NAVY);
-            doc.text("LÍQUIDO A PAGAR AL VENDEDOR:", 14, y + 8);
+            doc.text("Total a Pagar:", 14, y + 8);
             doc.setFontSize(14); doc.setTextColor(...TEAL);
             doc.text(fmtCLP(liquidoAPagar), W - 14, y + 8, {align:"right"});
 
@@ -4654,7 +4791,7 @@ function Dashboard({ session, onLogout }) {
             doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
             doc.text(`${casaNombre} · Powered by Pecker · pecker.cl`, 14, fy + 1);
             doc.text(new Date().toLocaleDateString("es-CL"), W - 14, fy + 1, {align:"right"});
-            doc.save(`liquidacion-vendedor-${(vd?.nombre||"vendedor").replace(/\s+/g,"-").toLowerCase()}.pdf`);
+            doc.save(`liquidacion-vendedor-${(vendedorSel||"vendedor").replace(/\s+/g,"-").toLowerCase()}.pdf`);
           };
 
           return (
@@ -4670,18 +4807,14 @@ function Dashboard({ session, onLogout }) {
                     <label className="fl">Propietario / Vendedor</label>
                     <select className="fsel" value={vendedorSel} onChange={e=>setVendedorSel(e.target.value)}>
                       <option value="">Seleccione un vendedor</option>
-                      {VENDEDORES_MOCK.map(v=><option key={v.id} value={v.id}>{v.nombre}</option>)}
+                      {propietariosUnicos.map(p=><option key={p} value={p}>{p}</option>)}
                     </select>
+                    {propietariosUnicos.length === 0 && (
+                      <div style={{marginTop:".5rem",fontSize:".7rem",color:"var(--mu)",fontStyle:"italic",lineHeight:1.5}}>
+                        No hay vendedores registrados en los lotes de este remate. Aseg&uacute;rate de completar el campo Propietario al crear los lotes.
+                      </div>
+                    )}
                   </div>
-
-                  {vd && (
-                    <div style={{padding:".65rem .85rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:8,marginBottom:".85rem",fontSize:".72rem",color:"var(--mu2)",lineHeight:1.8}}>
-                      <div><strong style={{color:"var(--wh2)"}}>RUT:</strong> {vd.rut}</div>
-                      <div><strong style={{color:"var(--wh2)"}}>Giro:</strong> {vd.giro}</div>
-                      <div><strong style={{color:"var(--wh2)"}}>Dirección:</strong> {vd.direccion}, {vd.comuna}</div>
-                      <div><strong style={{color:"var(--wh2)"}}>Email:</strong> {vd.email}</div>
-                    </div>
-                  )}
 
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".7rem",marginBottom:".7rem"}}>
                     <div>
@@ -4709,7 +4842,7 @@ function Dashboard({ session, onLogout }) {
                   </div>
 
                   <button className="btn-primary" style={{width:"100%"}}
-                    onClick={()=>{ if(!vendedorSel){notify("Selecciona un vendedor primero.","inf");return;} setVendedorLiqGenerada({vd,lotesVendedor,adjVendedor,lotesNoVendidos,totalVentas,comVentaMonto,comDefensaMonto,publicidad:Number(vendedorForm.publicidad||0),iva,totalDescuentos,liquidoAPagar,comVenta:vendedorForm.comVenta,comDefensa:vendedorForm.comDefensa}); notify("Liquidación generada.","sold"); }}>
+                    onClick={()=>{ if(!vendedorSel){notify("Selecciona un vendedor primero.","inf");return;} setVendedorLiqGenerada({vendedorSel,lotesVendedor,adjVendedor,lotesNoVendidos,totalVentas,comVentaMonto,comDefensaMonto,publicidad:Number(vendedorForm.publicidad||0),iva,totalDescuentos,liquidoAPagar,comVenta:vendedorForm.comVenta,comDefensa:vendedorForm.comDefensa}); notify("Liquidación generada.","sold"); }}>
                     Generar liquidación
                   </button>
                 </div>
@@ -4727,7 +4860,7 @@ function Dashboard({ session, onLogout }) {
                   {vendedorSel && (
                     <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1.2rem 1.3rem"}}>
                       <div style={{fontSize:".72rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:"1rem"}}>
-                        Preview liquidación — {vd?.nombre}
+                        Preview liquidación — {vendedorSel}
                       </div>
 
                       {/* Lotes vendidos */}
@@ -6378,7 +6511,69 @@ function Dashboard({ session, onLogout }) {
               <div style={{flex:1,fontSize:".76rem",color:"var(--mu2)",lineHeight:1.5}}>
                 Postores que <strong style={{color:"var(--wh2)"}}>no compraron</strong> y tienen garantia a devolver. El sistema los identifica automaticamente al cerrar el remate. Plazo: <strong style={{color:"var(--wh2)"}}>5 dias habiles.</strong>
               </div>
-              <button className="btn-primary" onClick={()=>notify("Notificaciones de devolucion enviadas.","sold")}>Notificar a todos</button>
+              <button className="btn-primary" disabled={notifNcLoading} onClick={async () => {
+                setNotifNcLoading(true);
+                try {
+                  // 1. Obtener todos los postores aprobados del remate activo
+                  const targetRemateId = salaRemateId || selectedRemate;
+                  if (!targetRemateId) { notify("Selecciona un remate primero.", "inf"); setNotifNcLoading(false); return; }
+                  const { data: postoresAprobados } = await supabase
+                    .from("postores").select("*")
+                    .eq("remate_id", targetRemateId)
+                    .eq("estado", "aprobada");
+                  if (!postoresAprobados?.length) { notify("No hay postores aprobados para este remate.", "inf"); setNotifNcLoading(false); return; }
+
+                  // 2. Filtrar los que NO tienen adjudicaciones (no están en liquidaciones ni ADJUDICACIONES)
+                  const adjNames = new Set([
+                    ...ADJUDICACIONES.map(a => a.postor),
+                    ...liquidaciones.map(l => l.postor),
+                  ]);
+                  const noCompradores = postoresAprobados.filter(p => {
+                    const nombre = p.nombre || p.razon_social || "";
+                    return !adjNames.has(nombre);
+                  });
+
+                  if (!noCompradores.length) { notify("Todos los postores compraron al menos un lote.", "inf"); setNotifNcLoading(false); return; }
+
+                  // 3. Obtener info del remate y casa
+                  const remateInfo = REMATES_MERGED.find(r => (r.supabaseId || r.id) === targetRemateId);
+                  const casaInfo = session?.casaNombre || remateInfo?.casa || "Casa de remates";
+                  const remateNombre = remateInfo?.name || remateInfo?.nombre || "Remate";
+                  const logoUrl = session?.casaLogo || null;
+
+                  // 4. Enviar email a cada no-comprador
+                  let enviados = 0;
+                  for (const p of noCompradores) {
+                    const emailDest = p.email;
+                    if (!emailDest) continue;
+                    const devolucionUrl = `https://gestionderemates.cl/devoluciones?p=${p.id}`;
+                    await fetch("/api/send-email", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        tipo: "no_comprador",
+                        email_cliente: emailDest,
+                        postor_id: p.id,
+                        nombre: p.nombre || p.razon_social || "Postor",
+                        numero: p.numero || "—",
+                        remate: remateNombre,
+                        casa: casaInfo,
+                        logo_url: logoUrl,
+                        devolucion_url: devolucionUrl,
+                      }),
+                    });
+                    enviados++;
+                  }
+                  notify(`📧 Notificaciones enviadas a ${enviados} no-compradores.`, "sold");
+                } catch (e) {
+                  console.error("Error notificando no-compradores:", e);
+                  notify("Error al enviar notificaciones. Intenta nuevamente.", "err");
+                } finally {
+                  setNotifNcLoading(false);
+                }
+              }}>
+                {notifNcLoading ? "Enviando..." : "📧 Notificar no-compradores"}
+              </button>
             </div>
             {/* Devs from real GARANTIAS data + dynamic ones */}
             {[

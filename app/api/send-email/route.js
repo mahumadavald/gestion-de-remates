@@ -282,6 +282,90 @@ export async function POST(req) {
       results.push({ destino: "bienvenida_postor", ...r });
     }
 
+    // ── 5. Email a NO-COMPRADORES (para devolución de garantía) ────────
+    if (tipo === "no_comprador" && email_cliente) {
+      const { postor_id, nombre: nombrePosNc, numero: numeroPosNc, remate: remateNc, casa: casaNc, logo_url: logoNc, devolucion_url } = body;
+
+      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+  <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
+    <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+
+      ${buildHeader({
+        casa: casaNc, logo_url: logoNc,
+        titulo: "Gracias por participar",
+        subtitulo: remateNc,
+      })}
+
+      <div style="background:#ffffff;padding:28px 36px;">
+        <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${nombrePosNc}</strong></p>
+        <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">
+          Gracias por participar en el remate <strong style="color:#1a1a1a;">${remateNc}</strong>. En esta oportunidad no resultaste adjudicatario de ningún lote, pero tu garantía está disponible para devolución.
+        </p>
+
+        <div style="background:linear-gradient(135deg,#f0fdfe,#ecfeff);border:2px solid #0891b2;border-radius:12px;text-align:center;padding:22px 16px;margin-bottom:24px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#0e7490;margin-bottom:6px;">Tu número de postor</div>
+          <div style="font-size:48px;font-weight:800;color:#0891b2;line-height:1;letter-spacing:-.02em;">#${numeroPosNc}</div>
+        </div>
+
+        <p style="font-size:14px;color:#374151;margin:0 0 20px;line-height:1.6;">
+          Para procesar la devolución de tu garantía, registra tu cuenta bancaria haciendo click en el botón de abajo:
+        </p>
+
+        <a href="${devolucion_url}" style="display:block;text-align:center;background:linear-gradient(135deg,#06B6D4,#14B8A6);color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:16px 24px;border-radius:10px;margin-bottom:24px;">
+          Registrar cuenta para devolución →
+        </a>
+
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;font-size:13px;color:#6b7280;line-height:1.7;">
+          <strong style="color:#374151;">¿Ya registraste tu cuenta?</strong><br>
+          Si ya completaste el formulario de devolución con el QR de tu boleta, no es necesario hacerlo nuevamente. La devolución se procesará en los próximos días hábiles.
+        </div>
+      </div>
+
+      ${FOOTER}
+    </div>
+  </body></html>`;
+
+      const r = await sendMail({
+        to: email_cliente,
+        subject: `Devolución de garantía disponible — ${remateNc} · ${casaNc}`,
+        html,
+      });
+      results.push({ destino: "no_comprador", ...r });
+    }
+
+    // ── 6. Solicitud de DEMO desde la landing ────────────────────────
+    if (tipo === "demo") {
+      const { nombre, correo, registro, remates, lotes, sistema } = body;
+      const casaDemo = body.casa || "—";
+      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
+        <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+          ${buildHeader({ casa:"Pecker", logo_url:null, titulo:"Nueva solicitud de demo", subtitulo:"Alguien quiere conocer Pecker" })}
+          <div style="background:#ffffff;padding:28px 36px;">
+            <p style="font-size:14px;color:#374151;margin:0 0 20px;line-height:1.6;">Se recibió una nueva solicitud de demo a través de la landing page.</p>
+            <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;">
+              ${tr("Nombre", nombre)}
+              ${tr("Correo", correo)}
+              ${tr("Casa de remates", casaDemo)}
+              ${tr("N° Registro Martillero", registro)}
+              ${remates ? tr("Remates / mes", remates) : ""}
+              ${lotes   ? tr("Lotes / remate", lotes)   : ""}
+              ${sistema ? tr("Sistema actual", sistema)  : ""}
+            </table>
+            <a href="mailto:${correo}" style="display:block;text-align:center;background:linear-gradient(135deg,#06B6D4,#14B8A6);color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:13px 20px;border-radius:10px;">Responder a ${nombre} →</a>
+          </div>
+          ${FOOTER}
+        </div>
+      </body></html>`;
+
+      const r = await sendMail({
+        to: "contacto@pecker.cl",
+        subject: `Nueva solicitud de demo — ${nombre} (${casaDemo})`,
+        html,
+      });
+      results.push({ destino: "demo", ...r });
+    }
+
     return NextResponse.json({ ok: true, results });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e.message }, { status: 500 });

@@ -28,8 +28,6 @@ export default function LandingPage() {
     return () => { window.removeEventListener('scroll', handleScroll); observer.disconnect(); };
   }, []);
 
-  const WA_DEMO = "https://wa.me/56991453680?text=Hola%2C%20me%20interesa%20Pecker.%20Mi%20nombre%20es%20____%20y%20soy%20de%20la%20casa%20de%20remates%20____";
-
   const bodyHTML = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -44,7 +42,7 @@ export default function LandingPage() {
     <span class="nav-logo-text">Pecker</span>
   </a>
   <div class="nav-cta">
-    <a href="${WA_DEMO}" target="_blank" class="btn-nav btn-ghost">Solicitar demo</a>
+    <a href="#contact" class="btn-nav btn-ghost">Agendar demo</a>
     <a href="/dashboard" class="btn-nav btn-solid">Ingresar →</a>
   </div>
 </nav>
@@ -68,9 +66,8 @@ export default function LandingPage() {
     </p>
 
     <div class="hero-btns reveal">
-      <a href="${WA_DEMO}" target="_blank" class="btn-primary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.553 4.103 1.518 5.829L.057 23.492a.5.5 0 00.614.611l5.783-1.517A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.947 0-3.768-.497-5.35-1.367l-.383-.215-3.434.9.916-3.352-.234-.38A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-        Solicitar demo gratis
+      <a href="#contact" class="btn-primary">
+        Agendar demo gratis →
       </a>
       <a href="/dashboard" class="btn-outline">Iniciar sesión →</a>
     </div>
@@ -329,7 +326,7 @@ export default function LandingPage() {
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#06B6D4" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Postores self-service</li>
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#06B6D4" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Hasta 2 usuarios</li>
       </ul>
-      <a href="${WA_DEMO}" target="_blank" class="btn-plan-outline">Consultar precio →</a>
+      <a href="#contact" class="btn-plan-outline">Consultar precio →</a>
     </div>
 
     <!-- ── Pecker Gold ── -->
@@ -359,7 +356,7 @@ export default function LandingPage() {
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Reportes avanzados + CSV</li>
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Soporte prioritario</li>
       </ul>
-      <a href="${WA_DEMO}" target="_blank" class="btn-plan-gold">Consultar precio →</a>
+      <a href="#contact" class="btn-plan-gold">Consultar precio →</a>
     </div>
 
     <!-- ── Pecker Platinum ── -->
@@ -388,7 +385,7 @@ export default function LandingPage() {
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>SLA garantizado</li>
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"><path d="M2 7l4 4 6-7"/></svg>Soporte 24/7</li>
       </ul>
-      <a href="${WA_DEMO}" target="_blank" class="btn-plan-platinum">Cotizar ahora →</a>
+      <a href="#contact" class="btn-plan-platinum">Cotizar ahora →</a>
     </div>
 
   </div>
@@ -936,117 +933,137 @@ footer{background:var(--surface);padding:2.5rem 2rem 1.5rem;}
 }
 `}</style>
       <div dangerouslySetInnerHTML={{__html: bodyHTML.split("<!-- FOOTER_SPLIT -->")[0]}} />
-      <DemoForm waNum="56991453680" />
+      <DemoForm />
       <div dangerouslySetInnerHTML={{__html: "<footer>" + bodyHTML.split("<!-- FOOTER_SPLIT -->\n<footer>")[1]}} />
     </>
   );
 }
 
 // ── Formulario de demo multi-step ────────────────────────────────
-function DemoForm({ waNum }) {
+function DemoForm() {
   const [step,    setStep]    = useState(1);
   const [done,    setDone]    = useState(false);
+  const [loading, setLoading] = useState(false);
   const [err,     setErr]     = useState("");
   const [f, setF] = useState({
-    nombre:"", correo:"", casa:"", tel:"",
+    nombre:"", correo:"", casa:"",
     registro:"", remates:"", lotes:"", sistema:"",
   });
 
   const set = (k, v) => setF(p => ({...p, [k]: v}));
 
   const next = () => {
-    if (!f.nombre.trim() || !f.correo.trim() || !f.casa.trim() || !f.tel.trim() || !f.registro.trim()) {
+    if (!f.nombre.trim() || !f.correo.trim() || !f.casa.trim() || !f.registro.trim()) {
       setErr("Completa todos los campos obligatorios, incluido el N° de registro de martillero."); return;
     }
     setErr(""); setStep(2);
   };
 
-  const submit = () => {
-    const msg = encodeURIComponent(
-      `Hola! Me interesa Pecker — Auction Software.\n` +
-      `Nombre: ${f.nombre}\nEmpresa: ${f.casa}\nCorreo: ${f.correo}\nWhatsApp: +56 ${f.tel}\nN° Registro Martillero: ${f.registro}\n` +
-      (f.remates ? `Remates/mes: ${f.remates}\n` : "") +
-      (f.lotes   ? `Lotes/remate: ${f.lotes}\n`  : "") +
-      (f.sistema ? `Sistema actual: ${f.sistema}` : "")
-    );
-    window.open(`https://wa.me/${waNum}?text=${msg}`, "_blank");
-    setDone(true);
+  const submit = async () => {
+    setLoading(true);
+    setErr("");
+    try {
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipo: "demo",
+          nombre: f.nombre,
+          correo: f.correo,
+          casa: f.casa,
+          registro: f.registro,
+          remates: f.remates,
+          lotes: f.lotes,
+          sistema: f.sistema,
+        }),
+      });
+      setDone(true);
+    } catch {
+      setErr("Hubo un problema al enviar. Intenta de nuevo o escríbenos a contacto@pecker.cl");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const pct   = step === 1 ? 50 : 100;
+  const pct  = step === 1 ? 50 : 100;
   const INPUT = {
-    width:"100%", padding:".85rem 1rem",
-    background:"rgba(255,255,255,.06)", border:"1.5px solid rgba(255,255,255,.12)",
-    borderRadius:10, color:"#fff", fontSize:".92rem", fontFamily:"inherit",
+    width:"100%", padding:".82rem 1rem",
+    background:"#ffffff", border:"1.5px solid #e5e7eb",
+    borderRadius:10, color:"#1a1a1a", fontSize:".92rem", fontFamily:"inherit",
     outline:"none", transition:"border-color .2s",
   };
-  const LABEL = { display:"block", fontSize:".78rem", color:"rgba(255,255,255,.55)", marginBottom:".4rem", fontWeight:500 };
+  const LABEL = { display:"block", fontSize:".75rem", fontWeight:600, color:"#6b7280", marginBottom:".4rem", textTransform:"uppercase", letterSpacing:".05em" };
 
   return (
-    <section id="contact" style={{background:"#07101c", padding:"6rem 1.5rem", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center"}}>
-      <div style={{width:"100%", maxWidth:680, margin:"0 auto"}}>
+    <section id="contact" style={{background:"#f4f4f2", padding:"7rem 1.5rem", borderTop:"1px solid #e5e7eb"}}>
+
+      {/* Cabecera de sección */}
+      <div style={{textAlign:"center", marginBottom:"3.5rem"}}>
+        <div style={{display:"inline-flex", alignItems:"center", gap:".5rem", padding:".3rem 1rem", background:"rgba(6,182,212,.08)", border:"1px solid rgba(6,182,212,.18)", borderRadius:20, fontSize:".66rem", fontWeight:700, color:"#06B6D4", letterSpacing:".14em", textTransform:"uppercase", marginBottom:"1rem"}}>
+          <span style={{width:6, height:6, borderRadius:"50%", background:"#14B8A6", display:"inline-block"}}/>
+          CONTACTO
+        </div>
+        <h2 style={{fontFamily:"'Poppins',sans-serif", fontSize:"clamp(2rem,4vw,3rem)", fontWeight:800, color:"#1a1a1a", lineHeight:1.1, letterSpacing:"-.025em", marginBottom:".75rem"}}>
+          Agenda tu demo<br/><em style={{fontStyle:"normal", background:"linear-gradient(135deg,#06B6D4,#14B8A6)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text"}}>sin compromiso</em>
+        </h2>
+        <p style={{fontSize:".95rem", color:"#6b7280", maxWidth:460, margin:"0 auto", lineHeight:1.7}}>Cuéntanos sobre tu casa de remates y te mostramos cómo Pecker se adapta a tu operación.</p>
+      </div>
+
+      {/* Card del formulario */}
+      <div style={{width:"100%", maxWidth:640, margin:"0 auto", background:"#ffffff", border:"1px solid #e5e7eb", borderRadius:20, padding:"2.5rem", boxShadow:"0 4px 24px rgba(0,0,0,.06)"}}>
 
         {/* Progress */}
         {!done && <>
-          <div style={{height:3, background:"rgba(255,255,255,.08)", borderRadius:99, marginBottom:".6rem"}}>
+          <div style={{height:4, background:"#f0f0ee", borderRadius:99, marginBottom:".5rem"}}>
             <div style={{height:"100%", width:`${pct}%`, background:"linear-gradient(90deg,#06B6D4,#14B8A6)", borderRadius:99, transition:"width .4s ease"}}/>
           </div>
-          <div style={{display:"flex", justifyContent:"space-between", fontSize:".72rem", color:"rgba(255,255,255,.35)", marginBottom:"3rem"}}>
-            <span>Paso {step} de 2</span><span>{pct}%</span>
+          <div style={{display:"flex", justifyContent:"space-between", fontSize:".72rem", color:"#9ca3af", marginBottom:"2rem"}}>
+            <span>Paso {step} de 2</span><span style={{color:"#06B6D4", fontWeight:700}}>{pct}%</span>
           </div>
         </>}
 
         {/* Step 1 */}
         {!done && step === 1 && (
           <>
-            <h2 style={{fontFamily:"'Poppins',sans-serif", fontSize:"clamp(1.9rem,4vw,2.8rem)", fontWeight:800, color:"#fff", textAlign:"center", marginBottom:".5rem"}}>¡Encantados de conocerte!</h2>
-            <p style={{color:"rgba(255,255,255,.45)", textAlign:"center", marginBottom:"2.5rem"}}>Cuéntanos sobre tu casa de remates</p>
+            <h3 style={{fontFamily:"'Poppins',sans-serif", fontSize:"1.35rem", fontWeight:800, color:"#1a1a1a", marginBottom:".3rem"}}>¡Encantados de conocerte!</h3>
+            <p style={{color:"#9ca3af", fontSize:".87rem", marginBottom:"1.75rem"}}>Cuéntanos sobre tu casa de remates</p>
 
-            {err && <div style={{background:"rgba(248,81,73,.12)", border:"1px solid rgba(248,81,73,.3)", borderRadius:8, padding:".75rem 1rem", color:"#f85149", fontSize:".84rem", marginBottom:"1.25rem"}}>{err}</div>}
+            {err && <div style={{background:"rgba(239,68,68,.06)", border:"1px solid rgba(239,68,68,.2)", borderRadius:8, padding:".7rem .9rem", color:"#ef4444", fontSize:".83rem", marginBottom:"1rem"}}>{err}</div>}
 
             <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"1rem", marginBottom:"1rem"}}>
               <div>
-                <label style={LABEL}>¿Cuál es tu nombre? *</label>
+                <label style={LABEL}>Tu nombre *</label>
                 <input style={INPUT} placeholder="Juan Pérez" value={f.nombre} onChange={e=>set("nombre",e.target.value)}
-                  onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}/>
+                  onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="#e5e7eb"}/>
               </div>
               <div>
-                <label style={LABEL}>¿Cuál es tu correo? *</label>
+                <label style={LABEL}>Tu correo *</label>
                 <input style={INPUT} type="email" placeholder="juan@empresa.cl" value={f.correo} onChange={e=>set("correo",e.target.value)}
-                  onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}/>
+                  onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="#e5e7eb"}/>
               </div>
             </div>
-            <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"1rem", marginBottom:"1rem"}}>
-              <div>
-                <label style={LABEL}>¿Nombre de tu casa de remates? *</label>
-                <input style={INPUT} placeholder="Remates García Ltda." value={f.casa} onChange={e=>set("casa",e.target.value)}
-                  onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}/>
-              </div>
-              <div>
-                <label style={LABEL}>WhatsApp *</label>
-                <div style={{display:"flex", background:"rgba(255,255,255,.06)", border:"1.5px solid rgba(255,255,255,.12)", borderRadius:10, overflow:"hidden"}}>
-                  <span style={{padding:"0 .85rem", color:"rgba(255,255,255,.6)", fontSize:".85rem", borderRight:"1px solid rgba(255,255,255,.1)", display:"flex", alignItems:"center", whiteSpace:"nowrap", gap:".3rem"}}>🇨🇱 +56</span>
-                  <input style={{...INPUT, border:"none", background:"transparent", flex:1}} placeholder="9 8765 4321" value={f.tel} onChange={e=>set("tel",e.target.value)}/>
-                </div>
-              </div>
+            <div style={{marginBottom:"1rem"}}>
+              <label style={LABEL}>Casa de remates *</label>
+              <input style={INPUT} placeholder="Remates García Ltda." value={f.casa} onChange={e=>set("casa",e.target.value)}
+                onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="#e5e7eb"}/>
             </div>
 
-            {/* Registro de martillero — campo destacado */}
-            <div style={{marginBottom:"2rem", padding:"1.1rem 1.25rem", background:"rgba(6,182,212,.06)", border:"1.5px solid rgba(6,182,212,.2)", borderRadius:12}}>
-              <label style={{...LABEL, color:"#06B6D4", fontWeight:700, fontSize:".8rem", letterSpacing:".04em", textTransform:"uppercase", marginBottom:".6rem"}}>
+            {/* Registro de martillero */}
+            <div style={{marginBottom:"1.75rem", padding:"1rem 1.15rem", background:"rgba(6,182,212,.04)", border:"1.5px solid rgba(6,182,212,.2)", borderRadius:12}}>
+              <label style={{...LABEL, color:"#06B6D4", marginBottom:".5rem"}}>
                 N° Registro Nacional de Martilleros *
               </label>
-              <input style={{...INPUT, background:"rgba(255,255,255,.05)", borderColor:"rgba(6,182,212,.25)"}}
+              <input style={{...INPUT, borderColor:"rgba(6,182,212,.25)"}}
                 placeholder="Ej: 1234 — Solo martilleros oficialmente registrados"
                 value={f.registro} onChange={e=>set("registro",e.target.value)}
                 onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="rgba(6,182,212,.25)"}/>
-              <div style={{fontSize:".72rem", color:"rgba(255,255,255,.3)", marginTop:".5rem"}}>
+              <div style={{fontSize:".7rem", color:"#9ca3af", marginTop:".45rem"}}>
                 Puedes verificar tu número en el Registro de Martilleros del Ministerio de Justicia de Chile.
               </div>
             </div>
 
             <button onClick={next}
-              style={{width:"100%", padding:"1rem", background:"linear-gradient(135deg,#06B6D4,#14B8A6)", border:"none", borderRadius:10, color:"#fff", fontSize:"1rem", fontWeight:700, fontFamily:"'Poppins',sans-serif", cursor:"pointer"}}>
+              style={{width:"100%", padding:"1rem", background:"linear-gradient(135deg,#06B6D4,#14B8A6)", border:"none", borderRadius:10, color:"#fff", fontSize:".95rem", fontWeight:700, fontFamily:"'Poppins',sans-serif", cursor:"pointer", transition:"opacity .2s"}}>
               Continuar →
             </button>
           </>
@@ -1055,41 +1072,43 @@ function DemoForm({ waNum }) {
         {/* Step 2 */}
         {!done && step === 2 && (
           <>
-            <h2 style={{fontFamily:"'Poppins',sans-serif", fontSize:"clamp(1.9rem,4vw,2.8rem)", fontWeight:800, color:"#fff", textAlign:"center", marginBottom:".5rem"}}>Un poco más...</h2>
-            <p style={{color:"rgba(255,255,255,.45)", textAlign:"center", marginBottom:"2.5rem"}}>Para armar el plan perfecto para ti</p>
+            <h3 style={{fontFamily:"'Poppins',sans-serif", fontSize:"1.35rem", fontWeight:800, color:"#1a1a1a", marginBottom:".3rem"}}>Un poco más...</h3>
+            <p style={{color:"#9ca3af", fontSize:".87rem", marginBottom:"1.75rem"}}>Para armar el plan perfecto para ti</p>
+
+            {err && <div style={{background:"rgba(239,68,68,.06)", border:"1px solid rgba(239,68,68,.2)", borderRadius:8, padding:".7rem .9rem", color:"#ef4444", fontSize:".83rem", marginBottom:"1rem"}}>{err}</div>}
 
             <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"1rem", marginBottom:"1rem"}}>
               <div>
-                <label style={LABEL}>¿Cuántos remates hacen al mes?</label>
+                <label style={LABEL}>Remates al mes</label>
                 <input style={INPUT} placeholder="Ej: 4" value={f.remates} onChange={e=>set("remates",e.target.value)}
-                  onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}/>
+                  onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="#e5e7eb"}/>
               </div>
               <div>
-                <label style={LABEL}>¿Cuántos lotes en promedio por remate?</label>
+                <label style={LABEL}>Lotes por remate</label>
                 <input style={INPUT} placeholder="Ej: 30" value={f.lotes} onChange={e=>set("lotes",e.target.value)}
-                  onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}/>
+                  onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="#e5e7eb"}/>
               </div>
             </div>
-            <div style={{marginBottom:"2rem"}}>
-              <label style={LABEL}>¿Qué sistema usan actualmente?</label>
-              <select style={{...INPUT, cursor:"pointer"}} value={f.sistema} onChange={e=>set("sistema",e.target.value)}
-                onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}>
-                <option value="" style={{background:"#07101c"}}>Selecciona una opción</option>
-                <option value="Excel / papel" style={{background:"#07101c"}}>Excel / papel</option>
-                <option value="Software propio" style={{background:"#07101c"}}>Software propio</option>
-                <option value="Otro software" style={{background:"#07101c"}}>Otro software</option>
-                <option value="Ninguno" style={{background:"#07101c"}}>Ninguno</option>
+            <div style={{marginBottom:"1.75rem"}}>
+              <label style={LABEL}>Sistema actual</label>
+              <select style={{...INPUT, cursor:"pointer", background:"#ffffff"}} value={f.sistema} onChange={e=>set("sistema",e.target.value)}
+                onFocus={e=>e.target.style.borderColor="#06B6D4"} onBlur={e=>e.target.style.borderColor="#e5e7eb"}>
+                <option value="">Selecciona una opción</option>
+                <option value="Excel / papel">Excel / papel</option>
+                <option value="Software propio">Software propio</option>
+                <option value="Otro software">Otro software</option>
+                <option value="Ninguno">Ninguno</option>
               </select>
             </div>
 
             <div style={{display:"flex", gap:".75rem"}}>
-              <button onClick={()=>setStep(1)}
-                style={{padding:"1rem 1.5rem", background:"transparent", border:"1.5px solid rgba(255,255,255,.15)", borderRadius:10, color:"rgba(255,255,255,.6)", fontFamily:"inherit", fontSize:".9rem", cursor:"pointer"}}>
+              <button onClick={()=>setStep(1)} disabled={loading}
+                style={{padding:"1rem 1.4rem", background:"transparent", border:"1.5px solid #e5e7eb", borderRadius:10, color:"#6b7280", fontFamily:"inherit", fontSize:".9rem", cursor:"pointer", opacity: loading ? .5 : 1}}>
                 ← Volver
               </button>
-              <button onClick={submit}
-                style={{flex:1, padding:"1rem", background:"linear-gradient(135deg,#06B6D4,#14B8A6)", border:"none", borderRadius:10, color:"#fff", fontSize:"1rem", fontWeight:700, fontFamily:"'Poppins',sans-serif", cursor:"pointer"}}>
-                Solicitar demo →
+              <button onClick={submit} disabled={loading}
+                style={{flex:1, padding:"1rem", background:"linear-gradient(135deg,#06B6D4,#14B8A6)", border:"none", borderRadius:10, color:"#fff", fontSize:".95rem", fontWeight:700, fontFamily:"'Poppins',sans-serif", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? .75 : 1}}>
+                {loading ? "Enviando..." : "Agendar demo →"}
               </button>
             </div>
           </>
@@ -1097,10 +1116,12 @@ function DemoForm({ waNum }) {
 
         {/* Done */}
         {done && (
-          <div style={{textAlign:"center"}}>
-            <div style={{fontSize:"4rem", marginBottom:"1.25rem"}}>🎉</div>
-            <h2 style={{fontFamily:"'Poppins',sans-serif", fontSize:"2.2rem", fontWeight:800, color:"#fff", marginBottom:".75rem"}}>¡Listo!</h2>
-            <p style={{color:"rgba(255,255,255,.5)", fontSize:"1.05rem", lineHeight:1.7}}>Te abrimos una conversación de WhatsApp.<br/>Te contactamos en menos de 24 horas.</p>
+          <div style={{textAlign:"center", padding:"1rem 0"}}>
+            <div style={{width:68, height:68, borderRadius:"50%", background:"rgba(20,184,166,.1)", border:"2px solid rgba(20,184,166,.3)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 1.25rem"}}>
+              <svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="#14B8A6" strokeWidth="2.5" strokeLinecap="round"><path d="M5 15l7 7 13-13"/></svg>
+            </div>
+            <h3 style={{fontFamily:"'Poppins',sans-serif", fontSize:"1.6rem", fontWeight:800, color:"#1a1a1a", marginBottom:".5rem"}}>¡Solicitud enviada!</h3>
+            <p style={{color:"#6b7280", fontSize:".95rem", lineHeight:1.7}}>Recibimos tu información y te contactaremos<br/>en menos de 24 horas a <strong style={{color:"#1a1a1a"}}>{f.correo}</strong>.</p>
           </div>
         )}
 
