@@ -20,7 +20,7 @@ export async function POST(req) {
       email,
       password,
       email_confirm: true,
-      user_metadata: { nombre },
+      user_metadata: { nombre, needs_password_change: true },
     });
 
     if (authErr) {

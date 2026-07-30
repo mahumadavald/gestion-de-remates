@@ -90,6 +90,10 @@ export default function PostorPage() {
   const [addCuenta,    setAddCuenta]    = useState(false);
   const [nuevaCuenta,  setNuevaCuenta]  = useState(cuentaVacia());
   const [savingCuenta, setSavingCuenta] = useState(false);
+  const [inscribirModal, setInscribirModal] = useState(null);
+  const [modInscModal,   setModInscModal]   = useState("PRESENCIAL");
+  const [comprobanteFile,setComprobanteFile]= useState(null);
+  const [inscribiendo,   setInscribiendo]   = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -100,7 +104,7 @@ export default function PostorPage() {
       // Buscar perfil postor por user_id (puede tener varias inscripciones)
       const { data: postorRows } = await supabase
         .from("postores")
-        .select("*, casas(nombre, slug, logo_url)")
+        .select("*, casas(nombre, slug, logo_url), remates(nombre, fecha, hora, modalidad)")
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: false });
 
@@ -133,6 +137,43 @@ export default function PostorPage() {
 
   const getInscripcion = (remateId) =>
     inscripciones.find(i => i.remate_id === remateId);
+
+  const handleInscribirme = async () => {
+    if (!inscribirModal || !postor) return;
+    setInscribiendo(true);
+
+    let comprobanteUrl = null;
+    if (comprobanteFile) {
+      const ext = comprobanteFile.name.split(".").pop();
+      const path = `${inscribirModal.id}-${Date.now()}.${ext}`;
+      const { data: up } = await supabase.storage.from("comprobantes").upload(path, comprobanteFile, { upsert: false });
+      if (up) {
+        const { data: u } = supabase.storage.from("comprobantes").getPublicUrl(up.path);
+        comprobanteUrl = u?.publicUrl || null;
+      }
+    }
+
+    const { count } = await supabase.from("postores").select("*", { count:"exact", head:true }).eq("remate_id", inscribirModal.id);
+    const numero = (count || 0) + 1;
+
+    const { data: newP, error: insErr } = await supabase.from("postores").insert({
+      nombre: postor.nombre, rut: postor.rut, email: postor.email,
+      telefono: postor.telefono, modalidad: modInscModal,
+      comprobante_url: comprobanteUrl, estado: "pendiente",
+      remate_id: inscribirModal.id, casa_id: inscribirModal.casa_id,
+      numero, user_id: authUser.id,
+    }).select("*, casas(nombre, slug, logo_url), remates(nombre, fecha, hora, modalidad)").single();
+
+    if (insErr) { alert("Error al inscribirte. Intenta nuevamente."); setInscribiendo(false); return; }
+
+    await fetch("/api/send-email", { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ tipo:"cliente", nombre:postor.nombre, email_cliente:postor.email,
+        remate:inscribirModal.nombre, fecha:inscribirModal.fecha, casa:inscribirModal.casas?.nombre||"",
+        logo_url:inscribirModal.casas?.logo_url||null, modalidad:modInscModal, comprobante_url:comprobanteUrl }) });
+
+    setInscripciones(prev => [...prev, newP]);
+    setInscribirModal(null); setComprobanteFile(null); setModInscModal("PRESENCIAL"); setInscribiendo(false);
+  };
 
   const guardarCuenta = async () => {
     if (!nuevaCuenta.titular.trim()) return alert("Ingresa el nombre del titular.");
@@ -244,9 +285,9 @@ export default function PostorPage() {
 
               <div style={{display:"flex",flexDirection:"column",gap:".5rem",alignItems:"flex-end"}}>
                 {!insc && (
-                  <a href={`/participar?casa=${casaSlug}`} className="ir-btn ir-btn-primary" style={{textDecoration:"none",display:"inline-block"}}>
+                  <button className="ir-btn ir-btn-primary" onClick={()=>{setInscribirModal(r);setModInscModal("PRESENCIAL");setComprobanteFile(null);}}>
                     Inscribirme →
-                  </a>
+                  </button>
                 )}
                 {insc && insc.estado === "verificado" && esLive && (
                   <a href={`/display/${casaSlug}`} className="ir-btn ir-btn-primary" target="_blank" rel="noreferrer" style={{textDecoration:"none",display:"inline-block"}}>
@@ -276,7 +317,7 @@ export default function PostorPage() {
           <div key={insc.id} className="inscripcion-card fade-up" style={{animationDelay:`${i*0.04}s`}}>
             <div className="inscripcion-num">#{String(insc.numero).padStart(3,"0")}</div>
             <div className="inscripcion-info">
-              <div className="inscripcion-remate">{insc.remate_id}</div>
+              <div className="inscripcion-remate">{insc.remates?.nombre || remates.find(r=>r.id===insc.remate_id)?.nombre || "—"}</div>
               <div className="inscripcion-sub">
                 {insc.casas?.nombre} · {insc.modalidad}
               </div>
@@ -361,6 +402,62 @@ export default function PostorPage() {
             </div>
           </div>
         )}
+
+      {/* Modal inscripción rápida */}
+      {inscribirModal && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.55)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}
+          onClick={e=>{if(e.target===e.currentTarget){setInscribirModal(null);}}}>
+          <div style={{background:"#fff",borderRadius:18,padding:"1.75rem",maxWidth:460,width:"100%",boxShadow:"0 24px 64px rgba(0,0,0,.22)"}}>
+            {/* Cabecera */}
+            <div style={{display:"flex",gap:".85rem",alignItems:"flex-start",marginBottom:"1.25rem"}}>
+              {inscribirModal.casas?.logo_url
+                ? <img src={inscribirModal.casas.logo_url} style={{width:42,height:42,borderRadius:9,objectFit:"contain",border:"1px solid var(--b1)",background:"var(--bg)",padding:3,flexShrink:0}}/>
+                : <div style={{width:42,height:42,borderRadius:9,background:"linear-gradient(135deg,#06B6D4,#14B8A6)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:".6rem",fontWeight:700,color:"#fff",textAlign:"center"}}>{inscribirModal.casas?.nombre?.slice(0,4)}</div>}
+              <div>
+                <div style={{fontWeight:800,fontSize:"1rem",color:"var(--wh)",lineHeight:1.25}}>{inscribirModal.nombre}</div>
+                <div style={{fontSize:".8rem",color:"var(--mu)",marginTop:".2rem"}}>{inscribirModal.casas?.nombre} · {fmt(inscribirModal.fecha)}{inscribirModal.hora?` · ${inscribirModal.hora}`:""}</div>
+              </div>
+            </div>
+
+            {/* Datos del postor (solo lectura) */}
+            <div style={{background:"#f8fafc",border:"1px solid var(--b1)",borderRadius:10,padding:".85rem 1rem",marginBottom:"1.1rem"}}>
+              <div style={{fontSize:".68rem",fontWeight:700,textTransform:"uppercase",letterSpacing:".1em",color:"var(--mu)",marginBottom:".4rem"}}>Tus datos</div>
+              <div style={{fontSize:".88rem",fontWeight:600,color:"var(--wh)"}}>{postor.nombre}</div>
+              <div style={{fontSize:".8rem",color:"var(--mu)",marginTop:".15rem"}}>{postor.email} · {postor.rut}</div>
+            </div>
+
+            {/* Modalidad */}
+            <div style={{marginBottom:"1rem"}}>
+              <div style={{fontSize:".72rem",fontWeight:700,textTransform:"uppercase",letterSpacing:".1em",color:"var(--mu)",marginBottom:".5rem"}}>Modalidad</div>
+              <div style={{display:"flex",gap:".5rem"}}>
+                {["PRESENCIAL","REMOTO"].map(m=>(
+                  <button key={m} onClick={()=>setModInscModal(m)} style={{flex:1,padding:".6rem",borderRadius:9,border:`2px solid ${modInscModal===m?"var(--ac)":"var(--b2)"}`,background:modInscModal===m?"rgba(6,182,212,.08)":"transparent",fontWeight:700,fontSize:".83rem",color:modInscModal===m?"var(--ac)":"var(--mu)",cursor:"pointer",transition:"all .15s"}}>
+                    {m}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Comprobante */}
+            <div style={{marginBottom:"1.5rem"}}>
+              <div style={{fontSize:".72rem",fontWeight:700,textTransform:"uppercase",letterSpacing:".1em",color:"var(--mu)",marginBottom:".5rem"}}>Comprobante de garantía</div>
+              <label style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:".4rem",border:`2px dashed ${comprobanteFile?"var(--ac)":"var(--b2)"}`,borderRadius:10,padding:"1rem",cursor:"pointer",background:comprobanteFile?"rgba(6,182,212,.04)":"transparent",transition:"all .15s"}}>
+                <input type="file" accept="image/*,.pdf" style={{display:"none"}} onChange={e=>setComprobanteFile(e.target.files[0]||null)}/>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={comprobanteFile?"var(--ac)":"var(--mu2)"} strokeWidth="1.7" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span style={{fontSize:".8rem",color:comprobanteFile?"var(--ac)":"var(--mu)",fontWeight:comprobanteFile?700:400}}>{comprobanteFile?comprobanteFile.name:"Subir foto o PDF"}</span>
+              </label>
+            </div>
+
+            {/* Botones */}
+            <div style={{display:"flex",gap:".6rem"}}>
+              <button onClick={()=>{setInscribirModal(null);setComprobanteFile(null);}} className="ir-btn ir-btn-outline" style={{flex:1}}>Cancelar</button>
+              <button onClick={handleInscribirme} className="ir-btn ir-btn-primary" style={{flex:2}} disabled={inscribiendo}>
+                {inscribiendo?"Inscribiendo...":"Confirmar inscripción →"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
         <div style={{marginTop:"3rem",paddingTop:"1.5rem",borderTop:"1px solid var(--b1)",display:"flex",alignItems:"center",gap:".6rem",justifyContent:"center"}}>
           <svg width="16" height="16" viewBox="0 0 36 36" fill="none">

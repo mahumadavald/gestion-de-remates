@@ -251,8 +251,9 @@ const CSS = `
 
 function ParticiparContent() {
   const searchParams = useSearchParams();
-  const idParam   = searchParams.get("id")   || "";   // nuevo: ?id=UUID
-  const slugParam = searchParams.get("casa") || "";   // legado: ?casa=slug
+  const idParam      = searchParams.get("id")     || "";
+  const slugParam    = searchParams.get("casa")   || "";
+  const remateParam  = searchParams.get("remate") || "";
   const returnUrl = (() => {
     try { return searchParams.get("return") ? decodeURIComponent(searchParams.get("return")) : ""; }
     catch { return ""; }
@@ -283,7 +284,7 @@ function ParticiparContent() {
   const [numCta,         setNumCta]         = useState("");
   const [cuentasGuardadas, setCuentasGuardadas] = useState([]);
   const [cuentaSelIdx,   setCuentaSelIdx]   = useState(""); // "" = nueva / índice
-  const [remateId,  setRemateId]  = useState("");
+  const [remateId,  setRemateId]  = useState(remateParam);
   const [modalidad, setModalidad] = useState("PRESENCIAL");
   const [comprobante, setComprobante] = useState(null);
   const [suscribir, setSuscribir] = useState(true);
@@ -300,10 +301,12 @@ function ParticiparContent() {
           .from("casas").select("*").eq("id", idParam).single();
         if (!casaData) { setNotFound(true); setLoading(false); return; }
         setCasa(casaData);
+        const hoy = new Date(); hoy.setDate(hoy.getDate() - 1); const fechaMin = hoy.toISOString().slice(0,10);
         const { data: rematesData } = await supabase
           .from("remates").select("*")
           .eq("casa_id", casaData.id)
           .in("estado", ["publicado","en_vivo","activo"])
+          .gte("fecha", fechaMin)
           .order("fecha");
         setRemates(rematesData || []);
         setLoading(false);
@@ -324,10 +327,12 @@ function ParticiparContent() {
       if (!casaData) { setNotFound(true); setLoading(false); return; }
       setCasa(casaData);
 
+      const hoy2 = new Date(); hoy2.setDate(hoy2.getDate() - 1); const fechaMin2 = hoy2.toISOString().slice(0,10);
       const { data: rematesData } = await supabase
         .from("remates").select("*")
         .eq("casa_id", casaData.id)
         .in("estado", ["publicado","en_vivo","activo"])
+        .gte("fecha", fechaMin2)
         .order("fecha");
 
       setRemates(rematesData || []);
@@ -458,8 +463,8 @@ function ParticiparContent() {
     if (!r.hora || !r.fecha) return false;
     try {
       const [h, m] = r.hora.split(":").map(Number);
-      const remateDate = new Date(r.fecha);
-      remateDate.setHours(h, m, 0, 0);
+      const [year, month, day] = r.fecha.split("-").map(Number);
+      const remateDate = new Date(year, month - 1, day, h, m, 0, 0); // hora local, no UTC
       const cutoff = new Date(remateDate.getTime() - 60 * 60 * 1000); // 1 hora antes
       return new Date() >= cutoff;
     } catch { return false; }
@@ -574,9 +579,10 @@ function ParticiparContent() {
         direccion:     direccion.trim(),
         comuna:        comuna || null,
         banco:         banco,
-        tipo_cuenta:   tipoCta,
-        numero_cuenta: numCta.trim(),
-        modalidad:     modalidad,
+        tipo_cuenta:    tipoCta,
+        numero_cuenta:  numCta.trim(),
+        modalidad:      modalidad,
+        comprobante_url: comprobanteUrl || null,
       };
 
       // 5a. Email de bienvenida con credenciales (si se creó cuenta nueva)

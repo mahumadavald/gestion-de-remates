@@ -1,19 +1,27 @@
 import { NextResponse } from "next/server";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL     = process.env.FROM_EMAIL || "noreply@pecker.cl";
+const FROM_EMAIL     = process.env.FROM_EMAIL || "noreply@gestionderemates.cl";
 
-async function sendMail({ to, subject, html }) {
-  if (!RESEND_API_KEY) return { ok: false, error: "RESEND_API_KEY not set" };
+async function sendMail({ to, subject, html, attachments }) {
+  if (!RESEND_API_KEY) {
+    console.error("[send-email] RESEND_API_KEY no está configurada");
+    return { ok: false, error: "RESEND_API_KEY not set" };
+  }
+  console.log(`[send-email] Enviando a=${to} from=${FROM_EMAIL} subject="${subject}"`);
+  const body = { from: FROM_EMAIL, to, subject, html };
+  if (attachments?.length) body.attachments = attachments;
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${RESEND_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ from: FROM_EMAIL, to, subject, html }),
+    body: JSON.stringify(body),
   });
   const data = await res.json();
+  if (!res.ok) console.error("[send-email] Error Resend:", JSON.stringify(data));
+  else console.log("[send-email] OK id:", data.id);
   return { ok: res.ok, data };
 }
 
@@ -24,19 +32,23 @@ function buildHeader({ casa, logo_url, titulo, subtitulo }) {
     : `<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.85);text-align:right;letter-spacing:-.01em;">${casa}</div>`;
 
   return `
-    <div style="background:linear-gradient(135deg,#0f4c5c 0%,#0891b2 60%,#06B6D4 100%);padding:30px 36px 26px;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td style="vertical-align:middle;">
-            <div style="font-size:20px;font-weight:700;color:#ffffff;line-height:1.25;">${titulo}</div>
-            ${subtitulo ? `<div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:5px;">${subtitulo}</div>` : ""}
-          </td>
-          <td style="vertical-align:middle;text-align:right;width:1%;white-space:nowrap;padding-left:20px;">
-            ${logoHtml}
-          </td>
-        </tr>
-      </table>
-    </div>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0891b2">
+      <tr>
+        <td style="background-color:#0891b2;background:linear-gradient(135deg,#0f4c5c 0%,#0891b2 60%,#06B6D4 100%);padding:28px 36px 24px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="vertical-align:middle;">
+                <div style="font-size:20px;font-weight:700;color:#ffffff;line-height:1.25;font-family:Arial,sans-serif;">${titulo}</div>
+                ${subtitulo ? `<div style="font-size:13px;color:#cce9f5;margin-top:5px;font-family:Arial,sans-serif;">${subtitulo}</div>` : ""}
+              </td>
+              <td style="vertical-align:middle;text-align:right;width:1%;white-space:nowrap;padding-left:20px;">
+                ${logoHtml}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   `;
 }
 
@@ -70,6 +82,7 @@ export async function POST(req) {
       email_cliente, email_casa,
       rut, telefono, giro, direccion, comuna,
       banco, tipo_cuenta, numero_cuenta, modalidad,
+      comprobante_url,
     } = body;
 
     const fechaStr = fecha
@@ -92,16 +105,11 @@ export async function POST(req) {
             subtitulo: remate + (fechaStr ? " · " + fechaStr : ""),
           })}
 
-          <div style="background:#ffffff;padding:28px 36px;">
+          <div style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
             <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${nombre}</strong></p>
-            <p style="font-size:14px;color:#6b7280;margin:0 0 20px;line-height:1.6;">Tu pre-inscripción en <strong style="color:#1a1a1a;">${remate}</strong> fue recibida correctamente.</p>
+            <p style="font-size:14px;color:#6b7280;margin:0 0 20px;line-height:1.6;">Tu pre-inscripción en <strong style="color:#1a1a1a;">${remate}</strong> de <strong style="color:#1a1a1a;">${casa}</strong> fue recibida correctamente.</p>
 
-            <div style="background:linear-gradient(135deg,#f0fdfe,#ecfeff);border:2px solid #0891b2;border-radius:12px;text-align:center;padding:22px 16px;margin-bottom:24px;">
-              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#0e7490;margin-bottom:6px;">Número de postor provisional</div>
-              <div style="font-size:52px;font-weight:800;color:#0891b2;line-height:1;letter-spacing:-.02em;">#${numero}</div>
-            </div>
-
-            <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:20px;">
               ${tr("Remate", remate)}
               ${fechaStr ? tr("Fecha", fechaStr) : ""}
               ${tr("RUT", rut)}
@@ -111,12 +119,14 @@ export async function POST(req) {
               ${tr("Forma de participación", modalidad || "—")}
             </table>
 
-            <div style="background:#fffbeb;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:14px 16px;margin:20px 0;font-size:13px;color:#92400e;line-height:1.6;">
-              <strong>Inscripción pendiente de aprobación.</strong><br>
-              ${casa} verificará tu comprobante de transferencia y confirmará tu participación. Recibirás un correo cuando sea aprobada.
-            </div>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#fffbeb">
+              <tr><td style="background-color:#fffbeb;border-left:4px solid #f59e0b;padding:14px 16px;font-size:13px;color:#92400e;line-height:1.6;">
+                <strong>Inscripción pendiente de aprobación.</strong><br>
+                ${casa} verificará tu comprobante de transferencia. Cuando sea aprobada recibirás un correo con tu número de postor e instrucciones para participar.
+              </td></tr>
+            </table>
 
-            <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;">¿Dudas? Contacta directamente a ${casa}${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#0891b2;'>" + email_casa + "</a>" : ""}.</p>
+            <p style="font-size:13px;color:#6b7280;margin:20px 0 0;line-height:1.6;">¿Dudas? Contacta directamente a ${casa}${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#0891b2;'>" + email_casa + "</a>" : ""}.</p>
           </div>
 
           ${FOOTER}
@@ -175,58 +185,83 @@ export async function POST(req) {
         </div>
       </body></html>`;
 
+      // Adjuntar comprobante si existe
+      let attachments = [];
+      if (comprobante_url) {
+        try {
+          const fileRes = await fetch(comprobante_url);
+          if (fileRes.ok) {
+            const buffer = await fileRes.arrayBuffer();
+            const base64 = Buffer.from(buffer).toString("base64");
+            const ext = comprobante_url.split("?")[0].split(".").pop()?.toLowerCase() || "jpg";
+            attachments = [{ filename: `comprobante-${numero}.${ext}`, content: base64 }];
+          }
+        } catch(e) { console.error("[send-email] Error adjuntando comprobante:", e.message); }
+      }
       const r = await sendMail({
         to: email_casa,
         subject: `Nueva inscripción #${numero} — ${nombre} en ${remate}`,
         html,
+        attachments,
       });
       results.push({ destino: "casa", ...r });
     }
 
     // ── 3. Email de CONFIRMACIÓN (postor verificado por martillero) ──
     if (tipo === "verificado" && email_cliente) {
-      const mensajeAcceso = esOnline
-        ? `<div style="background:#f0fdfe;border:1px solid #a5f3fc;border-radius:10px;padding:16px 20px;margin:20px 0;font-size:13px;color:#0e7490;line-height:1.8;">
-            Para participar en el remate <strong>online</strong> debes ingresar con tu <strong>número de postor</strong> y la <strong>clave de acceso de un solo uso</strong> que recibirás el día del remate. Esta clave es personal e intransferible y expirará tras su primer uso.
-          </div>`
-        : `<div style="background:#f0fdf4;border-left:4px solid #0891b2;border-radius:0 8px 8px 0;padding:14px 16px;margin:20px 0;font-size:13px;color:#0e7490;line-height:1.6;">
-            <strong>Todo listo para el remate presencial.</strong> Preséntate con tu número de postor el día del remate en el lugar indicado por ${casa}.
-          </div>`;
+      const esRemoto = modalidad && (modalidad.toLowerCase().includes("online") || modalidad.toLowerCase().includes("remoto"));
+      const portalUrl = body.portal_url || "https://gestionderemates.cl/dashboard";
+
+      const mensajeAcceso = esRemoto
+        ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0fdfe" style="margin:20px 0;">
+            <tr><td style="background-color:#f0fdfe;border:1px solid #a5f3fc;border-radius:10px;padding:16px 20px;font-size:13px;color:#0e7490;line-height:1.8;font-family:Arial,sans-serif;">
+              <strong>Participación remota:</strong><br>
+              Sigue las instrucciones de acceso que recibirás en el siguiente correo. Necesitarás ingresar a tu cuenta con tu correo y contraseña.
+            </td></tr>
+          </table>`
+        : `<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0fdf4" style="margin:20px 0;">
+            <tr><td style="background-color:#f0fdf4;border-left:4px solid #0891b2;padding:14px 16px;font-size:13px;color:#0e7490;line-height:1.6;font-family:Arial,sans-serif;">
+              <strong>Participación presencial:</strong><br>
+              Preséntate con tu número de postor el día del remate en el lugar indicado por <strong>${casa}</strong>.
+            </td></tr>
+          </table>`;
 
       const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
       <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
-        <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0f4f8">
+          <tr><td align="center" style="padding:32px 16px;">
+          <table width="580" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
 
-          ${buildHeader({
-            casa, logo_url,
-            titulo: "Confirmación de inscripción",
-            subtitulo: remate + (fechaStr ? " · " + fechaStr : ""),
-          })}
+          <tr><td>${buildHeader({ casa, logo_url, titulo: "Inscripción confirmada", subtitulo: remate + (fechaStr ? " · " + fechaStr : "") })}</td></tr>
 
-          <div style="background:#ffffff;padding:28px 36px;">
+          <tr><td style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
             <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${nombre}</strong></p>
-            <p style="font-size:14px;color:#6b7280;margin:0 0 20px;line-height:1.6;">
-              Hemos confirmado tu garantía y te damos la bienvenida al remate de <strong style="color:#1a1a1a;">${remate}</strong> de <strong style="color:#1a1a1a;">${casa}</strong>.
+            <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">
+              Hemos confirmado tu garantía y te damos la bienvenida al remate <strong style="color:#1a1a1a;">${remate}</strong> de <strong style="color:#1a1a1a;">${casa}</strong>.
             </p>
 
-            <div style="background:linear-gradient(135deg,#0f4c5c,#0891b2);border-radius:12px;text-align:center;padding:24px 16px;margin-bottom:20px;">
-              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.7);margin-bottom:8px;">Tu número de postor</div>
-              <div style="font-size:58px;font-weight:800;color:#ffffff;line-height:1;letter-spacing:-.02em;">#${numero}</div>
-              ${modalidad ? `<div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:10px;text-transform:uppercase;letter-spacing:.05em;">${modalidad}</div>` : ""}
-            </div>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0891b2">
+              <tr><td align="center" style="background-color:#0891b2;background:linear-gradient(135deg,#0f4c5c,#0891b2);border-radius:12px;padding:24px 16px;text-align:center;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#cce9f5;margin-bottom:8px;font-family:Arial,sans-serif;">Tu número de postor confirmado</div>
+                <div style="font-size:58px;font-weight:800;color:#ffffff;line-height:1;font-family:Arial,sans-serif;">#${numero}</div>
+                ${modalidad ? `<div style="font-size:13px;color:#cce9f5;margin-top:10px;text-transform:uppercase;font-family:Arial,sans-serif;">${modalidad}</div>` : ""}
+              </td></tr>
+            </table>
 
             ${mensajeAcceso}
 
-            <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;">¿Dudas? Contacta directamente a ${casa}${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#0891b2;'>" + email_casa + "</a>" : ""}.</p>
-          </div>
+            <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;font-family:Arial,sans-serif;">¿Dudas? Contacta directamente a <strong>${casa}</strong>${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#0891b2;'>" + email_casa + "</a>" : ""}.</p>
+          </td></tr>
 
-          ${FOOTER}
-        </div>
+          <tr><td>${FOOTER}</td></tr>
+          </table>
+          </td></tr>
+        </table>
       </body></html>`;
 
       const r = await sendMail({
         to: email_cliente,
-        subject: `Confirmación inscripción — Bienvenido al remate de ${casa}`,
+        subject: `¡Inscripción confirmada! — ${remate} · ${casa}`,
         html,
       });
       results.push({ destino: "verificado", ...r });
@@ -245,29 +280,43 @@ export async function POST(req) {
             subtitulo: "Tu cuenta de postor ha sido creada",
           })}
 
-          <div style="background:#ffffff;padding:28px 36px;">
+          <div style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
             <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${nombre}</strong></p>
-            <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">Tu cuenta de postor fue creada exitosamente. Usa estas credenciales para acceder a tu portal de postores.</p>
+            <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">Bienvenido a la plataforma de remates. Aquí encontrarás tus accesos para participar.</p>
 
-            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:20px 24px;margin-bottom:20px;">
               <div style="margin-bottom:14px;">
-                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:4px;">Correo / Usuario</div>
-                <div style="font-size:15px;font-weight:600;color:#1a1a1a;">${email_cliente}</div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:4px;font-family:Arial,sans-serif;">Correo / Usuario</div>
+                <div style="font-size:16px;font-weight:700;color:#1a1a1a;font-family:Arial,sans-serif;">${email_cliente}</div>
               </div>
+              ${temp_password ? `
               <div>
-                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:4px;">Contraseña provisoria</div>
-                <div style="font-size:22px;font-weight:800;color:#0891b2;letter-spacing:.08em;font-family:monospace;">${temp_password || "—"}</div>
-              </div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:4px;font-family:Arial,sans-serif;">Contraseña provisoria</div>
+                <div style="font-size:24px;font-weight:800;color:#0891b2;letter-spacing:.1em;font-family:monospace;">${temp_password}</div>
+              </div>` : `
+              <div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:4px;font-family:Arial,sans-serif;">Contraseña</div>
+                <div style="font-size:13px;color:#374151;font-family:Arial,sans-serif;">Usa tu contraseña habitual. Si no la recuerdas, puedes recuperarla desde el portal.</div>
+              </div>`}
             </div>
 
-            <div style="background:#fffbeb;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:24px;font-size:13px;color:#92400e;line-height:1.6;">
-              <strong>Esta contraseña es de un solo uso.</strong><br>
-              Al ingresar por primera vez debes cambiarla. Es personal e intransferible.
-            </div>
+            ${temp_password ? `
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#fffbeb" style="margin-bottom:20px;">
+              <tr><td style="background-color:#fffbeb;border-left:4px solid #f59e0b;padding:14px 16px;font-size:13px;color:#92400e;line-height:1.6;font-family:Arial,sans-serif;">
+                <strong>Al ingresar por primera vez se te pedirá crear una contraseña nueva.</strong> La clave provisoria es de un solo uso.
+              </td></tr>
+            </table>` : ""}
 
-            <a href="https://pecker.cl/dashboard" style="display:block;text-align:center;background:linear-gradient(135deg,#06B6D4,#14B8A6);color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 24px;border-radius:10px;margin-bottom:16px;">Ingresar a mi portal →</a>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
+              <tr><td align="center">
+                <a href="${body.portal_url||'https://gestionderemates.cl/dashboard'}" style="display:inline-block;background-color:#0891b2;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 36px;border-radius:10px;font-family:Arial,sans-serif;">
+                  Ingresar a mi cuenta →
+                </a>
+              </td></tr>
+            </table>
 
-            <p style="font-size:12px;color:#9ca3af;text-align:center;margin:0;">En caso de no poder ingresar, contacta a ${casa}.</p>
+            <p style="font-size:12px;color:#9ca3af;text-align:center;margin:0 0 16px;font-family:Arial,sans-serif;">gestionderemates.cl</p>
+            <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;font-family:Arial,sans-serif;">¿Dudas? Contacta a ${casa}${body.email_casa ? " en <a href='mailto:" + body.email_casa + "' style='color:#0891b2;'>" + body.email_casa + "</a>" : ""}.</p>
           </div>
 
           ${FOOTER}
