@@ -280,6 +280,32 @@ const CSS = `
   }
   .disp-footer-txt { font-size: .68rem; color: var(--mu); }
   .disp-footer-url { font-size: .7rem; font-weight: 600; color: var(--ac); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 700px) {
+    html, body { overflow: auto; height: auto; }
+    .disp-root { height: auto; min-height: 100dvh; overflow: visible; grid-template-rows: auto auto auto; }
+    .disp-header { padding: .55rem 1rem; }
+    .disp-body {
+      grid-template-columns: 1fr;
+      overflow: visible;
+      padding: .75rem;
+      gap: .75rem;
+      height: auto;
+    }
+    .disp-left { overflow: visible; min-height: 0; }
+    .disp-photo-wrap { min-height: 220px; max-height: 260px; flex: none; }
+    .disp-lot-title { font-size: 1rem; }
+    .disp-timer-num { font-size: 1.3rem; }
+    .disp-right { overflow: visible; }
+    .disp-bid-amount { font-size: 2.2rem; }
+    .disp-hist-card { display: none; }
+    .disp-footer { padding: .4rem 1rem; }
+    .disp-footer-txt { display: none; }
+    .disp-waiting-title { font-size: 1.4rem; }
+    .disp-sold-badge { font-size: 2.2rem; }
+    .disp-sold-monto { font-size: 1.8rem; }
+  }
 `;
 
 export default function DisplayPage({ params }) {
@@ -297,15 +323,39 @@ export default function DisplayPage({ params }) {
   const [flash,      setFlash]      = useState(false);
   const [photoIdx,   setPhotoIdx]   = useState(0);
 
-  const remateIdsRef  = React.useRef(null); // null = cargando, Set = listo
+  const remateIdsRef  = React.useRef(null);
   const loteActivoRef = React.useRef(null);
+  const [remateIds,   setRemateIds]   = useState(null);
 
-  // Estado para disparar la suscripción realtime DESPUÉS de tener los IDs
-  const [remateIds, setRemateIds] = useState(null);
+  // Auth
+  const [authChecked, setAuthChecked] = useState(false);
+  const [accesoDenegado, setAccesoDenegado] = useState(false);
+
+  useEffect(()=>{
+    if (!supabase || !slug) return;
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) { window.location.href = "/postor"; return; }
+
+      // Admins y martilleros pasan siempre
+      const { data: perfil } = await supabase.from("usuarios").select("roles").eq("id", session.user.id).maybeSingle();
+      const isStaff = perfil?.roles?.some(r => ["admin","martillero"].includes(r));
+      if (isStaff) { setAuthChecked(true); return; }
+
+      // Postores: verificar que estén verificados en un remate de esta casa
+      const { data: casaRow } = await supabase.from("casas").select("id").eq("slug", slug).single();
+      if (!casaRow) { setAccesoDenegado(true); setAuthChecked(true); return; }
+
+      const { data: postorRow } = await supabase.from("postores")
+        .select("id").eq("user_id", session.user.id).eq("casa_id", casaRow.id).eq("estado","verificado").maybeSingle();
+
+      if (!postorRow) { setAccesoDenegado(true); }
+      setAuthChecked(true);
+    });
+  },[slug]);
 
   /* Cargar casa + remates + lote activo inicial */
   useEffect(()=>{
-    if (!slug) return;
+    if (!authChecked || accesoDenegado || !slug) return;
     supabase.from("casas").select("*").eq("slug",slug).single()
       .then(async ({ data: casaData }) => {
         if (!casaData) { setRemateIds([]); return; }
@@ -330,9 +380,9 @@ export default function DisplayPage({ params }) {
       });
   },[slug]);
 
-  /* Realtime — se suscribe SOLO después de tener remateIds cargados */
+  /* Realtime — se suscribe SOLO después de tener remateIds cargados y auth OK */
   useEffect(()=>{
-    if (remateIds === null) return; // todavía cargando, no suscribir aún
+    if (remateIds === null || !authChecked || accesoDenegado) return;
     const remateIdsSet = new Set(remateIds);
 
     const ch = supabase.channel(`display-live-${slug}`)
@@ -385,6 +435,29 @@ export default function DisplayPage({ params }) {
   const timerColor = timer>8 ? "var(--gr)" : timer>4 ? "var(--yl)" : "var(--rd)";
   const timerPct   = (timer/15)*100;
   const badgeCls   = estado==="live" ? "disp-live-badge" : estado==="sold" ? "disp-live-badge sold" : "disp-live-badge wait";
+
+  if (!authChecked) return (
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0a0f1a",color:"#8ab4d4",fontSize:".9rem",gap:".75rem",flexDirection:"column"}}>
+      <div style={{width:28,height:28,border:"2.5px solid #1a3a5c",borderTopColor:"#38B2F6",borderRadius:"50%",animation:"spin .8s linear infinite"}}/>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      Verificando acceso...
+    </div>
+  );
+
+  if (accesoDenegado) return (
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0a0f1a",color:"#e0eaf4",fontFamily:"Inter,sans-serif",padding:"2rem"}}>
+      <div style={{textAlign:"center",maxWidth:380}}>
+        <div style={{fontSize:"3rem",marginBottom:"1rem"}}>🔒</div>
+        <div style={{fontSize:"1.2rem",fontWeight:700,marginBottom:".75rem"}}>Acceso restringido</div>
+        <div style={{fontSize:".88rem",color:"#5a7fa8",lineHeight:1.6,marginBottom:"1.5rem"}}>
+          Debes estar inscrito y verificado en este remate para acceder a la sala en vivo.
+        </div>
+        <a href="/postor" style={{display:"inline-block",padding:".75rem 1.75rem",background:"#38B2F6",color:"#fff",borderRadius:10,fontWeight:700,textDecoration:"none",fontSize:".9rem"}}>
+          Ir a mi portal →
+        </a>
+      </div>
+    </div>
+  );
 
   return (
     <div className="disp-root">

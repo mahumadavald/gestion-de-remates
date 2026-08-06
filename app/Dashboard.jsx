@@ -7496,13 +7496,29 @@ function exportCSV(){
 
         {/* ══ DEVOLUCIONES ══ */}
         {page==="devoluciones" && (()=>{
-          // ── Postores del remate seleccionado con datos bancarios ──
+          // ── Postores del remate seleccionado verificados ──
           const postoresDev = dbPostores.filter(p =>
             (!selectedRemate || p.remate_id === selectedRemate) &&
             (p.estado === "verificado" || p.estado === "aprobada" || p.estado === "aprobado")
           );
 
-          // Calcular si devuelto o pendiente (campo devolucion_enviada en Supabase o estado local)
+          // Nombres de postores que ganaron al menos un lote (desde DB y sesión actual)
+          const nombresCompradores = new Set([
+            ...dbLotes
+              .filter(l => l.postor && (!selectedRemate || l.remate_id === selectedRemate))
+              .map(l => l.postor),
+            ...liquidaciones
+              .filter(l => !selectedRemate || l.remateId === selectedRemate)
+              .map(l => l.postor),
+          ]);
+
+          const compradores   = postoresDev.filter(p =>
+            nombresCompradores.has(p.nombre) || nombresCompradores.has(p.razon_social)
+          );
+          const noCompradores = postoresDev.filter(p =>
+            !nombresCompradores.has(p.nombre) && !nombresCompradores.has(p.razon_social)
+          );
+
           const marcarDevuelto = async (postorId) => {
             await supabase.from("postores").update({ devolucion_enviada: true }).eq("id", postorId);
             const { data } = await supabase.from("postores").select("*").order("numero");
@@ -7510,17 +7526,21 @@ function exportCSV(){
             notify("Devolución marcada como enviada ✓", "sold");
           };
 
-          const pendientesCount = postoresDev.filter(p => !p.devolucion_enviada).length;
+          const pendientesCount = noCompradores.filter(p => !p.devolucion_enviada).length;
+
+          const thStyle = {padding:".55rem .75rem",textAlign:"left",fontSize:".72rem",fontWeight:700,letterSpacing:".04em",whiteSpace:"nowrap"};
+          const tdBase  = {padding:".55rem .75rem"};
 
           return (
           <div className="page">
 
             {/* Stats */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"1rem",marginBottom:"1.5rem"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"1rem",marginBottom:"1.5rem"}}>
               {[
-                {label:"Total postores", val: postoresDev.length, color:"var(--ac)"},
-                {label:"Pendientes de devolución", val: pendientesCount, color:"#f59e0b"},
-                {label:"Devueltas", val: postoresDev.filter(p=>p.devolucion_enviada).length, color:"#22c55e"},
+                {label:"Total postores",      val: postoresDev.length,                                  color:"var(--ac)"},
+                {label:"Compradores",          val: compradores.length,                                   color:"var(--gr)"},
+                {label:"No compradores",       val: noCompradores.length,                                 color:"#f59e0b"},
+                {label:"Garantías devueltas",  val: noCompradores.filter(p=>p.devolucion_enviada).length, color:"#22c55e"},
               ].map(s=>(
                 <div key={s.label} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1rem 1.2rem"}}>
                   <div style={{fontSize:"1.6rem",fontWeight:800,color:s.color}}>{s.val}</div>
@@ -7529,93 +7549,166 @@ function exportCSV(){
               ))}
             </div>
 
-            {/* Botón notificar */}
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1rem"}}>
-              <div style={{fontSize:".82rem",fontWeight:600,color:"var(--wh2)"}}>
-                Datos bancarios para devolución de garantía
-              </div>
-              <button className="btn-primary" disabled={notifNcLoading} style={{fontSize:".78rem"}} onClick={async () => {
-                setNotifNcLoading(true);
-                try {
-                  const targetRemateId = selectedRemate || salaRemateId;
-                  if (!targetRemateId) { notify("Selecciona un remate primero.","inf"); return; }
-                  const sinDevolver = postoresDev.filter(p => !p.devolucion_enviada && p.email);
-                  if (!sinDevolver.length) { notify("No hay pendientes por notificar.","inf"); return; }
-                  const remateInfo = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===targetRemateId);
-                  let enviados = 0;
-                  for (const p of sinDevolver) {
-                    const devolucionUrl = `https://gestionderemates.cl/devoluciones?p=${p.id}`;
-                    await fetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
-                      body:JSON.stringify({tipo:"no_comprador",email_cliente:p.email,nombre:p.nombre||"Postor",
-                        numero:p.numero||"—",remate:remateInfo?.name||"Remate",
-                        casa:session?.casaNombre||"Casa de Remates",logo_url:null,devolucion_url:devolucionUrl})});
-                    enviados++;
-                  }
-                  notify(`📧 ${enviados} correos enviados.`,"sold");
-                } catch { notify("Error al enviar.","inf"); }
-                finally { setNotifNcLoading(false); }
-              }}>
-                {notifNcLoading ? "Enviando..." : "📧 Notificar pendientes"}
-              </button>
-            </div>
-
-            {/* Tabla de postores con datos bancarios */}
-            {postoresDev.length === 0 ? (
+            {postoresDev.length === 0 && (
               <div style={{padding:"3rem",textAlign:"center",color:"var(--mu)",fontSize:".85rem",background:"var(--s2)",borderRadius:12,border:"1px solid var(--b1)"}}>
                 No hay postores verificados en este remate aún.
               </div>
-            ) : (
-              <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,overflow:"hidden"}}>
-                <div style={{overflowX:"auto"}}>
-                <table style={{width:"100%",minWidth:900,borderCollapse:"collapse"}}>
-                  <thead>
-                    <tr style={{background:"#0D9488",color:"#fff"}}>
-                      {["N°","Nombre","RUT","Email","Banco","Tipo cuenta","N° Cuenta","Modalidad","Estado","Acción"].map(h=>(
-                        <th key={h} style={{padding:".55rem .75rem",textAlign:"left",fontSize:".72rem",fontWeight:700,letterSpacing:".04em",whiteSpace:"nowrap"}}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {postoresDev.map((p,i)=>(
-                      <tr key={p.id} style={{borderBottom:"1px solid var(--b1)",background:i%2===0?"var(--s2)":"var(--s1)"}}>
-                        <td style={{padding:".55rem .75rem",fontWeight:700,color:"var(--ac)",fontSize:".8rem"}}>#{String(p.numero||i+1).padStart(2,"0")}</td>
-                        <td style={{padding:".55rem .75rem",fontWeight:600,fontSize:".82rem",whiteSpace:"nowrap"}}>{p.nombre||p.razon_social||"—"}</td>
-                        <td style={{padding:".55rem .75rem",fontSize:".75rem",color:"var(--mu2)",fontFamily:"monospace"}}>{p.rut||"—"}</td>
-                        <td style={{padding:".55rem .75rem",fontSize:".73rem",color:"var(--mu2)"}}>{p.email||"—"}</td>
-                        <td style={{padding:".55rem .75rem",fontSize:".78rem",fontWeight:600,color: p.banco ? "var(--wh2)" : "var(--mu)"}}>{p.banco||<span style={{color:"#f59e0b",fontSize:".7rem"}}>Sin datos</span>}</td>
-                        <td style={{padding:".55rem .75rem",fontSize:".75rem",color:"var(--mu2)"}}>{p.tipo_cuenta||"—"}</td>
-                        <td style={{padding:".55rem .75rem",fontSize:".78rem",fontWeight:600,fontFamily:"monospace"}}>{p.numero_cuenta||"—"}</td>
-                        <td style={{padding:".55rem .75rem"}}>
-                          <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .5rem",borderRadius:20,background:p.modalidad==="PRESENCIAL"?"rgba(139,92,246,.12)":"rgba(56,178,246,.1)",color:p.modalidad==="PRESENCIAL"?"#8b5cf6":"var(--ac)"}}>
-                            {p.modalidad||"REMOTO"}
-                          </span>
-                        </td>
-                        <td style={{padding:".55rem .75rem"}}>
-                          {p.devolucion_enviada
-                            ? <span style={{fontSize:".68rem",fontWeight:700,color:"#22c55e",background:"rgba(34,197,94,.1)",padding:".2rem .55rem",borderRadius:20}}>✓ Devuelta</span>
-                            : <span style={{fontSize:".68rem",fontWeight:700,color:"#f59e0b",background:"rgba(245,158,11,.1)",padding:".2rem .55rem",borderRadius:20}}>Pendiente</span>
-                          }
-                        </td>
-                        <td style={{padding:".55rem .75rem"}}>
-                          {!p.devolucion_enviada && (
-                            <button className="btn-primary" style={{fontSize:".65rem",padding:".25rem .6rem",whiteSpace:"nowrap"}}
-                              onClick={()=>marcarDevuelto(p.id)}>
-                              ✓ Marcar devuelta
-                            </button>
-                          )}
-                        </td>
+            )}
+
+            {/* ── SECCIÓN 1: COMPRADORES ── */}
+            {compradores.length > 0 && (
+              <div style={{marginBottom:"2rem"}}>
+                <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:".85rem"}}>
+                  <div style={{width:4,height:20,borderRadius:4,background:"var(--gr)"}}/>
+                  <div style={{fontSize:".9rem",fontWeight:700,color:"var(--wh2)"}}>Listado Compradores</div>
+                  <span style={{fontSize:".72rem",fontWeight:700,color:"var(--gr)",background:"rgba(20,184,166,.1)",padding:".15rem .55rem",borderRadius:20}}>{compradores.length}</span>
+                  <div style={{flex:1}}/>
+                  <button className="btn-sec" style={{fontSize:".75rem"}} onClick={()=>setPage("adjudicac")}>
+                    Ver adjudicaciones →
+                  </button>
+                </div>
+                <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,overflow:"hidden"}}>
+                  <div style={{overflowX:"auto"}}>
+                  <table style={{width:"100%",minWidth:600,borderCollapse:"collapse"}}>
+                    <thead>
+                      <tr style={{background:"#0D9488",color:"#fff"}}>
+                        {["N°","Nombre","RUT","Email","Modalidad","Acción"].map(h=>(
+                          <th key={h} style={thStyle}>{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {compradores.map((p,i)=>(
+                        <tr key={p.id} style={{borderBottom:"1px solid var(--b1)",background:i%2===0?"var(--s2)":"var(--s1)"}}>
+                          <td style={{...tdBase,fontWeight:700,color:"var(--ac)",fontSize:".8rem"}}>#{String(p.numero||i+1).padStart(2,"0")}</td>
+                          <td style={{...tdBase,fontWeight:600,fontSize:".82rem",whiteSpace:"nowrap"}}>{p.nombre||p.razon_social||"—"}</td>
+                          <td style={{...tdBase,fontSize:".75rem",color:"var(--mu2)",fontFamily:"monospace"}}>{p.rut||"—"}</td>
+                          <td style={{...tdBase,fontSize:".73rem",color:"var(--mu2)"}}>{p.email||"—"}</td>
+                          <td style={tdBase}>
+                            <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .5rem",borderRadius:20,background:p.modalidad==="PRESENCIAL"?"rgba(139,92,246,.12)":"rgba(56,178,246,.1)",color:p.modalidad==="PRESENCIAL"?"#8b5cf6":"var(--ac)"}}>
+                              {p.modalidad||"REMOTO"}
+                            </span>
+                          </td>
+                          <td style={tdBase}>
+                            <button className="btn-sec" style={{fontSize:".65rem",padding:".25rem .7rem"}}
+                              onClick={()=>setPage("adjudicac")}>
+                              Ver Liquidación →
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Aviso datos faltantes */}
-            {postoresDev.some(p=>!p.banco) && (
-              <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"rgba(245,158,11,.07)",border:"1px solid rgba(245,158,11,.2)",borderRadius:8,fontSize:".76rem",color:"var(--mu2)"}}>
-                ⚠️ Algunos postores no tienen datos bancarios registrados. Puedes notificarles con el botón de arriba para que los completen vía el link de devolución.
+            {/* ── SECCIÓN 2: NO COMPRADORES (DEVOLUCIONES) ── */}
+            {noCompradores.length > 0 && (
+              <div>
+                <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:".85rem"}}>
+                  <div style={{width:4,height:20,borderRadius:4,background:"#f59e0b"}}/>
+                  <div style={{fontSize:".9rem",fontWeight:700,color:"var(--wh2)"}}>No Compradores — Devolución de Garantía</div>
+                  <span style={{fontSize:".72rem",fontWeight:700,color:"#f59e0b",background:"rgba(245,158,11,.1)",padding:".15rem .55rem",borderRadius:20}}>{noCompradores.length}</span>
+                  <div style={{flex:1}}/>
+                  <button className="btn-primary" disabled={notifNcLoading} style={{fontSize:".75rem"}} onClick={async () => {
+                    setNotifNcLoading(true);
+                    try {
+                      const targetRemateId = selectedRemate || salaRemateId;
+                      if (!targetRemateId) { notify("Selecciona un remate primero.","inf"); return; }
+                      const sinDevolver = noCompradores.filter(p => !p.devolucion_enviada && p.email);
+                      if (!sinDevolver.length) { notify("No hay pendientes por notificar.","inf"); return; }
+                      const remateInfo = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===targetRemateId);
+                      let enviados = 0;
+                      for (const p of sinDevolver) {
+                        const devolucionUrl = `https://gestionderemates.cl/devoluciones?p=${p.id}`;
+                        await fetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
+                          body:JSON.stringify({tipo:"no_comprador",email_cliente:p.email,nombre:p.nombre||"Postor",
+                            numero:p.numero||"—",remate:remateInfo?.name||"Remate",
+                            casa:session?.casaNombre||"Casa de Remates",logo_url:null,devolucion_url:devolucionUrl})});
+                        enviados++;
+                      }
+                      notify(`📧 ${enviados} correos enviados.`,"sold");
+                    } catch { notify("Error al enviar.","inf"); }
+                    finally { setNotifNcLoading(false); }
+                  }}>
+                    {notifNcLoading ? "Enviando..." : "📧 Notificar pendientes"}
+                  </button>
+                </div>
+
+                <div style={{display:"flex",flexDirection:"column",gap:".75rem"}}>
+                  {noCompradores.map((p,i)=>{
+                    const tieneCuenta = p.banco && p.numero_cuenta;
+                    const copiarDatos = () => {
+                      const txt = [
+                        `Titular: ${p.nombre||p.razon_social||"—"}`,
+                        `RUT: ${p.rut||"—"}`,
+                        `Banco: ${p.banco||"—"}`,
+                        `Tipo de cuenta: ${p.tipo_cuenta||"—"}`,
+                        `N° de cuenta: ${p.numero_cuenta||"—"}`,
+                        `Email: ${p.email||"—"}`,
+                      ].join("\n");
+                      navigator.clipboard.writeText(txt).then(()=>notify("Datos copiados al portapapeles ✓","sold")).catch(()=>notify("No se pudo copiar","inf"));
+                    };
+                    return (
+                    <div key={p.id} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1rem 1.2rem",opacity:p.devolucion_enviada?.8:1}}>
+                      {/* Fila superior: nombre + estado + marcar */}
+                      <div style={{display:"flex",alignItems:"center",gap:".75rem",flexWrap:"wrap",marginBottom:".75rem"}}>
+                        <span style={{fontWeight:700,color:"#f59e0b",fontSize:".8rem"}}>#{String(p.numero||i+1).padStart(2,"0")}</span>
+                        <span style={{fontWeight:700,fontSize:".9rem",color:"var(--wh2)"}}>{p.nombre||p.razon_social||"—"}</span>
+                        <span style={{fontSize:".72rem",color:"var(--mu2)",fontFamily:"monospace"}}>{p.rut||"—"}</span>
+                        <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .5rem",borderRadius:20,background:p.modalidad==="PRESENCIAL"?"rgba(139,92,246,.12)":"rgba(56,178,246,.1)",color:p.modalidad==="PRESENCIAL"?"#8b5cf6":"var(--ac)"}}>
+                          {p.modalidad||"REMOTO"}
+                        </span>
+                        <div style={{flex:1}}/>
+                        {p.devolucion_enviada
+                          ? <span style={{fontSize:".72rem",fontWeight:700,color:"#22c55e",background:"rgba(34,197,94,.1)",padding:".25rem .7rem",borderRadius:20}}>✓ Garantía devuelta</span>
+                          : <button className="btn-primary" style={{fontSize:".72rem",padding:".3rem .75rem"}} onClick={()=>marcarDevuelto(p.id)}>✓ Marcar devuelta</button>
+                        }
+                      </div>
+
+                      {/* Bloque cuenta bancaria */}
+                      {tieneCuenta ? (
+                        <div style={{background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:8,padding:".7rem 1rem",display:"flex",alignItems:"center",gap:"1rem",flexWrap:"wrap"}}>
+                          <div style={{display:"flex",gap:"1.5rem",flexWrap:"wrap",flex:1}}>
+                            <div>
+                              <div style={{fontSize:".62rem",fontWeight:600,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".15rem"}}>Banco</div>
+                              <div style={{fontSize:".85rem",fontWeight:700,color:"var(--wh2)"}}>{p.banco}</div>
+                            </div>
+                            <div>
+                              <div style={{fontSize:".62rem",fontWeight:600,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".15rem"}}>Tipo</div>
+                              <div style={{fontSize:".85rem",fontWeight:700,color:"var(--wh2)"}}>{p.tipo_cuenta||"—"}</div>
+                            </div>
+                            <div>
+                              <div style={{fontSize:".62rem",fontWeight:600,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".15rem"}}>N° de cuenta</div>
+                              <div style={{fontSize:".95rem",fontWeight:800,color:"var(--ac)",fontFamily:"monospace",letterSpacing:".03em"}}>{p.numero_cuenta}</div>
+                            </div>
+                            <div>
+                              <div style={{fontSize:".62rem",fontWeight:600,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".15rem"}}>Email</div>
+                              <div style={{fontSize:".78rem",color:"var(--mu2)"}}>{p.email||"—"}</div>
+                            </div>
+                          </div>
+                          <button onClick={copiarDatos} style={{background:"rgba(56,178,246,.12)",border:"1px solid rgba(56,178,246,.25)",color:"var(--ac)",borderRadius:8,padding:".45rem .9rem",fontSize:".78rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+                            📋 Copiar datos
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{background:"rgba(245,158,11,.07)",border:"1px solid rgba(245,158,11,.2)",borderRadius:8,padding:".6rem 1rem",fontSize:".78rem",color:"#f59e0b",fontWeight:600}}>
+                          ⚠️ Sin datos bancarios — notificar al postor para que los complete
+                        </div>
+                      )}
+                    </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Cuando no hay remate seleccionado y hay postores sin separar todavía */}
+            {postoresDev.length > 0 && compradores.length === 0 && noCompradores.length === 0 && (
+              <div style={{padding:"2rem",textAlign:"center",color:"var(--mu)",fontSize:".82rem",background:"var(--s2)",borderRadius:12,border:"1px solid var(--b1)"}}>
+                Selecciona un remate para ver la separación de compradores y no compradores.
               </div>
             )}
 
