@@ -145,16 +145,16 @@ export async function POST(req) {
     if (tipo === "casa" && email_casa) {
       const trN = (label, value) => !value ? "" : `
         <tr>
-          <td style="padding:11px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;background:#0f2a3c;border-bottom:1px solid #1e3a4a;white-space:nowrap;width:38%;">${label}</td>
-          <td style="padding:11px 16px;font-size:14px;font-weight:700;color:#e2e8f0;background:#0d2233;border-bottom:1px solid #1e3a4a;">${value}</td>
+          <td style="padding:11px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;background:#f3f4f6;border-bottom:1px solid #e5e7eb;white-space:nowrap;width:38%;">${label}</td>
+          <td style="padding:11px 16px;font-size:14px;font-weight:700;color:#111827;background:#ffffff;border-bottom:1px solid #e5e7eb;">${value}</td>
         </tr>`;
 
       const datosBancarios = [banco, tipo_cuenta, numero_cuenta].filter(Boolean).join(" / ") || "—";
       const dirComuna = [direccion, comuna].filter(Boolean).join(", ") || "—";
 
       const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-      <body style="margin:0;padding:0;background:#071923;font-family:Arial,Helvetica,sans-serif;">
-        <div style="max-width:600px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 32px rgba(0,0,0,.5);">
+      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
+        <div style="max-width:600px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
 
           ${buildHeader({
             casa, logo_url,
@@ -163,13 +163,13 @@ export async function POST(req) {
           })}
 
           <!-- Cuerpo -->
-          <div style="background:#0d2233;padding:28px 36px 32px;">
+          <div style="background:#ffffff;padding:28px 36px 32px;">
 
-            <p style="font-size:14px;color:#94a3b8;margin:0 0 20px;line-height:1.7;font-family:Arial,sans-serif;">
+            <p style="font-size:14px;color:#4b5563;margin:0 0 20px;line-height:1.7;font-family:Arial,sans-serif;">
               El siguiente postor completó su formulario de inscripción y adjuntó el comprobante de garantía.
             </p>
 
-            <table style="width:100%;border-collapse:collapse;border:1px solid #1e3a4a;border-radius:10px;overflow:hidden;margin-bottom:24px;">
+            <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;">
               ${trN("Nombres / Razón Social", nombre)}
               ${trN("RUT", rut)}
               ${trN("Correo Electrónico", email_cliente)}
