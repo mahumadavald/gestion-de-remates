@@ -57,8 +57,8 @@ function tr(label, value) {
   if (!value) return "";
   return `
     <tr>
-      <td style="padding:10px 14px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6b7280;background:#f9fafb;border-bottom:1px solid #e5e7eb;white-space:nowrap;width:1%;">${label}</td>
-      <td style="padding:10px 14px;font-size:14px;font-weight:600;color:#1a1a1a;background:#ffffff;border-bottom:1px solid #e5e7eb;">${value}</td>
+      <td style="padding:11px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;background:#f3f4f6;border-bottom:1px solid #e5e7eb;white-space:nowrap;width:38%;">${label}</td>
+      <td style="padding:11px 16px;font-size:14px;font-weight:700;color:#111827;background:#ffffff;border-bottom:1px solid #e5e7eb;">${value}</td>
     </tr>
   `;
 }
@@ -322,7 +322,7 @@ export async function POST(req) {
 
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
               <tr><td align="center">
-                <a href="${body.portal_url||'https://gestionderemates.cl/dashboard'}" style="display:inline-block;background-color:#0891b2;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 36px;border-radius:10px;font-family:Arial,sans-serif;">
+                <a href="${body.portal_url||'https://gestionderemates.cl/postor'}" style="display:inline-block;background:linear-gradient(135deg,#0891b2,#06b6d4);color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 36px;border-radius:10px;font-family:Arial,sans-serif;">
                   Ingresar a mi cuenta →
                 </a>
               </td></tr>
