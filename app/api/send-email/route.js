@@ -143,41 +143,33 @@ export async function POST(req) {
 
     // ── 2. Email al MARTILLERO / CASA ────────────────────────────────
     if (tipo === "casa" && email_casa) {
-      const logoBlock = logo_url
-        ? `<img src="${logo_url}" alt="${casa}" style="max-height:64px;max-width:200px;object-fit:contain;display:block;margin:0 auto;" />`
-        : `<div style="font-size:20px;font-weight:800;color:#0f2a3c;letter-spacing:-.02em;font-family:Arial,sans-serif;">${casa}</div>`;
-
       const trN = (label, value) => !value ? "" : `
         <tr>
-          <td style="padding:11px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;background:#f3f4f6;border-bottom:1px solid #e5e7eb;white-space:nowrap;width:38%;">${label}</td>
-          <td style="padding:11px 16px;font-size:14px;font-weight:700;color:#111827;background:#ffffff;border-bottom:1px solid #e5e7eb;">${value}</td>
+          <td style="padding:11px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;background:#0f2a3c;border-bottom:1px solid #1e3a4a;white-space:nowrap;width:38%;">${label}</td>
+          <td style="padding:11px 16px;font-size:14px;font-weight:700;color:#e2e8f0;background:#0d2233;border-bottom:1px solid #1e3a4a;">${value}</td>
         </tr>`;
 
       const datosBancarios = [banco, tipo_cuenta, numero_cuenta].filter(Boolean).join(" / ") || "—";
       const dirComuna = [direccion, comuna].filter(Boolean).join(", ") || "—";
 
       const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
-        <div style="max-width:600px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+      <body style="margin:0;padding:0;background:#071923;font-family:Arial,Helvetica,sans-serif;">
+        <div style="max-width:600px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 32px rgba(0,0,0,.5);">
 
-          <!-- Logo superior -->
-          <div style="background:#ffffff;padding:28px 36px 22px;text-align:center;border-bottom:3px solid #0891b2;">
-            ${logoBlock}
-          </div>
+          ${buildHeader({
+            casa, logo_url,
+            titulo: "Notificación de nuevo participante",
+            subtitulo: "Se registró una nueva inscripción para: " + remate + (fechaStr ? " · " + fechaStr : ""),
+          })}
 
           <!-- Cuerpo -->
-          <div style="background:#ffffff;padding:28px 36px 32px;">
+          <div style="background:#0d2233;padding:28px 36px 32px;">
 
-            <h1 style="font-size:20px;font-weight:800;color:#0891b2;letter-spacing:.04em;text-transform:uppercase;margin:0 0 16px;font-family:Arial,sans-serif;">
-              Notificación de nuevo participante
-            </h1>
-
-            <p style="font-size:14px;color:#374151;margin:0 0 22px;line-height:1.6;font-family:Arial,sans-serif;">
-              Se ha registrado una nueva inscripción para el remate:
-              <strong style="color:#111827;">${remate}${fechaStr ? " · " + fechaStr : ""}</strong>
+            <p style="font-size:14px;color:#94a3b8;margin:0 0 20px;line-height:1.7;font-family:Arial,sans-serif;">
+              El siguiente postor completó su formulario de inscripción y adjuntó el comprobante de garantía.
             </p>
 
-            <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;">
+            <table style="width:100%;border-collapse:collapse;border:1px solid #1e3a4a;border-radius:10px;overflow:hidden;margin-bottom:24px;">
               ${trN("Nombres / Razón Social", nombre)}
               ${trN("RUT", rut)}
               ${trN("Correo Electrónico", email_cliente)}
@@ -185,7 +177,7 @@ export async function POST(req) {
               ${trN("Giro", giro)}
               ${trN("Dirección / Comuna", dirComuna)}
               ${trN("Datos Bancarios", datosBancarios)}
-              ${trN("Forma Participación", modalidad)}
+              ${trN("Forma de Participación", modalidad)}
             </table>
 
             ${comprobante_url ? `
@@ -193,7 +185,7 @@ export async function POST(req) {
               <tr>
                 <td align="center">
                   <a href="${comprobante_url}" target="_blank"
-                    style="display:inline-block;background:#1d4ed8;color:#ffffff;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;padding:14px 32px;border-radius:8px;font-family:Arial,sans-serif;">
+                    style="display:inline-block;background:linear-gradient(135deg,#0891b2,#06b6d4);color:#ffffff;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:14px 36px;border-radius:8px;font-family:Arial,sans-serif;">
                     Ver comprobante adjunto
                   </a>
                 </td>
