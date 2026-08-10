@@ -176,9 +176,9 @@ function ProximosRemates() {
       <div className="topbar">
         <a className="topbar-brand" href="https://takka.cl">
           <svg width="26" height="26" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="4" width="32" height="9" rx="3" fill="#0891b2"/>
-            <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#0891b2"/>
-            <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
+            <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
+            <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
+            <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
           </svg>
           <span className="topbar-name">TAKKA</span>
         </a>

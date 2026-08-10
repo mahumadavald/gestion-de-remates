@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = SUPA_URL ? createClient(SUPA_URL, SUPA_KEY) : null;
+const SUPA_URL = "https://xqkfcqibukghtyfjcwfb.supabase.co";
+const SUPA_KEY = "sb_publishable_m2bABYE65JScB4oCJUBmFg_3eVzUuIR";
+const supabase = createClient(SUPA_URL, SUPA_KEY);
 
 const CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -74,12 +74,11 @@ export default function ResetPasswordPage() {
       <div className="wrap">
         <div className="card">
           <div className="logo">
-            <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
-              <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
-              <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
+            <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1a1a1a" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
             </svg>
-            <span style={{fontWeight:700,fontSize:".88rem",color:"#374151",letterSpacing:"-.01em"}}>TAKKA</span>
+            <span style={{fontWeight:700,fontSize:".88rem",color:"#374151",letterSpacing:"-.01em"}}>GR Auction Software</span>
           </div>
 
           {done ? (

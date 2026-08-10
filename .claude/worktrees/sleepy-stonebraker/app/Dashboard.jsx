@@ -4,22 +4,22 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContai
 import { createClient } from "@supabase/supabase-js";
 
 // ── Supabase client ───────────────────────────────────────────────
-const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = SUPA_URL ? createClient(SUPA_URL, SUPA_KEY) : null;
+const SUPA_URL = "https://xqkfcqibukghtyfjcwfb.supabase.co";
+const SUPA_KEY = "sb_publishable_m2bABYE65JScB4oCJUBmFg_3eVzUuIR";
+const supabase = createClient(SUPA_URL, SUPA_KEY);
 
 
 // ── BRAND ─────────────────────────────────────────────────────────
-const TakkaLogo = ({ collapsed = false }) => (
+const GRLogo = ({ collapsed = false }) => (
   <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="3" width="32" height="9" rx="3" fill="rgba(255,255,255,.92)"/>
-      <polygon points="13,12 24,12 18,34 13,34" fill="rgba(255,255,255,.92)"/>
-      <polygon points="18,34 24,12 24,34" fill="rgba(255,255,255,.48)"/>
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <path d="M18 3C9.716 3 3 9.716 3 18s6.716 15 15 15 15-6.716 15-15S26.284 3 18 3z" fill="none"/>
+      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
     </svg>
     {!collapsed && (
-      <div style={{ fontFamily:"'Poppins',sans-serif", fontWeight:800, fontSize:".92rem", color:"#fff", letterSpacing:".1em" }}>
-        TAKKA
+      <div style={{ fontFamily:"'Poppins',sans-serif", fontWeight:700, fontSize:".88rem", color:"#fff", letterSpacing:".02em" }}>
+        Auction Software
       </div>
     )}
   </div>
@@ -72,16 +72,15 @@ const calcLiquidacion = (lotes, postor) => {
   let totalEx = 0, totalAf = 0, totalCom = 0, totalGastosAdm = 0;
   const lineas = [];
   lotes.forEach(l => {
-    const afecto    = l.afectoIva || false;
     const com       = Math.round(l.monto * (l.comPct ?? 3) / 100);
     const gastosAdm = l.motorizado ? GASTO_ADMIN_MOTORIZADO : 0;
-    if(afecto) { totalAf += l.monto; } else { totalEx += l.monto; }
+    totalEx       += l.monto;
     totalCom      += com;
     totalGastosAdm+= gastosAdm;
-    totalAf       += gastosAdm;
-    lineas.push({ lote:l.lote, exp:l.exp||"", monto:l.monto, com, gastosAdm, motorizado:l.motorizado, comPct:l.comPct??3, afectoIva:afecto });
+    totalAf       += gastosAdm; // comisión va aparte en totalCom
+    lineas.push({ lote:l.lote, exp:l.exp||"", monto:l.monto, com, gastosAdm, motorizado:l.motorizado, comPct:l.comPct??3 });
   });
-  const ivaBase   = totalCom + totalAf; // comisión AF + lotes AF + gastos admin
+  const ivaBase   = totalCom + totalAf; // comisión + gastos admin son AF
   const iva       = Math.round(ivaBase * IVA);
   const total     = totalEx + totalCom + totalAf + iva;
   const garantia  = postor ? (GARANTIAS.find(g=>g.postor===postor.name&&g.estado==="aprobada")?.monto||0) : 0;
@@ -114,7 +113,7 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
   .dato-key{color:#666;min-width:90px;flex-shrink:0;}
   .dato-val{font-weight:600;color:#111;}
   table{width:100%;border-collapse:collapse;margin-bottom:1.2rem;font-size:9.5pt;}
-  thead tr{background:#0D9488;color:#fff;}
+  thead tr{background:#1e3a5f;color:#fff;}
   thead th{padding:.4rem .6rem;text-align:left;font-size:8.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
   thead th.r{text-align:right;}
   tbody tr{border-bottom:1px solid #e5e7eb;}
@@ -235,7 +234,7 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
 </div>
 
 <div class="footer">
-  Documento generado por TAKKA · ${new Date().toLocaleDateString("es-CL")} · takka.cl
+  Documento generado por GR Auction Software · ${new Date().toLocaleDateString("es-CL")} · gestionderemates.cl
 </div>
 
 <script>window.onload=()=>{window.print();}<\/script>
@@ -279,39 +278,20 @@ button,input,select{font-family:'Inter',sans-serif;}
 .app{display:flex;height:100vh;overflow:hidden;}
 
 /* ── SIDEBAR ── */
-.sidebar{width:252px;background:linear-gradient(180deg,#0e7490 0%,#06B6D4 60%,#14B8A6 100%);border-right:none;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;overflow-x:hidden;transition:width .22s ease;}
-.sidebar.collapsed{width:64px;}
-.sb-logo{padding:1rem 1rem .9rem;border-bottom:1px solid rgba(255,255,255,.15);display:flex;align-items:center;gap:.7rem;min-height:60px;}
-.sb-toggle{margin-left:auto;flex-shrink:0;background:transparent;border:none;cursor:pointer;padding:.3rem;border-radius:6px;color:rgba(255,255,255,.7);display:flex;align-items:center;transition:background .15s,color .15s;}
-.sb-toggle:hover{background:rgba(255,255,255,.15);color:#fff;}
-.sidebar.collapsed .sb-toggle{margin-left:0;}
-.sb-user-card{padding:.85rem 1rem 1rem;border-bottom:1px solid rgba(255,255,255,.15);display:flex;align-items:center;gap:.75rem;overflow:hidden;}
-.sb-ava{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.25);border:1.5px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;flex-shrink:0;}
-.sb-user-info{flex:1;min-width:0;}
-.sb-uname{font-size:.82rem;font-weight:700;color:#fff;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.sb-urole{font-size:.7rem;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;}
-.sb-section{padding:.8rem 1rem .25rem;font-size:.6rem;font-weight:700;letter-spacing:.09em;color:rgba(255,255,255,.5);text-transform:uppercase;white-space:nowrap;overflow:hidden;}
-.sidebar.collapsed .sb-section{opacity:0;height:0;padding:0;}
-.sb-item{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;margin:.04rem .5rem;border-radius:8px;cursor:pointer;transition:background .14s,color .14s;color:rgba(255,255,255,.8);font-size:.82rem;font-weight:500;white-space:nowrap;overflow:hidden;position:relative;}
-.sb-item:hover{background:rgba(255,255,255,.15);color:#fff;}
-.sb-item.on{background:rgba(255,255,255,.22);color:#fff;font-weight:700;}
-.sb-item.on::before{content:"";position:absolute;left:0;top:15%;height:70%;width:3px;background:#fff;border-radius:0 3px 3px 0;}
-.sb-icon{width:18px;min-width:18px;text-align:center;flex-shrink:0;color:inherit;opacity:.85;}
+.sidebar{width:240px;background:linear-gradient(180deg,#0e7490 0%,#06B6D4 60%,#14B8A6 100%);border-right:none;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sb-logo{padding:1.2rem 1.3rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.15);display:flex;align-items:center;}
+.sb-section{padding:.9rem 1.3rem .3rem;font-size:.62rem;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.55);text-transform:uppercase;}
+.sb-item{display:flex;align-items:center;gap:.7rem;padding:.55rem 1rem;margin:.06rem .7rem;border-radius:9px;cursor:pointer;transition:all .18s cubic-bezier(.34,1.56,.64,1);color:rgba(255,255,255,.8);font-size:.82rem;font-weight:500;}
+.sb-item:hover{background:rgba(255,255,255,.18);color:#fff;transform:scale(1.03);box-shadow:0 2px 10px rgba(0,0,0,.12);}
+.sb-item.on{background:rgba(255,255,255,.25);color:#fff;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.12);}
 .sb-item.on .sb-icon{opacity:1;}
-.sb-label{flex:1;overflow:hidden;text-overflow:ellipsis;}
-.sidebar.collapsed .sb-label{display:none;}
-.sb-badge{margin-left:auto;background:rgba(255,255,255,.9);color:#0e7490;font-size:.58rem;padding:.1rem .42rem;border-radius:10px;font-weight:700;flex-shrink:0;}
-.sidebar.collapsed .sb-badge{display:none;}
-.sb-footer{padding:.85rem 1rem;border-top:1px solid rgba(255,255,255,.15);display:flex;flex-direction:column;gap:.5rem;}
-.sb-logout{display:flex;align-items:center;gap:.6rem;padding:.5rem .7rem;border-radius:7px;cursor:pointer;color:rgba(255,255,255,.75);font-size:.78rem;font-weight:500;background:transparent;border:none;width:100%;text-align:left;transition:background .14s,color .14s;}
-.sb-logout:hover{background:rgba(255,255,255,.15);color:#fff;}
-.sb-help{font-size:.68rem;color:rgba(255,255,255,.5);text-align:center;line-height:1.5;padding:.2rem 0;}
-.sidebar.collapsed .sb-help{display:none;}
-.sidebar.collapsed .sb-user-info{display:none;}
-.sidebar.collapsed .sb-item{justify-content:center;gap:0;padding:.62rem 0;margin:.04rem .4rem;}
-.sidebar.collapsed .sb-logout span{display:none;}
-.sidebar.collapsed .sb-logout{justify-content:center;}
+.sb-icon{width:17px;text-align:center;flex-shrink:0;opacity:.7;color:#fff;}
+.sb-badge{margin-left:auto;background:rgba(255,255,255,.9);color:#0e7490;font-size:.58rem;padding:.1rem .42rem;border-radius:10px;font-weight:700;}
+.sb-footer{margin-top:auto;padding:.9rem 1rem;border-top:1px solid rgba(255,255,255,.15);}
+.sb-user{display:flex;align-items:center;gap:.65rem;}
+.sb-ava{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0;}
+.sb-uname{font-size:.78rem;font-weight:600;color:#fff;line-height:1.25;}
+.sb-urole{font-size:.65rem;color:rgba(255,255,255,.65);}
 
 /* ── MAIN ── */
 .main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
@@ -335,7 +315,7 @@ button,input,select{font-family:'Inter',sans-serif;}
 .btn-confirm:hover{background:var(--acH);}
 
 /* PAGE */
-.page{flex:1;min-height:0;overflow-y:auto;padding:2rem 2.2rem;}
+.page{flex:1;overflow-y:auto;padding:2rem 2.2rem;}
 
 /* NOTIF */
 .notif{position:fixed;top:62px;right:1.4rem;z-index:999;padding:.55rem 1.2rem;border-radius:7px;font-size:.75rem;font-weight:600;animation:si .2s ease;}
@@ -478,21 +458,21 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .sala-wrap-new{display:flex;flex-direction:column;height:calc(100vh - 52px);overflow:hidden;background:var(--bg);}
 .sala-header{display:flex;align-items:center;gap:1rem;padding:.65rem 1.25rem;background:var(--s1);border-bottom:1px solid var(--b1);flex-shrink:0;}
 .sala-header h1{font-size:1rem;font-weight:800;color:var(--wh);margin:0;white-space:nowrap;}
-.sala-body{display:grid;grid-template-columns:1fr 360px;gap:1rem;padding:.85rem 1.1rem;flex:1;overflow:hidden;min-height:0;}
+.sala-body{display:grid;grid-template-columns:1fr 460px;gap:1.1rem;padding:1rem 1.25rem;flex:1;overflow:hidden;min-height:0;}
 
 /* Left card */
 .sala-left-card{background:var(--s2);border:1px solid var(--b1);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
 .sala-live-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.22rem .65rem;background:rgba(20,184,166,.15);color:var(--gr);border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.04em;margin:.6rem auto 0;width:fit-content;}
 .sala-lot-title{font-size:1rem;font-weight:800;color:var(--wh);text-align:center;padding:.35rem 1.1rem .2rem;line-height:1.2;}
 /* Foto + cámara: flex:1 para llenar el espacio disponible */
-.sala-photo-wrap{position:relative;background:var(--s3);margin:.3rem .75rem;border-radius:10px;overflow:hidden;flex:1;min-height:300px;display:flex;gap:0;}
+.sala-photo-wrap{position:relative;background:var(--s3);margin:.3rem .75rem;border-radius:10px;overflow:hidden;flex:1;min-height:200px;display:flex;gap:0;}
 .sala-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
 .sala-photo-placeholder{width:100%;height:100%;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;}
 /* Foto principal */
 .sala-photo-main{flex:1;position:relative;overflow:hidden;min-width:0;}
 .sala-photo-main img{width:100%;height:100%;object-fit:cover;display:block;}
-/* Cámara lateral martillero — pequeña, 20% del ancho */
-.sala-cam-side{width:20%;flex-shrink:0;background:#000;position:relative;border-left:2px solid var(--s3);border-radius:0 10px 10px 0;}
+/* Cámara lateral — 36% del ancho */
+.sala-cam-side{width:36%;flex-shrink:0;background:#000;position:relative;border-left:2px solid var(--s3);}
 .sala-cam-side video{width:100%;height:100%;object-fit:cover;display:block;}
 .sala-cam-side-label{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.6);border-radius:4px;padding:.12rem .4rem;font-size:.58rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:3px;}
 .sala-cam-rec{width:5px;height:5px;border-radius:50%;background:var(--rd);animation:pulse 1s infinite;}
@@ -780,9 +760,8 @@ tr:hover td{background:rgba(56,178,246,.04);}
   .app{height:auto;min-height:100vh;overflow:visible;}
 
   /* Sidebar: hidden by default, shown as drawer */
-  .sidebar{position:fixed;top:0;left:-280px;width:260px;height:100vh;z-index:500;transition:left .25s ease;box-shadow:4px 0 24px rgba(0,0,0,.18);}
+  .sidebar{position:fixed;top:0;left:-280px;width:260px;height:100vh;z-index:500;transition:left .25s ease;box-shadow:4px 0 24px rgba(0,0,0,.35);}
   .sidebar.open{left:0;}
-  .sidebar.collapsed{width:260px;}
 
   /* Overlay behind drawer */
   .mob-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:499;opacity:0;pointer-events:none;transition:opacity .25s;}
@@ -862,10 +841,9 @@ tr:hover td{background:rgba(56,178,246,.04);}
 
   /* NEW AuctionHub layout — mobile */
   .sala-wrap-new{height:auto;overflow:visible;}
-  .sala-body{grid-template-columns:1fr;overflow:visible;padding:.6rem;}
-  .sala-left-card{min-height:420px;}
-  .sala-photo-wrap{min-height:280px;max-height:340px;flex:none;height:300px;}
-  .sala-cam-side{width:26%;}
+  .sala-body{grid-template-columns:1fr;overflow:visible;padding:.75rem;}
+  .sala-left-card{min-height:320px;}
+  .sala-photo-wrap{min-height:180px;max-height:220px;flex:none;height:180px;}
   .sala-cam-side{display:none;}
   .sala-quick-bids{grid-template-columns:repeat(2,1fr);}
   .sala-right-col{overflow-y:visible;}
@@ -974,7 +952,7 @@ const Icon = ({ name }) => {
 
 // Mock credentials — replace with Supabase Auth in production
 const USERS = [
-  { id:"u1", email:"admin@takka.cl",           password:"admin2026",      role:"admin",      name:"Max Ahumada",        casa:null,            casaNombre:"TAKKA" },
+  { id:"u1", email:"admin@grauction.cl",       password:"admin2026",      role:"admin",      name:"Max Ahumada",        casa:null,            casaNombre:"GR Auction Software" },
   { id:"u2", email:"martillero@rematesahumada.cl", password:"remates2026", role:"martillero", name:"Remates Ahumada",    casa:"remates-ahumada", casaNombre:"Remates Ahumada" },
   { id:"u3", email:"demo@casaderemates.cl",     password:"demo2026",       role:"martillero", name:"Casa Demo",          casa:"casa-demo",       casaNombre:"Casa Demo S.A." },
 ];
@@ -1193,44 +1171,19 @@ const AUTH_CSS = `
 `;
 
 function AuthScreen({ onLogin }) {
-  const [email,          setEmail]          = useState("");
-  const [password,       setPassword]       = useState("");
-  const [error,          setError]          = useState("");
-  const [loading,        setLoading]        = useState(false);
-  const [forgotMode,     setForgotMode]     = useState(false);
-  const [forgotEmail,    setForgotEmail]    = useState("");
-  const [forgotSent,     setForgotSent]     = useState(false);
-  const [turnstileOk,    setTurnstileOk]    = useState(false);
-  const [showChangePass, setShowChangePass] = useState(false);
-  const [pendingSession, setPendingSession] = useState(null);
-  const [newPass,        setNewPass]        = useState("");
-  const [newPass2,       setNewPass2]       = useState("");
-
-  // Carga el script de Cloudflare Turnstile
-  useEffect(() => {
-    window.__turnstileCb = () => setTurnstileOk(true);
-    const s = document.createElement("script");
-    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
-    s.async = true;
-    document.head.appendChild(s);
-    return () => { try { document.head.removeChild(s); } catch {} };
-  }, []);
-
-  const handleGoogleLogin = async () => {
-    if (!supabase) return;
-    setLoading(true); setError("");
-    const { error: e } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: typeof window !== "undefined" ? window.location.origin : "" },
-    });
-    if (e) { setError(e.message); setLoading(false); }
-  };
+  const [email,      setEmail]      = useState("");
+  const [password,   setPassword]   = useState("");
+  const [error,      setError]      = useState("");
+  const [loading,    setLoading]    = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail,setForgotEmail]= useState("");
+  const [forgotSent, setForgotSent] = useState(false);
 
   const handleForgot = async () => {
     if (!forgotEmail.trim()) { setError("Ingresa tu correo."); return; }
     setLoading(true); setError("");
     await supabase.auth.resetPasswordForEmail(forgotEmail.trim(), {
-      redirectTo: "https://takka.cl/reset-password",
+      redirectTo: "https://gestionderemates.cl/reset-password",
     });
     setForgotSent(true);
     setLoading(false);
@@ -1238,13 +1191,12 @@ function AuthScreen({ onLogin }) {
 
   const handleLogin = async () => {
     setError(""); setLoading(true);
-    if (!supabase) { setError("Error de configuración. Contacta al administrador."); setLoading(false); return; }
     try {
       {
         const { data, error: authErr } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (authErr) { setError("Credenciales incorrectas."); setLoading(false); return; }
         // Buscar perfil — con fallback si no existe en tabla usuarios
-        let sessionData = { id:data.user.id, email:data.user.email, name:"Admin", role:"admin", roles:["admin"], casa:null, casaNombre:"TAKKA", activo:true };
+        let sessionData = { id:data.user.id, email:data.user.email, name:"Admin", role:"admin", roles:["admin"], casa:null, casaNombre:"GR Auction Software", activo:true };
         try {
           const { data: perfil } = await supabase
             .from("usuarios")
@@ -1254,17 +1206,17 @@ function AuthScreen({ onLogin }) {
           if (perfil) {
             const r = Array.isArray(perfil.roles) && perfil.roles.length > 0 ? perfil.roles[0] : "admin";
             if (!perfil.activo) { setError("Usuario inactivo. Contacta al administrador."); await supabase.auth.signOut(); setLoading(false); return; }
-            // ── Verificar licencia (solo para no-admin TAKKA) ──
+            // ── Verificar licencia (solo para no-admin GR) ──
             if (perfil.casas && r !== "admin") {
               const lic = perfil.casas.licencia_estado;
               const vence = perfil.casas.licencia_vence ? new Date(perfil.casas.licencia_vence) : null;
               const vencida = vence && vence < new Date();
               if (lic === "bloqueado") {
-                setError("Acceso bloqueado. Contacta a TAKKA: contacto@takka.cl");
+                setError("Acceso bloqueado. Contacta a GR Auction Software: contacto@gestionderemates.cl");
                 await supabase.auth.signOut(); setLoading(false); return;
               }
               if (lic === "suspendido" || vencida) {
-                setError("Tu licencia está suspendida o venció. Contacta a TAKKA para renovar.");
+                setError("Tu licencia está suspendida o venció. Contacta a GR Auction Software para renovar.");
                 await supabase.auth.signOut(); setLoading(false); return;
               }
             }
@@ -1272,7 +1224,7 @@ function AuthScreen({ onLogin }) {
               id: data.user.id, email: data.user.email, name: perfil.nombre, role: r,
               roles: perfil.roles||[r], casa: perfil.casas?.slug||null,
               casaId: perfil.casas?.id||null,
-              casaNombre: perfil.casas?.nombre||"TAKKA",
+              casaNombre: perfil.casas?.nombre||"GR Auction Software",
               licencia: perfil.casas?.licencia_estado||"activo",
               licenciaPlan: perfil.casas?.licencia_plan||"trial",
               licenciaVence: perfil.casas?.licencia_vence||null,
@@ -1301,77 +1253,13 @@ function AuthScreen({ onLogin }) {
             }
           } catch(e2) {}
         }
-        // Verificar si debe cambiar contraseña (primer ingreso)
-        const needsChange = data.user?.user_metadata?.needs_password_change === true;
-        if (needsChange) {
-          setPendingSession(sessionData);
-          setShowChangePass(true);
-          setLoading(false);
-          return;
-        }
         onLogin(sessionData);
       }
     } catch(e) {
-      setError("Error de conexión: " + (e?.message || "Intenta nuevamente."));
+      setError("Error de conexión. Intenta nuevamente.");
       setLoading(false);
     }
   };
-
-  const handleChangePass = async () => {
-    setError("");
-    if (newPass.length < 8) { setError("La contraseña debe tener al menos 8 caracteres."); return; }
-    if (newPass !== newPass2) { setError("Las contraseñas no coinciden."); return; }
-    setLoading(true);
-    const { error: upErr } = await supabase.auth.updateUser({
-      password: newPass,
-      data: { needs_password_change: false },
-    });
-    if (upErr) { setError("Error al cambiar contraseña: " + upErr.message); setLoading(false); return; }
-    onLogin(pendingSession);
-  };
-
-  if (showChangePass) return (
-    <div className="auth-root">
-      <style>{AUTH_CSS}</style>
-      <div className="auth-left">
-        <div style={{display:"flex",alignItems:"center",gap:"14px",marginBottom:"2.2rem"}}>
-          <svg width="52" height="52" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="3" width="32" height="9" rx="3" fill="rgba(255,255,255,.92)"/>
-            <polygon points="13,12 24,12 18,34 13,34" fill="rgba(255,255,255,.92)"/>
-            <polygon points="18,34 24,12 24,34" fill="rgba(255,255,255,.48)"/>
-          </svg>
-          <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:"1.2rem",color:"#fff",letterSpacing:".08em"}}>TAKKA</div>
-        </div>
-        <div className="auth-brand-title">Crea tu<br/>contraseña.</div>
-        <div className="auth-brand-sub">Por seguridad debes establecer una contraseña personal antes de continuar.</div>
-      </div>
-      <div className="auth-right">
-        <div className="auth-card">
-          <div className="auth-logo-mob">
-            <svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
-              <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
-              <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
-            </svg>
-          </div>
-          <h2 className="auth-title">Nueva contraseña</h2>
-          <p style={{fontSize:".85rem",color:"#6b7280",marginBottom:"1.5rem",lineHeight:1.5}}>Elige una contraseña segura para tu cuenta. La usarás en todos los ingresos futuros.</p>
-          {error && <div className="auth-error">{error}</div>}
-          <label className="auth-label">Nueva contraseña</label>
-          <input className="auth-input" type="password" placeholder="Mínimo 8 caracteres"
-            value={newPass} onChange={e=>setNewPass(e.target.value)}
-            onKeyDown={e=>e.key==="Enter"&&handleChangePass()}/>
-          <label className="auth-label" style={{marginTop:"1rem"}}>Confirmar contraseña</label>
-          <input className="auth-input" type="password" placeholder="Repite tu contraseña"
-            value={newPass2} onChange={e=>setNewPass2(e.target.value)}
-            onKeyDown={e=>e.key==="Enter"&&handleChangePass()}/>
-          <button className="auth-submit" onClick={handleChangePass} disabled={loading} style={{marginTop:"1.5rem"}}>
-            {loading ? "Guardando..." : "Guardar contraseña y entrar →"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="auth-root">
@@ -1381,12 +1269,12 @@ function AuthScreen({ onLogin }) {
       <div className="auth-left">
         {/* Logo blanco */}
         <div style={{display:"flex",alignItems:"center",gap:"14px",marginBottom:"2.2rem",position:"relative"}}>
-          <svg width="52" height="52" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="3" width="32" height="9" rx="3" fill="rgba(255,255,255,.92)"/>
-            <polygon points="13,12 24,12 18,34 13,34" fill="rgba(255,255,255,.92)"/>
-            <polygon points="18,34 24,12 24,34" fill="rgba(255,255,255,.48)"/>
+          <svg width="52" height="52" viewBox="0 0 36 36" fill="none">
+            <rect width="36" height="36" rx="8" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.3)" strokeWidth="1"/>
+            <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.6)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
           </svg>
-          <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:"1.2rem",color:"#fff",letterSpacing:".08em"}}>TAKKA</div>
+          <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:"1rem",color:"#fff",letterSpacing:".02em"}}>Auction Software</div>
         </div>
 
         <div className="auth-brand-title">La plataforma<br/>de remates<br/>en Chile.</div>
@@ -1411,14 +1299,14 @@ function AuthScreen({ onLogin }) {
         <div className="auth-form-wrap">
           {/* Logo pequeño en el card */}
           <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"1.6rem"}}>
-            <svg width="38" height="38" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
-              <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
-              <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
+            <svg width="38" height="38" viewBox="0 0 36 36" fill="none">
+              <rect width="36" height="36" rx="8" fill="rgba(6,182,212,.1)" stroke="rgba(6,182,212,.22)" strokeWidth="1"/>
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="#0e7490" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
             </svg>
             <div>
-              <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:"1.1rem",color:"#0891b2",letterSpacing:".06em"}}>TAKKA</div>
-              <div style={{fontSize:".7rem",color:"#9ca3af",letterSpacing:".04em",textTransform:"uppercase",marginTop:1}}>Auction Software</div>
+              <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:".88rem",color:"#1a1a1a",letterSpacing:".01em"}}>Auction Software</div>
+              <div style={{fontSize:".7rem",color:"#9ca3af",letterSpacing:".04em",textTransform:"uppercase",marginTop:1}}>Gestión de Remates</div>
             </div>
           </div>
           <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:"1.3rem",color:"#1a1a1a",marginBottom:".3rem"}}>Iniciar sesión</div>
@@ -1439,32 +1327,8 @@ function AuthScreen({ onLogin }) {
               onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
           </div>
 
-          {/* Cloudflare Turnstile */}
-          <div style={{margin:".75rem 0"}}
-            className="cf-turnstile"
-            data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000BB"}
-            data-callback="__turnstileCb"
-            data-theme="light"
-          />
-
           <button className="auth-submit" onClick={handleLogin} disabled={loading}>
-            {loading ? "Verificando..." : "Iniciar sesión"}
-          </button>
-
-          {/* Divisor */}
-          <div style={{display:"flex",alignItems:"center",gap:".75rem",margin:"1rem 0"}}>
-            <div style={{flex:1,height:1,background:"#e5e7eb"}}/>
-            <span style={{fontSize:".75rem",color:"#9ca3af",fontWeight:500}}>o</span>
-            <div style={{flex:1,height:1,background:"#e5e7eb"}}/>
-          </div>
-
-          {/* Google OAuth */}
-          <button onClick={handleGoogleLogin} disabled={loading}
-            style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:".65rem",padding:".8rem",border:"1.5px solid #e5e7eb",borderRadius:8,background:"#fff",cursor:"pointer",fontFamily:"inherit",fontSize:".88rem",fontWeight:600,color:"#374151",transition:"all .2s"}}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor="#d1d5db";e.currentTarget.style.background="#f9fafb";}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor="#e5e7eb";e.currentTarget.style.background="#fff";}}>
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Continuar con Google
+            {loading ? "Verificando..." : "Iniciar sesion"}
           </button>
 
           {/* Olvidé mi contraseña */}
@@ -1637,7 +1501,7 @@ function BuyerView({ user, onLogout }) {
       {/* Header */}
       <div className="bv-header">
         <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
-          <TakkaLogo/>
+          <GRLogo/>
           <div style={{width:1,height:24,background:"rgba(255,255,255,.1)"}}/>
           <div className="bv-casa">{user.casaNombre}</div>
           <div className="bv-paleta">Paleta {user.token||user.numero||"—"}</div>
@@ -1888,7 +1752,7 @@ function SpotterView({ user, onLogout }) {
 
       <div className="sp-header">
         <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
-          <TakkaLogo/>
+          <GRLogo/>
           <span style={{fontSize:".78rem",fontWeight:700,color:"#7a9ab8"}}>Digitador de sala</span>
         </div>
         <button style={{background:"transparent",border:"1px solid rgba(255,255,255,.1)",color:"#4a6a8a",fontSize:".72rem",padding:".3rem .7rem",borderRadius:5,cursor:"pointer"}} onClick={onLogout}>Salir</button>
@@ -1951,58 +1815,23 @@ export default function Root() {
   const [session,  setSession]  = useState(null);
   const [loading,  setLoading]  = useState(true);  // espera chequeo de sesión
 
+  // Siempre pedir login al cargar — cerrar cualquier sesión previa
   useEffect(() => {
-    if (!supabase) { setLoading(false); return; }
-
+    supabase.auth.signOut().then(() => setLoading(false));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
-      if (event === "SIGNED_OUT") { setSession(null); }
+      if (event === "SIGNED_OUT") setSession(null);
     });
-
-    const url = typeof window !== "undefined" ? window.location.href : "";
-    const isOAuthRedirect = url.includes("code=") || url.includes("access_token=");
-
-    if (isOAuthRedirect) {
-      // Viene del redirect de Google — detectar sesión OAuth
-      supabase.auth.getSession().then(async ({ data: { session: s } }) => {
-        if (s?.user) {
-          const perfil = await fetchPerfil(s.user.id);
-          setSession(perfil);
-        }
-        setLoading(false);
-      });
-    } else {
-      // Carga normal — siempre pedir login
-      supabase.auth.signOut().then(() => setLoading(false));
-    }
-
     return () => subscription.unsubscribe();
   }, []);
 
   const fetchPerfil = async (uid) => {
     try {
-      // Usuarios de Google → siempre rol postor (cliente), sin excepción
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      const isGoogle = authUser?.app_metadata?.provider === "google" ||
-                       authUser?.identities?.some(i => i.provider === "google");
-      if (isGoogle) {
-        return {
-          id:         uid,
-          email:      authUser.email,
-          name:       authUser.user_metadata?.full_name || authUser.email,
-          role:       "postor",
-          roles:      ["postor"],
-          casa:       null,
-          casaNombre: "",
-          activo:     true,
-        };
-      }
-
       const { data } = await supabase
         .from("usuarios")
         .select("*, casas(slug, nombre)")
         .eq("id", uid)
         .single();
-      if (!data) return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"TAKKA", activo:true };
+      if (!data) return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"GR Auction Software", activo:true };
       const role = Array.isArray(data.roles) && data.roles.length > 0 ? data.roles[0] : "martillero";
       return {
         id:         uid,
@@ -2010,11 +1839,12 @@ export default function Root() {
         role:       role,
         roles:      data.roles || [],
         casa:       data.casas?.slug   || null,
-        casaNombre: data.casas?.nombre || "TAKKA",
+        casaNombre: data.casas?.nombre || "GR Auction Software",
         activo:     data.activo,
       };
     } catch(e) {
-      return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"TAKKA", activo:true };
+      // Si falla Supabase, dar acceso igual con rol admin
+      return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"GR Auction Software", activo:true };
     }
   };
 
@@ -2031,15 +1861,10 @@ export default function Root() {
 
 // ─────────────────────────────────────────────────────────────────
 function Dashboard({ session, onLogout }) {
-  const [page,             setPage]             = useState("dashboard");
-  const [mobileMenu,       setMobileMenu]       = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [page,       setPage]       = useState("dashboard");
+  const [mobileMenu, setMobileMenu] = useState(false);
   const [notif,      setNotif]      = useState(null);
   const [modal,      setModal]      = useState(null);
-  const [importModal,  setImportModal]  = useState(false); // modal importar excel
-  const [importRows,   setImportRows]   = useState([]);    // filas parseadas
-  const [importSaving, setImportSaving] = useState(false);
-  const [importDone,   setImportDone]   = useState(null);  // {ok, errors}
   const [filterTab,  setFilterTab]  = useState("todos");
   // Nuevo lote form state
   const [loteForm,   setLoteForm]   = useState({ tipoRemate:"judicial", motorizado:false, comCustom:"" });
@@ -2050,9 +1875,8 @@ function Dashboard({ session, onLogout }) {
   const [wizFotos,   setWizFotos]   = useState({frente:null,izq:null,der:null,trasera:null});
   const [wizItems,   setWizItems]   = useState([{id:1,nombre:"",foto:null}]);
   const [wizDocs,    setWizDocs]    = useState([]);
-  const [wizDatos, setWizDatos] = useState({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",incremento:"",descripcion:"",ubicacion:"",remateId:"",cantidad:"1",ppu:false,afectoIva:false});
-  const [editLoteData, setEditLoteData] = useState(null);
-  const resetWiz = () => { setWizStep(1); setWizTipo(null); setWizVehTipo(""); setWizFotos({frente:null,izq:null,der:null,trasera:null}); setWizItems([{id:1,nombre:"",foto:null}]); setWizDocs([]); setLoteForm({ tipoRemate:"judicial", motorizado:false, comCustom:"" }); setWizDatos({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",incremento:"",descripcion:"",ubicacion:"",remateId:"",cantidad:"1",ppu:false,afectoIva:false}); };
+  const [wizDatos, setWizDatos] = useState({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",incremento:"",descripcion:"",ubicacion:"",remateId:""});
+  const resetWiz = () => { setWizStep(1); setWizTipo(null); setWizVehTipo(""); setWizFotos({frente:null,izq:null,der:null,trasera:null}); setWizItems([{id:1,nombre:"",foto:null}]); setWizDocs([]); setLoteForm({ tipoRemate:"judicial", motorizado:false, comCustom:"" }); setWizDatos({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",incremento:"",descripcion:"",ubicacion:"",remateId:""}); };
 
   // ── Retiro de bienes ──
   const [dbRetiros, setDbRetiros] = useState([]);
@@ -2060,11 +1884,10 @@ function Dashboard({ session, onLogout }) {
   // Liquidaciones agrupadas por comprador para revisión post-remate
   const [liqReview,  setLiqReview]  = useState(null);  // null | { compradores: [...] }
   const [liqExpanded,setLiqExpanded]= useState(null);  // nComprador expandido
-  const [remateActivo,   setRemateActivo]   = useState(null); // remate de trabajo global
   const [selectedRemate, setSelectedRemate] = useState(null); // remate seleccionado en post-remate
   const [adminClienteSel, setAdminClienteSel] = useState(null); // cliente seleccionado en panel admin
 
-  // ── Usuarios (solo admin) ──
+  // ── Usuarios (solo admin GR) ──
   const ROLES_DISPONIBLES = ["admin","martillero","spotter","postremate","garantias","solo lectura"];
   const [usuarios, setUsuarios] = useState([]);
   const [usuarioForm, setUsuarioForm] = useState({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
@@ -2098,9 +1921,9 @@ function Dashboard({ session, onLogout }) {
   const [aiRemateResult,  setAiRemateResult]  = useState(null);  // { resumen, destacados, conclusion }
   const [aiRemateLoading, setAiRemateLoading] = useState(false);
 
-  // ── Licencias (solo admin) ──
+  // ── Licencias (solo admin GR) ──
   const [dbLicencias, setDbLicencias] = useState([]);
-  // ── Casas (solo admin) ──
+  // ── Casas (solo admin GR) ──
   const [casaForm, setCasaForm] = useState({nombre:"",email:"",telefono:"",direccion:"",logoFile:null,logoUrl:null,martillero:"",rutMartillero:"",telefonoMartillero:"",emailMartillero:"",direccionMartillero:""});
   const [casaModal, setCasaModal] = useState(false);
   const [logoUploading, setLogoUploading] = useState(null); // casa.id mientras sube
@@ -2175,7 +1998,6 @@ function Dashboard({ session, onLogout }) {
     recaudado:  r.total_recaudado || 0,
     casa:       r.casa_nombre || "",
     casaSlug:   r.casas?.slug || "",
-    casaId:     r.casa_id || null,
     supabaseId: r.id,
   })) : REMATES;
 
@@ -2189,9 +2011,6 @@ function Dashboard({ session, onLogout }) {
     estado:  l.estado,
     supabaseId: l.id,
     remateId:   l.remate_id,
-    cantidad:   l.cantidad || 1,
-    ppu:        l.precio_por_unidad || false,
-    afectoIva:  l.afecto_iva || false,
   })) : LOTES;
 
   const POSTORES_MERGED = dbPostores.length > 0 ? dbPostores.map(p => ({
@@ -2209,8 +2028,6 @@ function Dashboard({ session, onLogout }) {
     supabaseId:     p.id,
     remateId:       p.remate_id,
     remate_id:      p.remate_id,
-    casa_id:        p.casa_id,
-    user_id:        p.user_id || null,
     pujas:          0,
     remates:        1,
   })) : POSTORES;
@@ -2267,8 +2084,6 @@ function Dashboard({ session, onLogout }) {
   ];
   const [vendedorSel,   setVendedorSel]   = useState("");
   const [vendedorForm,  setVendedorForm]  = useState({comVenta:5, comDefensa:2, publicidad:0});
-  const [dbVendedores,  setDbVendedores]  = useState([]);
-  const [nuevoVendedorForm, setNuevoVendedorForm] = useState({nombre:"",rut:"",giro:"",direccion:"",telefono:"",email:""});
   const [vendedorLiqGenerada, setVendedorLiqGenerada] = useState(null);
   const [devoluciones,  setDevoluciones]  = useState([]);
 
@@ -2289,9 +2104,7 @@ function Dashboard({ session, onLogout }) {
     setNoCompradoresState(prev => prev.map(c => c.nPart===nPart ? {...c, devolucion:metodo} : c));
   };
   const [remateTerminado, setRemateTerminado] = useState(false);
-  const [notifNcLoading, setNotifNcLoading] = useState(false);
   const [selectedBalanceRemate, setSelectedBalanceRemate] = useState("all");
-  const [comVentaPorVend, setComVentaPorVend] = useState({}); // { "NombreVendedor": pct }
   const [statsView,  setStatsView]  = useState("mes");
   const [statsAnio,  setStatsAnio]  = useState(new Date().getFullYear());
   const [statsMes,   setStatsMes]   = useState(new Date().getMonth());
@@ -2312,31 +2125,28 @@ function Dashboard({ session, onLogout }) {
     return () => clearTimeout(bidTimerRef.current);
   }, [bidTimer, aState]);
 
-  // adjCountdown: se activa al adjudicar — avance MANUAL por el martillero
-  const avanzarSiguienteLote = () => {
-    setAdjCountdown(null);
-    setIdx(prev => {
-      const next = prev + 1;
-      if (next < lots.length) {
-        setAState("waiting"); setBidTimer(null); setLastBidder(null);
-        setCurInc(lots[next]?.inc||100000); setCustomMonto(""); setPhotoIdx(0);
-        notify(`Lote ${next+1} — ${lots[next]?.name}`, "inf");
-        return next;
-      } else {
-        notify("Último lote adjudicado — remate finalizado", "ok");
-        return prev;
-      }
-    });
-  };
-
-  const revertirAdjudicacion = () => {
-    setBids(p => { const n=[...p]; n[idx]={...n[idx], status:"live", winner: n[idx].history?.[0]?.bidder||null}; return n; });
-    setAState("live"); setBidTimer(BID_TIMER);
-    setAdjCountdown(null);
-    // Eliminar la liquidación auto-creada para este lote
-    setLiquidaciones(p => p.filter(l => !(l.lote===lots[idx]?.name && l.id.startsWith("LIQ-"))));
-    notify("Adjudicación revertida — lote en vivo nuevamente", "inf");
-  };
+  // adjCountdown: 3s después de adjudicar → pasa al siguiente lote automáticamente
+  useEffect(() => {
+    if (adjCountdown===null) return;
+    if (adjCountdown<=0) {
+      setAdjCountdown(null);
+      setIdx(prev => {
+        const next = prev+1;
+        if (next < lots.length) {
+          setAState("waiting"); setBidTimer(null); setLastBidder(null);
+          setCurInc(lots[next]?.inc||100000); setCustomMonto(""); setPhotoIdx(0);
+          notify(`Lote ${next+1} — ${lots[next]?.name}`,"inf");
+          return next;
+        } else {
+          notify("Último lote adjudicado — remate finalizado","ok");
+          return prev;
+        }
+      });
+      return;
+    }
+    const t = setTimeout(()=>setAdjCountdown(c=>c-1),1000);
+    return ()=>clearTimeout(t);
+  }, [adjCountdown]);
 
   // ── Supabase: carga inicial ──────────────────────────────────────
   useEffect(() => {
@@ -2374,32 +2184,6 @@ function Dashboard({ session, onLogout }) {
     cargar();
     return () => { mounted = false; };
   }, [session]);
-
-  // ── Vendedores: persistencia en localStorage ──────────────────────
-  useEffect(() => {
-    try { const s = localStorage.getItem("takka_vendedores"); if(s) setDbVendedores(JSON.parse(s)); } catch {}
-  }, []);
-  useEffect(() => {
-    try { localStorage.setItem("takka_vendedores", JSON.stringify(dbVendedores)); } catch {}
-  }, [dbVendedores]);
-
-  // ── Remate activo: persistencia y sincronización global ───────────
-  useEffect(() => {
-    try { const s = localStorage.getItem("takka_remate_activo"); if(s) setRemateActivo(JSON.parse(s)); } catch {}
-  }, []);
-  useEffect(() => {
-    try {
-      if(remateActivo) localStorage.setItem("takka_remate_activo", JSON.stringify(remateActivo));
-      else localStorage.removeItem("takka_remate_activo");
-    } catch {}
-  }, [remateActivo]);
-  // Cuando cambia el remate activo, sincroniza todos los filtros derivados
-  useEffect(() => {
-    const id = remateActivo?.supabaseId || remateActivo?.id || null;
-    setLotesFiltroRemate(id);
-    setSelectedRemate(id);
-    if(id) setSalaRemateId(id);
-  }, [remateActivo]);
 
   // ── Supabase: realtime pujas ─────────────────────────────────────
   useEffect(() => {
@@ -2456,9 +2240,8 @@ function Dashboard({ session, onLogout }) {
 
   // Pujas simuladas eliminadas — solo pujas reales de postores
 
-  const placeBid = (overrideInc) => {
-    const inc = overrideInc ?? curInc;
-    const amt = (bids[idx]?.current||0) + inc;
+  const placeBid = () => {
+    const amt = (bids[idx]?.current||0) + curInc;
     setBids(p=>{const n=[...p];const c=n[idx];n[idx]={...c,current:amt,count:c.count+1,history:[{bidder:"Tu (P-0245)",amount:amt,time:new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),mine:true},...c.history.slice(0,19)],winner:"Tu (P-0245)"};return n;});
     setLastBidder("me"); setBidTimer(BID_TIMER); 
     setFlash(true); setTimeout(()=>setFlash(false),600); notify("Puja registrada.");
@@ -2467,23 +2250,19 @@ function Dashboard({ session, onLogout }) {
   // ── ADJUDICACIÓN + generación automática de liquidaciones/devoluciones ──
   const doAdjudicar = (manual=false) => {
     const winner   = bids[idx]?.winner || null;
-    const montoUnitario = bids[idx]?.current || lots[idx]?.base;
+    const monto    = bids[idx]?.current || lots[idx]?.base;
     const loteNom  = lots[idx]?.name;
-    // Look up matching lote from DB for tipo/motorizado/ppu
-    const loteReal = LOTES_MERGED.find(l => l.name === loteNom) || {};
+    // Look up matching lote real for tipo/motorizado — fallback to sala lot data
+    const loteReal = LOTES_REALES.find(l => l.name === loteNom) || {};
     const tipoRemate  = loteReal.tipoRemate || "judicial";
     const motorizado  = loteReal.motorizado || lots[idx]?.cat==="Vehiculo" || false;
     const comPct      = loteReal.com ?? COMISIONES[tipoRemate]?.com ?? 10;
     const gastosAdm   = motorizado ? GASTO_ADMIN_MOTORIZADO : 0;
-    const cantidadLote = loteReal.cantidad || lots[idx]?.cantidad || 1;
-    const ppu          = loteReal.ppu || lots[idx]?.ppu || false;
-    const afectoIva    = loteReal.afectoIva || lots[idx]?.afectoIva || false;
-    const monto        = ppu ? montoUnitario * cantidadLote : montoUnitario;
 
     setBids(p=>{const n=[...p];n[idx]={...n[idx],status:"sold"};return n;});
     setAState("sold"); setBidTimer(null);
-    // Mostrar panel de control manual — el martillero decide cuándo avanzar
-    setAdjCountdown(true);
+    // Auto-avance al siguiente lote en 3 segundos
+    if (idx < lots.length-1) setAdjCountdown(3);
 
     if (winner) {
       // Liquidación automática — comisión según tipo + gastos admin si motorizado
@@ -2500,7 +2279,6 @@ function Dashboard({ session, onLogout }) {
         email: winner.includes("Online") ? "postor@email.cl" : "rfuentes@gmail.com",
         monto, gar, saldo, com, gastosAdm, totalAPagar,
         tipoRemate, motorizado, comPct,
-        ppu, cantidadLote: ppu ? cantidadLote : 1, montoUnitario: ppu ? montoUnitario : null, afectoIva,
         estado: saldo===0 ? "pagado" : "saldo pendiente",
         enviado: false,
         retiro: null,
@@ -2712,175 +2490,6 @@ function Dashboard({ session, onLogout }) {
     notify(`✓ Postura presencial — Paleta ${presPaleta} · ${fmt(montoNum)}`,"sold");
   };
   const handlePhoto   = (i,e) => { const f=e.target.files[0]; if(!f) return; setLots(p=>{const n=[...p];const imgs=[...(n[i].imgs||[]),URL.createObjectURL(f)];n[i]={...n[i],imgs};return n;}); notify("Foto agregada.","inf"); };
-
-  // ── Planilla de Remate ──
-  const printPlanillaRemate = () => {
-    const lotesFiltrados = (lotesFiltroRemate
-      ? dbLotes.filter(l => l.remate_id === lotesFiltroRemate)
-      : dbLotes
-    ).slice().sort((a, b) => (a.orden || 0) - (b.orden || 0));
-
-    if (!lotesFiltrados.length) { notify("No hay lotes para generar la planilla.", "inf"); return; }
-
-    const remateNombre = lotesFiltroRemate
-      ? REMATES_MERGED.find(r => (r.supabaseId || r.id) === lotesFiltroRemate)?.name || "Remate"
-      : "Todos los remates";
-
-    const fmtClp = n => n ? Number(n).toLocaleString("es-CL") : "—";
-
-    const filas = lotesFiltrados.map((l, i) =>
-      `<tr>
-        <td>${l.orden ?? i + 1}</td>
-        <td>${l.cantidad || 1}</td>
-        <td>${l.nombre || "—"}</td>
-        <td style="text-align:right">${fmtClp(l.base)}</td>
-        <td></td>
-        <td></td>
-      </tr>`
-    ).join("");
-
-    const csvData = lotesFiltrados.map((l, i) =>
-      `${l.orden ?? i + 1},${l.cantidad || 1},"${(l.nombre || "").replace(/"/g, '""')}",${l.base || 0},,`
-    ).join("\n");
-
-    const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
-<title>Planilla de Remate — ${remateNombre}</title>
-<style>
-  body{font-family:Arial,sans-serif;padding:20px;color:#111;}
-  h1{text-align:center;font-size:1.3rem;font-weight:900;margin-bottom:1.5rem;letter-spacing:.05em;}
-  .toolbar{display:flex;gap:10px;margin-bottom:1.2rem;}
-  button{padding:7px 18px;border:none;border-radius:5px;font-size:.85rem;font-weight:700;cursor:pointer;}
-  .btn-csv{background:#1a73e8;color:#fff;}
-  .btn-print{background:#1a73e8;color:#fff;}
-  .btn-back{background:#111;color:#fff;}
-  table{width:100%;border-collapse:collapse;font-size:.9rem;}
-  thead tr{border-bottom:3px solid #111;}
-  th{font-weight:900;padding:8px 6px;text-align:left;font-size:.85rem;}
-  td{padding:7px 6px;border-bottom:1px solid #ddd;vertical-align:top;}
-  td:first-child,td:nth-child(2){text-align:center;}
-  td:nth-child(4){text-align:right;}
-  @media print{.toolbar{display:none;}body{padding:10px;}table{font-size:.8rem;}}
-</style>
-</head><body>
-<div class="toolbar">
-  <button class="btn-csv" onclick="exportCSV()">Exportar a CSV</button>
-  <button class="btn-print" onclick="window.print()">Imprimir Tabla</button>
-  <button class="btn-back" onclick="window.close()">Volver</button>
-</div>
-<h1>PLANILLA DE REMATE</h1>
-<table>
-  <thead><tr><th>LOTE</th><th>CANTIDAD</th><th>DESCRIPCIÓN</th><th>MÍNIMO</th><th>COMPRADOR</th><th>VALOR</th></tr></thead>
-  <tbody>${filas}</tbody>
-</table>
-<script>
-const CSV_DATA = "LOTE,CANTIDAD,DESCRIPCIÓN,MÍNIMO,COMPRADOR,VALOR\\n${csvData.replace(/\\/g, "\\\\").replace(/`/g, "\\`")}";
-function exportCSV(){
-  const blob = new Blob(["\\uFEFF" + CSV_DATA], {type:"text/csv;charset=utf-8;"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "planilla-remate.csv";
-  a.click();
-}
-<\/script>
-</body></html>`;
-
-    const w = window.open("", "_blank", "width=1000,height=750");
-    w.document.write(html);
-    w.document.close();
-  };
-
-  // ── Import Excel: descargar plantilla ──
-  const descargarPlantillaExcel = async () => {
-    const XLSX = await import("xlsx");
-    const headers = [
-      "Nombre del artículo *","Expediente / N° causa","Mandante",
-      "Categoría (Vehículo / Inmueble / Muebles / Enseres)",
-      "Año","Patente (si es vehículo)","Precio base *",
-      "Precio mínimo","Incremento mínimo",
-      "Comisión % (vacío = judicial 10% / concursal 7%)",
-      "Tipo de remate (judicial / concursal / privado)","Descripción"
-    ];
-    const ejemplo = [
-      "Suzuki Baleno GLX HB 1.4 AUT Siniestrado","RGSL-74-2024","Banco Estado",
-      "Vehículo","2021","ABCD12","400000","350000","50000","10","judicial",
-      "Vehículo recupero de robo, sin motor, con llaves y arranque"
-    ];
-    const ws = XLSX.utils.aoa_to_sheet([headers, ejemplo]);
-    ws["!cols"] = headers.map(h => ({ wch: Math.max(h.length, 18) }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Lotes");
-    XLSX.writeFile(wb, "plantilla-lotes-gr.xlsx");
-  };
-
-  // ── Import Excel: parsear archivo ──
-  const handleImportFile = async (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    const XLSX = await import("xlsx");
-    const buf  = await file.arrayBuffer();
-    const wb   = XLSX.read(buf);
-    const ws   = wb.Sheets[wb.SheetNames[0]];
-    const raw  = XLSX.utils.sheet_to_json(ws, { header:1, defval:"" });
-    const dataRows = raw.slice(1).filter(r => r.some(c => String(c).trim() !== ""));
-    const parsed = dataRows.map((r, i) => {
-      const nombre   = String(r[0]  || "").trim();
-      const exp      = String(r[1]  || "").trim();
-      const mandante = String(r[2]  || "").trim();
-      const cat      = String(r[3]  || "Muebles").trim() || "Muebles";
-      const anio     = String(r[4]  || "").trim();
-      const patente  = String(r[5]  || "").trim();
-      const base     = parseInt(String(r[6]  || "0").replace(/\D/g,"")) || 0;
-      const minimo   = parseInt(String(r[7]  || "0").replace(/\D/g,"")) || 0;
-      const incr     = parseInt(String(r[8]  || "0").replace(/\D/g,"")) || 0;
-      const comStr   = String(r[9]  || "").trim();
-      const com      = comStr !== "" ? parseFloat(comStr.replace(",",".")) : null;
-      const tipo     = String(r[10] || "judicial").trim().toLowerCase() || "judicial";
-      const desc     = String(r[11] || "").trim();
-      const errors   = [];
-      if (!nombre) errors.push("Nombre obligatorio");
-      if (!base)   errors.push("Precio base obligatorio");
-      return { _row:i+2, nombre, exp, mandante, cat, anio, patente, base, minimo, incr, com, tipo, desc, errors };
-    });
-    setImportRows(parsed);
-    setImportDone(null);
-    setImportModal(true);
-    e.target.value = "";
-  };
-
-  // ── Import Excel: confirmar y guardar en Supabase ──
-  const confirmarImport = async () => {
-    setImportSaving(true);
-    const validas  = importRows.filter(r => r.errors.length === 0);
-    const errCount = importRows.filter(r => r.errors.length > 0).length;
-    let ok = 0;
-    const { data: casaData } = await supabase.from("casas").select("id").eq("slug", session?.casa).single();
-    for (const r of validas) {
-      const comFinal = r.com != null ? r.com
-        : (r.tipo === "concursal" ? 7 : 10);
-      const { error } = await supabase.from("lotes").insert({
-        casa_id:     casaData?.id || null,
-        codigo:      `L-${String(Date.now()+ok).slice(-5)}`,
-        nombre:      r.nombre,
-        descripcion: r.desc,
-        expediente:  r.exp  || null,
-        mandante:    r.mandante || null,
-        categoria:   r.cat  || "Muebles",
-        anio:        r.anio ? parseInt(r.anio) : null,
-        patente:     r.patente || null,
-        base:        r.base,
-        minimo:      r.minimo || null,
-        incremento:  r.incr || Math.round(r.base * 0.05) || 50000,
-        comision:    comFinal,
-        tipo_remate: r.tipo,
-        estado:      "disponible",
-        orden:       dbLotes.length + ok + 1,
-      });
-      if (!error) ok++;
-    }
-    const { data: lotData } = await supabase.from("lotes").select("*").order("orden");
-    if (lotData) setDbLotes(lotData);
-    setImportDone({ ok, errors: errCount + (validas.length - ok) });
-    setImportSaving(false);
-  };
   const removePhoto   = (loteI, photoI) => { setLots(p=>{const n=[...p];const imgs=n[loteI].imgs.filter((_,j)=>j!==photoI);n[loteI]={...n[loteI],imgs};return n;}); setPhotoIdx(0); };
 
   // Genera e imprime PDF de liquidación de un comprador
@@ -2891,235 +2500,229 @@ function exportCSV(){
     const l   = c.liq;
     const num = String(c.key).padStart(2,"0");
 
-    // Datos de la casa
-    const casaData   = dbLicencias.find(x => x.slug === session?.casa) || {};
-    const casaNombre = casaData.nombre    || session?.casaNombre || "Casa de Remates";
-    const logoUrl    = casaData.logo_url  || null;
-    const martillero = casaData.martillero|| "";
-    const rutMart    = casaData.rut_martillero       || "";
-    const telMart    = casaData.telefono_martillero  || casaData.telefono  || "";
-    const emailMart  = casaData.email_martillero     || casaData.email     || "";
-    const remNombre  = liqReview?.remateNombre || "Remate";
+    // Datos de la casa desde Supabase o session
+    const casaData = dbLicencias.find(x => x.slug === session?.casa) || {};
+    const casaNombre   = casaData.nombre    || session?.casaNombre || "Remates Ahumada";
+    const logoUrl      = casaData.logo_url  || null;
+    const martillero   = casaData.martillero|| "";
+    const rutMart      = casaData.rut_martillero       || "";
+    const dirMart      = casaData.direccion_martillero || casaData.direccion || "";
+    const telMart      = casaData.telefono_martillero  || casaData.telefono  || "";
+    const emailMart    = casaData.email_martillero     || casaData.email     || "";
 
-    // Paleta — consistente con la app
-    const TEAL   = [20,  184, 166];
-    const NAVY   = [13, 148, 136];
-    const CYAN   = [6,   182, 212];
-    const GRAY   = [100, 116, 139];
-    const LTGRAY = [248, 250, 252];
-    const BORDER = [226, 232, 240];
-    const GREEN  = [22,  163, 74 ];
-    const WHITE  = [255, 255, 255];
+    // Colores corporativos GR
+    const C_AZUL   = [31, 41, 55];    // #1F2937 secundario
+    const C_PRIMARY= [56, 178, 246];  // #38B2F6 primario
+    const C_TEAL   = [20, 184, 166];  // #14B8A6 acento
+    const C_GRAY   = [100, 116, 139];
+    const C_LIGHT  = [248, 250, 252];
+    const C_BORDER = [226, 232, 240];
 
     const fmtCLP = v => "$ " + Math.round(v).toLocaleString("es-CL");
 
     const doc = new jsPDF({ orientation:"portrait", unit:"mm", format:"letter" });
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
-    let y = 0;
+    let y = 14;
 
-    // Barra superior teal
-    doc.setFillColor(...TEAL);
-    doc.rect(0, 0, W, 3.5, "F");
-    y = 10;
+    // ══════════════════════════════════════════
+    // HEADER — logo + datos casa + título centrado
+    // ══════════════════════════════════════════
 
-    // Header: logo casa (izquierda) | título centrado | logo TAKKA (derecha)
+    // Franja superior color primario
+    doc.setFillColor(...C_PRIMARY);
+    doc.rect(0, 0, W, 2, "F");
 
-    // Logo casa (izquierda)
-    if (logoUrl) {
+    // Bloque logo e info casa (izquierda)
+    if(logoUrl) {
       try {
+        // Intentar cargar imagen — si falla usa texto
         const img = new Image();
         img.crossOrigin = "anonymous";
-        await new Promise(res => { img.onload = res; img.onerror = res; img.src = logoUrl; });
-        if (img.naturalWidth > 0) {
-          const ratio = img.naturalWidth / img.naturalHeight;
-          const lw = Math.min(36, 24 * ratio);
-          doc.addImage(img, "PNG", 14, y, lw, 24, undefined, "FAST");
+        await new Promise((res) => { img.onload = res; img.onerror = res; img.src = logoUrl; });
+        if(img.naturalWidth > 0) {
+          doc.addImage(img, "PNG", 14, y, 36, 18, undefined, "FAST");
+          y += 2;
         }
-      } catch {}
+      } catch(e) { /* logo failed, use text */ }
     }
 
-    // Logo TAKKA (derecha, pequeño) — TODO: reemplazar por logo final de TAKKA
-    try {
-      const grCanvas = document.createElement("canvas");
-      grCanvas.width = 72; grCanvas.height = 72;
-      const ctx2 = grCanvas.getContext("2d");
-      ctx2.fillStyle = "#EBF8FF"; ctx2.beginPath();
-      ctx2.roundRect(0,0,72,72,14); ctx2.fill();
-      ctx2.strokeStyle = "#38B2F6"; ctx2.lineWidth = 7;
-      ctx2.lineCap = "round"; ctx2.lineJoin = "round";
-      ctx2.beginPath(); ctx2.moveTo(16,24); ctx2.quadraticCurveTo(16,14,28,14);
-      ctx2.lineTo(44,14); ctx2.quadraticCurveTo(60,14,60,28);
-      ctx2.quadraticCurveTo(60,38,48,40); ctx2.lineTo(60,56); ctx2.stroke();
-      ctx2.strokeStyle = "#1E3A5F";
-      ctx2.beginPath(); ctx2.moveTo(8,24); ctx2.quadraticCurveTo(8,10,24,10);
-      ctx2.lineTo(40,10); ctx2.stroke();
-      doc.addImage(grCanvas.toDataURL("image/png"), "PNG", W - 14 - 16, y + 1, 16, 16, undefined, "FAST");
-      doc.setFont("helvetica","normal"); doc.setFontSize(5.5); doc.setTextColor(...GRAY);
-      doc.text("TAKKA", W - 14 - 8, y + 20, { align:"center" });
-    } catch {}
+    // Nombre casa en negrita
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(12);
+    doc.setTextColor(...C_AZUL);
+    const logoOffset = logoUrl ? 56 : 14;
+    doc.text(casaNombre.toUpperCase(), logoOffset, y + 5);
 
-    // Título centrado
-    doc.setFont("helvetica","bold"); doc.setFontSize(20); doc.setTextColor(...TEAL);
-    doc.text("LIQUIDACIÓN", W / 2, y + 9, { align:"center" });
-    doc.setFontSize(11); doc.setTextColor(...NAVY);
-    doc.text("COMPRADOR", W / 2, y + 16, { align:"center" });
-    doc.setFontSize(22); doc.setTextColor(...CYAN);
-    doc.text(`N° ${num}`, W / 2, y + 26, { align:"center" });
-
-    y = 42;
-
-    // Separador
-    doc.setDrawColor(...TEAL); doc.setLineWidth(0.5);
-    doc.line(14, y, W - 14, y);
-    y += 2;
-
-    // Banda de identificación de la casa de remates
-    doc.setFillColor(...NAVY);
-    doc.rect(14, y, W - 28, martillero ? 14 : 8, "F");
-    doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(...WHITE);
-    doc.text(casaNombre.toUpperCase(), W / 2, y + 6, { align:"center" });
-    if (martillero) {
-      const infoLine = [martillero, rutMart && `RUT: ${rutMart}`, telMart && `Tel: ${telMart}`].filter(Boolean).join("  ·  ");
-      doc.setFont("helvetica","normal"); doc.setFontSize(6.5); doc.setTextColor(180, 220, 240);
-      doc.text(infoLine, W / 2, y + 11.5, { align:"center" });
+    // Datos martillero
+    if(martillero) {
+      doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...C_PRIMARY);
+      doc.text("MARTILLERO PÚBLICO", logoOffset, y + 11);
+      doc.setFont("helvetica","normal"); doc.setTextColor(...C_GRAY);
+      doc.setFontSize(7.5);
+      doc.text(martillero, logoOffset, y + 16);
+      let rowY = y + 21;
+      if(rutMart)   { doc.text(`RUT: ${rutMart}`, logoOffset, rowY); rowY += 5; }
+      let infoLine = "";
+      if(telMart)   infoLine += `Fono: ${telMart}   `;
+      if(emailMart) infoLine += `Email: ${emailMart}`;
+      if(infoLine)  { doc.text(infoLine, logoOffset, rowY); rowY += 5; }
+      if(dirMart)   doc.text(`Dirección: ${dirMart}`, logoOffset, rowY);
     }
-    y += (martillero ? 14 : 8) + 5;
 
-    // Banner remate
-    doc.setFillColor(236, 253, 245);
-    doc.setDrawColor(...TEAL); doc.setLineWidth(0.3);
-    doc.roundedRect(14, y, W - 28, 9, 2, 2, "FD");
-    doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(...NAVY);
-    doc.text(remNombre, 19, y + 6);
-    doc.setFont("helvetica","normal"); doc.setTextColor(...GRAY);
-    doc.text(`Fecha: ${fechaRemate}`, W - 18, y + 6, { align:"right" });
-    y += 14;
+    y = 46;
 
-    // Datos comprador
-    const datos = [
-      ["SEÑOR(ES)", p?.razonSocial || p?.nombre || "—"],
-      ["R.U.T.",    p?.rut         || "—"],
-      ["GIRO",      p?.giro        || "—"],
-      ["DIRECCIÓN", p?.direccion   || "—"],
-      ["TELÉFONO",  p?.tel         || "—"],
-      ["MAIL",      p?.email       || "—"],
-      ["COMUNA",    p?.comuna      || "—"],
+    // Línea separadora
+    doc.setDrawColor(...C_PRIMARY);
+    doc.setLineWidth(0.6);
+    doc.line(14, y, W-14, y);
+    y += 6;
+
+    // ── Título centrado ──
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(15);
+    doc.setTextColor(...C_AZUL);
+    doc.text("LIQUIDACIÓN REMATE", W/2, y, {align:"center"});
+    y += 7;
+    doc.setFontSize(13);
+    doc.setTextColor(...C_PRIMARY);
+    doc.text(`COMPRADOR N° : ${num}`, W/2, y, {align:"center"});
+    y += 9;
+
+    // ══════════════════════════════════════════
+    // DATOS DEL COMPRADOR — formato fiel al original
+    // ══════════════════════════════════════════
+    const datosComp = [
+      ["FECHA",     fechaRemate],
+      ["R.U.T",     p?.rut||"—"],
+      ["SEÑOR(ES)", p?.razonSocial||p?.nombre||"—"],
+      ["GIRO",      p?.giro||"—"],
+      ["DIRECCIÓN", p?.direccion||"—"],
+      ["TELÉFONO",  p?.tel||"—"],
+      ["MAIL",      p?.email||"—"],
+      ["COMUNA",    p?.comuna||"—"],
     ];
-    const datosH = datos.length * 6 + 8;
-    doc.setFillColor(...LTGRAY); doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
-    doc.roundedRect(14, y, W - 28, datosH, 2, 2, "FD");
-    let dy = y + 7;
-    datos.forEach(([k, v]) => {
-      doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.setTextColor(...GRAY);
-      doc.text(k, 18, dy);
-      doc.setFont("helvetica","normal"); doc.setTextColor(30, 30, 30);
-      doc.text(String(v || "—"), 56, dy);
-      dy += 6;
-    });
-    y = dy + 5;
 
-    // Tabla lotes
+    datosComp.forEach(([k, v]) => {
+      doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(...C_GRAY);
+      doc.text(k, 14, y);
+      doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30);
+      doc.text(String(v||"—"), 52, y);
+      y += 6;
+    });
+    y += 3;
+
+    // ══════════════════════════════════════════
+    // TABLA LOTES — fiel al formato original
+    // ══════════════════════════════════════════
     const rows = [];
     l.lineas.forEach((ln, li) => {
-      const label = `LOTE ${li + 1}`;
-      rows.push([label, "1", ln.lote.toUpperCase(), "EX", fmtCLP(ln.monto), fmtCLP(ln.monto)]);
-      rows.push([label, "1", `Comisión ${ln.comPct}%`, "AF", fmtCLP(ln.com), fmtCLP(ln.com)]);
-      if (ln.motorizado) rows.push(["G-ADM", "1", `Gastos Adm. Vehículo (${label})`, "AF", fmtCLP(ln.gastosAdm), fmtCLP(ln.gastosAdm)]);
+      const loteLabel = `LOTE ${li + 1}`;
+      rows.push([loteLabel, "1", ln.lote.toUpperCase(), "EX", fmtCLP(ln.monto), fmtCLP(ln.monto)]);
+      rows.push([loteLabel, "1", `COMISION ${ln.comPct}%`, "AF", fmtCLP(ln.com), fmtCLP(ln.com)]);
+      if(ln.motorizado) rows.push(["G-ADMIN", "1",
+        `GASTOS ADMINISTRATIVOS
+VEHÍCULO MOTORIZADO (${loteLabel})`, "AF",
+        fmtCLP(ln.gastosAdm), fmtCLP(ln.gastosAdm)]);
     });
 
     autoTable(doc, {
       startY: y,
-      head: [["LOTE","CANT.","DESCRIPCIÓN","ND","UNITARIO","TOTAL"]],
+      head: [["LOTE","CANTIDAD","DESCRIPCIÓN","ND","UNITARIO","TOTAL"]],
       body: rows,
       styles: { fontSize:8, cellPadding:2.8, textColor:[30,30,30], font:"helvetica" },
-      headStyles: { fillColor:NAVY, textColor:WHITE, fontStyle:"bold", fontSize:7.5, halign:"center" },
+      headStyles: { fillColor:C_AZUL, textColor:[255,255,255], fontStyle:"bold", fontSize:7.5, halign:"center" },
       columnStyles: {
-        0: { cellWidth:18, halign:"center", textColor:GRAY, fontSize:7.5 },
-        1: { cellWidth:12, halign:"center" },
+        0: { cellWidth:18, halign:"center", textColor:C_GRAY, fontSize:7.5 },
+        1: { cellWidth:14, halign:"center" },
         2: { cellWidth:"auto" },
         3: { cellWidth:13, halign:"center" },
-        4: { cellWidth:26, halign:"right" },
+        4: { cellWidth:26, halign:"right", fontStyle:"normal" },
         5: { cellWidth:26, halign:"right", fontStyle:"bold" },
       },
-      alternateRowStyles: { fillColor:LTGRAY },
-      tableLineColor:BORDER, tableLineWidth:0.2,
+      alternateRowStyles: { fillColor:[248,250,252] },
+      tableLineColor: C_BORDER,
+      tableLineWidth: 0.2,
       didDrawCell: (data) => {
-        if (data.section==="body" && data.column.index===3) {
+        if(data.section==="body" && data.column.index===3) {
           const txt = data.cell.raw;
           const x=data.cell.x+1.5, cy=data.cell.y+1.8, w=data.cell.width-3, h=data.cell.height-3.5;
-          if (txt==="EX") { doc.setFillColor(220,252,231); doc.setDrawColor(134,239,172); }
-          else            { doc.setFillColor(204,251,241); doc.setDrawColor(94,234,212); }
+          if(txt==="EX") { doc.setFillColor(220,252,231); doc.setDrawColor(134,239,172); }
+          else           { doc.setFillColor(219,234,254); doc.setDrawColor(147,197,253); }
           doc.roundedRect(x,cy,w,h,1,1,"FD");
-          doc.setFontSize(6.5); doc.setFont("helvetica","bold");
-          doc.setTextColor(txt==="EX"?22:15, txt==="EX"?163:118, txt==="EX"?74:110);
+          doc.setFontSize(6.5);
+          doc.setTextColor(txt==="EX"?22:30, txt==="EX"?163:64, txt==="EX"?74:175);
+          doc.setFont("helvetica","bold");
           doc.text(txt, x+w/2, cy+h-1.2, {align:"center"});
         }
       },
     });
 
-    y = doc.lastAutoTable.finalY + 8;
+    y = doc.lastAutoTable.finalY + 6;
 
-    // Page break si no hay espacio para totales + box
-    if (y + 70 > H - 20) {
-      doc.addPage();
-      y = 20;
-    }
-
-    // Totales — izquierda (desglose claro EX / AF / IVA)
-    const colW = (W - 28) / 2 - 4;
+    // ══════════════════════════════════════════
+    // TOTALES — lado izquierdo
+    // GARANTÍA + TOTAL A PAGAR — lado derecho
+    // ══════════════════════════════════════════
     const totalesY = y;
-    const ivaBase = l.totalCom + l.totalAf;
-    const totItems = [
-      ["PRECIO MARTILLO (EX)",   l.totalEx,  false],
-      ["COMISIONES MARTILLERO (AF)", l.totalCom, false],
-      ...(l.totalAf > 0 ? [["GASTOS ADM. (AF)", l.totalAf, false]] : []),
-      ["BASE AFECTA IVA",        ivaBase,    true],
-      ["IVA 19%",                l.iva,      false],
+    const colW = (W-28)/2 - 4;
+
+    // Columna izquierda: totales
+    const totales = [
+      ["TOTAL COMPRAS EXENTAS:", l.totalEx],
+      ["TOTAL COMPRAS AFECTAS:", l.totalAf],
+      ["TOTAL COMISION:", l.totalCom],
+      ["19% IVA:", l.iva],
     ];
     let ty = totalesY;
-    totItems.forEach(([k, v, bold]) => {
-      doc.setFont("helvetica", bold ? "bold" : "normal"); doc.setFontSize(8.5);
-      doc.setTextColor(...(bold ? NAVY : GRAY));
+    totales.forEach(([k,v]) => {
+      doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...C_GRAY);
       doc.text(k, 14, ty);
-      doc.setFont("helvetica","bold"); doc.setTextColor(30, 30, 30);
-      doc.text(fmtCLP(v), 14 + colW, ty, { align:"right" });
-      doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
-      doc.line(14, ty + 2, 14 + colW, ty + 2);
+      doc.setFont("helvetica","bold"); doc.setTextColor(30,30,30);
+      doc.text(fmtCLP(v), 14+colW, ty, {align:"right"});
+      doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.2);
+      doc.line(14, ty+2, 14+colW, ty+2);
       ty += 6.5;
     });
-    doc.setDrawColor(...TEAL); doc.setLineWidth(0.6);
-    doc.line(14, ty, 14 + colW, ty);
-    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...NAVY);
-    doc.text("TOTAL:", 14, ty + 7);
-    doc.setFontSize(11); doc.setTextColor(...TEAL);
-    doc.text(fmtCLP(l.total), 14 + colW, ty + 7, { align:"right" });
+    // Total final
+    doc.setDrawColor(...C_PRIMARY); doc.setLineWidth(0.6);
+    doc.line(14, ty, 14+colW, ty);
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...C_PRIMARY);
+    doc.text("TOTAL:", 14, ty+6);
+    doc.setFontSize(11);
+    doc.text(fmtCLP(l.total), 14+colW, ty+6, {align:"right"});
 
-    // Box garantía + total a pagar — derecha
-    const bx = W / 2 + 6, bw = W / 2 - 20, bh = 34;
-    doc.setFillColor(236, 253, 245);
-    doc.setDrawColor(...TEAL); doc.setLineWidth(0.6);
-    doc.roundedRect(bx, totalesY, bw, bh, 3, 3, "FD");
-    doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...GRAY);
-    doc.text("GARANTÍA:", bx + 5, totalesY + 10);
-    doc.setFont("helvetica","bold"); doc.setTextColor(...GREEN);
-    doc.text(fmtCLP(l.garantia), bx + bw - 5, totalesY + 10, { align:"right" });
-    doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
-    doc.line(bx + 5, totalesY + 14, bx + bw - 5, totalesY + 14);
-    doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...NAVY);
-    doc.text("TOTAL A PAGAR:", bx + 5, totalesY + 24);
-    doc.setFontSize(14); doc.setTextColor(...TEAL);
-    doc.text(fmtCLP(l.totalAPagar), bx + bw - 5, totalesY + 25, { align:"right" });
+    // Columna derecha: garantía + total a pagar
+    const bx = W/2 + 6, bw = W/2 - 20, bh = 28;
+    const by2 = totalesY;
+    doc.setFillColor(239,246,255);
+    doc.setDrawColor(...C_PRIMARY); doc.setLineWidth(0.6);
+    doc.roundedRect(bx, by2, bw, bh, 3, 3, "FD");
 
-    // Footer
+    doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...C_GRAY);
+    doc.text("GARANTÍA:", bx+4, by2+8);
+    doc.setFont("helvetica","bold"); doc.setTextColor(22,163,74);
+    doc.text(fmtCLP(l.garantia), bx+bw-4, by2+8, {align:"right"});
+
+    doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.2);
+    doc.line(bx+4, by2+12, bx+bw-4, by2+12);
+
+    doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...C_AZUL);
+    doc.text("TOTAL A PAGAR:", bx+4, by2+20);
+    doc.setFontSize(13); doc.setTextColor(...C_PRIMARY);
+    doc.text(fmtCLP(l.totalAPagar), bx+bw-4, by2+21, {align:"right"});
+
+    // ══════════════════════════════════════════
+    // FOOTER
+    // ══════════════════════════════════════════
     const fy = H - 12;
-    doc.setFillColor(...TEAL);
-    doc.rect(0, H - 5, W, 5, "F");
-    doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
-    doc.line(14, fy - 3, W - 14, fy - 3);
-    doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
-    doc.text(`${casaNombre} · Powered by TAKKA · takka.cl`, 14, fy + 1);
-    doc.text(`Remate ${fechaRemate} · Comprador N° ${num}`, W - 14, fy + 1, { align:"right" });
+    doc.setFillColor(...C_PRIMARY);
+    doc.rect(0, H-4, W, 4, "F");
+    doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.2);
+    doc.line(14, fy-3, W-14, fy-3);
+    doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(...C_GRAY);
+    doc.text(`${casaNombre} · Powered by GR Auction Software · gestionderemates.cl`, 14, fy+1);
+    doc.text(`Remate ${fechaRemate} · Comprador N° ${num}`, W-14, fy+1, {align:"right"});
 
     doc.save(`liquidacion-comprador-${num}-${fechaRemate.replace(/\//g,"-")}.pdf`);
   };
@@ -3154,27 +2757,7 @@ function exportCSV(){
     { id:"config",       icon:"config",    label:"Configuracion" },
   ];
 
-  const PAGE_TITLE = {
-    dashboard:"Dashboard", remates:"Remates", sala:"Sala en vivo",
-    // Pre Remate
-    "nuevo-remate":"Nuevo Remate", "ingreso-vendedores":"Ingreso Vendedores",
-    lotes:"Ingreso Lotes", planilla:"Planilla de Remate",
-    "lotes-vendedor":"Lotes por Vendedor",
-    // Clientes
-    clientes:"Listado Clientes", postores:"Ingreso Cliente",
-    // Garantía
-    preinscriptos:"Pre Inscritos Web", garantias:"Ingresar Garantía",
-    reimprimir:"Reimprimir Comprobante", devoluciones:"Devoluciones de Garantía",
-    "participantes-online":"Participantes Online",
-    // Post Remate
-    adjudicac:"Participantes", factura:"Liquidar Remate",
-    vendedores:"Liquidar Vendedores", liquidac:"Liquidar Compradores",
-    "liq-masivo":"Generar Liquidaciones Masivo", "env-masivo":"Enviar Liquidaciones Masivo",
-    retiro:"Retiro de Bienes",
-    // Resto
-    reportes:"Estadísticas", config:"Configuración",
-    usuarios:"Usuarios", licencias:"Licencias", casas:"Casas de Remates",
-  };
+  const PAGE_TITLE = {dashboard:"Dashboard",remates:"Remates",lotes:"Lotes",sala:"Sala en vivo",postores:"Postores",garantias:"Garantias",adjudicac:"Adjudicaciones",liquidac:"Liquidaciones",devoluciones:"Devoluciones de Garantía",retiro:"Retiro de Bienes",factura:"Balance Económico",vendedores:"Liquidación de Vendedores",reportes:"Estadísticas",config:"Configuracion",usuarios:"Usuarios",licencias:"Licencias",casas:"Casas de Remates"};
 
   return (
     <div className="app">
@@ -3255,22 +2838,15 @@ function exportCSV(){
                     ))}
                   </div>
                   <div className="form-grid">
-                    {lotesFiltroRemate ? (
-                      <div className="fg full" style={{padding:".55rem .8rem",background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.2)",borderRadius:8}}>
-                        <div style={{fontSize:".63rem",fontWeight:700,textTransform:"uppercase",letterSpacing:".07em",color:"var(--mu)",marginBottom:2}}>Remate</div>
-                        <div style={{fontWeight:700,color:"var(--ac)",fontSize:".82rem"}}>{REMATES_MERGED.find(r=>(r.supabaseId||r.id)===lotesFiltroRemate)?.name||"Remate seleccionado"}</div>
-                      </div>
-                    ) : (
-                      <div className="fg full">
-                        <label className="fl">Remate al que pertenece</label>
-                        <select className="fsel" value={wizDatos.remateId||""} onChange={e=>setWizDatos(f=>({...f,remateId:e.target.value}))}>
-                          <option value="">— Sin asignar —</option>
-                          {REMATES_MERGED.filter(r=>r.estado!=="cerrado").map(r=>(
-                            <option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
+                    <div className="fg full">
+                      <label className="fl">Remate al que pertenece</label>
+                      <select className="fsel" value={wizDatos.remateId||""} onChange={e=>setWizDatos(f=>({...f,remateId:e.target.value}))}>
+                        <option value="">— Sin asignar —</option>
+                        {REMATES_MERGED.filter(r=>r.estado!=="cerrado").map(r=>(
+                          <option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>
+                        ))}
+                      </select>
+                    </div>
                     <div className="fg full"><label className="fl">Nombre del artículo</label>
                       <input className="fi" placeholder={wizTipo==="VEHICULOS"?"Toyota Hilux 2020 4x4":wizTipo==="INMUEBLES"?"Parcela 315 — Coinco VI Region":"Enseres varios — Hogar"} value={wizDatos.nombre} onChange={e=>setWizDatos(f=>({...f,nombre:e.target.value}))}/>
                     </div>
@@ -3279,29 +2855,6 @@ function exportCSV(){
                     </div>
                     <div className="fg"><label className="fl">Mandante</label>
                       <input className="fi" placeholder="Tanner / Judicial / Particular" value={wizDatos.mandante} onChange={e=>setWizDatos(f=>({...f,mandante:e.target.value}))}/>
-                    </div>
-                    <div className="fg"><label className="fl">Propietario / Vendedor</label>
-                      {dbVendedores.length > 0 ? (
-                        <select className="fsel" value={wizDatos.propietario} onChange={e=>setWizDatos(f=>({...f,propietario:e.target.value}))}>
-                          <option value="">— Seleccionar vendedor —</option>
-                          {dbVendedores.map((v,i)=>(
-                            <option key={i} value={v.nombre}>{v.nombre}{v.rut?` — ${v.rut}`:""}</option>
-                          ))}
-                          <option value="__otro__">+ Escribir manualmente...</option>
-                        </select>
-                      ) : null}
-                      {(dbVendedores.length===0 || wizDatos.propietario==="__otro__") && (
-                        <input className="fi" placeholder="Nombre del consignatario o vendedor"
-                          value={wizDatos.propietario==="__otro__"?"":wizDatos.propietario}
-                          onChange={e=>setWizDatos(f=>({...f,propietario:e.target.value}))}
-                          style={{marginTop: dbVendedores.length>0?".4rem":0}}
-                        />
-                      )}
-                      {dbVendedores.length===0 && (
-                        <div style={{fontSize:".68rem",color:"var(--mu)",marginTop:".3rem"}}>
-                          Sin vendedores — <span style={{color:"var(--ac)",cursor:"pointer",textDecoration:"underline"}} onClick={()=>{setModal(null);setPage("ingreso-vendedores");}}>agregar en Ingreso Vendedores</span>
-                        </div>
-                      )}
                     </div>
                     {wizTipo==="VEHICULOS" && <>
                       <div className="fg"><label className="fl">Patente</label>
@@ -3343,27 +2896,6 @@ function exportCSV(){
                     </div>
                     <div className="fg"><label className="fl">Incremento mínimo de puja</label>
                       <input className="fi" placeholder="$100.000" value={wizDatos.incremento} onChange={e=>setWizDatos(f=>({...f,incremento:e.target.value}))}/>
-                    </div>
-                    <div className="fg"><label className="fl">Cantidad del lote</label>
-                      <input className="fi" type="number" min="1" placeholder="1" value={wizDatos.cantidad} onChange={e=>setWizDatos(f=>({...f,cantidad:e.target.value,ppu:parseInt(e.target.value)>1?f.ppu:false}))}/>
-                    </div>
-                    <div style={{display:"flex",alignItems:"center",gap:"1.5rem",flexWrap:"wrap"}}>
-                      <div style={{display:"flex",alignItems:"center",gap:".6rem",cursor:"pointer",userSelect:"none"}}
-                        onClick={()=>setWizDatos(f=>({...f,ppu:!f.ppu}))}>
-                        <div style={{width:20,height:20,borderRadius:4,border:`2px solid ${wizDatos.ppu?"var(--ac)":"var(--b2)"}`,background:wizDatos.ppu?"var(--ac)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s"}}>
-                          {wizDatos.ppu && <svg width="11" height="9" viewBox="0 0 12 10" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 5l3.5 3.5L11 1"/></svg>}
-                        </div>
-                        <span style={{fontSize:".8rem",fontWeight:600,color:"var(--wh2)"}}>c/u</span>
-                        {wizDatos.ppu && <span style={{fontSize:".68rem",color:"var(--ac)"}}>× {wizDatos.cantidad||1} = total</span>}
-                      </div>
-                      <div style={{display:"flex",alignItems:"center",gap:".6rem",cursor:"pointer",userSelect:"none"}}
-                        onClick={()=>setWizDatos(f=>({...f,afectoIva:!f.afectoIva}))}>
-                        <div style={{width:20,height:20,borderRadius:4,border:`2px solid ${wizDatos.afectoIva?"var(--yl)":"var(--b2)"}`,background:wizDatos.afectoIva?"var(--yl)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s"}}>
-                          {wizDatos.afectoIva && <svg width="11" height="9" viewBox="0 0 12 10" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 5l3.5 3.5L11 1"/></svg>}
-                        </div>
-                        <span style={{fontSize:".8rem",fontWeight:600,color:"var(--wh2)"}}>Afecto IVA</span>
-                        {wizDatos.afectoIva && <span style={{fontSize:".68rem",color:"var(--yl)"}}>+19% lote + com.</span>}
-                      </div>
                     </div>
                     <div className="fg full"><label className="fl">Descripción <span style={{color:"var(--mu)",fontWeight:400}}>(opcional)</span></label>
                       <textarea className="fi" rows={2} placeholder="Estado general, observaciones..." style={{resize:"none"}} value={wizDatos.descripcion} onChange={e=>setWizDatos(f=>({...f,descripcion:e.target.value}))}/>
@@ -3581,137 +3113,9 @@ function exportCSV(){
                 <div className="fg full"><label className="fl">Numero de cuenta bancaria (para devolucion)</label><input className="fi" placeholder="Banco Estado N 123456789"/></div>
               </div>
             </>}
-            {modal==="nuevo-vendedor" && <>
-              <div className="modal-title">Agregar Vendedor / Consignatario</div>
-              <div className="form-grid">
-                <div className="fg full"><label className="fl">Nombre completo / Razón social *</label>
-                  <input className="fi" placeholder="Juan Pérez Soto / Empresa SpA" value={nuevoVendedorForm.nombre} onChange={e=>setNuevoVendedorForm(f=>({...f,nombre:e.target.value}))}/>
-                </div>
-                <div className="fg"><label className="fl">RUT *</label>
-                  <input className="fi" placeholder="12.345.678-9" value={nuevoVendedorForm.rut} onChange={e=>setNuevoVendedorForm(f=>({...f,rut:e.target.value}))}/>
-                </div>
-                <div className="fg"><label className="fl">Teléfono</label>
-                  <input className="fi" placeholder="+56 9 1234 5678" value={nuevoVendedorForm.telefono} onChange={e=>setNuevoVendedorForm(f=>({...f,telefono:e.target.value}))}/>
-                </div>
-                <div className="fg full"><label className="fl">Email</label>
-                  <input className="fi" type="email" placeholder="vendedor@email.cl" value={nuevoVendedorForm.email} onChange={e=>setNuevoVendedorForm(f=>({...f,email:e.target.value}))}/>
-                </div>
-                <div className="fg full" style={{borderTop:"1px solid var(--b2)",paddingTop:".75rem",marginTop:".25rem"}}>
-                  <div style={{fontSize:".68rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".6rem"}}>Datos de facturación</div>
-                </div>
-                <div className="fg full"><label className="fl">Giro comercial</label>
-                  <input className="fi" placeholder="Venta de maquinaria / Agrícola / Servicios..." value={nuevoVendedorForm.giro} onChange={e=>setNuevoVendedorForm(f=>({...f,giro:e.target.value}))}/>
-                </div>
-                <div className="fg full"><label className="fl">Dirección</label>
-                  <input className="fi" placeholder="Av. Las Condes 1234, Santiago" value={nuevoVendedorForm.direccion} onChange={e=>setNuevoVendedorForm(f=>({...f,direccion:e.target.value}))}/>
-                </div>
-              </div>
-            </>}
-
-            {modal==="editar-lote" && editLoteData && <>
-              <div className="modal-title">Editar lote</div>
-              <div className="form-grid">
-                <div className="fg full"><label className="fl">Nombre del artículo</label>
-                  <input className="fi" value={editLoteData.nombre} onChange={e=>setEditLoteData(f=>({...f,nombre:e.target.value}))}/>
-                </div>
-                <div className="fg"><label className="fl">Propietario / Vendedor</label>
-                  {dbVendedores.length > 0 ? (
-                    <select className="fsel" value={editLoteData.propietario} onChange={e=>setEditLoteData(f=>({...f,propietario:e.target.value}))}>
-                      <option value="">— Seleccionar —</option>
-                      {dbVendedores.map((v,i)=><option key={i} value={v.nombre}>{v.nombre}</option>)}
-                      <option value="__otro__">+ Escribir manualmente...</option>
-                    </select>
-                  ) : null}
-                  {(dbVendedores.length===0 || editLoteData.propietario==="__otro__") && (
-                    <input className="fi" value={editLoteData.propietario==="__otro__"?"":editLoteData.propietario}
-                      onChange={e=>setEditLoteData(f=>({...f,propietario:e.target.value}))}
-                      style={{marginTop:dbVendedores.length>0?".4rem":0}}/>
-                  )}
-                </div>
-                <div className="fg"><label className="fl">Categoría</label>
-                  <select className="fsel" value={editLoteData.categoria} onChange={e=>setEditLoteData(f=>({...f,categoria:e.target.value}))}>
-                    <option value="Muebles">Muebles</option>
-                    <option value="Vehículo">Vehículo</option>
-                    <option value="Inmueble">Inmueble</option>
-                  </select>
-                </div>
-                <div className="fg"><label className="fl">Precio base ($)</label>
-                  <input className="fi" type="number" value={editLoteData.base} onChange={e=>setEditLoteData(f=>({...f,base:e.target.value}))}/>
-                </div>
-                <div className="fg"><label className="fl">Precio mínimo ($)</label>
-                  <input className="fi" type="number" value={editLoteData.minimo} onChange={e=>setEditLoteData(f=>({...f,minimo:e.target.value}))}/>
-                </div>
-                <div className="fg"><label className="fl">Comisión (%)</label>
-                  <input className="fi" type="number" step="0.5" min="0" max="50" value={editLoteData.comision} onChange={e=>setEditLoteData(f=>({...f,comision:e.target.value}))}/>
-                </div>
-                <div className="fg"><label className="fl">Estado</label>
-                  <select className="fsel" value={editLoteData.estado} onChange={e=>setEditLoteData(f=>({...f,estado:e.target.value}))}>
-                    <option value="disponible">Disponible</option>
-                    <option value="publicado">Publicado</option>
-                    <option value="vendido">Vendido</option>
-                    <option value="sin vender">Sin vender</option>
-                  </select>
-                </div>
-                <div className="fg"><label className="fl">N° de orden (lote)</label>
-                  <input className="fi" type="number" min="1" value={editLoteData.orden} onChange={e=>setEditLoteData(f=>({...f,orden:e.target.value}))}/>
-                </div>
-                <div className="fg"><label className="fl">Cantidad del lote</label>
-                  <input className="fi" type="number" min="1" value={editLoteData.cantidad} onChange={e=>setEditLoteData(f=>({...f,cantidad:e.target.value}))}/>
-                </div>
-                <div style={{display:"flex",alignItems:"center",gap:"1.5rem",flexWrap:"wrap"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:".6rem",cursor:"pointer",userSelect:"none"}}
-                    onClick={()=>setEditLoteData(f=>({...f,ppu:!f.ppu}))}>
-                    <div style={{width:20,height:20,borderRadius:4,border:`2px solid ${editLoteData.ppu?"var(--ac)":"var(--b2)"}`,background:editLoteData.ppu?"var(--ac)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s"}}>
-                      {editLoteData.ppu && <svg width="11" height="9" viewBox="0 0 12 10" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 5l3.5 3.5L11 1"/></svg>}
-                    </div>
-                    <span style={{fontSize:".8rem",fontWeight:600,color:"var(--wh2)"}}>c/u</span>
-                    {editLoteData.ppu && <span style={{fontSize:".68rem",color:"var(--ac)"}}>× {editLoteData.cantidad||1} = total</span>}
-                  </div>
-                  <div style={{display:"flex",alignItems:"center",gap:".6rem",cursor:"pointer",userSelect:"none"}}
-                    onClick={()=>setEditLoteData(f=>({...f,afectoIva:!f.afectoIva}))}>
-                    <div style={{width:20,height:20,borderRadius:4,border:`2px solid ${editLoteData.afectoIva?"var(--yl)":"var(--b2)"}`,background:editLoteData.afectoIva?"var(--yl)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s"}}>
-                      {editLoteData.afectoIva && <svg width="11" height="9" viewBox="0 0 12 10" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 5l3.5 3.5L11 1"/></svg>}
-                    </div>
-                    <span style={{fontSize:".8rem",fontWeight:600,color:"var(--wh2)"}}>Afecto IVA</span>
-                    {editLoteData.afectoIva && <span style={{fontSize:".68rem",color:"var(--yl)"}}>+19% lote + com.</span>}
-                  </div>
-                </div>
-              </div>
-            </>}
-
             <div className="modal-actions">
-              <button className="btn-cancel" onClick={()=>{setModal(null);resetWiz();setNuevoVendedorForm({nombre:"",rut:"",giro:"",direccion:"",telefono:"",email:""});setEditLoteData(null);}}>Cancelar</button>
-              {modal==="editar-lote" ? (
-                <button className="btn-confirm" onClick={async ()=>{
-                  if(!editLoteData.nombre.trim()){notify("El nombre no puede estar vacío.","inf");return;}
-                  const {error} = await supabase.from("lotes").update({
-                    nombre:             editLoteData.nombre,
-                    propietario:        editLoteData.propietario&&editLoteData.propietario!=="__otro__" ? editLoteData.propietario : null,
-                    categoria:          editLoteData.categoria||null,
-                    base:               parseFloat(editLoteData.base)||0,
-                    minimo:             parseFloat(editLoteData.minimo)||0,
-                    comision:           parseFloat(editLoteData.comision)||5,
-                    estado:             editLoteData.estado||"disponible",
-                    orden:              parseInt(editLoteData.orden)||1,
-                    cantidad:           parseInt(editLoteData.cantidad)||1,
-                    precio_por_unidad:  editLoteData.ppu||false,
-                    afecto_iva:         editLoteData.afectoIva||false,
-                  }).eq("id", editLoteData.id);
-                  if(error){notify("Error al guardar: "+error.message,"inf");return;}
-                  setDbLotes(prev=>prev.map(l=>l.id===editLoteData.id?{...l,...editLoteData,base:parseFloat(editLoteData.base)||0,minimo:parseFloat(editLoteData.minimo)||0,comision:parseFloat(editLoteData.comision)||5,orden:parseInt(editLoteData.orden)||1,cantidad:parseInt(editLoteData.cantidad)||1,precio_por_unidad:editLoteData.ppu||false,afecto_iva:editLoteData.afectoIva||false}:l));
-                  setModal(null); setEditLoteData(null); notify("Lote actualizado.","sold");
-                }}>Guardar cambios</button>
-              ) : modal==="nuevo-vendedor" ? (
-                <button className="btn-confirm" onClick={()=>{
-                  if(!nuevoVendedorForm.nombre.trim()){notify("Ingresa el nombre del vendedor.","inf");return;}
-                  if(!nuevoVendedorForm.rut.trim()){notify("Ingresa el RUT.","inf");return;}
-                  const nuevo = {...nuevoVendedorForm, id: Date.now()};
-                  setDbVendedores(prev=>[...prev, nuevo]);
-                  notify(`Vendedor "${nuevo.nombre}" guardado.`,"sold");
-                  setModal(null);
-                  setNuevoVendedorForm({nombre:"",rut:"",giro:"",direccion:"",telefono:"",email:""});
-                }}>Guardar vendedor</button>
-              ) : modal==="nuevo-lote" ? (
+              <button className="btn-cancel" onClick={()=>{setModal(null);resetWiz();}}>Cancelar</button>
+              {modal==="nuevo-lote" ? (
                 <>
                   {wizStep>1 && <button className="btn-sec" style={{marginRight:"auto"}} onClick={()=>setWizStep(s=>s-1)}>← Atrás</button>}
                   {wizStep===1 && <button className="btn-confirm" onClick={()=>{
@@ -3753,22 +3157,18 @@ function exportCSV(){
                         if(fotoFiles.length>0 && imagenes.length===0){ notify("No se pudieron subir las fotos. Verifica que el bucket 'lotes' existe en Supabase Storage.","inf"); return; }
                         const {error} = await supabase.from("lotes").insert({
                           casa_id:     casaIdActual,
-                          remate_id:   wizDatos.remateId || lotesFiltroRemate || null,
+                          remate_id:   wizDatos.remateId||null,
                           codigo,
                           nombre:      wizDatos.nombre,
-                          propietario: wizDatos.propietario||null,
                           descripcion: [wizDatos.descripcion, wizDatos.exp&&`Exp: ${wizDatos.exp}`, wizDatos.mandante&&`Mandante: ${wizDatos.mandante}`, wizDatos.patente&&`Patente: ${wizDatos.patente}`, wizDatos.year&&`Año: ${wizDatos.year}`, wizDatos.km&&`Km: ${wizDatos.km}`].filter(Boolean).join(" | "),
                           categoria:   wizTipo==="VEHICULOS"?"Vehículo":wizTipo==="INMUEBLES"?"Inmueble":"Muebles",
                           base:        baseNum,
                           minimo:      minNum,
                           incremento:  incNum,
                           comision:    loteForm.tipoRemate==="judicial" ? 10 : loteForm.tipoRemate==="concursal" ? 7 : (parseFloat(loteForm.comCustom)||5),
-                          tipo_iva:    wizDatos.afectoIva ? "AF" : "EX",
-                          afecto_iva:  wizDatos.afectoIva||false,
-                          cantidad:    parseInt(wizDatos.cantidad)||1,
-                          precio_por_unidad: wizDatos.ppu||false,
+                          tipo_iva:    "AF",
                           estado:      "disponible",
-                          orden: (()=>{ const rid=wizDatos.remateId||lotesFiltroRemate||null; const ls=rid?dbLotes.filter(l=>l.remate_id===rid):[]; return ls.length>0?Math.max(...ls.map(l=>l.orden||0))+1:1; })(),
+                          orden:       dbLotes.length+1,
                           imagenes:    imagenes.length>0 ? imagenes : null,
                         });
                         if(error){notify("Error al guardar lote: "+error.message,"inf");console.error(error);return;}
@@ -3829,193 +3229,104 @@ function exportCSV(){
       {/* Mobile overlay */}
       <div className={`mob-overlay${mobileMenu?" open":""}`} onClick={()=>setMobileMenu(false)}/>
 
-      {/* ── SIDEBAR ── oculto en sala en vivo para maximizar espacio */}
-      <aside className={`sidebar${mobileMenu?" open":""}${sidebarCollapsed?" collapsed":""}`} style={page==="sala"?{display:"none"}:undefined}>
+      {/* ── SIDEBAR ── */}
+      <aside className={`sidebar${mobileMenu?" open":""}`}>
+        <div className="sb-logo"><GRLogo/></div>
+        <div style={{height:".5rem"}}/>
 
-        {/* Logo + toggle */}
-        <div className="sb-logo">
-          {!sidebarCollapsed && <TakkaLogo/>}
-          {sidebarCollapsed && (
-            <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
-              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1d4ed8" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
-            </svg>
-          )}
-          <button className="sb-toggle" title={sidebarCollapsed?"Expandir menú":"Colapsar menú"} onClick={()=>setSidebarCollapsed(c=>!c)}>
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <path d="M2 4h14M2 9h14M2 14h14"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* Usuario */}
-        <div className="sb-user-card">
-          <div className="sb-ava">{session?.name?.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()||"??"}</div>
-          <div className="sb-user-info">
-            <div className="sb-uname">{session?.name||"Usuario"}</div>
-            <div className="sb-urole">{session?.casaNombre||"TAKKA"} · <span style={{color:"#1d4ed8",fontWeight:600}}>{session?.role}</span></div>
+        {/* GESTIÓN */}
+        <div className="sb-section">Gestión</div>
+        {[
+          {id:"dashboard", icon:"dashboard", label:"Dashboard"},
+          {id:"remates",   icon:"remates",   label:"Remates",  badge:3},
+          {id:"lotes",     icon:"lotes",     label:"Lotes",    badge:LOTES_REALES.length},
+          {id:"postores",  icon:"postores",  label:"Postores"},
+          {id:"garantias", icon:"garantia",  label:"Garantías", badge:GARANTIAS.filter(g=>g.estado==="pendiente").length||undefined},
+        ].map(n => (
+          <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>{setPage(n.id);setMobileMenu(false);}}>
+            <span className="sb-icon"><Icon name={n.icon}/></span>{n.label}
+            {n.badge ? <span className="sb-badge">{n.badge}</span> : null}
           </div>
+        ))}
+
+        {/* REMATE EN VIVO */}
+        <div className="sb-section">Remate en vivo</div>
+        <div className={`sb-item${page==="sala"?" on":""}`} onClick={()=>{setPage("sala");setMobileMenu(false);}}>
+          <span className="sb-icon"><Icon name="sala"/></span>Sala en vivo
+          {aState==="live" && <div className="ldot" style={{marginLeft:"auto"}}/>}
         </div>
 
-        {/* Remate activo */}
-        {!sidebarCollapsed && (
-          <div style={{padding:".6rem .9rem",borderBottom:"1px solid rgba(255,255,255,.12)"}}>
-            {remateActivo ? (
-              <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
-                <div className="ldot" style={{flexShrink:0,background:"#34d399"}}/>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:".65rem",fontWeight:700,color:"rgba(255,255,255,.5)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".1rem"}}>Remate activo</div>
-                  <div style={{fontSize:".75rem",fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{remateActivo.name}</div>
-                  <div style={{fontSize:".62rem",color:"rgba(255,255,255,.55)"}}>{remateActivo.fecha}</div>
-                </div>
-                <button onClick={()=>setRemateActivo(null)}
-                  style={{background:"rgba(255,255,255,.12)",border:"none",borderRadius:5,color:"rgba(255,255,255,.75)",fontSize:".62rem",fontWeight:700,padding:".22rem .45rem",cursor:"pointer",whiteSpace:"nowrap"}}>
-                  Cambiar
-                </button>
-              </div>
-            ) : (
-              <button onClick={()=>setPage("remates")}
-                style={{width:"100%",padding:".45rem .6rem",background:"rgba(246,173,85,.18)",border:"1px solid rgba(246,173,85,.4)",borderRadius:7,color:"#fbbf24",fontSize:".7rem",fontWeight:700,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:".4rem"}}>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M6 4v2.5M6 8v.5"/></svg>
-                Seleccionar remate
-              </button>
-            )}
+        {/* POST-REMATE */}
+        <div className="sb-section">Post-remate</div>
+        {[
+          {id:"adjudicac",    icon:"adjudic",  label:"Adjudicaciones"},
+          {id:"liquidac",     icon:"liq",      label:"Liquidaciones", badge:liquidaciones.filter(l=>!l.enviado).length||undefined},
+          {id:"devoluciones", icon:"dev",      label:"Devoluciones",  badge:devoluciones.filter(d=>d.estado==="pendiente").length||undefined},
+          {id:"retiro",       icon:"vendedor", label:"Retiro de bienes", badge:dbRetiros.filter(r=>r.estado==="pendiente").length||undefined},
+          {id:"vendedores",   icon:"vendedor", label:"Vendedores"},
+        ].map(n => (
+          <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>setPage(n.id)}>
+            <span className="sb-icon"><Icon name={n.icon}/></span>{n.label}
+            {n.badge ? <span className="sb-badge" style={{background:"var(--yl)",color:"#1F2937"}}>{n.badge}</span> : null}
+          </div>
+        ))}
+
+        {/* FINANZAS */}
+        {session?.role==="admin" && <>
+          <div className="sb-section">Finanzas</div>
+          {[
+            {id:"factura",  icon:"factura",  label:"Balance"},
+            {id:"reportes", icon:"reportes", label:"Estadísticas"},
+          ].map(n => (
+            <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>setPage(n.id)}>
+              <span className="sb-icon"><Icon name={n.icon}/></span>{n.label}
+            </div>
+          ))}
+        </>}
+
+        {/* SISTEMA */}
+        <div className="sb-section">Sistema</div>
+        <div className={`sb-item${page==="config"?" on":""}`} onClick={()=>{setPage("config");setMobileMenu(false);}}>
+          <span className="sb-icon"><Icon name="config"/></span>Configuración
+        </div>
+        {session?.role==="admin" && (
+          <div className={`sb-item${page==="usuarios"?" on":""}`} onClick={()=>{setPage("usuarios");setMobileMenu(false);}}>
+            <span className="sb-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2.2-5 5-5s5 2 5 5"/><path d="M13 7v4M11 9h4"/></svg>
+            </span>Usuarios
           </div>
         )}
-
-        {/* Nav */}
-        <nav className="sb-nav">
-
-          {/* ── GESTIÓN ── */}
-          <div className="sb-section">Gestión</div>
-          {[
-            {id:"dashboard", icon:"dashboard", label:"Dashboard"},
-            {id:"remates",   icon:"remates",   label:"Remates"},
-          ].map(n=>(
-            <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>{setPage(n.id);setMobileMenu(false);}}>
-              <span className="sb-icon"><Icon name={n.icon}/></span><span className="sb-label">{n.label}</span>
-            </div>
-          ))}
-          <div className={`sb-item${page==="sala"?" on":""}`} onClick={()=>{setPage("sala");setMobileMenu(false);}}>
-            <span className="sb-icon"><Icon name="sala"/></span>
-            <span className="sb-label">Sala en vivo</span>
-            {aState==="live" && <div className="ldot" style={{marginLeft:"auto"}}/>}
+        {session?.role==="admin" && (
+          <div className={`sb-item${page==="licencias"?" on":""}`} onClick={()=>{setPage("licencias");setMobileMenu(false);}}>
+            <span className="sb-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="2" y="4" width="12" height="9" rx="2"/><path d="M5 4V3a3 3 0 016 0v1"/><circle cx="8" cy="9" r="1.2"/></svg>
+            </span>Licencias
           </div>
-
-          {/* ── PRE REMATE ── */}
-          <div className="sb-section">Pre Remate</div>
-          <div className="sb-item" onClick={()=>{setPage("remates");setModal("nuevo-remate");setMobileMenu(false);}}>
-            <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M8 3v10M3 8h10"/></svg></span>
-            <span className="sb-label">Nuevo Remate</span>
+        )}
+        {session?.role==="admin" && (
+          <div className={`sb-item${page==="casas"?" on":""}`} onClick={()=>{setPage("casas");setMobileMenu(false);}}>
+            <span className="sb-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M2 14V7l6-5 6 5v7"/><path d="M6 14v-4h4v4"/></svg>
+            </span>Casas de remates
           </div>
-          {[
-            {id:"ingreso-vendedores", icon:"vendedor", label:"Ingreso Vendedores"},
-            {id:"lotes",              icon:"lotes",    label:"Ingreso Lotes"},
-            {id:"planilla",           icon:"lotes",    label:"Planilla"},
-            {id:"lotes-vendedor",     icon:"vendedor", label:"Lotes por Vendedor"},
-          ].map(n=>(
-            <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>{setPage(n.id);setMobileMenu(false);}}>
-              <span className="sb-icon"><Icon name={n.icon}/></span><span className="sb-label">{n.label}</span>
-            </div>
-          ))}
-          <div className="sb-item" onClick={()=>{
-            const rem = REMATES_MERGED.find(r=>r.supabaseId||r.id);
-            if(rem) window.open(`/catalogo/${rem.supabaseId||rem.id}`,"_blank");
-            else notify("Selecciona un remate primero.","inf");
-          }}>
-            <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 6h6M5 9h4"/></svg></span>
-            <span className="sb-label">Catálogo ↗</span>
-          </div>
-
-          {/* ── CLIENTES ── */}
-          <div className="sb-section">Clientes</div>
-          <div className="sb-item" onClick={()=>{ const id=session?.casaId||null; window.open(id?`/participar?id=${id}`:"/participar","_blank"); }}>
-            <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M8 3v10M3 8h10"/></svg></span>
-            <span className="sb-label">Ingreso ↗</span>
-          </div>
-          <div className={`sb-item${page==="clientes"?" on":""}`} onClick={()=>{setPage("clientes");setMobileMenu(false);}}>
-            <span className="sb-icon"><Icon name="postores"/></span>
-            <span className="sb-label">Listado Clientes</span>
-          </div>
-
-          {/* ── GARANTÍA ── */}
-          <div className="sb-section">Garantía</div>
-          {[
-            {id:"preinscriptos",       icon:"postores", label:"Pre inscritos web",      badge: dbPostores.filter(p=>p.estado==="pendiente"&&p.modalidad==="web").length||undefined},
-            {id:"garantias",           icon:"garantia", label:"Ingresar Garantía",      badge: GARANTIAS.filter(g=>g.estado==="pendiente").length||undefined},
-            {id:"reimprimir",          icon:"factura",  label:"Reimprimir Comprobante"},
-            {id:"devoluciones",        icon:"dev",      label:"Devoluciones",           badge: devoluciones.filter(d=>d.estado==="pendiente").length||undefined},
-            {id:"participantes-online",icon:"postores", label:"Participantes Online"},
-          ].map(n=>(
-            <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>{setPage(n.id);setMobileMenu(false);}}>
-              <span className="sb-icon"><Icon name={n.icon}/></span>
-              <span className="sb-label">{n.label}</span>
-              {n.badge ? <span className="sb-badge">{n.badge}</span> : null}
-            </div>
-          ))}
-
-          {/* ── POST REMATE ── */}
-          <div className="sb-section">Post Remate</div>
-          {[
-            {id:"resultado-remate", icon:"reportes", label:"Resultado de Remate"},
-            {id:"adjudicac",  icon:"adjudic",  label:"Participantes"},
-            {id:"factura",    icon:"factura",  label:"Liquidar Remate"},
-            {id:"vendedores", icon:"vendedor", label:"Liquidar Vendedores"},
-            {id:"liquidac",   icon:"liq",      label:"Liquidar Compradores", badge:liquidaciones.filter(l=>!l.enviado).length||undefined},
-            {id:"liq-masivo", icon:"liq",      label:"Generar Liq. Masivo"},
-            {id:"env-masivo", icon:"liq",      label:"Enviar Liq. Masivo"},
-            {id:"retiro",     icon:"vendedor", label:"Retiro de Bienes",     badge:dbRetiros.filter(r=>r.estado==="pendiente").length||undefined},
-          ].map(n=>(
-            <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>{setPage(n.id);setMobileMenu(false);}}>
-              <span className="sb-icon"><Icon name={n.icon}/></span>
-              <span className="sb-label">{n.label}</span>
-              {n.badge ? <span className="sb-badge">{n.badge}</span> : null}
-            </div>
-          ))}
-
-          {/* ── ESTADÍSTICAS ── */}
-          <div className="sb-section">Estadísticas</div>
-          <div className={`sb-item${page==="reportes"?" on":""}`} onClick={()=>{setPage("reportes");setMobileMenu(false);}}>
-            <span className="sb-icon"><Icon name="reportes"/></span>
-            <span className="sb-label">Estadísticas</span>
-          </div>
-          <div className={`sb-item${page==="factura"?" on":""}`} onClick={()=>{setPage("factura");setMobileMenu(false);}}>
-            <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M3 12V7M8 12V3M13 12V9"/><path d="M1 14h14"/></svg></span>
-            <span className="sb-label">Balance por Remate</span>
-          </div>
-
-          {/* ── SISTEMA ── */}
-          <div className="sb-section">Sistema</div>
-          <div className={`sb-item${page==="config"?" on":""}`} onClick={()=>{setPage("config");setMobileMenu(false);}}>
-            <span className="sb-icon"><Icon name="config"/></span><span className="sb-label">Configuración</span>
-          </div>
-          {session?.role==="admin" && (
-            <div className={`sb-item${page==="usuarios"?" on":""}`} onClick={()=>{setPage("usuarios");setMobileMenu(false);}}>
-              <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2.2-5 5-5s5 2 5 5"/><path d="M13 7v4M11 9h4"/></svg></span>
-              <span className="sb-label">Usuarios</span>
-            </div>
-          )}
-          {session?.role==="admin" && (
-            <div className={`sb-item${page==="licencias"?" on":""}`} onClick={()=>{setPage("licencias");setMobileMenu(false);}}>
-              <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="2" y="4" width="12" height="9" rx="2"/><path d="M5 4V3a3 3 0 016 0v1"/><circle cx="8" cy="9" r="1.2"/></svg></span>
-              <span className="sb-label">Licencias</span>
-            </div>
-          )}
-          {session?.role==="admin" && (
-            <div className={`sb-item${page==="casas"?" on":""}`} onClick={()=>{setPage("casas");setMobileMenu(false);}}>
-              <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M2 14V7l6-5 6 5v7"/><path d="M6 14v-4h4v4"/></svg></span>
-              <span className="sb-label">Casas de remates</span>
-            </div>
-          )}
-        </nav>
-
-        {/* Footer */}
+        )}
         <div className="sb-footer">
-          <button className="sb-logout" onClick={onLogout}>
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M5 2H2v11h3M10 10l3-3-3-3M13 7H6"/></svg>
-            <span>Cerrar sesión</span>
-          </button>
-          <div className="sb-help">Si tienes dudas,<br/>consulta el <span style={{color:"#1d4ed8",fontWeight:600,cursor:"pointer"}}>Centro de ayuda</span></div>
+          <div className="sb-user">
+            <div className="sb-ava">{session?.name?.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()||"??"}</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div className="sb-uname">{session?.name||"Usuario"}</div>
+              <div className="sb-urole">{session?.casaNombre||"GR Auction Software"}</div>
+            </div>
+            <button title="Cerrar sesion" onClick={onLogout} style={{background:"transparent",border:"none",cursor:"pointer",color:"#364d70",padding:".2rem",borderRadius:4,flexShrink:0,transition:"color .15s"}}
+              onMouseEnter={e=>e.target.style.color="#e05252"} onMouseLeave={e=>e.target.style.color="#364d70"}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M5 2H2v10h3M9 10l3-3-3-3M12 7H5"/></svg>
+            </button>
+          </div>
+          {session?.role && (
+            <div style={{marginTop:".5rem",paddingTop:".5rem",borderTop:"1px solid var(--b1)"}}>
+              <span className={`role-badge ${session.role}`}>{session.role==="admin"?"Admin GR":session.role==="martillero"?"Martillero":"Postor"}</span>
+            </div>
+          )}
         </div>
       </aside>
 
@@ -4034,17 +3345,9 @@ function exportCSV(){
               <div className="topbar-title">{PAGE_TITLE[page]}</div>
             </div>
             <div className="topbar-right">
-              {aState==="live" && <div className="tb-live"><div className="ldot"/>En vivo</div>}
-              {remateActivo && (
-                <div style={{display:"flex",alignItems:"center",gap:".5rem",padding:".28rem .7rem",background:"rgba(6,182,212,.08)",border:"1px solid rgba(6,182,212,.25)",borderRadius:8}}>
-                  <div className="ldot" style={{background:"var(--ac)"}}/>
-                  <span style={{fontSize:".72rem",fontWeight:700,color:"var(--ac)",maxWidth:220,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{remateActivo.name}</span>
-                  <button onClick={()=>setRemateActivo(null)} style={{background:"transparent",border:"none",color:"var(--mu)",fontSize:".65rem",cursor:"pointer",padding:"0 .2rem",lineHeight:1,fontFamily:"Inter,sans-serif",fontWeight:600,marginLeft:".2rem"}}>✕</button>
-                </div>
-              )}
+              {aState==="live" && <div className="tb-live"><div className="ldot"/>En vivo — Remate Industrial Marzo</div>}
               {page==="remates"   && <button className="btn-primary" onClick={()=>setModal("nuevo-remate")}>+ Nuevo remate</button>}
               {page==="lotes"     && <>
-                <button className="btn-sec" style={{fontSize:".7rem"}} onClick={printPlanillaRemate}>📋 Planilla</button>
                 <button className="btn-sec" style={{fontSize:".7rem"}} onClick={async()=>{
                   // Generar Bid Sheets PDF — hoja imprimible por lote
                   if(!LOTES_MERGED.length){ notify("No hay lotes cargados para generar el PDF.","inf"); return; }
@@ -4094,55 +3397,42 @@ function exportCSV(){
                   notify("Bid sheets generados.","sold");
                   } catch(e){ console.error(e); notify("Error al generar PDF: "+e.message,"inf"); }
                 }}>🖨 Bid Sheets PDF</button>
-                <button className="btn-sec" style={{fontSize:".7rem",display:"inline-flex",alignItems:"center",gap:".3rem"}} onClick={()=>{setImportModal(true);setImportRows([]);setImportDone(null);}}>
+                <label className="btn-sec" style={{fontSize:".7rem",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:".3rem"}}>
                   ↑ Importar Excel
-                </button>
+                  <input type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={async e=>{
+                    const file = e.target.files[0]; if(!file) return;
+                    const text = await file.text();
+                    const rows = text.split("\n").slice(1).filter(r=>r.trim());
+                    let ok=0;
+                    const {data:casaData} = await supabase.from("casas").select("id").eq("slug","rematesahumada").single();
+                    for(const row of rows){
+                      const cols = row.split(",").map(c=>c.replace(/"/g,"").trim());
+                      if(!cols[0]) continue;
+                      const {error} = await supabase.from("lotes").insert({
+                        casa_id: casaData?.id||null,
+                        codigo:  `L-${String(Date.now()+ok).slice(-5)}`,
+                        nombre:  cols[0]||"Sin nombre",
+                        descripcion: cols[1]||"",
+                        base:    parseInt(cols[2])||0,
+                        minimo:  parseInt(cols[3])||0,
+                        incremento: parseInt(cols[4])||0,
+                        comision: parseFloat(cols[5])||3,
+                        estado:  "disponible",
+                        orden:   dbLotes.length+ok+1,
+                      });
+                      if(!error) ok++;
+                    }
+                    const {data:lotData} = await supabase.from("lotes").select("*").order("orden");
+                    if(lotData) setDbLotes(lotData);
+                    notify(`${ok} lotes importados desde Excel.`,"sold");
+                    e.target.value="";
+                  }}/>
+                </label>
                 <button className="btn-primary" onClick={()=>setModal("nuevo-lote")}>+ Agregar lote</button>
               </>}
-              {(page==="postores"||page==="clientes") && <button className="btn-primary" onClick={()=>setModal("nuevo-postor")}>+ Agregar cliente</button>}
+              {page==="postores"  && <button className="btn-primary" onClick={()=>setModal("nuevo-postor")}>+ Agregar postor</button>}
               {page==="garantias" && <button className="btn-primary" onClick={()=>setModal("nueva-garantia")}>+ Registrar garantia</button>}
-              {page==="planilla" && <button className="btn-primary" onClick={printPlanillaRemate}>📋 Abrir / Imprimir</button>}
-              {page==="ingreso-vendedores" && <button className="btn-primary" onClick={()=>setModal("nuevo-vendedor")}>+ Agregar Vendedor</button>}
             </div>
-          </div>
-        )}
-
-        {/* ══ SELECTOR DE REMATE (pantalla inicial) ══ */}
-        {!remateActivo && !["remates","dashboard","config","usuarios","licencias","casas","clientes"].includes(page) && (
-          <div className="page" style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"70vh",gap:"2rem"}}>
-            <div style={{textAlign:"center"}}>
-              <svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="var(--ac)" strokeWidth="1.5" strokeLinecap="round" style={{marginBottom:"1rem"}}><rect x="6" y="8" width="40" height="36" rx="4"/><path d="M6 18h40M18 8v10M34 8v10"/></svg>
-              <div style={{fontSize:"1.3rem",fontWeight:800,color:"var(--wh2)",marginBottom:".4rem"}}>Selecciona un remate</div>
-              <div style={{fontSize:".85rem",color:"var(--mu)",maxWidth:340}}>Elige el remate con el que quieres trabajar. Todo lo que veas estará dentro de ese remate.</div>
-            </div>
-            {REMATES_MERGED.length === 0 ? (
-              <div style={{textAlign:"center",color:"var(--mu)",fontSize:".85rem"}}>
-                No hay remates creados aún.
-                <br/>
-                <button className="btn-primary" style={{marginTop:"1rem"}} onClick={()=>setPage("remates")}>Crear primer remate →</button>
-              </div>
-            ) : (
-              <div style={{width:"100%",maxWidth:520,display:"flex",flexDirection:"column",gap:".65rem"}}>
-                {REMATES_MERGED.map(r => {
-                  const activo = r.estado==="activo"||r.estado==="publicado"||r.estado==="en_vivo";
-                  return (
-                    <button key={r.id||r.supabaseId}
-                      onClick={()=>{ setRemateActivo(r); notify(`Trabajando en: ${r.name}`,"sold"); }}
-                      style={{display:"flex",alignItems:"center",gap:"1rem",padding:"1rem 1.25rem",background:"var(--s2)",border:`1px solid ${activo?"rgba(6,182,212,.35)":"var(--b1)"}`,borderRadius:12,cursor:"pointer",textAlign:"left",transition:"border-color .15s,background .15s",width:"100%"}}>
-                      <div style={{width:10,height:10,borderRadius:"50%",background:activo?"#34d399":r.estado==="cerrado"||r.estado==="finalizado"?"#6b7280":"#f59e0b",flexShrink:0}}/>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontWeight:700,fontSize:".88rem",color:"var(--wh2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</div>
-                        <div style={{fontSize:".72rem",color:"var(--mu)",marginTop:".1rem"}}>{r.fecha}{r.hora?` · ${r.hora}`:""} · {r.modal||r.modalidad||"—"}</div>
-                      </div>
-                      <span style={{fontSize:".68rem",fontWeight:700,color:activo?"var(--ac)":"var(--mu)",whiteSpace:"nowrap",padding:".2rem .55rem",background:activo?"rgba(6,182,212,.1)":"var(--s3)",border:`1px solid ${activo?"rgba(6,182,212,.25)":"var(--b2)"}`,borderRadius:5}}>
-                        {r.estado==="activo"||r.estado==="publicado"?"Activo":r.estado==="en_vivo"?"En vivo":r.estado==="cerrado"||r.estado==="finalizado"?"Cerrado":"Borrador"}
-                      </span>
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--mu)" strokeWidth="1.8" strokeLinecap="round"><path d="M5 3l4 4-4 4"/></svg>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
           </div>
         )}
 
@@ -4315,17 +3605,6 @@ function exportCSV(){
                       )}
                       <td>
                         <div style={{display:"flex",gap:".35rem",flexWrap:"nowrap",alignItems:"center"}}>
-                          {/* Activar como remate de trabajo */}
-                          {(remateActivo?.supabaseId||remateActivo?.id)===(r.supabaseId||r.id) ? (
-                            <span style={{fontSize:".66rem",fontWeight:700,color:"#34d399",display:"flex",alignItems:"center",gap:".25rem",padding:".2rem .5rem",background:"rgba(52,211,153,.1)",border:"1px solid rgba(52,211,153,.3)",borderRadius:5}}>
-                              <div className="ldot" style={{background:"#34d399",width:6,height:6}}/> Activo
-                            </span>
-                          ) : (
-                            <button className="btn-sec" style={{fontSize:".66rem",whiteSpace:"nowrap",color:"var(--ac)",border:"1px solid rgba(6,182,212,.3)"}}
-                              onClick={()=>{ setRemateActivo(r); notify(`Trabajando en: ${r.name}`,"sold"); }}>
-                              ↳ Trabajar aquí
-                            </button>
-                          )}
                           {/* Cambiar estado */}
                           {nextEstado[r.estado] && r.supabaseId && (
                             <button className="btn-sec" style={{fontSize:".66rem",whiteSpace:"nowrap",color:r.estado==="publicado"?"var(--gr)":r.estado==="en_vivo"?"var(--mu)":"var(--ac)"}}
@@ -4377,25 +3656,6 @@ function exportCSV(){
                               ✨ Resumen IA
                             </button>
                           </>)}
-                          {/* Eliminar remate — solo admin o martillero de la misma casa */}
-                          {r.supabaseId && (session?.role === "admin" || (session?.role === "martillero" && r.casaId === session?.casaId)) && (
-                            <button className="btn-sec" style={{fontSize:".66rem",whiteSpace:"nowrap",color:"var(--rd)",border:"1px solid rgba(239,68,68,.25)",padding:".2rem .5rem"}}
-                              onClick={async()=>{
-                                const msg = r.estado === "en_vivo"
-                                  ? `"${r.name}" está EN VIVO. ¿Seguro que quieres eliminarlo? Se borrarán lotes y postores. Esta acción no se puede deshacer.`
-                                  : `¿Eliminar "${r.name}"? Se eliminarán también los lotes y postores asociados. Esta acción no se puede deshacer.`;
-                                if(!window.confirm(msg)) return;
-                                await supabase.from("pujas").delete().eq("remate_id", r.supabaseId);
-                                await supabase.from("postores").delete().eq("remate_id", r.supabaseId);
-                                await supabase.from("lotes").delete().eq("remate_id", r.supabaseId);
-                                const {error} = await supabase.from("remates").delete().eq("id", r.supabaseId);
-                                if(error){ notify("Error al eliminar el remate.","inf"); console.error(error); return; }
-                                setDbRemates(prev => prev.filter(x => x.id !== r.supabaseId));
-                                notify(`Remate "${r.name}" eliminado.`, "inf");
-                              }}>
-                              🗑 Eliminar
-                            </button>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -4409,39 +3669,24 @@ function exportCSV(){
 
         {/* ══ LOTES ══ */}
         {page==="lotes" && (()=>{
-          const lotesOrdenados = (lotesFiltroRemate
-            ? dbLotes.filter(l => l.remate_id === lotesFiltroRemate)
-            : dbLotes
-          ).slice().sort((a,b)=>(a.orden||0)-(b.orden||0));
-          const lotesMostrar = filterTab==="todos"
-            ? lotesOrdenados
-            : lotesOrdenados.filter(l=>l.estado===filterTab);
-          const fmtClp = n => n ? Number(n).toLocaleString("es-CL") : "—";
-
-          const moverLote = async (loteId, dir) => {
-            const arr = lotesOrdenados;
-            const idx = arr.findIndex(l => l.id === loteId);
-            const ti  = idx + dir;
-            if(idx < 0 || ti < 0 || ti >= arr.length) return;
-            const a = arr[idx], b = arr[ti];
-            const oA = a.orden ?? idx+1, oB = b.orden ?? ti+1;
-            setDbLotes(prev => prev.map(l => {
-              if(l.id === a.id) return {...l, orden: oB};
-              if(l.id === b.id) return {...l, orden: oA};
-              return l;
-            }));
-            Promise.all([
-              supabase.from("lotes").update({orden: oB}).eq("id", a.id),
-              supabase.from("lotes").update({orden: oA}).eq("id", b.id),
-            ]).catch(e => console.warn("reorder:", e));
-          };
-
-          const remateName = lotesFiltroRemate
-            ? REMATES_MERGED.find(r=>(r.supabaseId||r.id)===lotesFiltroRemate)?.name||""
-            : "";
-
+          const lotesDelRemate = lotesFiltroRemate
+            ? LOTES_MERGED.filter(l => l.remateId === lotesFiltroRemate || l.remate_id === lotesFiltroRemate)
+            : LOTES_MERGED;
+          const lotesMostrar = filterTab==="todos" ? lotesDelRemate : lotesDelRemate.filter(l=>l.estado===filterTab);
           return (
           <div className="page">
+            {/* Selector de remate */}
+            <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".65rem 1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:9}}>
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="13" height="11" rx="2"/><path d="M1 6h13M5 2v4M10 2v4"/></svg>
+              <span style={{fontSize:".75rem",fontWeight:600,color:"var(--mu2)",whiteSpace:"nowrap"}}>Filtrar por remate:</span>
+              <select className="fsel" style={{flex:1,maxWidth:320}} value={lotesFiltroRemate||""} onChange={e=>setLotesFiltroRemate(e.target.value||null)}>
+                <option value="">Todos los lotes</option>
+                {REMATES_MERGED.map(r=>(
+                  <option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name} — {r.fecha}</option>
+                ))}
+              </select>
+              {lotesFiltroRemate && <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>setLotesFiltroRemate(null)}>× Limpiar</button>}
+            </div>
             <div className="filter-row" style={{marginBottom:"1rem"}}>
               {["todos","publicado","vendido","sin vender"].map(f => (
                 <button key={f} className={`filter-btn${filterTab===f?" on":""}`} onClick={()=>setFilterTab(f)}>{f}</button>
@@ -4449,221 +3694,51 @@ function exportCSV(){
             </div>
             <div className="table-card">
               <div className="table-head">
-                <div className="table-title">{lotesMostrar.length} lotes{remateName ? ` — ${remateName}` : ""}</div>
+                <div className="table-title">{lotesMostrar.length} lotes{lotesFiltroRemate ? ` — ${REMATES_MERGED.find(r=>(r.supabaseId||r.id)===lotesFiltroRemate)?.name||""}` : ""}</div>
+                <div style={{display:"flex",gap:".5rem"}}>
+                  <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>notify("Exportando listado...","inf")}>Exportar PDF</button>
+                </div>
               </div>
-              <div style={{overflowX:"auto"}}>
-                <table>
-                  <thead>
-                    <tr>
-                      <th style={{textAlign:"center",width:56}}>Lote</th>
-                      <th style={{textAlign:"center",width:52}}>Cant.</th>
-                      <th>Descripción</th>
-                      <th>Propietario</th>
-                      <th style={{textAlign:"right"}}>Mínimo</th>
-                      <th style={{textAlign:"center"}}>Com.</th>
-                      <th style={{textAlign:"center"}}>Estado</th>
-                      <th style={{textAlign:"center"}}>Acción</th>
-                      <th style={{textAlign:"center",width:56}}>Orden</th>
+              <table>
+                <thead><tr><th>Código</th><th>Artículo</th><th>Categoría</th><th>Base</th><th>Com.</th><th>Estado</th></tr></thead>
+                <tbody>
+                  {lotesMostrar.length === 0 ? (
+                    <tr><td colSpan={6} style={{textAlign:"center",color:"var(--mu)",padding:"2rem",fontSize:".8rem"}}>
+                      {lotesFiltroRemate ? "Este remate no tiene lotes aún. Usa + Agregar lote." : "No hay lotes registrados."}
+                    </td></tr>
+                  ) : lotesMostrar.map(l => (
+                    <tr key={l.id}>
+                      <td><span className="exp-badge">{l.id}</span></td>
+                      <td style={{fontWeight:600}}>{l.name}</td>
+                      <td className="mono">{l.cat}</td>
+                      <td className="gt">{fmt(l.base)}</td>
+                      <td className="mono" style={{color:"var(--ac)",fontWeight:600}}>{l.com}%</td>
+                      <td><span className={`pill p-${l.estado?.replace(" ","-")||"publicado"}`}>{l.estado||"publicado"}</span></td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {lotesMostrar.length === 0 ? (
-                      <tr><td colSpan={9} style={{textAlign:"center",color:"var(--mu)",padding:"2rem",fontSize:".8rem"}}>
-                        {lotesFiltroRemate ? "Este remate no tiene lotes aún. Usa + Agregar lote." : "No hay lotes registrados."}
-                      </td></tr>
-                    ) : lotesMostrar.map((l,i) => {
-                      const idxTotal = lotesOrdenados.findIndex(x=>x.id===l.id);
-                      const puedeSubir = idxTotal > 0;
-                      const puedeBajar = idxTotal < lotesOrdenados.length-1;
-                      return (
-                        <tr key={l.id}>
-                          <td style={{textAlign:"center"}}>
-                            <span style={{fontWeight:900,fontSize:".88rem",color:"var(--ac)",fontFamily:"Inter,sans-serif"}}>{l.orden??idxTotal+1}</span>
-                          </td>
-                          <td style={{textAlign:"center"}}>{l.cantidad||1}</td>
-                          <td style={{fontWeight:600}}>{l.nombre||"—"}</td>
-                          <td className="mono">{l.propietario||"—"}</td>
-                          <td style={{textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:600}}>${fmtClp(l.base)}</td>
-                          <td style={{textAlign:"center"}}>
-                            <span style={{color:"var(--ac)",fontWeight:700,fontFamily:"Inter,sans-serif",fontSize:".76rem"}}>{l.comision||3}%</span>
-                          </td>
-                          <td style={{textAlign:"center"}}>
-                            <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
-                              <span className={`pill p-${(l.estado||"publicado").replace(" ","-")}`}>{l.estado||"publicado"}</span>
-                              {l.afecto_iva && <span style={{fontSize:".6rem",fontWeight:700,color:"var(--yl)",background:"rgba(234,179,8,.1)",border:"1px solid rgba(234,179,8,.28)",borderRadius:4,padding:"1px 5px"}}>IVA</span>}
-                            </div>
-                          </td>
-                          <td style={{textAlign:"center"}}>
-                            <button className="btn-sec" style={{fontSize:".68rem",padding:".2rem .65rem"}}
-                              onClick={()=>{
-                                setEditLoteData({
-                                  id:          l.id,
-                                  nombre:      l.nombre||"",
-                                  propietario: l.propietario||"",
-                                  categoria:   l.categoria||"",
-                                  base:        l.base||"",
-                                  minimo:      l.minimo||"",
-                                  comision:    l.comision||"",
-                                  estado:      l.estado||"disponible",
-                                  orden:       l.orden||idxTotal+1,
-                                  cantidad:    l.cantidad||1,
-                                  ppu:         l.precio_por_unidad||false,
-                                  afectoIva:   l.afecto_iva||false,
-                                });
-                                setModal("editar-lote");
-                              }}>Editar</button>
-                          </td>
-                          <td style={{textAlign:"center"}}>
-                            <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-                              <button onClick={()=>moverLote(l.id,-1)} disabled={!puedeSubir} title="Subir"
-                                style={{width:24,height:20,display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid var(--b1)",borderRadius:4,background:"transparent",cursor:puedeSubir?"pointer":"default",opacity:puedeSubir?1:.18,padding:0}}>
-                                <svg width="8" height="6" viewBox="0 0 10 8" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 6l4-4 4 4"/></svg>
-                              </button>
-                              <button onClick={()=>moverLote(l.id,1)} disabled={!puedeBajar} title="Bajar"
-                                style={{width:24,height:20,display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid var(--b1)",borderRadius:4,background:"transparent",cursor:puedeBajar?"pointer":"default",opacity:puedeBajar?1:.18,padding:0}}>
-                                <svg width="8" height="6" viewBox="0 0 10 8" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 2l4 4 4-4"/></svg>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
           );
         })()}
 
         {/* ══ POSTORES ══ */}
-        {(page==="postores"||page==="clientes") && (()=>{
-          const generarBoleta = async (postor) => {
-            const { jsPDF } = await import("jspdf");
-            const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [148, 210] });
-            const W = 148, H = 210;
-            const TEAL = [20, 184, 166];
-            const NAVY = [13, 148, 136];
-            const GRAY = [100, 116, 139];
-            const LTGRAY = [245, 247, 250];
-
-            const casaData = dbLicencias.find(x => x.slug === session?.casa) || {};
-            const logoUrl  = casaData.logo_url || null;
-            const casaNombre = casaData.nombre || session?.casaNombre || "Casa de Remates";
-
-            // ── Barra superior teal ──
-            doc.setFillColor(...TEAL);
-            doc.rect(0, 0, W, 5, "F");
-
-            let y = 10;
-
-            // ── Logo centrado arriba ──
-            let logoLoaded = false;
-            if (logoUrl) {
-              try {
-                const img = new Image();
-                img.crossOrigin = "anonymous";
-                await new Promise(res => { img.onload = res; img.onerror = res; img.src = logoUrl; });
-                if (img.naturalWidth > 0) {
-                  const ratio = img.naturalWidth / img.naturalHeight;
-                  const lh = 22;
-                  const lw = Math.min(60, lh * ratio);
-                  doc.addImage(img, "PNG", (W - lw) / 2, y, lw, lh, undefined, "FAST");
-                  logoLoaded = true;
-                  y += lh + 4;
-                }
-              } catch {}
-            }
-            if (!logoLoaded) {
-              // Fallback: nombre de la casa centrado grande
-              doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(...NAVY);
-              doc.text(casaNombre.toUpperCase(), W / 2, y + 8, { align: "center" });
-              y += 16;
-            }
-
-            // ── Número de postor ──
-            doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(...TEAL);
-            doc.text("NÚMERO DE POSTOR", W / 2, y, { align: "center" });
-            y += 2;
-            doc.setFont("helvetica", "bold"); doc.setFontSize(52); doc.setTextColor(...NAVY);
-            doc.text(String(postor.nComprador || postor.numero || "—"), W / 2, y + 22, { align: "center" });
-            y += 28;
-
-            // ── Divisor ──
-            doc.setDrawColor(...TEAL); doc.setLineWidth(0.6);
-            doc.line(10, y, W - 10, y);
-            y += 7;
-
-            // ── Datos del cliente — más grandes ──
-            const rows = [
-              ["CLIENTE",      postor.name || postor.nombre || "—"],
-              ["RUT",          postor.rut || "—"],
-              ["MONTO",        postor.garantia ? `$ ${Number(postor.garantia).toLocaleString("es-CL")}` : "$ 0"],
-              ["FECHA",        new Date().toLocaleDateString("es-CL")],
-              ["TIPO DE PAGO", postor.modalidad || "TRANSFERENCIA"],
-            ];
-            rows.forEach(([k, v]) => {
-              // Fondo suave por fila
-              doc.setFillColor(...LTGRAY);
-              doc.roundedRect(10, y - 4, W - 20, 8, 1.5, 1.5, "F");
-              // Label
-              doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(...TEAL);
-              doc.text(k, 14, y + 0.5);
-              // Valor
-              doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...NAVY);
-              doc.text(String(v), W - 14, y + 0.5, { align: "right" });
-              y += 10;
-            });
-
-            y += 3;
-            doc.setDrawColor(...TEAL); doc.setLineWidth(0.4);
-            doc.line(10, y, W - 10, y);
-            y += 7;
-
-            // ── QR codes ──
-            const BASE = "https://gestionderemates.cl";
-            const catUrl = `${BASE}/catalogo/${postor.remate_id || postor.remateId || ""}`;
-            const devUrl = `${BASE}/devoluciones?p=${postor.supabaseId || postor.id}`;
-            const qrApiBase = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=";
-
-            const loadQR = (url) => new Promise(res => {
-              const img = new Image();
-              img.crossOrigin = "anonymous";
-              img.onload = () => res(img);
-              img.onerror = () => res(null);
-              img.src = qrApiBase + encodeURIComponent(url);
-            });
-            const [qrCat, qrDev] = await Promise.all([loadQR(catUrl), loadQR(devUrl)]);
-
-            const qrSize = 48;
-            const leftX  = W / 2 - qrSize - 6;
-            const rightX = W / 2 + 6;
-
-            // Labels sobre cada QR
-            doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(...TEAL);
-            doc.text("CATÁLOGO", leftX + qrSize / 2, y, { align: "center" });
-            doc.text("DEVOLUCIÓN", rightX + qrSize / 2, y, { align: "center" });
-            y += 4;
-
-            if (qrCat) doc.addImage(qrCat, "PNG", leftX, y, qrSize, qrSize, undefined, "FAST");
-            else { doc.setFillColor(230,230,230); doc.rect(leftX, y, qrSize, qrSize, "F"); }
-
-            if (qrDev) doc.addImage(qrDev, "PNG", rightX, y, qrSize, qrSize, undefined, "FAST");
-            else { doc.setFillColor(230,230,230); doc.rect(rightX, y, qrSize, qrSize, "F"); }
-
-            y += qrSize + 6;
-
-            // ── Footer ──
-            doc.setFillColor(...TEAL);
-            doc.rect(0, H - 5, W, 5, "F");
-            doc.setFont("helvetica", "normal"); doc.setFontSize(6); doc.setTextColor(...GRAY);
-            doc.text("Powered by TAKKA · takka.cl", W / 2, H - 7, { align: "center" });
-
-            doc.save(`boleta-postor-${postor.nComprador || postor.numero || postor.supabaseId || postor.id}.pdf`);
-          };
+        {page==="postores" && (()=>{
           const pendientes = POSTORES_MERGED.filter(p=>p.estado==="pendiente");
           return (
           <div className="page">
+            {/* Selector de remate para filtrar */}
+            <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".65rem 1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:9}}>
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="13" height="11" rx="2"/><path d="M1 6h13M5 2v4M10 2v4"/></svg>
+              <span style={{fontSize:".75rem",fontWeight:600,color:"var(--mu2)",whiteSpace:"nowrap"}}>Remate:</span>
+              <select className="fsel" style={{flex:1,maxWidth:320}} value={lotesFiltroRemate||""} onChange={e=>setLotesFiltroRemate(e.target.value||null)}>
+                <option value="">Todos los remates</option>
+                {REMATES_MERGED.map(r=><option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>)}
+              </select>
+              {lotesFiltroRemate && <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>setLotesFiltroRemate(null)}>× Todos</button>}
+            </div>
+
             {/* Alerta pendientes */}
             {pendientes.length > 0 && (
               <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".7rem 1rem",background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",borderRadius:9}}>
@@ -4685,17 +3760,16 @@ function exportCSV(){
             <div className="table-card">
               <div className="table-head">
                 <div className="table-title">
-                  {POSTORES_MERGED.filter(p=>(filterTab==="todos"||p.estado===filterTab)&&(page==="clientes"||!lotesFiltroRemate||(p.remateId===lotesFiltroRemate||p.remate_id===lotesFiltroRemate))).length} postores
+                  {POSTORES_MERGED.filter(p=>(filterTab==="todos"||p.estado===filterTab)&&(!lotesFiltroRemate||(p.remateId===lotesFiltroRemate||p.remate_id===lotesFiltroRemate))).length} postores
                 </div>
               </div>
-              <div style={{overflowX:"auto"}}>
-              <table style={{minWidth:900}}>
+              <table>
                 <thead>
                   <tr><th>N°</th><th>Nombre</th><th>RUT</th><th>Email</th><th>Teléfono</th><th>Modalidad</th><th>Comprobante</th><th>Estado</th><th>Acción</th></tr>
                 </thead>
                 <tbody>
                   {POSTORES_MERGED
-                    .filter(p=>(filterTab==="todos"||p.estado===filterTab)&&(page==="clientes"||!lotesFiltroRemate||(p.remateId===lotesFiltroRemate||p.remate_id===lotesFiltroRemate)))
+                    .filter(p=>(filterTab==="todos"||p.estado===filterTab)&&(!lotesFiltroRemate||(p.remateId===lotesFiltroRemate||p.remate_id===lotesFiltroRemate)))
                     .map(p => (
                     <tr key={p.id}>
                       <td><span style={{fontFamily:"Inter,sans-serif",fontSize:".8rem",fontWeight:700,color:"var(--ac)"}}>#{String(p.nComprador).padStart(2,"0")}</span></td>
@@ -4730,53 +3804,29 @@ function exportCSV(){
                                   const {data} = await supabase.from("postores").select("*").order("numero");
                                   if(data) setDbPostores(data);
                                   notify(`${p.name} verificado.`,"sold");
-
-                                  if(!p.email) return;
-                                  // Obtener casa desde BD
-                                  const {data:casaDB} = p.casa_id
-                                    ? await supabase.from("casas").select("*").eq("id",p.casa_id).single()
-                                    : {data:null};
-                                  const casaInfo = casaDB || {};
-                                  const casaNom = casaInfo.nombre || session?.casaNombre || "Casa de Remates";
-                                  const remateInfo = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===p.remate_id);
-
-                                  // Crear cuenta si no existe
-                                  let tempPass = null;
-                                  const {data:existing} = await supabase.from("usuarios").select("id").eq("email",p.email).maybeSingle();
-                                  if(!existing){
-                                    const chars="ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-                                    const candidatePass = Array.from({length:8},()=>chars[Math.floor(Math.random()*chars.length)]).join("");
+                                  // Enviar email de confirmación al postor
+                                  const casaInfo = dbLicencias.find(x => x.slug === session?.casa) || {};
+                                  const remateInfo = REMATES_MERGED.find(r => (r.supabaseId||r.id) === p.remate_id);
+                                  if(p.email){
                                     try {
-                                      const res = await fetch("/api/admin/create-user",{method:"POST",headers:{"Content-Type":"application/json"},
-                                        body:JSON.stringify({email:p.email,password:candidatePass,nombre:p.name,casa_id:p.casa_id||null,roles:["postor"],activo:true})});
-                                      const created = await res.json();
-                                      if(created.id){
-                                        tempPass = candidatePass;
-                                        await supabase.from("postores").update({user_id:created.id}).eq("id",p.supabaseId);
-                                      } else {
-                                        notify("Cuenta no creada: "+(created.error||"error"),"inf");
-                                      }
-                                    } catch(e){ notify("Error al crear cuenta","inf"); }
+                                      await fetch("/api/send-email", {
+                                        method: "POST",
+                                        headers: {"Content-Type":"application/json"},
+                                        body: JSON.stringify({
+                                          tipo:          "verificado",
+                                          nombre:        p.name,
+                                          numero:        String(p.nComprador).padStart(3,"0"),
+                                          remate:        remateInfo?.name || "Remate",
+                                          fecha:         remateInfo?.fecha || null,
+                                          casa:          casaInfo.nombre || session?.casaNombre || "",
+                                          logo_url:      casaInfo.logo_url || null,
+                                          email_cliente: p.email,
+                                          email_casa:    casaInfo.email || null,
+                                          modalidad:     p.modalidad || null,
+                                        }),
+                                      });
+                                    } catch(e) { /* no bloquea */ }
                                   }
-
-                                  // Email 1: inscripción confirmada
-                                  try {
-                                    await fetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
-                                      body:JSON.stringify({tipo:"verificado",nombre:p.name,
-                                        numero:String(p.nComprador).padStart(3,"0"),
-                                        remate:remateInfo?.name||"Remate",fecha:remateInfo?.fecha||null,
-                                        casa:casaNom,logo_url:casaInfo.logo_url||null,
-                                        email_cliente:p.email,email_casa:casaInfo.email||null,
-                                        modalidad:p.modalidad||null,portal_url:"https://gestionderemates.cl/postor"})});
-                                  } catch(e){}
-
-                                  // Email 2: bienvenida con credenciales (solo si es nuevo)
-                                  if(tempPass) try {
-                                    await fetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
-                                      body:JSON.stringify({tipo:"bienvenida_postor",nombre:p.name,email_cliente:p.email,
-                                        casa:casaNom,logo_url:casaInfo.logo_url||null,email_casa:casaInfo.email||null,
-                                        temp_password:tempPass,portal_url:"https://gestionderemates.cl/postor"})});
-                                  } catch(e){}
                                 }
                               }}>✓ Verificar</button>
                           )}
@@ -4796,18 +3846,12 @@ function exportCSV(){
                                 else notify("Error al eliminar postor.","inf");
                               }}>🗑</button>
                           )}
-                          {p.supabaseId && (
-                            <button className="btn-sec" style={{fontSize:".65rem",padding:".22rem .55rem"}}
-                              onClick={()=>generarBoleta(p)}
-                              title="Imprimir boleta">🖨️ Boleta</button>
-                          )}
                         </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              </div>
             </div>
 
             {/* Link de inscripción pública */}
@@ -4815,10 +3859,10 @@ function exportCSV(){
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M4 7h6M7 4l3 3-3 3"/></svg>
               <span style={{fontSize:".75rem",color:"var(--mu2)"}}>Link de inscripción pública:</span>
               <code style={{fontSize:".73rem",color:"var(--ac)",fontFamily:"Inter,sans-serif",flex:1}}>
-                takka.cl/participar?id={session?.casaId||session?.casa||"—"}
+                gestionderemates.cl/participar?id={session?.casaId||session?.casa||"—"}
               </code>
               <button className="btn-sec" style={{fontSize:".68rem"}} onClick={()=>{
-                navigator.clipboard.writeText(`https://takka.cl/participar?id=${session?.casaId||session?.casa||""}`);
+                navigator.clipboard.writeText(`https://gestionderemates.cl/participar?id=${session?.casaId||session?.casa||""}`);
                 notify("Link copiado al portapapeles.","sold");
               }}>Copiar link</button>
             </div>
@@ -4864,7 +3908,7 @@ function exportCSV(){
                     // Header
                     doc.setFillColor(7,15,28); doc.rect(0,0,W,32,"F");
                     doc.setTextColor(56,178,246); doc.setFontSize(9); doc.setFont("helvetica","bold");
-                    doc.text("TAKKA",14,10);
+                    doc.text("GR AUCTION SOFTWARE",14,10);
                     doc.setTextColor(255,255,255); doc.setFontSize(15);
                     doc.text("LIQUIDACIÓN AL MARTILLERO",14,20);
                     doc.setFontSize(8); doc.setFont("helvetica","normal"); doc.setTextColor(90,127,168);
@@ -4909,7 +3953,7 @@ function exportCSV(){
                     y+=33;
                     doc.setFillColor(56,178,246); doc.rect(10,y,W-20,10,"F");
                     doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont("helvetica","bold");
-                    doc.text("TOTAL A PAGAR A TAKKA:",14,y+7);
+                    doc.text("TOTAL A PAGAR A GR AUCTION SOFTWARE:",14,y+7);
                     doc.text(fmtCL(neto),W-14,y+7,{align:"right"});
 
                     doc.save(`balance-martillero-${remateNom.replace(/\s/g,"-")}.pdf`);
@@ -5081,224 +4125,6 @@ function exportCSV(){
                         </table>
                     }
                   </div>
-
-                  {/* ── Desglose por vendedor ── */}
-                  {(()=>{
-                    // Lotes del remate seleccionado con propietario
-                    const lotesRemate = dbLotes.filter(l=>
-                      selectedBalanceRemate==="all" || l.remate_id===selectedBalanceRemate
-                    );
-                    const vendedores = [...new Set(lotesRemate.map(l=>l.propietario).filter(Boolean))].sort();
-                    if(vendedores.length===0) return null;
-
-                    // Por cada vendedor calcular sus números
-                    const vendData = vendedores.map(v=>{
-                      const lotesV = lotesRemate.filter(l=>l.propietario===v);
-                      const adjV   = adjAll.filter(a=>lotesV.some(l=>l.nombre===a.lote||l.id===a.loteId||l.name===a.lote));
-                      const noVend = lotesV.filter(l=>!adjV.some(a=>a.lote===l.nombre||a.lote===l.name||a.loteId===l.id));
-                      const totalMartillo = adjV.reduce((s,a)=>s+(a.monto||0),0);
-                      const comCompra     = adjV.reduce((s,a)=>s+(a.com||Math.round((a.monto||0)*(a.comPct??3)/100)),0);
-                      const pctVenta      = comVentaPorVend[v]??5;
-                      const comVenta      = Math.round(totalMartillo*(pctVenta/100));
-                      return {v, lotesV, adjV, noVend, totalMartillo, comCompra, comVenta, pctVenta};
-                    });
-
-                    const totalMartilloAll = vendData.reduce((s,d)=>s+d.totalMartillo,0);
-                    const totalComVenta    = vendData.reduce((s,d)=>s+d.comVenta,0);
-                    const totalComCompra   = vendData.reduce((s,d)=>s+d.comCompra,0);
-                    const totalComisiones  = totalComVenta+totalComCompra;
-
-                    return (
-                      <div style={{marginTop:"1.25rem"}}>
-                        {/* Header de la sección */}
-                        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:".75rem",flexWrap:"wrap",gap:".5rem"}}>
-                          <div>
-                            <div style={{fontSize:".82rem",fontWeight:800,color:"var(--wh2)"}}>Desglose por vendedor</div>
-                            <div style={{fontSize:".68rem",color:"var(--mu)",marginTop:".1rem"}}>
-                              Ajusta el % de comisión de venta por vendedor — la de compra se calcula automáticamente desde los adjudicados
-                            </div>
-                          </div>
-                          <button className="btn-sec" style={{fontSize:".7rem"}} onClick={async()=>{
-                            try{
-                              const {jsPDF}=await import("jspdf");
-                              const autoTable=(await import("jspdf-autotable")).default;
-                              const doc=new jsPDF({orientation:"landscape",unit:"mm",format:"a4"});
-                              const W=doc.internal.pageSize.getWidth();
-                              const remNom=selectedBalanceRemate==="all"?"Todos los remates":(REMATES_MERGED.find(r=>(r.supabaseId||r.id)===selectedBalanceRemate)?.name||"Remate");
-                              const fmtCL=n=>"$"+Math.round(n).toLocaleString("es-CL");
-
-                              // Header
-                              doc.setFillColor(7,15,28); doc.rect(0,0,W,28,"F");
-                              doc.setTextColor(56,178,246); doc.setFontSize(8); doc.setFont("helvetica","bold");
-                              doc.text("TAKKA — AUCTION SOFTWARE",14,9);
-                              doc.setTextColor(255,255,255); doc.setFontSize(13);
-                              doc.text("BALANCE POR VENDEDOR",14,18);
-                              doc.setFontSize(7.5); doc.setFont("helvetica","normal"); doc.setTextColor(90,127,168);
-                              doc.text(`Remate: ${remNom}   ·   ${new Date().toLocaleDateString("es-CL")}`,14,25);
-
-                              // KPIs rápidos
-                              let y=35;
-                              const kpis=[["Venta total martillo",fmtCL(totalMartilloAll)],["Com. de venta (vendedores)",fmtCL(totalComVenta)],["Com. de compra (compradores)",fmtCL(totalComCompra)],["Total comisiones remate",fmtCL(totalComisiones)]];
-                              const kw=(W-28)/4;
-                              kpis.forEach((k,i)=>{
-                                const x=14+i*(kw+2);
-                                doc.setFillColor(11,31,56); doc.roundedRect(x,y,kw,13,1.5,1.5,"F");
-                                doc.setTextColor(90,127,168); doc.setFontSize(5.5); doc.setFont("helvetica","normal"); doc.text(k[0].toUpperCase(),x+3,y+4.5);
-                                doc.setTextColor(255,255,255); doc.setFontSize(8.5); doc.setFont("helvetica","bold"); doc.text(k[1],x+3,y+10.5);
-                              });
-                              y+=20;
-
-                              // Tabla por vendedor
-                              const body=vendData.map(d=>[
-                                d.v,
-                                String(d.lotesV.length),
-                                String(d.adjV.length),
-                                fmtCL(d.totalMartillo),
-                                `${d.pctVenta}%`,
-                                fmtCL(d.comVenta),
-                                fmtCL(d.comCompra),
-                                fmtCL(d.comVenta+d.comCompra),
-                              ]);
-                              body.push(["TOTAL","","",fmtCL(totalMartilloAll),"",fmtCL(totalComVenta),fmtCL(totalComCompra),fmtCL(totalComisiones)]);
-
-                              autoTable(doc,{
-                                startY:y,
-                                head:[["Vendedor","Lotes","Vendidos","Total martillo","Com. venta %","Com. venta $","Com. compra $","Total comisiones"]],
-                                body,
-                                styles:{fontSize:8,cellPadding:3},
-                                headStyles:{fillColor:[14,116,144],textColor:255,fontStyle:"bold"},
-                                columnStyles:{0:{cellWidth:55},1:{cellWidth:18,halign:"center"},2:{cellWidth:18,halign:"center"},3:{cellWidth:38,halign:"right"},4:{cellWidth:22,halign:"center"},5:{cellWidth:38,halign:"right"},6:{cellWidth:38,halign:"right"},7:{cellWidth:42,halign:"right"}},
-                                didParseCell:(data)=>{
-                                  if(data.row.index===body.length-1){ data.cell.styles.fontStyle="bold"; data.cell.styles.fillColor=[7,15,28]; data.cell.styles.textColor=[56,178,246]; }
-                                }
-                              });
-
-                              // Detalle por vendedor (lotes)
-                              vendData.forEach(d=>{
-                                if(!d.adjV.length) return;
-                                doc.addPage();
-                                doc.setFillColor(11,31,56); doc.rect(0,0,W,14,"F");
-                                doc.setTextColor(56,178,246); doc.setFontSize(8); doc.setFont("helvetica","bold");
-                                doc.text(`VENDEDOR: ${d.v.toUpperCase()}`,14,9);
-                                doc.setTextColor(90,127,168); doc.setFontSize(7); doc.setFont("helvetica","normal");
-                                doc.text(`Lotes: ${d.lotesV.length} · Vendidos: ${d.adjV.length} · Total martillo: ${fmtCL(d.totalMartillo)} · Com.venta ${d.pctVenta}%: ${fmtCL(d.comVenta)} · Com.compra: ${fmtCL(d.comCompra)}`,14,13);
-                                autoTable(doc,{
-                                  startY:18,
-                                  head:[["Lote","Comprador","Monto martillo","Com. compra","Com. venta vendedor"]],
-                                  body:d.adjV.map(a=>{
-                                    const comC=a.com||Math.round((a.monto||0)*(a.comPct??3)/100);
-                                    const comV=Math.round((a.monto||0)*(d.pctVenta/100));
-                                    return [a.lote||"—",a.postor||"—",fmtCL(a.monto||0),fmtCL(comC),fmtCL(comV)];
-                                  }),
-                                  styles:{fontSize:8,cellPadding:3},
-                                  headStyles:{fillColor:[7,15,28],textColor:[56,178,246],fontStyle:"bold"},
-                                  columnStyles:{2:{halign:"right"},3:{halign:"right"},4:{halign:"right"}},
-                                });
-                              });
-
-                              doc.save(`balance-vendedores-${remNom.replace(/\s/g,"-")}.pdf`);
-                              notify("PDF generado.","sold");
-                            }catch(e){notify("Error: "+e.message,"inf");}
-                          }}>↓ PDF Vendedores</button>
-                        </div>
-
-                        {/* Tarjetas por vendedor */}
-                        <div style={{display:"flex",flexDirection:"column",gap:".85rem"}}>
-                          {vendData.map((d,vi)=>(
-                            <div key={vi} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,overflow:"hidden"}}>
-                              {/* Header del vendedor */}
-                              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:".7rem 1.1rem",background:"var(--s3)",borderBottom:"1px solid var(--b1)",flexWrap:"wrap",gap:".5rem"}}>
-                                <div style={{display:"flex",alignItems:"center",gap:".6rem"}}>
-                                  <div style={{width:8,height:8,borderRadius:"50%",background:d.totalMartillo>0?"#34d399":"#94a3b8",flexShrink:0}}/>
-                                  <div style={{fontWeight:700,fontSize:".85rem",color:"var(--wh2)"}}>{d.v}</div>
-                                  <span style={{fontSize:".65rem",padding:".15rem .5rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:4,color:"var(--ac)",fontWeight:600}}>
-                                    {d.adjV.length}/{d.lotesV.length} lotes vendidos
-                                  </span>
-                                </div>
-                                {/* Comisión de venta editable */}
-                                <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
-                                  <span style={{fontSize:".68rem",color:"var(--mu)",whiteSpace:"nowrap"}}>Comisión de venta:</span>
-                                  <div style={{display:"flex",alignItems:"center",gap:".25rem",background:"rgba(246,173,85,.08)",border:"1px solid rgba(246,173,85,.25)",borderRadius:6,padding:".2rem .4rem .2rem .6rem"}}>
-                                    <input
-                                      type="number" min="0" max="30" step="0.5"
-                                      value={d.pctVenta}
-                                      onChange={e=>setComVentaPorVend(prev=>({...prev,[d.v]:parseFloat(e.target.value)||0}))}
-                                      style={{width:38,border:"none",background:"transparent",fontSize:".82rem",fontWeight:700,color:"var(--yl)",textAlign:"right",outline:"none"}}
-                                    />
-                                    <span style={{fontSize:".75rem",fontWeight:700,color:"var(--yl)"}}>%</span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Números del vendedor */}
-                              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0,borderBottom:"1px solid var(--b1)"}}>
-                                {[
-                                  {label:"Total martillo",     val:fmt(d.totalMartillo),         color:"var(--wh2)"},
-                                  {label:`Com. venta ${d.pctVenta}% → vendedor paga`, val:fmt(d.comVenta), color:"#f87171"},
-                                  {label:"Com. compra → comprador paga", val:fmt(d.comCompra),   color:"var(--gr)"},
-                                  {label:"Total comisiones casa",         val:fmt(d.comVenta+d.comCompra), color:"var(--ac)"},
-                                ].map((c,i)=>(
-                                  <div key={i} style={{padding:".75rem 1rem",borderRight:i<3?"1px solid var(--b1)":"none",textAlign:"center"}}>
-                                    <div style={{fontSize:".57rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".25rem",lineHeight:1.3}}>{c.label}</div>
-                                    <div style={{fontFamily:"Inter,sans-serif",fontSize:".9rem",fontWeight:800,color:c.color}}>{c.val}</div>
-                                  </div>
-                                ))}
-                              </div>
-
-                              {/* Lotes del vendedor */}
-                              {d.adjV.length>0 && (
-                                <div style={{overflowX:"auto"}}>
-                                  <table>
-                                    <thead><tr><th>Lote</th><th>Comprador</th><th style={{textAlign:"right"}}>Martillo</th><th style={{textAlign:"right"}}>Com. compra</th><th style={{textAlign:"right"}}>Com. venta</th><th style={{textAlign:"right"}}>Total casa</th></tr></thead>
-                                    <tbody>
-                                      {d.adjV.map((a,ai)=>{
-                                        const comC=a.com||Math.round((a.monto||0)*(a.comPct??3)/100);
-                                        const comV=Math.round((a.monto||0)*(d.pctVenta/100));
-                                        return (
-                                          <tr key={ai}>
-                                            <td style={{fontWeight:500,fontSize:".76rem"}}>{a.lote||"—"}</td>
-                                            <td style={{fontSize:".73rem",color:"var(--mu2)"}}>{a.postor||"—"}</td>
-                                            <td style={{textAlign:"right",fontWeight:600}}>{fmt(a.monto||0)}</td>
-                                            <td style={{textAlign:"right",color:"var(--gr)",fontWeight:600,fontSize:".73rem"}}>{fmt(comC)}</td>
-                                            <td style={{textAlign:"right",color:"#f87171",fontWeight:600,fontSize:".73rem"}}>{fmt(comV)}</td>
-                                            <td style={{textAlign:"right",color:"var(--ac)",fontWeight:700}}>{fmt(comC+comV)}</td>
-                                          </tr>
-                                        );
-                                      })}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              )}
-                              {d.adjV.length===0 && (
-                                <div style={{padding:".85rem 1.1rem",fontSize:".75rem",color:"var(--mu)",fontStyle:"italic"}}>Sin lotes vendidos aún</div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Resumen total del remate */}
-                        <div style={{marginTop:"1rem",background:"var(--s3)",border:"1px solid var(--b1)",borderRadius:12,overflow:"hidden"}}>
-                          <div style={{padding:".7rem 1.1rem",borderBottom:"1px solid var(--b1)",fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".08em"}}>
-                            Resumen total — {selectedBalanceRemate==="all"?"Todos los remates":(REMATES_MERGED.find(r=>(r.supabaseId||r.id)===selectedBalanceRemate)?.name||"Remate")}
-                          </div>
-                          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0}}>
-                            {[
-                              {label:"Vendido en remate",         val:fmt(totalMartilloAll),  color:"var(--wh2)"},
-                              {label:"Total com. de venta",       val:fmt(totalComVenta),     color:"#f87171",   sub:"cobrado a vendedores"},
-                              {label:"Total com. de compra",      val:fmt(totalComCompra),    color:"var(--gr)", sub:"cobrado a compradores"},
-                              {label:"Total comisiones remate",   val:fmt(totalComisiones),   color:"var(--ac)", sub:"ingreso bruto casa"},
-                            ].map((c,i)=>(
-                              <div key={i} style={{padding:"1rem 1.1rem",borderRight:i<3?"1px solid var(--b1)":"none",textAlign:"center",borderTop:`3px solid ${c.color}`}}>
-                                <div style={{fontSize:".58rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".3rem"}}>{c.label}</div>
-                                <div style={{fontFamily:"Inter,sans-serif",fontSize:"1.1rem",fontWeight:900,color:c.color}}>{c.val}</div>
-                                {c.sub && <div style={{fontSize:".6rem",color:"var(--mu)",marginTop:".15rem"}}>{c.sub}</div>}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })()}
                 </>
               );
             })()}
@@ -5434,22 +4260,30 @@ function exportCSV(){
 
         {/* ══ VENDEDORES / CONSIGNATARIOS ══ */}
         {page==="vendedores" && (()=>{
-          const BannerRemate = () => null;
-          // Lotes del remate seleccionado (o todos si no hay selección)
-          const lotesDelRemate = dbLotes.filter(l => !selectedRemate || l.remate_id === selectedRemate);
-          // Propietarios únicos extraídos de los lotes reales
-          const propietariosUnicos = [...new Set(
-            lotesDelRemate.map(l => l.propietario).filter(p => p && p.trim())
-          )].sort();
-          // Lotes del vendedor seleccionado
-          const lotesVendedor = vendedorSel
-            ? lotesDelRemate.filter(l => l.propietario === vendedorSel)
-            : [];
+          const vd = VENDEDORES_MOCK.find(v=>v.id===vendedorSel);
+          // Banner selector remate (inline)
+          const BannerRemate = () => {
+            const cerrados = REMATES_MERGED.filter(r => r.estado === "cerrado");
+            return (
+              <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",padding:".75rem 1rem",background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.18)",borderRadius:9}}>
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
+                <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
+                <select value={selectedRemate||""} onChange={e=>setSelectedRemate(e.target.value||null)}
+                  style={{flex:1,maxWidth:340,padding:".4rem .7rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:7,color:"var(--wh2)",fontSize:".8rem",fontFamily:"Inter,sans-serif",cursor:"pointer"}}>
+                  <option value="">— Todos los remates cerrados —</option>
+                  {cerrados.map(r=><option key={r.id} value={r.id}>{r.name} · {r.fecha} · {r.casa}</option>)}
+                </select>
+                {selectedRemate && <button onClick={()=>setSelectedRemate(null)} style={{background:"transparent",border:"1px solid var(--b2)",borderRadius:6,color:"var(--mu2)",fontSize:".7rem",padding:".3rem .6rem",cursor:"pointer"}}>Ver todos</button>}
+              </div>
+            );
+          };
+          // Calcular lotes del vendedor seleccionado (mock: todos los lotes reales)
+          const lotesVendedor = LOTES_REALES.filter((_,i)=>i<4); // mock: primeros 4 lotes
           const adjVendedor   = [...ADJUDICACIONES,...liquidaciones].filter(a=>
-            lotesVendedor.find(l=>l.nombre===a.lote||l.id===a.loteId)
+            lotesVendedor.find(l=>l.name===a.lote)
           );
           const totalVentas   = adjVendedor.reduce((s,a)=>s+(a.monto||0),0);
-          const lotesNoVendidos = lotesVendedor.filter(l=>!adjVendedor.find(a=>a.lote===l.nombre||a.loteId===l.id));
+          const lotesNoVendidos = lotesVendedor.filter(l=>!adjVendedor.find(a=>a.lote===l.name));
           const totalNoVendido  = lotesNoVendidos.reduce((s,l)=>s+(l.base||0),0);
           const comVentaMonto  = Math.round(totalVentas * (vendedorForm.comVenta/100));
           const comDefensaMonto= Math.round(totalNoVendido * (vendedorForm.comDefensa/100));
@@ -5461,272 +4295,100 @@ function exportCSV(){
           const generarPDFVendedor = async () => {
             const { jsPDF } = await import("jspdf");
             const { default: autoTable } = await import("jspdf-autotable");
-
-            // Datos de la casa — igual que PDF comprador
-            const casaData   = dbLicencias.find(x => x.slug === session?.casa) || {};
-            const casaNombre = casaData.nombre    || session?.casaNombre || "Casa de Remates";
-            const logoUrl    = casaData.logo_url  || null;
-            const martillero = casaData.martillero|| "";
-            const rutMart    = casaData.rut_martillero       || "";
-            const telMart    = casaData.telefono_martillero  || casaData.telefono  || "";
-            const emailMart  = casaData.email_martillero     || casaData.email     || "";
-
-            // Paleta
-            const TEAL   = [20,  184, 166];
-            const NAVY   = [13, 148, 136];
-            const GRAY   = [100, 116, 139];
-            const LTGRAY = [248, 250, 252];
-            const BORDER = [226, 232, 240];
-            const RED    = [239, 68,  68 ];
-            const WHITE  = [255, 255, 255];
-
-            const fmtCLP = v => "$ " + Math.round(v).toLocaleString("es-CL");
+            const casaNombre = session?.casaNombre || "Remates Ahumada";
             const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"letter"});
             const W = doc.internal.pageSize.getWidth();
-            const H = doc.internal.pageSize.getHeight();
-            let y = 0;
+            let y = 18;
+            const fmtCLP = v => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(v);
 
-            // Barra superior teal
-            doc.setFillColor(...TEAL);
-            doc.rect(0, 0, W, 3.5, "F");
-            y = 10;
+            // Cabecera
+            doc.setFillColor(47,128,237);
+            doc.rect(14,y-6,W-28,0.8,"F");
+            doc.setFont("helvetica","bold"); doc.setFontSize(18); doc.setTextColor(47,128,237);
+            doc.text("LIQUIDACIÓN DE VENDEDOR",14,y+4);
+            doc.setFontSize(9); doc.setTextColor(100,100,100);
+            doc.text(casaNombre.toUpperCase(),14,y+10);
+            doc.setFontSize(10); doc.setTextColor(50,50,50);
+            doc.text(`Fecha: ${new Date().toLocaleDateString("es-CL")}`,W-14,y+4,{align:"right"});
+            doc.setFontSize(9); doc.setTextColor(120,120,120);
+            doc.text(`Remate: ${REMATES_MERGED[0]?.name||"—"}`,W-14,y+10,{align:"right"});
+            y+=18;
 
-            // Header: logo + datos casa (izquierda) | título (derecha)
-            let logoEndX = 14;
-            if (logoUrl) {
-              try {
-                const img = new Image();
-                img.crossOrigin = "anonymous";
-                await new Promise(res => { img.onload = res; img.onerror = res; img.src = logoUrl; });
-                if (img.naturalWidth > 0) {
-                  const ratio = img.naturalWidth / img.naturalHeight;
-                  const lw = Math.min(38, 22 * ratio);
-                  doc.addImage(img, "PNG", 14, y, lw, 22, undefined, "FAST");
-                  logoEndX = 14 + lw + 5;
-                }
-              } catch {}
-            } else {
-              try {
-                const canvas = document.createElement("canvas");
-                canvas.width = 72; canvas.height = 72;
-                const ctx = canvas.getContext("2d");
-                ctx.fillStyle = "#EBF8FF"; ctx.beginPath();
-                ctx.roundRect(0,0,72,72,14); ctx.fill();
-                ctx.strokeStyle = "#38B2F6"; ctx.lineWidth = 7;
-                ctx.lineCap = "round"; ctx.lineJoin = "round";
-                ctx.beginPath(); ctx.moveTo(16,24); ctx.quadraticCurveTo(16,14,28,14);
-                ctx.lineTo(44,14); ctx.quadraticCurveTo(60,14,60,28);
-                ctx.quadraticCurveTo(60,38,48,40); ctx.lineTo(60,56); ctx.stroke();
-                ctx.strokeStyle = "#1E3A5F";
-                ctx.beginPath(); ctx.moveTo(8,24); ctx.quadraticCurveTo(8,10,24,10);
-                ctx.lineTo(40,10); ctx.stroke();
-                doc.addImage(canvas.toDataURL("image/png"), "PNG", 14, y, 18, 18, undefined, "FAST");
-                logoEndX = 37;
-              } catch {}
-            }
-
-            doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor(...NAVY);
-            doc.text(casaNombre.toUpperCase(), logoEndX, y + 7);
-            if (martillero) {
-              doc.setFont("helvetica","bold"); doc.setFontSize(7); doc.setTextColor(...TEAL);
-              doc.text("MARTILLERO PÚBLICO", logoEndX, y + 13);
-              doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
-              doc.text(martillero, logoEndX, y + 18);
-              let iY = y + 23;
-              const info = [rutMart && `RUT: ${rutMart}`, telMart && `Tel: ${telMart}`, emailMart && `Email: ${emailMart}`].filter(Boolean);
-              info.forEach(line => { doc.text(line, logoEndX, iY); iY += 4; });
-            }
-
-            doc.setFont("helvetica","bold"); doc.setFontSize(19); doc.setTextColor(...TEAL);
-            doc.text("LIQUIDACIÓN", W - 14, y + 9, {align:"right"});
-            doc.setFontSize(11); doc.setTextColor(...NAVY);
-            doc.text("VENDEDOR", W - 14, y + 16, {align:"right"});
-            doc.setFont("helvetica","normal"); doc.setFontSize(6.5); doc.setTextColor(...GRAY);
-            doc.text("Powered by TAKKA", W - 14, y + 32, {align:"right"});
-
-            y = 42;
-            doc.setDrawColor(...TEAL); doc.setLineWidth(0.5);
-            doc.line(14, y, W - 14, y);
-            y += 5;
-
-            // Banner remate
-            const remateSelObj = REMATES_MERGED.find(r => r.id === selectedRemate);
-            const remNombreV   = remateSelObj?.name || REMATES_MERGED[0]?.name || "Remate";
-            doc.setFillColor(236, 253, 245);
-            doc.setDrawColor(...TEAL); doc.setLineWidth(0.3);
-            doc.roundedRect(14, y, W - 28, 9, 2, 2, "FD");
-            doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(...NAVY);
-            doc.text(remNombreV, 19, y + 6);
-            doc.setFont("helvetica","normal"); doc.setTextColor(...GRAY);
-            doc.text(`Fecha: ${new Date().toLocaleDateString("es-CL")}`, W - 18, y + 6, {align:"right"});
-            y += 14;
-
-            // Datos vendedor — sólo propietario y remate (sin RUT/giro/dirección)
-            const datosV = [
-              ["PROPIETARIO", vendedorSel || "—"],
-              ["REMATE",      remNombreV],
-            ];
-            const datosH = datosV.length * 6 + 8;
-            doc.setFillColor(...LTGRAY); doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
-            doc.roundedRect(14, y, W - 28, datosH, 2, 2, "FD");
-            let dvy = y + 7;
-            datosV.forEach(([k, val]) => {
-              doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.setTextColor(...GRAY);
-              doc.text(k, 18, dvy);
-              doc.setFont("helvetica","normal"); doc.setTextColor(30, 30, 30);
-              doc.text(String(val || "—"), 56, dvy);
-              dvy += 6;
+            // Datos vendedor
+            doc.setFillColor(247,249,252); doc.setDrawColor(221,227,240);
+            doc.roundedRect(14,y,W-28,26,2,2,"FD");
+            const datosV = [["Propietario/Vendedor:",vd?.nombre||"—"],["R.U.T:",vd?.rut||"—"],["Giro:",vd?.giro||"—"],["Dirección:",vd?.direccion||"—"],["Comuna:",vd?.comuna||"—"],["Email:",vd?.email||"—"]];
+            let dy=y+6;
+            datosV.slice(0,3).forEach(([k,v])=>{
+              doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(140,140,140); doc.text(k,18,dy);
+              doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30); doc.text(v,52,dy); dy+=7;
             });
-            y = dvy + 5;
+            dy=y+6;
+            datosV.slice(3).forEach(([k,v])=>{
+              doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(140,140,140); doc.text(k,W/2+4,dy);
+              doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30); doc.text(v,W/2+22,dy); dy+=7;
+            });
+            y+=31;
 
             // Tabla lotes vendidos
-            if (adjVendedor.length > 0) {
-              doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...NAVY);
-              doc.text("Lotes vendidos", 14, y); y += 4;
-              autoTable(doc, {
-                startY: y,
-                head: [["Lote", "Cant.", "Descripción", "Mínimo", "Defensa", "Valor"]],
-                body: adjVendedor.map(a => {
-                  const lote = lotesVendedor.find(l => l.nombre === a.lote || l.id === a.loteId);
-                  return [
-                    lote?.orden || a.lote || "—",
-                    lote?.cantidad || 1,
-                    lote?.nombre || a.lote || "—",
-                    fmtCLP(lote?.minimo || 0),
-                    fmtCLP(lote?.defensa || 0),
-                    fmtCLP(a.monto || 0),
-                  ];
-                }),
-                styles: { fontSize:8.5, cellPadding:2.8 },
-                headStyles: { fillColor:NAVY, textColor:WHITE, fontStyle:"bold", fontSize:8 },
-                columnStyles: { 0:{halign:"center"}, 1:{halign:"center"}, 3:{halign:"right"}, 4:{halign:"right"}, 5:{halign:"right",fontStyle:"bold"} },
-                alternateRowStyles: { fillColor:LTGRAY },
-                tableLineColor:BORDER, tableLineWidth:0.2,
-              });
-              y = doc.lastAutoTable.finalY + 6;
-            }
+            doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(26,37,64);
+            doc.text("Lotes vendidos",14,y); y+=4;
+            autoTable(doc,{
+              startY:y,
+              head:[["Expediente","Descripción","Precio martillo"]],
+              body: adjVendedor.map(a=>[lotesVendedor.find(l=>l.name===a.lote)?.exp||"—", a.lote, fmtCLP(a.monto||0)]),
+              styles:{fontSize:9,cellPadding:2.5},
+              headStyles:{fillColor:[26,37,64],textColor:255,fontStyle:"bold",fontSize:8},
+              columnStyles:{2:{halign:"right",font:"courier",fontStyle:"bold"}},
+              alternateRowStyles:{fillColor:[250,251,253]},
+            });
+            y=doc.lastAutoTable.finalY+6;
 
             // Tabla lotes no vendidos
-            if (lotesNoVendidos.length > 0) {
-              doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...NAVY);
-              doc.text("Lotes no vendidos (base comisión defensa)", 14, y); y += 4;
-              autoTable(doc, {
-                startY: y,
-                head: [["Lote","Cant.","Descripción","Base"]],
-                body: lotesNoVendidos.map(l => [l.orden||"—", l.cantidad||1, l.nombre||"—", fmtCLP(l.base||0)]),
-                styles: { fontSize:8.5, cellPadding:2.8 },
-                headStyles: { fillColor:GRAY, textColor:WHITE, fontStyle:"bold", fontSize:8 },
-                columnStyles: { 0:{halign:"center"}, 1:{halign:"center"}, 3:{halign:"right"} },
-                alternateRowStyles: { fillColor:LTGRAY },
-                tableLineColor:BORDER, tableLineWidth:0.2,
+            if(lotesNoVendidos.length>0){
+              doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(26,37,64);
+              doc.text("Lotes no vendidos (base para comisión defensa)",14,y); y+=4;
+              autoTable(doc,{
+                startY:y,
+                head:[["Expediente","Descripción","Base"]],
+                body:lotesNoVendidos.map(l=>[l.exp||"—",l.name,fmtCLP(l.base||0)]),
+                styles:{fontSize:9,cellPadding:2.5},
+                headStyles:{fillColor:[100,100,100],textColor:255,fontStyle:"bold",fontSize:8},
+                columnStyles:{2:{halign:"right",font:"courier"}},
               });
-              y = doc.lastAutoTable.finalY + 6;
+              y=doc.lastAutoTable.finalY+6;
             }
 
             // Liquidación financiera
-            // Page break si no cabe
-            if (y + 80 > H - 20) { doc.addPage(); y = 20; }
-
-            const ivaComVenta    = Math.round(comVentaMonto * 0.19);
-            const ivaComDefensa  = Math.round(comDefensaMonto * 0.19);
-            const ivaPublicidad  = Math.round(Number(vendedorForm.publicidad||0) * 0.19);
             const items = [
-              { k: "Total Ventas",                                      v: totalVentas,                          desc: false, bold: true  },
-              { k: `Comisión Ventas ${vendedorForm.comVenta}%`,         v: -comVentaMonto,                       desc: true,  bold: false },
-              { k: "IVA Comisión Ventas",                               v: -ivaComVenta,                         desc: true,  bold: false },
-              { k: `Comisión Defensas ${vendedorForm.comDefensa}%`,     v: -comDefensaMonto,                     desc: true,  bold: false },
-              { k: "IVA Comisión Defensas",                             v: -ivaComDefensa,                       desc: true,  bold: false },
-              { k: "Avisos Publicitarios",                               v: -Number(vendedorForm.publicidad||0),  desc: true,  bold: false },
+              ["Total ventas martillo:", totalVentas, false],
+              [`Comisión ventas ${vendedorForm.comVenta}%:`, -comVentaMonto, true],
+              [`Comisión defensa ${vendedorForm.comDefensa}%:`, -comDefensaMonto, true],
+              ["Avisos publicitarios:", -Number(vendedorForm.publicidad||0), true],
+              ["IVA 19% s/comisiones:", -iva, true],
             ];
-            doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...NAVY);
-            doc.text("Liquidación financiera", 14, y); y += 7;
-            items.forEach(({ k, v, desc, bold }) => {
-              doc.setFont("helvetica", bold ? "bold" : "normal");
-              doc.setFontSize(9); doc.setTextColor(...(desc && !bold ? GRAY : [30,30,30]));
-              doc.text(k, 14, y);
-              doc.setFont("helvetica","bold");
-              doc.setTextColor(...(v < 0 ? RED : [30,30,30]));
-              doc.text(fmtCLP(v), W - 14, y, {align:"right"});
-              doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
-              doc.line(14, y + 2, W - 14, y + 2);
-              y += 8;
+            items.forEach(([k,v,desc])=>{
+              doc.setFont("helvetica",desc?"normal":"bold"); doc.setFontSize(9.5);
+              doc.setTextColor(desc?80:30,desc?80:30,desc?80:30);
+              doc.text(k,14,y);
+              doc.setFont("helvetica","bold"); doc.setTextColor(desc?200:47, desc?80:128, desc?80:237);
+              doc.text(fmtCLP(v),W-14,y,{align:"right"});
+              doc.setDrawColor(238,240,245); doc.line(14,y+2,W-14,y+2);
+              y+=8;
             });
-            doc.setDrawColor(...TEAL); doc.setLineWidth(0.8);
-            doc.line(14, y - 2, W - 14, y - 2);
-            doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(...NAVY);
-            doc.text("Total a Pagar:", 14, y + 8);
-            doc.setFontSize(14); doc.setTextColor(...TEAL);
-            doc.text(fmtCLP(liquidoAPagar), W - 14, y + 8, {align:"right"});
+            // Línea total
+            doc.setDrawColor(47,128,237); doc.setLineWidth(0.8); doc.line(14,y-2,W-14,y-2);
+            doc.setFont("helvetica","bold"); doc.setFontSize(13); doc.setTextColor(47,128,237);
+            doc.text("Líquido a pagar al vendedor:",14,y+6);
+            doc.setFontSize(15); doc.text(fmtCLP(liquidoAPagar),W-14,y+6,{align:"right"});
 
             // Footer
-            const fy = H - 12;
-            doc.setFillColor(...TEAL);
-            doc.rect(0, H - 5, W, 5, "F");
-            doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
-            doc.line(14, fy - 3, W - 14, fy - 3);
-            doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
-            doc.text(`${casaNombre} · Powered by TAKKA · takka.cl`, 14, fy + 1);
-            doc.text(new Date().toLocaleDateString("es-CL"), W - 14, fy + 1, {align:"right"});
-            doc.save(`liquidacion-vendedor-${(vendedorSel||"vendedor").replace(/\s+/g,"-").toLowerCase()}.pdf`);
-          };
-
-          const generarPDFLotesVendedor = async () => {
-            if (!vendedorSel) { notify("Selecciona un vendedor primero.", "inf"); return; }
-            if (!lotesVendedor.length) { notify("Este vendedor no tiene lotes.", "inf"); return; }
-            const { jsPDF } = await import("jspdf");
-            const { default: autoTable } = await import("jspdf-autotable");
-            const remateNombre = REMATES_MERGED.find(r => r.id === selectedRemate || r.supabaseId === selectedRemate)?.name || "Remate";
-            const doc = new jsPDF({ orientation:"landscape", unit:"mm", format:"letter" });
-            const W = doc.internal.pageSize.getWidth();
-            doc.setFillColor(26, 115, 232); doc.rect(0, 0, W, 10, "F");
-            doc.setFont("helvetica","bold"); doc.setFontSize(13); doc.setTextColor(255,255,255);
-            doc.text(`LOTES — ${vendedorSel.toUpperCase()}`, 14, 7);
-            doc.setFontSize(9);
-            doc.text(remateNombre, W - 14, 7, { align:"right" });
-            autoTable(doc, {
-              startY: 16,
-              head: [["N° Lote","Cant.","Descripción","Mínimo","Comprador","Valor"]],
-              body: lotesVendedor.map((l, i) => [
-                l.orden ?? i + 1,
-                l.cantidad || 1,
-                l.nombre || "—",
-                l.base ? `$ ${Number(l.base).toLocaleString("es-CL")}` : "—",
-                "",
-                ""
-              ]),
-              headStyles: { fillColor:[26,115,232], fontStyle:"bold", fontSize:9 },
-              bodyStyles: { fontSize:8.5 },
-              columnStyles: { 0:{cellWidth:18,halign:"center"}, 1:{cellWidth:16,halign:"center"}, 3:{halign:"right",cellWidth:30}, 4:{cellWidth:35}, 5:{cellWidth:30} },
-              alternateRowStyles: { fillColor:[245,248,255] },
-            });
-            doc.save(`lotes-${(vendedorSel||"vendedor").replace(/\s+/g,"-").toLowerCase()}.pdf`);
-            notify("PDF generado.", "sold");
-          };
-
-          const exportExcelLotesVendedor = async () => {
-            if (!vendedorSel) { notify("Selecciona un vendedor primero.", "inf"); return; }
-            if (!lotesVendedor.length) { notify("Este vendedor no tiene lotes.", "inf"); return; }
-            const XLSX = await import("xlsx");
-            const remateNombre = REMATES_MERGED.find(r => r.id === selectedRemate || r.supabaseId === selectedRemate)?.name || "Remate";
-            const rows = [
-              [`LOTES — ${vendedorSel}  |  ${remateNombre}`],
-              [],
-              ["N° Lote","Cantidad","Descripción","Mínimo","Comprador","Valor"],
-              ...lotesVendedor.map((l, i) => [
-                l.orden ?? i + 1,
-                l.cantidad || 1,
-                l.nombre || "",
-                l.base || 0,
-                "",
-                ""
-              ])
-            ];
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws["!cols"] = [{wch:10},{wch:10},{wch:55},{wch:15},{wch:25},{wch:20}];
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Lotes");
-            XLSX.writeFile(wb, `lotes-${(vendedorSel||"vendedor").replace(/\s+/g,"-").toLowerCase()}.xlsx`);
-            notify("Excel exportado.", "sold");
+            const fy=doc.internal.pageSize.getHeight()-12;
+            doc.setDrawColor(221,227,240); doc.setLineWidth(0.3); doc.line(14,fy-3,W-14,fy-3);
+            doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(170,170,170);
+            doc.text(`${casaNombre} — Liquidación generada por GR Auction Software`,14,fy+2);
+            doc.text(new Date().toLocaleDateString("es-CL"),W-14,fy+2,{align:"right"});
+            doc.save(`liquidacion-vendedor-${(vd?.nombre||"vendedor").replace(/\s+/g,"-").toLowerCase()}.pdf`);
           };
 
           return (
@@ -5742,14 +4404,18 @@ function exportCSV(){
                     <label className="fl">Propietario / Vendedor</label>
                     <select className="fsel" value={vendedorSel} onChange={e=>setVendedorSel(e.target.value)}>
                       <option value="">Seleccione un vendedor</option>
-                      {propietariosUnicos.map(p=><option key={p} value={p}>{p}</option>)}
+                      {VENDEDORES_MOCK.map(v=><option key={v.id} value={v.id}>{v.nombre}</option>)}
                     </select>
-                    {propietariosUnicos.length === 0 && (
-                      <div style={{marginTop:".5rem",fontSize:".7rem",color:"var(--mu)",fontStyle:"italic",lineHeight:1.5}}>
-                        No hay vendedores registrados en los lotes de este remate. Aseg&uacute;rate de completar el campo Propietario al crear los lotes.
-                      </div>
-                    )}
                   </div>
+
+                  {vd && (
+                    <div style={{padding:".65rem .85rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:8,marginBottom:".85rem",fontSize:".72rem",color:"var(--mu2)",lineHeight:1.8}}>
+                      <div><strong style={{color:"var(--wh2)"}}>RUT:</strong> {vd.rut}</div>
+                      <div><strong style={{color:"var(--wh2)"}}>Giro:</strong> {vd.giro}</div>
+                      <div><strong style={{color:"var(--wh2)"}}>Dirección:</strong> {vd.direccion}, {vd.comuna}</div>
+                      <div><strong style={{color:"var(--wh2)"}}>Email:</strong> {vd.email}</div>
+                    </div>
+                  )}
 
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".7rem",marginBottom:".7rem"}}>
                     <div>
@@ -5777,17 +4443,9 @@ function exportCSV(){
                   </div>
 
                   <button className="btn-primary" style={{width:"100%"}}
-                    onClick={()=>{ if(!vendedorSel){notify("Selecciona un vendedor primero.","inf");return;} setVendedorLiqGenerada({vendedorSel,lotesVendedor,adjVendedor,lotesNoVendidos,totalVentas,comVentaMonto,comDefensaMonto,publicidad:Number(vendedorForm.publicidad||0),iva,totalDescuentos,liquidoAPagar,comVenta:vendedorForm.comVenta,comDefensa:vendedorForm.comDefensa}); notify("Liquidación generada.","sold"); }}>
+                    onClick={()=>{ if(!vendedorSel){notify("Selecciona un vendedor primero.","inf");return;} setVendedorLiqGenerada({vd,lotesVendedor,adjVendedor,lotesNoVendidos,totalVentas,comVentaMonto,comDefensaMonto,publicidad:Number(vendedorForm.publicidad||0),iva,totalDescuentos,liquidoAPagar,comVenta:vendedorForm.comVenta,comDefensa:vendedorForm.comDefensa}); notify("Liquidación generada.","sold"); }}>
                     Generar liquidación
                   </button>
-                  <div style={{display:"flex",gap:".5rem",marginTop:".6rem"}}>
-                    <button className="btn-sec" style={{flex:1,fontSize:".75rem"}} onClick={generarPDFLotesVendedor}>
-                      📄 PDF lotes
-                    </button>
-                    <button className="btn-sec" style={{flex:1,fontSize:".75rem"}} onClick={exportExcelLotesVendedor}>
-                      📊 Excel lotes
-                    </button>
-                  </div>
                 </div>
 
                 {/* ── Preview liquidación ── */}
@@ -5803,7 +4461,7 @@ function exportCSV(){
                   {vendedorSel && (
                     <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1.2rem 1.3rem"}}>
                       <div style={{fontSize:".72rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:"1rem"}}>
-                        Preview liquidación — {vendedorSel}
+                        Preview liquidación — {vd?.nombre}
                       </div>
 
                       {/* Lotes vendidos */}
@@ -5920,100 +4578,32 @@ function exportCSV(){
                   const el=document.createElement("a"); el.href="data:text/csv;charset=utf-8,\uFEFF"+encodeURIComponent(csv); el.download="estadisticas.csv"; el.click();
                   notify("CSV exportado.","sold");
                 }}>↓ CSV</button>
-                {/* Estadísticas PDF */}
+                {/* Catálogo PDF */}
                 <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async()=>{
+                  if(!LOTES_MERGED.length){notify("No hay lotes.","inf");return;}
                   try{
                     const {jsPDF}=await import("jspdf");
-                    const autoTable=(await import("jspdf-autotable")).default;
                     const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
                     const W=doc.internal.pageSize.getWidth();
-                    const meses=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-                    const periodoLabel=statsView==="mes"?`${meses[statsMes]} ${statsAnio}`:`Año ${statsAnio}`;
-                    const parseFecha=(a)=>{
-                      if(a.fechaISO) return new Date(a.fechaISO);
-                      if(a.fecha){ const p=a.fecha.split(/[\/\-\.]/); if(p.length===3) return new Date(Number(p[2]),Number(p[1])-1,Number(p[0])); }
-                      return new Date();
-                    };
-                    const adjAll=[...ADJUDICACIONES,...liquidaciones];
-                    const adjPeriodo=adjAll.filter(a=>{
-                      const d=parseFecha(a);
-                      if(statsView==="mes") return d.getFullYear()===statsAnio && d.getMonth()===statsMes;
-                      return d.getFullYear()===statsAnio;
+                    doc.setFillColor(7,15,28); doc.rect(0,0,W,30,"F");
+                    doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont("helvetica","bold");
+                    doc.text("CATÁLOGO DE LOTES",W/2,14,{align:"center"});
+                    doc.setFontSize(9); doc.setFont("helvetica","normal");
+                    doc.text(`Generado: ${new Date().toLocaleDateString("es-CL")}`,W/2,22,{align:"center"});
+                    let y=38;
+                    LOTES_MERGED.forEach((l,i)=>{
+                      if(y>260){doc.addPage();y=20;}
+                      doc.setFillColor(11,31,56); doc.roundedRect(10,y,W-20,22,2,2,"F");
+                      doc.setTextColor(255,255,255); doc.setFontSize(10); doc.setFont("helvetica","bold");
+                      doc.text(`Lote ${i+1} — ${l.name}`,15,y+8);
+                      doc.setFontSize(8); doc.setFont("helvetica","normal"); doc.setTextColor(90,127,168);
+                      doc.text(`Base: ${fmt(l.base||0)}   Estado: ${l.estado||"disponible"}`,15,y+16);
+                      y+=26;
                     });
-                    const vTotal=adjPeriodo.reduce((s,a)=>s+(a.monto||0),0);
-                    const tCom=adjPeriodo.reduce((s,a)=>s+(a.com||Math.round((a.monto||0)*0.03)),0);
-                    const tGAdm=adjPeriodo.reduce((s,a)=>s+(a.gastosAdm||0),0);
-                    const tIva=Math.round((tCom+tGAdm)*0.19);
-                    const tNeto=tCom+tGAdm-tIva;
-                    const fmtCL=n=>"$"+Math.round(n).toLocaleString("es-CL");
-
-                    // Header oscuro
-                    doc.setFillColor(7,15,28); doc.rect(0,0,W,32,"F");
-                    doc.setTextColor(56,178,246); doc.setFontSize(9); doc.setFont("helvetica","bold");
-                    doc.text("TAKKA — AUCTION SOFTWARE",14,10);
-                    doc.setTextColor(255,255,255); doc.setFontSize(15);
-                    doc.text("ESTADÍSTICAS DE REMATE",14,20);
-                    doc.setFontSize(8); doc.setFont("helvetica","normal"); doc.setTextColor(90,127,168);
-                    doc.text(`Período: ${periodoLabel}   ·   Generado: ${new Date().toLocaleDateString("es-CL")}`,14,28);
-
-                    let y=42;
-
-                    // 6 KPI boxes (2 filas × 3 cols)
-                    const kpis=[
-                      ["Venta total martillo",fmtCL(vTotal)],
-                      ["Comisiones netas",fmtCL(tCom)],
-                      ["G. adm. motorizados",fmtCL(tGAdm)],
-                      ["IVA 19% (AF)",fmtCL(tIva)],
-                      ["Ingreso neto empresa",fmtCL(tNeto)],
-                      ["Lotes adjudicados",String(adjPeriodo.length)],
-                    ];
-                    const colW=(W-28)/3;
-                    kpis.forEach((kpi,i)=>{
-                      const col=i%3; const row=Math.floor(i/3);
-                      const x=14+col*(colW+2); const ky=y+row*18;
-                      doc.setFillColor(11,31,56); doc.roundedRect(x,ky,colW,14,2,2,"F");
-                      doc.setTextColor(90,127,168); doc.setFontSize(6); doc.setFont("helvetica","normal");
-                      doc.text(kpi[0].toUpperCase(),x+4,ky+5);
-                      doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont("helvetica","bold");
-                      doc.text(kpi[1],x+4,ky+11);
-                    });
-                    y+=42;
-
-                    // Tabla de remates del período
-                    const rematesData=REMATES_MERGED.filter(r=>{
-                      if(!r.fecha) return true;
-                      const d=new Date(r.fecha.replace(/(\d{2})\/(\d{2})\/(\d{4})/,"$3-$2-$1")||r.fecha);
-                      return isNaN(d.getFullYear())||d.getFullYear()===statsAnio;
-                    }).map(r=>[r.name||"—",String(r.lotes||0),fmtCL(r.recaudado||0),fmtCL(Math.round((r.recaudado||0)*.03)),r.estado||"—"]);
-
-                    autoTable(doc,{
-                      startY:y,
-                      head:[["Remate","Lotes","Recaudado","Comisiones","Estado"]],
-                      body:rematesData.length?rematesData:[["Sin remates en este período","","","",""]],
-                      styles:{fontSize:8,cellPadding:3},
-                      headStyles:{fillColor:[14,116,144],textColor:255,fontStyle:"bold"},
-                      columnStyles:{0:{cellWidth:65},1:{cellWidth:16,halign:"center"},2:{cellWidth:38,halign:"right"},3:{cellWidth:34,halign:"right"},4:{cellWidth:28}},
-                    });
-
-                    // Top compradores
-                    const byPostor={};
-                    adjPeriodo.forEach(a=>{ const k=a.postor||"Desconocido"; if(!byPostor[k]) byPostor[k]={postor:k,monto:0,lotes:0}; byPostor[k].monto+=a.monto||0; byPostor[k].lotes++; });
-                    const topComp=Object.values(byPostor).sort((a,b)=>b.monto-a.monto).slice(0,10);
-                    if(topComp.length){
-                      autoTable(doc,{
-                        startY:doc.lastAutoTable.finalY+10,
-                        head:[["Comprador","Lotes","Monto total"]],
-                        body:topComp.map(t=>[t.postor,String(t.lotes),fmtCL(t.monto)]),
-                        styles:{fontSize:8,cellPadding:3},
-                        headStyles:{fillColor:[7,15,28],textColor:[56,178,246],fontStyle:"bold"},
-                        columnStyles:{0:{cellWidth:100},1:{cellWidth:20,halign:"center"},2:{cellWidth:60,halign:"right"}},
-                      });
-                    }
-
-                    doc.save(`estadisticas-${periodoLabel.replace(/\s/g,"-")}.pdf`);
+                    doc.save("catalogo-lotes.pdf");
                     notify("PDF generado.","sold");
                   }catch(e){notify("Error: "+e.message,"inf");}
-                }}>↓ Estadísticas PDF</button>
+                }}>↓ Catálogo PDF</button>
               </div>
             </div>
 
@@ -6260,8 +4850,8 @@ function exportCSV(){
         )}
         {/* ══ USUARIOS ══ */}
         {page==="usuarios" && session?.role==="admin" && (()=>{
-          // Casas reales desde Supabase — incluye "TAKKA" para admin global
-          const CASAS_LISTA_REAL = [{ id: null, nombre: "TAKKA (Admin global)" }, ...dbLicencias];
+          // Casas reales desde Supabase — incluye "GR Auction Software" para admin global
+          const CASAS_LISTA_REAL = [{ id: null, nombre: "GR Auction Software (Admin global)" }, ...dbLicencias];
           const toggleRol = (rol) => {
             setUsuarioForm(f=>({...f, roles: f.roles.includes(rol) ? f.roles.filter(r=>r!==rol) : [...f.roles, rol]}));
           };
@@ -6363,7 +4953,7 @@ function exportCSV(){
                   {/* Admins globales */}
                   {usuarios.filter(u=>!u.casa).length > 0 && (
                     <div style={{padding:".75rem 1rem",background:"rgba(224,82,82,.06)",border:"1px solid rgba(224,82,82,.15)",borderRadius:10}}>
-                      <div style={{fontSize:".68rem",fontWeight:700,color:"var(--rd)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".4rem"}}>Admin</div>
+                      <div style={{fontSize:".68rem",fontWeight:700,color:"var(--rd)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".4rem"}}>Admin GR</div>
                       <div style={{fontSize:"1.2rem",fontWeight:800,color:"var(--wh2)"}}>{usuarios.filter(u=>!u.casa).length}</div>
                       <div style={{fontSize:".68rem",color:"var(--mu)",marginTop:".1rem"}}>Sin casa asignada</div>
                     </div>
@@ -6700,7 +5290,7 @@ function exportCSV(){
 
         {/* ══ CASAS DE REMATES ══ */}
         {page==="casas" && session?.role==="admin" && (()=>{
-          const BASE_URL = "https://takka.cl";
+          const BASE_URL = "https://gestionderemates.cl";
 
           const toSlug = (nombre) => nombre.toLowerCase()
             .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
@@ -6873,7 +5463,7 @@ function exportCSV(){
                         {casaForm.nombre && (
                           <div style={{marginTop:".4rem",fontSize:".7rem",color:"var(--mu2)",fontFamily:"Inter,sans-serif"}}>
                             Slug: <span style={{color:"var(--ac)"}}>{toSlug(casaForm.nombre)}</span>
-                            <span style={{color:"var(--mu)",marginLeft:".5rem"}}>→ takka.cl/participar/{toSlug(casaForm.nombre)}</span>
+                            <span style={{color:"var(--mu)",marginLeft:".5rem"}}>→ gestionderemates.cl/participar/{toSlug(casaForm.nombre)}</span>
                           </div>
                         )}
                       </div>
@@ -7500,226 +6090,60 @@ function exportCSV(){
         )}
 
         {/* ══ DEVOLUCIONES ══ */}
-        {page==="devoluciones" && (()=>{
-          // ── Postores del remate seleccionado verificados ──
-          const postoresDev = dbPostores.filter(p =>
-            (!selectedRemate || p.remate_id === selectedRemate) &&
-            (p.estado === "verificado" || p.estado === "aprobada" || p.estado === "aprobado")
-          );
-
-          // Nombres de postores que ganaron al menos un lote (desde DB y sesión actual)
-          const nombresCompradores = new Set([
-            ...dbLotes
-              .filter(l => l.postor && (!selectedRemate || l.remate_id === selectedRemate))
-              .map(l => l.postor),
-            ...liquidaciones
-              .filter(l => !selectedRemate || l.remateId === selectedRemate)
-              .map(l => l.postor),
-          ]);
-
-          const compradores   = postoresDev.filter(p =>
-            nombresCompradores.has(p.nombre) || nombresCompradores.has(p.razon_social)
-          );
-          const noCompradores = postoresDev.filter(p =>
-            !nombresCompradores.has(p.nombre) && !nombresCompradores.has(p.razon_social)
-          );
-
-          const marcarDevuelto = async (postorId) => {
-            await supabase.from("postores").update({ devolucion_enviada: true }).eq("id", postorId);
-            const { data } = await supabase.from("postores").select("*").order("numero");
-            if (data) setDbPostores(data);
-            notify("Devolución marcada como enviada ✓", "sold");
-          };
-
-          const pendientesCount = noCompradores.filter(p => !p.devolucion_enviada).length;
-
-          const thStyle = {padding:".55rem .75rem",textAlign:"left",fontSize:".72rem",fontWeight:700,letterSpacing:".04em",whiteSpace:"nowrap"};
-          const tdBase  = {padding:".55rem .75rem"};
-
-          return (
+        {page==="devoluciones" && (
           <div className="page">
-
-            {/* Stats */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"1rem",marginBottom:"1.5rem"}}>
-              {[
-                {label:"Total postores",      val: postoresDev.length,                                  color:"var(--ac)"},
-                {label:"Compradores",          val: compradores.length,                                   color:"var(--gr)"},
-                {label:"No compradores",       val: noCompradores.length,                                 color:"#f59e0b"},
-                {label:"Garantías devueltas",  val: noCompradores.filter(p=>p.devolucion_enviada).length, color:"#22c55e"},
-              ].map(s=>(
-                <div key={s.label} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1rem 1.2rem"}}>
-                  <div style={{fontSize:"1.6rem",fontWeight:800,color:s.color}}>{s.val}</div>
-                  <div style={{fontSize:".72rem",color:"var(--mu)",marginTop:".2rem"}}>{s.label}</div>
+            {/* Banner selector de remate */}
+            {(() => {
+              const cerrados = REMATES_MERGED.filter(r => r.estado === "cerrado");
+              return (
+                <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1rem",padding:".75rem 1rem",background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.18)",borderRadius:9}}>
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
+                  <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
+                  <select value={selectedRemate||""} onChange={e=>setSelectedRemate(e.target.value||null)}
+                    style={{flex:1,maxWidth:340,padding:".4rem .7rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:7,color:"var(--wh2)",fontSize:".8rem",fontFamily:"Inter,sans-serif",cursor:"pointer"}}>
+                    <option value="">— Todos los remates cerrados —</option>
+                    {cerrados.map(r=><option key={r.id} value={r.id}>{r.name} · {r.fecha} · {r.casa}</option>)}
+                  </select>
+                  {selectedRemate && <button onClick={()=>setSelectedRemate(null)} style={{background:"transparent",border:"1px solid var(--b2)",borderRadius:6,color:"var(--mu2)",fontSize:".7rem",padding:".3rem .6rem",cursor:"pointer"}}>Ver todos</button>}
                 </div>
-              ))}
+              );
+            })()}
+            <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".8rem 1rem",background:"rgba(246,173,85,.07)",border:"1px solid rgba(246,173,85,.2)",borderRadius:8}}>
+              <div style={{flex:1,fontSize:".76rem",color:"var(--mu2)",lineHeight:1.5}}>
+                Postores que <strong style={{color:"var(--wh2)"}}>no compraron</strong> y tienen garantia a devolver. El sistema los identifica automaticamente al cerrar el remate. Plazo: <strong style={{color:"var(--wh2)"}}>5 dias habiles.</strong>
+              </div>
+              <button className="btn-primary" onClick={()=>notify("Notificaciones de devolucion enviadas.","sold")}>Notificar a todos</button>
             </div>
-
-            {postoresDev.length === 0 && (
-              <div style={{padding:"3rem",textAlign:"center",color:"var(--mu)",fontSize:".85rem",background:"var(--s2)",borderRadius:12,border:"1px solid var(--b1)"}}>
-                No hay postores verificados en este remate aún.
-              </div>
-            )}
-
-            {/* ── SECCIÓN 1: COMPRADORES ── */}
-            {compradores.length > 0 && (
-              <div style={{marginBottom:"2rem"}}>
-                <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:".85rem"}}>
-                  <div style={{width:4,height:20,borderRadius:4,background:"var(--gr)"}}/>
-                  <div style={{fontSize:".9rem",fontWeight:700,color:"var(--wh2)"}}>Listado Compradores</div>
-                  <span style={{fontSize:".72rem",fontWeight:700,color:"var(--gr)",background:"rgba(20,184,166,.1)",padding:".15rem .55rem",borderRadius:20}}>{compradores.length}</span>
-                  <div style={{flex:1}}/>
-                  <button className="btn-sec" style={{fontSize:".75rem"}} onClick={()=>setPage("adjudicac")}>
-                    Ver adjudicaciones →
+            {/* Devs from real GARANTIAS data + dynamic ones */}
+            {[
+              ...GARANTIAS.filter(g=>g.estado==="aprobada"&&!g.devolucion).map(g=>({
+                postor:g.postor, rut:g.rut, email:g.email, monto:g.monto, estado:"pendiente", enviado:false, id:g.id
+              })),
+              ...devoluciones
+            ].filter((v,i,arr)=>arr.findIndex(x=>x.postor===v.postor)===i)
+            .map((d,i)=>(
+              <div className="dev-card" key={i}>
+                <div>
+                  <div className="dev-name">{d.postor}</div>
+                  <div className="dev-sub">{d.rut} · {d.email}</div>
+                  <div className="dev-sub" style={{marginTop:".15rem"}}>Cuenta destino: {d.cuenta||"Por confirmar"}</div>
+                  <div className="dev-monto">{fmt(d.monto)}</div>
+                </div>
+                <div className="dev-actions">
+                  <span className={`pill ${d.enviado?"p-enviada":"p-penddev"}`}>{d.enviado?"Devolucion enviada":"Pendiente"}</span>
+                  {!d.enviado && (
+                    <button className="btn-primary" style={{fontSize:".7rem",padding:".3rem .75rem"}} onClick={()=>notify(`Devolucion marcada para ${d.postor}.`,"sold")}>
+                      Marcar como enviada
+                    </button>
+                  )}
+                  <button className="btn-sec" style={{fontSize:".68rem",padding:".26rem .65rem"}} onClick={()=>notify(`Correo enviado a ${d.email}.`,"inf")}>
+                    Notificar por correo
                   </button>
                 </div>
-                <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,overflow:"hidden"}}>
-                  <div style={{overflowX:"auto"}}>
-                  <table style={{width:"100%",minWidth:600,borderCollapse:"collapse"}}>
-                    <thead>
-                      <tr style={{background:"#0D9488",color:"#fff"}}>
-                        {["N°","Nombre","RUT","Email","Modalidad","Acción"].map(h=>(
-                          <th key={h} style={thStyle}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {compradores.map((p,i)=>(
-                        <tr key={p.id} style={{borderBottom:"1px solid var(--b1)",background:i%2===0?"var(--s2)":"var(--s1)"}}>
-                          <td style={{...tdBase,fontWeight:700,color:"var(--ac)",fontSize:".8rem"}}>#{String(p.numero||i+1).padStart(2,"0")}</td>
-                          <td style={{...tdBase,fontWeight:600,fontSize:".82rem",whiteSpace:"nowrap"}}>{p.nombre||p.razon_social||"—"}</td>
-                          <td style={{...tdBase,fontSize:".75rem",color:"var(--mu2)",fontFamily:"monospace"}}>{p.rut||"—"}</td>
-                          <td style={{...tdBase,fontSize:".73rem",color:"var(--mu2)"}}>{p.email||"—"}</td>
-                          <td style={tdBase}>
-                            <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .5rem",borderRadius:20,background:p.modalidad==="PRESENCIAL"?"rgba(139,92,246,.12)":"rgba(56,178,246,.1)",color:p.modalidad==="PRESENCIAL"?"#8b5cf6":"var(--ac)"}}>
-                              {p.modalidad||"REMOTO"}
-                            </span>
-                          </td>
-                          <td style={tdBase}>
-                            <button className="btn-sec" style={{fontSize:".65rem",padding:".25rem .7rem"}}
-                              onClick={()=>setPage("adjudicac")}>
-                              Ver Liquidación →
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  </div>
-                </div>
               </div>
-            )}
-
-            {/* ── SECCIÓN 2: NO COMPRADORES (DEVOLUCIONES) ── */}
-            {noCompradores.length > 0 && (
-              <div>
-                <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:".85rem"}}>
-                  <div style={{width:4,height:20,borderRadius:4,background:"#f59e0b"}}/>
-                  <div style={{fontSize:".9rem",fontWeight:700,color:"var(--wh2)"}}>No Compradores — Devolución de Garantía</div>
-                  <span style={{fontSize:".72rem",fontWeight:700,color:"#f59e0b",background:"rgba(245,158,11,.1)",padding:".15rem .55rem",borderRadius:20}}>{noCompradores.length}</span>
-                  <div style={{flex:1}}/>
-                  <button className="btn-primary" disabled={notifNcLoading} style={{fontSize:".75rem"}} onClick={async () => {
-                    setNotifNcLoading(true);
-                    try {
-                      const targetRemateId = selectedRemate || salaRemateId;
-                      if (!targetRemateId) { notify("Selecciona un remate primero.","inf"); return; }
-                      const sinDevolver = noCompradores.filter(p => !p.devolucion_enviada && p.email);
-                      if (!sinDevolver.length) { notify("No hay pendientes por notificar.","inf"); return; }
-                      const remateInfo = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===targetRemateId);
-                      let enviados = 0;
-                      for (const p of sinDevolver) {
-                        const devolucionUrl = `https://gestionderemates.cl/devoluciones?p=${p.id}`;
-                        await fetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
-                          body:JSON.stringify({tipo:"no_comprador",email_cliente:p.email,nombre:p.nombre||"Postor",
-                            numero:p.numero||"—",remate:remateInfo?.name||"Remate",
-                            casa:session?.casaNombre||"Casa de Remates",logo_url:null,devolucion_url:devolucionUrl})});
-                        enviados++;
-                      }
-                      notify(`📧 ${enviados} correos enviados.`,"sold");
-                    } catch { notify("Error al enviar.","inf"); }
-                    finally { setNotifNcLoading(false); }
-                  }}>
-                    {notifNcLoading ? "Enviando..." : "📧 Notificar pendientes"}
-                  </button>
-                </div>
-
-                <div style={{display:"flex",flexDirection:"column",gap:".75rem"}}>
-                  {noCompradores.map((p,i)=>{
-                    const tieneCuenta = p.banco && p.numero_cuenta;
-                    const copiarDatos = () => {
-                      const txt = [
-                        `Titular: ${p.nombre||p.razon_social||"—"}`,
-                        `RUT: ${p.rut||"—"}`,
-                        `Banco: ${p.banco||"—"}`,
-                        `Tipo de cuenta: ${p.tipo_cuenta||"—"}`,
-                        `N° de cuenta: ${p.numero_cuenta||"—"}`,
-                        `Email: ${p.email||"—"}`,
-                      ].join("\n");
-                      navigator.clipboard.writeText(txt).then(()=>notify("Datos copiados al portapapeles ✓","sold")).catch(()=>notify("No se pudo copiar","inf"));
-                    };
-                    return (
-                    <div key={p.id} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1rem 1.2rem",opacity:p.devolucion_enviada?.8:1}}>
-                      {/* Fila superior: nombre + estado + marcar */}
-                      <div style={{display:"flex",alignItems:"center",gap:".75rem",flexWrap:"wrap",marginBottom:".75rem"}}>
-                        <span style={{fontWeight:700,color:"#f59e0b",fontSize:".8rem"}}>#{String(p.numero||i+1).padStart(2,"0")}</span>
-                        <span style={{fontWeight:700,fontSize:".9rem",color:"var(--wh2)"}}>{p.nombre||p.razon_social||"—"}</span>
-                        <span style={{fontSize:".72rem",color:"var(--mu2)",fontFamily:"monospace"}}>{p.rut||"—"}</span>
-                        <span style={{fontSize:".65rem",fontWeight:700,padding:".15rem .5rem",borderRadius:20,background:p.modalidad==="PRESENCIAL"?"rgba(139,92,246,.12)":"rgba(56,178,246,.1)",color:p.modalidad==="PRESENCIAL"?"#8b5cf6":"var(--ac)"}}>
-                          {p.modalidad||"REMOTO"}
-                        </span>
-                        <div style={{flex:1}}/>
-                        {p.devolucion_enviada
-                          ? <span style={{fontSize:".72rem",fontWeight:700,color:"#22c55e",background:"rgba(34,197,94,.1)",padding:".25rem .7rem",borderRadius:20}}>✓ Garantía devuelta</span>
-                          : <button className="btn-primary" style={{fontSize:".72rem",padding:".3rem .75rem"}} onClick={()=>marcarDevuelto(p.id)}>✓ Marcar devuelta</button>
-                        }
-                      </div>
-
-                      {/* Bloque cuenta bancaria */}
-                      {tieneCuenta ? (
-                        <div style={{background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:8,padding:".7rem 1rem",display:"flex",alignItems:"center",gap:"1rem",flexWrap:"wrap"}}>
-                          <div style={{display:"flex",gap:"1.5rem",flexWrap:"wrap",flex:1}}>
-                            <div>
-                              <div style={{fontSize:".62rem",fontWeight:600,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".15rem"}}>Banco</div>
-                              <div style={{fontSize:".85rem",fontWeight:700,color:"var(--wh2)"}}>{p.banco}</div>
-                            </div>
-                            <div>
-                              <div style={{fontSize:".62rem",fontWeight:600,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".15rem"}}>Tipo</div>
-                              <div style={{fontSize:".85rem",fontWeight:700,color:"var(--wh2)"}}>{p.tipo_cuenta||"—"}</div>
-                            </div>
-                            <div>
-                              <div style={{fontSize:".62rem",fontWeight:600,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".15rem"}}>N° de cuenta</div>
-                              <div style={{fontSize:".95rem",fontWeight:800,color:"var(--ac)",fontFamily:"monospace",letterSpacing:".03em"}}>{p.numero_cuenta}</div>
-                            </div>
-                            <div>
-                              <div style={{fontSize:".62rem",fontWeight:600,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".15rem"}}>Email</div>
-                              <div style={{fontSize:".78rem",color:"var(--mu2)"}}>{p.email||"—"}</div>
-                            </div>
-                          </div>
-                          <button onClick={copiarDatos} style={{background:"rgba(56,178,246,.12)",border:"1px solid rgba(56,178,246,.25)",color:"var(--ac)",borderRadius:8,padding:".45rem .9rem",fontSize:".78rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
-                            📋 Copiar datos
-                          </button>
-                        </div>
-                      ) : (
-                        <div style={{background:"rgba(245,158,11,.07)",border:"1px solid rgba(245,158,11,.2)",borderRadius:8,padding:".6rem 1rem",fontSize:".78rem",color:"#f59e0b",fontWeight:600}}>
-                          ⚠️ Sin datos bancarios — notificar al postor para que los complete
-                        </div>
-                      )}
-                    </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Cuando no hay remate seleccionado y hay postores sin separar todavía */}
-            {postoresDev.length > 0 && compradores.length === 0 && noCompradores.length === 0 && (
-              <div style={{padding:"2rem",textAlign:"center",color:"var(--mu)",fontSize:".82rem",background:"var(--s2)",borderRadius:12,border:"1px solid var(--b1)"}}>
-                Selecciona un remate para ver la separación de compradores y no compradores.
-              </div>
-            )}
-
+            ))}
           </div>
-          );
-        })()}
+        )}
 
         {/* ══ SALA EN VIVO ══ */}
         {page==="sala" && (
@@ -8084,29 +6508,21 @@ function exportCSV(){
                             </div>
                           </div>
                         )}
-                        {/* Panel post-adjudicación — control manual del martillero */}
-                        {adjCountdown && (
-                          <div style={{marginTop:".5rem",background:"rgba(20,184,166,.07)",border:"1px solid rgba(20,184,166,.35)",borderRadius:10,padding:".75rem .9rem",display:"flex",flexDirection:"column",gap:".5rem"}}>
+                        {/* Banner auto-avance post-adjudicación */}
+                        {adjCountdown!==null && (
+                          <div style={{marginTop:".5rem",background:"rgba(20,184,166,.08)",border:"1px solid rgba(20,184,166,.3)",borderRadius:8,padding:".6rem .85rem",display:"flex",alignItems:"center",justifyContent:"space-between",gap:".5rem"}}>
                             <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
-                              <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="var(--gr)" strokeWidth="1.5"/><path d="M5 8l2 2 4-4" stroke="var(--gr)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                              <div style={{fontSize:".75rem",fontWeight:700,color:"var(--gr)"}}>Lote adjudicado correctamente</div>
+                              <div style={{fontSize:"1.4rem",fontWeight:800,color:"var(--gr)",minWidth:24,textAlign:"center"}}>{adjCountdown}</div>
+                              <div>
+                                <div style={{fontSize:".72rem",fontWeight:700,color:"var(--gr)"}}>✓ Lote adjudicado</div>
+                                <div style={{fontSize:".65rem",color:"var(--mu)"}}>Pasando al lote {idx+2} automáticamente…</div>
+                              </div>
                             </div>
-                            <div style={{display:"flex",gap:".45rem"}}>
-                              <button
-                                onClick={avanzarSiguienteLote}
-                                disabled={idx >= lots.length-1}
-                                style={{flex:1,padding:".5rem",background:"var(--gr)",border:"none",borderRadius:7,color:"#fff",fontSize:".78rem",fontWeight:700,cursor:"pointer",opacity:idx>=lots.length-1?.4:1}}>
-                                Siguiente lote →
-                              </button>
-                              <button
-                                onClick={revertirAdjudicacion}
-                                style={{padding:".5rem .75rem",background:"rgba(239,68,68,.1)",border:"1px solid rgba(239,68,68,.3)",borderRadius:7,color:"#f87171",fontSize:".75rem",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>
-                                ↩ Revertir
-                              </button>
-                            </div>
-                            {idx >= lots.length-1 && (
-                              <div style={{fontSize:".65rem",color:"var(--mu)",textAlign:"center"}}>Último lote — remate finalizado</div>
-                            )}
+                            <button
+                              onClick={()=>{ setAdjCountdown(0); }}
+                              style={{padding:".3rem .65rem",background:"rgba(20,184,166,.2)",border:"1px solid rgba(20,184,166,.4)",borderRadius:6,color:"var(--gr)",fontSize:".68rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+                              Pasar ahora →
+                            </button>
                           </div>
                         )}
                       </>
@@ -8185,7 +6601,7 @@ function exportCSV(){
                           key={inc}
                           className={`sala-quick-card c${i}`}
                           disabled={aState!=="live"}
-                          onClick={()=>{ setCurInc(inc); placeBid(inc); }}
+                          onClick={()=>{setCurInc(inc); placeBid();}}
                           title={`Pujar con incremento ${fmtS(inc)}`}
                         >
                           <div className="sala-quick-label">Quick Bid</div>
@@ -8202,846 +6618,7 @@ function exportCSV(){
           </div>
         )}
 
-      {/* ══ MODAL IMPORTAR EXCEL ══ */}
-      {importModal && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",zIndex:9000,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}
-          onClick={e=>{ if(e.target===e.currentTarget && !importSaving){ setImportModal(false); setImportRows([]); setImportDone(null); } }}>
-          <div style={{background:"#fff",borderRadius:16,width:"100%",maxWidth:900,maxHeight:"92vh",overflowY:"auto",boxShadow:"0 24px 80px rgba(0,0,0,.5)",display:"flex",flexDirection:"column"}}>
-
-            {/* Header */}
-            <div style={{padding:"1.4rem 1.75rem 1rem",borderBottom:"1px solid #e5e7eb",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
-              <div>
-                <div style={{fontSize:"1.1rem",fontWeight:800,color:"#0f172a"}}>Importar lotes desde Excel</div>
-                <div style={{fontSize:".78rem",color:"#6b7280",marginTop:".15rem"}}>Carga tu archivo .xlsx o .csv con los datos de los lotes</div>
-              </div>
-              <button onClick={()=>{ if(!importSaving){ setImportModal(false); setImportRows([]); setImportDone(null); } }}
-                style={{background:"none",border:"1px solid #e5e7eb",borderRadius:8,padding:".3rem .7rem",fontSize:".8rem",color:"#6b7280",cursor:"pointer"}}>✕ Cerrar</button>
-            </div>
-
-            <div style={{padding:"1.5rem 1.75rem",flex:1}}>
-
-              {/* ── ESTADO: resultado final ── */}
-              {importDone && (
-                <div style={{textAlign:"center",padding:"2rem 1rem"}}>
-                  <div style={{fontSize:"3rem",marginBottom:".75rem"}}>
-                    {importDone.errors === 0 ? "✅" : "⚠️"}
-                  </div>
-                  <div style={{fontSize:"1.2rem",fontWeight:800,color:"#0f172a",marginBottom:".5rem"}}>
-                    {importDone.ok} lote{importDone.ok!==1?"s":""} importado{importDone.ok!==1?"s":""} correctamente
-                  </div>
-                  {importDone.errors > 0 && (
-                    <div style={{fontSize:".88rem",color:"#ef4444",marginBottom:".5rem"}}>
-                      {importDone.errors} fila{importDone.errors!==1?"s":""} con errores — no fueron importadas
-                    </div>
-                  )}
-                  <div style={{marginTop:"1.25rem",padding:"1rem 1.25rem",background:"rgba(6,182,212,.07)",border:"1px solid rgba(6,182,212,.2)",borderRadius:10,fontSize:".84rem",color:"#0f172a",lineHeight:1.6}}>
-                    💡 <strong>Lotes importados.</strong> Puedes agregar fotos a cada lote desde el módulo de <strong>Lotes</strong>.
-                  </div>
-                  <div style={{display:"flex",gap:".75rem",justifyContent:"center",marginTop:"1.5rem"}}>
-                    <button onClick={()=>{ setImportModal(false); setImportRows([]); setImportDone(null); setPage("lotes"); }}
-                      style={{padding:".6rem 1.4rem",background:"#06B6D4",border:"none",borderRadius:9,color:"#fff",fontWeight:700,fontSize:".9rem",cursor:"pointer"}}>
-                      Ir a Lotes →
-                    </button>
-                    <button onClick={()=>{ setImportModal(false); setImportRows([]); setImportDone(null); }}
-                      style={{padding:".6rem 1.2rem",background:"none",border:"1px solid #d1d5db",borderRadius:9,color:"#6b7280",fontSize:".9rem",cursor:"pointer"}}>
-                      Cerrar
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* ── ESTADO: preview de filas ── */}
-              {!importDone && importRows.length > 0 && (
-                <>
-                  {/* Resumen validación */}
-                  <div style={{display:"flex",gap:".75rem",marginBottom:"1rem",flexWrap:"wrap"}}>
-                    <div style={{padding:".45rem .9rem",background:"rgba(20,184,166,.1)",border:"1px solid rgba(20,184,166,.25)",borderRadius:8,fontSize:".78rem",fontWeight:600,color:"#0f766e"}}>
-                      ✓ {importRows.filter(r=>r.errors.length===0).length} lotes válidos
-                    </div>
-                    {importRows.filter(r=>r.errors.length>0).length > 0 && (
-                      <div style={{padding:".45rem .9rem",background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",borderRadius:8,fontSize:".78rem",fontWeight:600,color:"#dc2626"}}>
-                        ✕ {importRows.filter(r=>r.errors.length>0).length} con errores (no se importarán)
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Tabla preview */}
-                  <div style={{overflowX:"auto",border:"1px solid #e5e7eb",borderRadius:10,marginBottom:"1.25rem"}}>
-                    <table style={{width:"100%",borderCollapse:"collapse",fontSize:".78rem"}}>
-                      <thead>
-                        <tr style={{background:"#0D9488",color:"#fff"}}>
-                          {["Fila","Nombre","Categoría","Tipo remate","Base","Comisión","Estado"].map(h=>(
-                            <th key={h} style={{padding:".55rem .7rem",textAlign:"left",fontWeight:700,whiteSpace:"nowrap",fontSize:".72rem",letterSpacing:".04em"}}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {importRows.map((r, i) => (
-                          <tr key={i} style={{borderTop:"1px solid #f1f5f9",background:r.errors.length>0?"#fff5f5":i%2===0?"#fff":"#f8fafc"}}>
-                            <td style={{padding:".45rem .7rem",color:"#6b7280",fontWeight:600}}>{r._row}</td>
-                            <td style={{padding:".45rem .7rem",maxWidth:200}}>
-                              <div style={{fontWeight:600,color:"#0f172a",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:180}}>{r.nombre || <span style={{color:"#ef4444",fontStyle:"italic"}}>— vacío —</span>}</div>
-                              {r.exp && <div style={{fontSize:".68rem",color:"#6b7280"}}>{r.exp}</div>}
-                            </td>
-                            <td style={{padding:".45rem .7rem",color:"#374151"}}>{r.cat}</td>
-                            <td style={{padding:".45rem .7rem"}}>
-                              <span style={{padding:".15rem .5rem",borderRadius:5,fontSize:".68rem",fontWeight:700,
-                                background:r.tipo==="judicial"?"rgba(6,182,212,.1)":r.tipo==="concursal"?"rgba(167,139,250,.1)":"rgba(246,173,85,.1)",
-                                color:r.tipo==="judicial"?"#0891b2":r.tipo==="concursal"?"#7c3aed":"#b45309"}}>
-                                {r.tipo}
-                              </span>
-                            </td>
-                            <td style={{padding:".45rem .7rem",fontWeight:700,color:r.base?"#0f172a":"#ef4444"}}>
-                              {r.base ? `$ ${r.base.toLocaleString("es-CL")}` : <span style={{fontStyle:"italic"}}>— vacío —</span>}
-                            </td>
-                            <td style={{padding:".45rem .7rem",color:"#374151"}}>
-                              {r.com != null ? `${r.com}%` : <span style={{color:"#6b7280",fontSize:".7rem"}}>auto ({r.tipo==="concursal"?"7":"10"}%)</span>}
-                            </td>
-                            <td style={{padding:".45rem .7rem"}}>
-                              {r.errors.length === 0
-                                ? <span style={{color:"#059669",fontWeight:600,fontSize:".72rem"}}>✓ OK</span>
-                                : <span style={{color:"#dc2626",fontSize:".7rem",lineHeight:1.4}}>{r.errors.join(" · ")}</span>}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Acciones */}
-                  <div style={{display:"flex",gap:".75rem",justifyContent:"flex-end",alignItems:"center"}}>
-                    <label style={{padding:".55rem 1rem",border:"1px solid #d1d5db",borderRadius:9,fontSize:".82rem",color:"#6b7280",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:".4rem"}}>
-                      ↑ Cambiar archivo
-                      <input type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={handleImportFile}/>
-                    </label>
-                    <button onClick={()=>{ setImportRows([]); setImportDone(null); }}
-                      style={{padding:".55rem 1rem",border:"1px solid #d1d5db",borderRadius:9,fontSize:".82rem",color:"#6b7280",background:"none",cursor:"pointer"}}>
-                      Cancelar
-                    </button>
-                    <button onClick={confirmarImport} disabled={importSaving || importRows.filter(r=>r.errors.length===0).length===0}
-                      style={{padding:".55rem 1.4rem",background: importRows.filter(r=>r.errors.length===0).length===0?"#d1d5db":"#06B6D4",border:"none",borderRadius:9,color:"#fff",fontWeight:700,fontSize:".88rem",cursor:"pointer",display:"flex",alignItems:"center",gap:".4rem",opacity:importSaving?.6:1}}>
-                      {importSaving ? <><span style={{width:14,height:14,border:"2px solid rgba(255,255,255,.4)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/> Guardando...</> : `Confirmar importación (${importRows.filter(r=>r.errors.length===0).length} lotes) →`}
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {/* ── ESTADO: pantalla inicial ── */}
-              {!importDone && importRows.length === 0 && (
-                <div style={{display:"flex",flexDirection:"column",gap:"1.25rem"}}>
-                  {/* Paso 1: descargar plantilla */}
-                  <div style={{padding:"1.25rem",background:"rgba(6,182,212,.05)",border:"1px solid rgba(6,182,212,.2)",borderRadius:12}}>
-                    <div style={{fontWeight:700,color:"#0f172a",marginBottom:".4rem",display:"flex",alignItems:"center",gap:".5rem"}}>
-                      <span style={{background:"#06B6D4",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:".72rem",fontWeight:800,flexShrink:0}}>1</span>
-                      Descarga la plantilla (recomendado)
-                    </div>
-                    <div style={{fontSize:".82rem",color:"#6b7280",marginBottom:".85rem",lineHeight:1.6}}>
-                      Usa nuestra plantilla Excel con las columnas correctas: nombre, expediente, mandante, categoría, precio base, comisión, tipo de remate y más.
-                    </div>
-                    <button onClick={descargarPlantillaExcel}
-                      style={{padding:".55rem 1.2rem",background:"#06B6D4",border:"none",borderRadius:9,color:"#fff",fontWeight:700,fontSize:".84rem",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:".4rem"}}>
-                      ⬇ Descargar plantilla .xlsx
-                    </button>
-                  </div>
-
-                  {/* Paso 2: subir archivo */}
-                  <div style={{padding:"1.25rem",background:"#f8fafc",border:"2px dashed #d1d5db",borderRadius:12,textAlign:"center"}}>
-                    <div style={{fontWeight:700,color:"#0f172a",marginBottom:".4rem",display:"flex",alignItems:"center",justifyContent:"center",gap:".5rem"}}>
-                      <span style={{background:"#0D9488",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:".72rem",fontWeight:800,flexShrink:0}}>2</span>
-                      Sube tu archivo Excel o CSV
-                    </div>
-                    <div style={{fontSize:".8rem",color:"#9ca3af",marginBottom:"1rem"}}>Formatos aceptados: .xlsx, .xls, .csv</div>
-                    <label style={{padding:".65rem 1.6rem",background:"#0D9488",border:"none",borderRadius:9,color:"#fff",fontWeight:700,fontSize:".88rem",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:".5rem"}}>
-                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M8 11V3M5 6l3-3 3 3"/><path d="M3 13h10"/></svg>
-                      Seleccionar archivo
-                      <input type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={handleImportFile}/>
-                    </label>
-                  </div>
-
-                  {/* Columnas disponibles */}
-                  <div style={{padding:"1rem 1.25rem",background:"#f8fafc",border:"1px solid #e5e7eb",borderRadius:10}}>
-                    <div style={{fontSize:".72rem",fontWeight:700,color:"#6b7280",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".65rem"}}>Columnas de la plantilla</div>
-                    <div style={{display:"flex",flexWrap:"wrap",gap:".35rem"}}>
-                      {["Nombre *","Expediente","Mandante","Categoría","Año","Patente","Precio base *","Precio mínimo","Incremento","Comisión %","Tipo de remate","Descripción"].map((c,i)=>(
-                        <span key={i} style={{padding:".2rem .55rem",borderRadius:5,fontSize:".7rem",fontWeight:600,
-                          background:c.includes("*")?"rgba(6,182,212,.12)":"rgba(0,0,0,.05)",
-                          color:c.includes("*")?"#0891b2":"#374151",
-                          border:c.includes("*")?"1px solid rgba(6,182,212,.25)":"1px solid #e5e7eb"}}>
-                          {c}
-                        </span>
-                      ))}
-                    </div>
-                    <div style={{fontSize:".7rem",color:"#9ca3af",marginTop:".6rem"}}>* campos obligatorios</div>
-                  </div>
-                </div>
-              )}
-
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ══ PLANILLA DE REMATE ══ */}
-      {page==="planilla" && (()=>{
-        const lotesFiltrados = (lotesFiltroRemate
-          ? dbLotes.filter(l=>l.remate_id===lotesFiltroRemate)
-          : dbLotes
-        ).slice().sort((a,b)=>(a.orden||0)-(b.orden||0));
-        const fmtClp = n => n ? Number(n).toLocaleString("es-CL") : "—";
-        return (
-          <div className="page">
-            {lotesFiltrados.length===0 ? (
-              <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"40vh",gap:".75rem",color:"var(--mu)"}}>
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="4" y="4" width="32" height="32" rx="4"/><path d="M12 13h16M12 20h16M12 27h8"/></svg>
-                <div style={{fontSize:".88rem",fontWeight:600,color:"var(--wh2)"}}>Sin lotes — {remateActivo?"este remate no tiene lotes aún":"selecciona un remate"}</div>
-              </div>
-            ) : (
-              <div className="table-card">
-                <div className="table-head">
-                  <div className="table-title">{lotesFiltrados.length} lotes</div>
-                  <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>window.print()}>Imprimir</button>
-                </div>
-                <div style={{overflowX:"auto"}}>
-                  <table>
-                    <thead><tr><th>Lote</th><th>Cant.</th><th>Descripción</th><th>Propietario</th><th style={{textAlign:"right"}}>Mínimo</th><th>Comprador</th><th style={{textAlign:"right"}}>Valor</th></tr></thead>
-                    <tbody>
-                      {lotesFiltrados.map((l,i)=>(
-                        <tr key={l.id||i}>
-                          <td style={{fontWeight:700,color:"var(--ac)"}}>{l.orden??i+1}</td>
-                          <td style={{textAlign:"center"}}>{l.cantidad||1}</td>
-                          <td>{l.nombre||"—"}</td>
-                          <td style={{fontSize:".75rem",color:"var(--mu2)"}}>{l.propietario||"—"}</td>
-                          <td style={{textAlign:"right",fontWeight:600}}>${fmtClp(l.base)}</td>
-                          <td style={{fontSize:".75rem",color:"var(--mu)"}}></td>
-                          <td style={{textAlign:"right"}}></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* ══ RESULTADO DE REMATE ══ */}
-      {page==="resultado-remate" && (()=>{
-        const lotesFiltrados = (lotesFiltroRemate
-          ? dbLotes.filter(l=>l.remate_id===lotesFiltroRemate)
-          : dbLotes
-        ).slice().sort((a,b)=>(a.orden||0)-(b.orden||0));
-        const fmtClp = n => n ? Number(n).toLocaleString("es-CL") : "—";
-        const adjDeRemate = [...ADJUDICACIONES,...liquidaciones].filter(a=>
-          !lotesFiltroRemate||(a.remateId===lotesFiltroRemate||a.remate_id===lotesFiltroRemate)
-        );
-        const vendidos  = lotesFiltrados.filter(l=>adjDeRemate.some(a=>a.lote===l.nombre||a.lote===l.name||a.loteId===l.id));
-        const totalMart = adjDeRemate.reduce((s,a)=>s+(a.monto||0),0);
-        const remNombre = remateActivo?.name||"Resultado de Remate";
-        const remFecha  = remateActivo?.fecha||"";
-        return (
-          <div className="page" style={{paddingBottom:"2rem"}}>
-
-            {/* Cabecera */}
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1.25rem",padding:"1rem 1.4rem",background:"linear-gradient(135deg,#0b1f38 0%,#0e2d4a 100%)",border:"1px solid rgba(56,178,246,.2)",borderRadius:14,flexWrap:"wrap",gap:".75rem"}}>
-              <div>
-                <div style={{fontSize:".6rem",fontWeight:700,color:"rgba(56,178,246,.7)",textTransform:"uppercase",letterSpacing:".1em",marginBottom:".25rem"}}>Resultado de Remate</div>
-                <div style={{fontSize:"1.15rem",fontWeight:900,color:"#fff",lineHeight:1.2}}>{remNombre}</div>
-                {remFecha && <div style={{fontSize:".72rem",color:"rgba(255,255,255,.5)",marginTop:".2rem"}}>{remFecha}</div>}
-              </div>
-              <div style={{display:"flex",gap:"1.25rem",alignItems:"center",flexWrap:"wrap"}}>
-                {[
-                  {val:lotesFiltrados.length, label:"Total lotes",  color:"#38B2F6"},
-                  {val:vendidos.length,       label:"Vendidos",     color:"#34d399"},
-                  {val:lotesFiltrados.length-vendidos.length, label:"Pendientes", color:"#f6ad55"},
-                ].map((s,i)=>(
-                  <div key={i} style={{textAlign:"center"}}>
-                    <div style={{fontSize:"1.5rem",fontWeight:900,color:s.color,lineHeight:1}}>{s.val}</div>
-                    <div style={{fontSize:".6rem",color:"rgba(255,255,255,.45)",textTransform:"uppercase",letterSpacing:".06em"}}>{s.label}</div>
-                    {i<2 && <div style={{width:1,height:32,background:"rgba(255,255,255,.12)",position:"absolute"}}/>}
-                  </div>
-                ))}
-                {totalMart>0 && <div style={{textAlign:"center"}}>
-                  <div style={{fontSize:"1.05rem",fontWeight:900,color:"#a78bfa",lineHeight:1}}>${totalMart.toLocaleString("es-CL")}</div>
-                  <div style={{fontSize:".6rem",color:"rgba(255,255,255,.45)",textTransform:"uppercase",letterSpacing:".06em"}}>Total martillo</div>
-                </div>}
-                <button className="btn-sec" style={{fontSize:".7rem"}} onClick={()=>window.print()}>
-                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" style={{marginRight:4,verticalAlign:"middle"}}><rect x="1" y="4" width="11" height="7" rx="1.5"/><path d="M4 4V1.5h5V4M4 10h5"/></svg>
-                  Imprimir
-                </button>
-              </div>
-            </div>
-
-            {lotesFiltrados.length===0 ? (
-              <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"40vh",gap:".75rem",color:"var(--mu)"}}>
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="4" y="4" width="32" height="32" rx="4"/><path d="M12 13h16M12 20h16M12 27h8"/></svg>
-                <div style={{fontSize:".88rem",fontWeight:600,color:"var(--wh2)"}}>Sin lotes — {remateActivo?"este remate no tiene lotes aún":"selecciona un remate"}</div>
-              </div>
-            ) : (
-              <div style={{borderRadius:14,overflow:"hidden",border:"1px solid var(--b1)"}}>
-                {/* Encabezado columnas */}
-                <div style={{display:"grid",gridTemplateColumns:"64px 40px 1fr 160px 180px 200px",alignItems:"center",padding:".55rem 1rem",background:"#0b1f38",gap:"0 .5rem"}}>
-                  {["N°","Cant.","Descripción / Vendedor","Precio mínimo","Comprador","Valor martillo"].map((h,i)=>(
-                    <div key={i} style={{fontSize:".6rem",fontWeight:700,color:"rgba(56,178,246,.7)",textTransform:"uppercase",letterSpacing:".07em",textAlign:i>=3?"right":"left"}}>{h}</div>
-                  ))}
-                </div>
-
-                {/* Filas */}
-                {lotesFiltrados.map((l,i)=>{
-                  const adj     = adjDeRemate.find(a=>a.lote===l.nombre||a.lote===l.name||a.loteId===l.id);
-                  const vendido = !!adj;
-                  return (
-                    <div key={l.id||i} style={{
-                      display:"grid",gridTemplateColumns:"64px 40px 1fr 160px 180px 200px",
-                      alignItems:"center",gap:"0 .5rem",padding:".7rem 1rem",
-                      borderBottom:"1px solid var(--b1)",
-                      background:vendido?"rgba(52,211,153,.06)":i%2===0?"var(--s1)":"#fff",
-                    }}>
-                      {/* Badge N° */}
-                      <div style={{display:"flex",alignItems:"center",justifyContent:"center"}}>
-                        <div style={{width:44,height:44,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:1,
-                          background:vendido?"rgba(52,211,153,.15)":"rgba(56,178,246,.1)",
-                          border:`2px solid ${vendido?"rgba(52,211,153,.4)":"rgba(56,178,246,.25)"}`,
-                        }}>
-                          {vendido && <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3 6-7" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                          <span style={{fontFamily:"Inter,sans-serif",fontSize:vendido?".62rem":".82rem",fontWeight:900,color:vendido?"#34d399":"var(--ac)",lineHeight:1}}>
-                            {l.orden??i+1}
-                          </span>
-                        </div>
-                      </div>
-                      {/* Cant */}
-                      <div style={{textAlign:"center",fontSize:".78rem",fontWeight:600,color:"var(--mu2)"}}>{l.cantidad||1}</div>
-                      {/* Descripción */}
-                      <div>
-                        <div style={{fontWeight:700,fontSize:".88rem",color:"var(--wh2)",lineHeight:1.25,marginBottom:".18rem"}}>{l.nombre||"—"}</div>
-                        <div style={{display:"flex",gap:".5rem",alignItems:"center",flexWrap:"wrap"}}>
-                          {l.propietario && <span style={{fontSize:".65rem",color:"var(--mu2)"}}><span style={{color:"var(--mu)"}}>Vendedor: </span>{l.propietario}</span>}
-                          {l.categoria && <span style={{fontSize:".6rem",padding:".1rem .4rem",background:"rgba(56,178,246,.08)",border:"1px solid rgba(56,178,246,.18)",borderRadius:4,color:"var(--ac)",fontWeight:600}}>{l.categoria}</span>}
-                        </div>
-                      </div>
-                      {/* Mínimo */}
-                      <div style={{textAlign:"right"}}>
-                        <div style={{fontFamily:"Inter,sans-serif",fontWeight:700,fontSize:".85rem",color:"var(--wh2)"}}>${fmtClp(l.base)}</div>
-                        <div style={{fontSize:".6rem",color:"var(--mu)",marginTop:".1rem"}}>precio mínimo</div>
-                      </div>
-                      {/* Comprador */}
-                      <div style={{textAlign:"right"}}>
-                        {adj
-                          ? <div><div style={{fontWeight:700,fontSize:".82rem",color:"var(--wh2)"}}>{adj.postor}</div>{adj.nComprador&&<div style={{fontSize:".62rem",color:"var(--mu)"}}>Paleta #{String(adj.nComprador).padStart(2,"0")}</div>}</div>
-                          : <div style={{borderBottom:"1.5px dashed rgba(0,0,0,.15)",width:"90%",marginLeft:"auto",height:18}}/>
-                        }
-                      </div>
-                      {/* Valor */}
-                      <div style={{textAlign:"right"}}>
-                        {adj
-                          ? <div style={{display:"inline-flex",alignItems:"center",gap:".35rem",padding:".3rem .7rem",background:"rgba(52,211,153,.12)",border:"1px solid rgba(52,211,153,.3)",borderRadius:8}}>
-                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5.5l3 3 5-6" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                              <span style={{fontFamily:"Inter,sans-serif",fontWeight:800,fontSize:".88rem",color:"#34d399"}}>${fmtClp(adj.monto)}</span>
-                            </div>
-                          : <div style={{borderBottom:"1.5px dashed rgba(0,0,0,.15)",width:"90%",marginLeft:"auto",height:18}}/>
-                        }
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* Pie */}
-                {vendidos.length>0 && (
-                  <div style={{display:"grid",gridTemplateColumns:"64px 40px 1fr 160px 180px 200px",alignItems:"center",gap:"0 .5rem",padding:".75rem 1rem",background:"#0b1f38",borderTop:"2px solid rgba(56,178,246,.2)"}}>
-                    <div style={{gridColumn:"1/6",textAlign:"right",fontSize:".65rem",fontWeight:700,color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:".07em"}}>
-                      Total martillo — {vendidos.length} de {lotesFiltrados.length} lotes vendidos
-                    </div>
-                    <div style={{textAlign:"right"}}>
-                      <span style={{fontFamily:"Inter,sans-serif",fontWeight:900,fontSize:"1rem",color:"#34d399"}}>${totalMart.toLocaleString("es-CL")}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* ══ LOTES POR VENDEDOR ══ */}
-      {page==="lotes-vendedor" && (()=>{
-        const VENDEDORES = [...new Set(dbLotes.map(l=>l.propietario).filter(Boolean))].sort();
-        const remateVend = lotesFiltroRemate;
-        const lotesFilt = dbLotes
-          .filter(l=> (!remateVend || l.remate_id===remateVend) && (!vendedorSel || l.propietario===vendedorSel))
-          .sort((a,b)=>(a.orden||0)-(b.orden||0));
-        const fmtClp = n => n ? Number(n).toLocaleString("es-CL") : "—";
-
-        const exportarPDF = async () => {
-          if(!vendedorSel){ notify("Selecciona un vendedor primero.","inf"); return; }
-          if(!lotesFilt.length){ notify("Este vendedor no tiene lotes.","inf"); return; }
-          const {jsPDF} = await import("jspdf");
-          const autoTable = (await import("jspdf-autotable")).default;
-          const doc = new jsPDF({orientation:"landscape",unit:"mm",format:"a4"});
-          doc.setFont("helvetica","bold"); doc.setFontSize(14); doc.setTextColor(14,116,144);
-          doc.text(`Lotes — ${vendedorSel}`,14,16);
-          doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(100,116,139);
-          doc.text(`Total: ${lotesFilt.length} lote(s)`,14,23);
-          autoTable(doc,{
-            startY:28, head:[["#","Lote","Descripción","Base (CLP)"]],
-            body:lotesFilt.map((l,i)=>[l.orden??i+1,l.nombre||"—",l.descripcion||"—",(l.base||0).toLocaleString("es-CL")]),
-            styles:{fontSize:9,cellPadding:3}, headStyles:{fillColor:[14,116,144],textColor:255,fontStyle:"bold"},
-          });
-          doc.save(`lotes-${vendedorSel.replace(/\s/g,"_")}.pdf`);
-          notify("PDF generado.","sold");
-        };
-        const exportarExcel = async () => {
-          if(!vendedorSel){ notify("Selecciona un vendedor primero.","inf"); return; }
-          if(!lotesFilt.length){ notify("Este vendedor no tiene lotes.","inf"); return; }
-          const XLSX = await import("xlsx");
-          const ws = XLSX.utils.aoa_to_sheet([
-            ["#","Descripción","Base (CLP)","Propietario"],
-            ...lotesFilt.map((l,i)=>[l.orden??i+1,l.nombre||"—",l.base||0,l.propietario||"—"]),
-          ]);
-          const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb,ws,vendedorSel.substring(0,31));
-          XLSX.writeFile(wb,`lotes-${vendedorSel.replace(/\s/g,"_")}.xlsx`);
-          notify("Excel generado.","sold");
-        };
-        return (
-          <div className="page">
-            <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",flexWrap:"wrap"}}>
-              <select className="fsel" value={vendedorSel} onChange={e=>setVendedorSel(e.target.value)} style={{maxWidth:300}}>
-                <option value="">— Todos los vendedores —</option>
-                {VENDEDORES.map(v=><option key={v} value={v}>{v}</option>)}
-              </select>
-              <button className="btn-sec" style={{fontSize:".7rem"}} onClick={exportarPDF}>PDF</button>
-              <button className="btn-sec" style={{fontSize:".7rem"}} onClick={exportarExcel}>Excel</button>
-              <span style={{fontSize:".73rem",color:"var(--mu)",marginLeft:"auto"}}>{lotesFilt.length} lotes</span>
-            </div>
-            {lotesFilt.length===0 ? (
-              <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"40vh",gap:".75rem",color:"var(--mu)"}}>
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="4" y="4" width="32" height="32" rx="4"/><path d="M12 13h16M12 20h16M12 27h8"/></svg>
-                <div style={{fontSize:".88rem",fontWeight:600,color:"var(--wh2)"}}>{vendedorSel?"Sin lotes para este vendedor":"Selecciona un vendedor para ver sus lotes"}</div>
-              </div>
-            ) : (
-              <div className="table-card">
-                <div className="table-head">
-                  <div className="table-title">{lotesFilt.length} lotes</div>
-                </div>
-                <div style={{overflowX:"auto"}}>
-                  <table>
-                    <thead><tr><th>#</th><th>Descripción</th><th>Categoría</th><th style={{textAlign:"right"}}>Base (CLP)</th></tr></thead>
-                    <tbody>
-                      {lotesFilt.map((l,i)=>(
-                        <tr key={l.id||i}>
-                          <td style={{fontWeight:700,color:"var(--ac)"}}>{l.orden??i+1}</td>
-                          <td style={{fontWeight:500}}>{l.nombre||"—"}</td>
-                          <td style={{fontSize:".75rem",color:"var(--mu2)"}}>{l.categoria||"—"}</td>
-                          <td style={{textAlign:"right",fontWeight:600}}>${(l.base||0).toLocaleString("es-CL")}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* ══ INGRESO VENDEDORES ══ */}
-      {page==="ingreso-vendedores" && (()=>{
-        const vendedoresConLotes = dbVendedores.map(v=>({
-          ...v,
-          lotes: dbLotes.filter(l=>l.propietario===v.nombre).length,
-          montoTotal: dbLotes.filter(l=>l.propietario===v.nombre).reduce((acc,l)=>acc+(l.base||0),0),
-        }));
-        const soloEnLotes = [...new Set(dbLotes.map(l=>l.propietario).filter(Boolean))]
-          .filter(n=>!dbVendedores.find(v=>v.nombre===n))
-          .map(n=>({nombre:n,rut:"",giro:"",email:"",telefono:"",direccion:"",lotes:dbLotes.filter(l=>l.propietario===n).length,montoTotal:dbLotes.filter(l=>l.propietario===n).reduce((acc,l)=>acc+(l.base||0),0)}));
-        const todos = [...vendedoresConLotes, ...soloEnLotes];
-        return (
-          <div className="page">
-            {todos.length===0 ? (
-              <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"45vh",gap:".75rem",color:"var(--mu)"}}>
-                <svg width="44" height="44" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="20" cy="14" r="7"/><path d="M7 36c0-7.2 5.8-13 13-13s13 5.8 13 13"/></svg>
-                <div style={{fontSize:".9rem",fontWeight:600,color:"var(--wh2)"}}>Sin vendedores aún</div>
-                <div style={{fontSize:".78rem",color:"var(--mu)",textAlign:"center",maxWidth:320}}>Agrega vendedores con el botón <strong style={{color:"var(--wh2)"}}>+ Agregar Vendedor</strong> para poder seleccionarlos al ingresar lotes.</div>
-                <button className="btn-primary" onClick={()=>setModal("nuevo-vendedor")}>+ Agregar Vendedor</button>
-              </div>
-            ) : (
-              <div className="table-card">
-                <div className="table-head">
-                  <div className="table-title">{todos.length} vendedores</div>
-                  <button className="btn-primary" style={{fontSize:".75rem"}} onClick={()=>setModal("nuevo-vendedor")}>+ Agregar Vendedor</button>
-                </div>
-                <div style={{overflowX:"auto"}}>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Nombre / Razón social</th>
-                        <th>RUT</th>
-                        <th>Giro</th>
-                        <th>Email</th>
-                        <th>Teléfono</th>
-                        <th style={{textAlign:"center"}}>Lotes</th>
-                        <th style={{textAlign:"right"}}>Base total</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {todos.map((v,i)=>(
-                        <tr key={v.id||i}>
-                          <td style={{fontWeight:600,color:"var(--wh2)"}}>{v.nombre}</td>
-                          <td style={{fontFamily:"monospace",fontSize:".78rem"}}>{v.rut||<span style={{color:"var(--mu)"}}>—</span>}</td>
-                          <td style={{fontSize:".75rem",color:"var(--mu2)",maxWidth:160,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{v.giro||<span style={{color:"var(--mu)"}}>—</span>}</td>
-                          <td style={{fontSize:".75rem"}}>{v.email||<span style={{color:"var(--mu)"}}>—</span>}</td>
-                          <td style={{fontSize:".75rem"}}>{v.telefono||<span style={{color:"var(--mu)"}}>—</span>}</td>
-                          <td style={{textAlign:"center",fontWeight:600,color:"var(--ac)"}}>{v.lotes}</td>
-                          <td style={{textAlign:"right",fontWeight:600}}>${v.montoTotal.toLocaleString("es-CL")}</td>
-                          <td style={{display:"flex",gap:".35rem"}}>
-                            <button onClick={()=>{setVendedorSel(v.nombre);setPage("lotes-vendedor");}}
-                              style={{padding:".25rem .6rem",background:"rgba(6,182,212,.12)",border:"1px solid rgba(6,182,212,.28)",borderRadius:6,fontSize:".68rem",fontWeight:700,color:"var(--ac)",cursor:"pointer",whiteSpace:"nowrap"}}>
-                              Ver lotes
-                            </button>
-                            {v.id && (
-                              <button onClick={()=>{if(confirm(`¿Eliminar a ${v.nombre}?`)) setDbVendedores(prev=>prev.filter(x=>x.id!==v.id));}}
-                                style={{padding:".25rem .5rem",background:"rgba(239,68,68,.1)",border:"1px solid rgba(239,68,68,.25)",borderRadius:6,fontSize:".68rem",fontWeight:700,color:"#f87171",cursor:"pointer"}}>
-                                ×
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* ══ PRE INSCRITOS WEB ══ */}
-      {page==="preinscriptos" && (()=>{
-        const lista = POSTORES_MERGED.filter(p=>p.estado==="pendiente"||p.modalidad==="web");
-        return (
-          <div className="page">
-            <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem"}}>
-              <div style={{flex:1,fontSize:".82rem",fontWeight:700,color:"var(--wh2)"}}>Pre inscritos web pendientes de verificación</div>
-              {lista.length>0 && <span style={{padding:".25rem .65rem",background:"rgba(246,173,85,.12)",border:"1px solid rgba(246,173,85,.28)",borderRadius:6,fontSize:".7rem",fontWeight:700,color:"var(--yl)"}}>{lista.length} pendientes</span>}
-            </div>
-            {lista.length===0 ? (
-              <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"40vh",gap:".75rem",color:"var(--mu)"}}>
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="20" cy="14" r="7"/><path d="M7 36c0-7.2 5.8-13 13-13s13 5.8 13 13"/></svg>
-                <div style={{fontSize:".88rem",fontWeight:600,color:"var(--wh2)"}}>Sin pre inscritos pendientes</div>
-              </div>
-            ) : (
-              <div className="table-card">
-                <div className="table-head">
-                  <div className="table-title">{lista.length} pre inscritos</div>
-                </div>
-                <div style={{overflowX:"auto"}}>
-                  <table>
-                    <thead><tr><th>N°</th><th>Nombre</th><th>RUT</th><th>Email</th><th>Teléfono</th><th>Comprobante</th><th>Estado</th><th>Acciones</th></tr></thead>
-                    <tbody>
-                      {lista.map((p,i)=>(
-                        <tr key={p.id||i}>
-                          <td style={{color:"var(--ac)",fontWeight:700}}>{p.nComprador||String(i+1).padStart(2,"0")}</td>
-                          <td style={{fontWeight:600}}>{p.name||p.razonSocial||"—"}</td>
-                          <td style={{fontFamily:"monospace",fontSize:".78rem"}}>{p.rut||"—"}</td>
-                          <td style={{fontSize:".78rem"}}>{p.email||"—"}</td>
-                          <td style={{fontSize:".78rem"}}>{p.tel||"—"}</td>
-                          <td>
-                            {p.comprobante_url
-                              ? <a href={p.comprobante_url} target="_blank" rel="noreferrer"
-                                  style={{display:"inline-flex",alignItems:"center",gap:".3rem",padding:".22rem .55rem",background:"rgba(6,182,212,.1)",border:"1px solid rgba(6,182,212,.25)",borderRadius:5,fontSize:".7rem",fontWeight:700,color:"var(--ac)",textDecoration:"none"}}>
-                                  <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 7l4 4 8-8"/></svg>Ver
-                                </a>
-                              : <span style={{fontSize:".7rem",color:"var(--mu2)"}}>Sin comprobante</span>
-                            }
-                          </td>
-                          <td><span style={{padding:".2rem .55rem",background:"rgba(246,173,85,.1)",border:"1px solid rgba(246,173,85,.25)",borderRadius:5,fontSize:".68rem",fontWeight:700,color:"var(--yl)"}}>{p.estado||"pendiente"}</span></td>
-                          <td style={{display:"flex",gap:".4rem"}}>
-                            <button onClick={async()=>{
-                              if(!p.supabaseId) return;
-                              // 1. Marcar como verificado
-                              const {data:updData} = await supabase.from("postores").update({estado:"verificado"}).eq("id",p.supabaseId).select();
-                              if(updData) setDbPostores(prev=>prev.map(x=>x.id===p.supabaseId?updData[0]:x));
-                              notify("Postor verificado","sold");
-
-                              if(!p.email) return;
-                              // Obtener casa directamente de BD (no depende de dbLicencias)
-                              const {data:casaDB} = p.casa_id
-                                ? await supabase.from("casas").select("*").eq("id",p.casa_id).single()
-                                : {data:null};
-                              const casaInfo = casaDB || {};
-                              const remateInfo = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===p.remate_id);
-                              const casaNom = casaInfo.nombre || "Casa de Remates";
-                              const portalUrl = "https://gestionderemates.cl/dashboard";
-
-                              // 2. Crear cuenta si no existe
-                              let tempPass = null;
-                              const {data:existing} = await supabase.from("usuarios").select("id").eq("email",p.email).maybeSingle();
-                              if(!existing){
-                                const chars="ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-                                const candidatePass = Array.from({length:8},()=>chars[Math.floor(Math.random()*chars.length)]).join("");
-                                try {
-                                  const res = await fetch("/api/admin/create-user",{method:"POST",headers:{"Content-Type":"application/json"},
-                                    body:JSON.stringify({email:p.email,password:candidatePass,nombre:p.name,casa_id:p.casa_id||null,roles:["postor"],activo:true})});
-                                  const created = await res.json();
-                                  if(created.id){
-                                    tempPass = candidatePass;
-                                    await supabase.from("postores").update({user_id:created.id}).eq("id",p.supabaseId);
-                                  } else {
-                                    notify("Cuenta no creada: " + (created.error||"error desconocido"), "inf");
-                                  }
-                                } catch(e){ console.error("create-user error",e); notify("Error al crear cuenta","inf"); }
-                              }
-
-                              // 3. Email 1: inscripción confirmada (de parte de la casa)
-                              try {
-                                await fetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
-                                  body:JSON.stringify({tipo:"verificado",nombre:p.name,
-                                    numero:String(p.nComprador).padStart(3,"0"),
-                                    remate:remateInfo?.name||"Remate",
-                                    fecha:remateInfo?.fecha||null,
-                                    casa:casaNom,logo_url:casaInfo.logo_url||null,
-                                    email_cliente:p.email,email_casa:casaInfo.email||null,
-                                    modalidad:p.modalidad||null,portal_url:portalUrl})});
-                              } catch(e){}
-
-                              // 4. Email 2: bienvenida con credenciales (solo si es usuario nuevo)
-                              if(tempPass) try {
-                                await fetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
-                                  body:JSON.stringify({tipo:"bienvenida_postor",nombre:p.name,email_cliente:p.email,
-                                    casa:casaNom,logo_url:casaInfo.logo_url||null,
-                                    email_casa:casaInfo.email||null,
-                                    temp_password:tempPass,portal_url:portalUrl})});
-                              } catch(e){}
-                            }} style={{padding:".25rem .6rem",background:"rgba(52,211,153,.15)",border:"1px solid rgba(52,211,153,.3)",borderRadius:6,fontSize:".7rem",fontWeight:700,color:"var(--gr)",cursor:"pointer"}}>
-                              Verificar
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* ══ REIMPRIMIR COMPROBANTE ══ */}
-      {page==="reimprimir" && (()=>{
-        const lista = POSTORES_MERGED;
-        const reimprimirBoleta = async (postor) => {
-          const {jsPDF} = await import("jspdf");
-          const doc = new jsPDF({orientation:"portrait",unit:"mm",format:[148,210]});
-          const W=148,H=210;
-          const casaData = dbLicencias.find(x=>x.slug===session?.casa)||{};
-          const casaNombre = casaData.nombre||session?.casaNombre||"Casa de Remates";
-          doc.setFillColor(20,184,166); doc.rect(0,0,W,5,"F");
-          let y=14;
-          doc.setFont("helvetica","bold"); doc.setFontSize(13); doc.setTextColor(13,148,136);
-          doc.text(casaNombre,W/2,y,{align:"center"}); y+=7;
-          doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(100,116,139);
-          doc.text("COMPROBANTE DE INSCRIPCIÓN",W/2,y,{align:"center"}); y+=10;
-          doc.setDrawColor(220,225,235); doc.line(12,y,W-12,y); y+=7;
-          const campos = [
-            ["Nombre",postor.name||postor.razonSocial||"—"],
-            ["RUT",postor.rut||"—"],
-            ["N° Paleta",String(postor.nComprador||"—").padStart(2,"0")],
-            ["Email",postor.email||"—"],
-            ["Teléfono",postor.tel||"—"],
-            ["Modalidad",postor.modalidad||"PRESENCIAL"],
-          ];
-          campos.forEach(([k,v])=>{
-            doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.setTextColor(14,116,144); doc.text(k.toUpperCase(),14,y);
-            doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(13,148,136); doc.text(v,14,y+5); y+=12;
-          });
-          doc.setFillColor(20,184,166); doc.rect(12,y,W-24,18,3,"F"); // eslint-disable-line
-          doc.setFont("helvetica","bold"); doc.setFontSize(14); doc.setTextColor(255,255,255);
-          doc.text(`PALETA N° ${String(postor.nComprador||"?").padStart(2,"0")}`,W/2,y+11,{align:"center"});
-          doc.save(`comprobante-${postor.nComprador||postor.rut||"postor"}.pdf`);
-          notify("Comprobante descargado","sold");
-        };
-        return (
-          <div className="page">
-            <div style={{marginBottom:"1.2rem",fontSize:".82rem",color:"var(--mu)"}}>
-              Todos los inscritos — haz clic en <strong style={{color:"var(--wh2)"}}>Reimprimir</strong> para descargar el comprobante en PDF.
-            </div>
-            {lista.length===0 ? (
-              <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"40vh",gap:".75rem",color:"var(--mu)"}}>
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="20" cy="14" r="7"/><path d="M7 36c0-7.2 5.8-13 13-13s13 5.8 13 13"/></svg>
-                <div style={{fontSize:".88rem",fontWeight:600,color:"var(--wh2)"}}>Sin inscritos aún</div>
-              </div>
-            ) : (
-              <div className="table-card">
-                <div className="table-head">
-                  <div className="table-title">{lista.length} inscritos</div>
-                </div>
-                <div style={{overflowX:"auto"}}>
-                  <table>
-                    <thead><tr><th>Paleta</th><th>Nombre</th><th>RUT</th><th>Email</th><th>Modalidad</th><th>Estado</th><th></th></tr></thead>
-                    <tbody>
-                      {lista.map((p,i)=>(
-                        <tr key={p.id||i}>
-                          <td style={{fontWeight:700,color:"var(--ac)"}}>#{String(p.nComprador||i+1).padStart(2,"0")}</td>
-                          <td style={{fontWeight:600}}>{p.name||p.razonSocial||"—"}</td>
-                          <td style={{fontFamily:"monospace",fontSize:".78rem"}}>{p.rut||"—"}</td>
-                          <td style={{fontSize:".78rem"}}>{p.email||"—"}</td>
-                          <td style={{fontSize:".75rem",color:"var(--mu2)"}}>{p.modalidad||"PRESENCIAL"}</td>
-                          <td><span style={{padding:".2rem .5rem",background:"rgba(52,211,153,.1)",border:"1px solid rgba(52,211,153,.25)",borderRadius:5,fontSize:".68rem",fontWeight:700,color:"var(--gr)"}}>{p.estado||"activo"}</span></td>
-                          <td>
-                            <button onClick={()=>reimprimirBoleta(p)} style={{padding:".25rem .6rem",background:"rgba(6,182,212,.12)",border:"1px solid rgba(6,182,212,.3)",borderRadius:6,fontSize:".7rem",fontWeight:700,color:"var(--ac)",cursor:"pointer"}}>
-                              Reimprimir
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* ══ PARTICIPANTES ONLINE ══ */}
-      {page==="participantes-online" && (()=>{
-        const lista = POSTORES_MERGED.filter(p=>{
-          const m = (p.modalidad||"").toLowerCase();
-          return m.includes("online")||m.includes("híbrido")||m.includes("hibrido")||m==="web";
-        });
-        return (
-          <div className="page">
-            <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem"}}>
-              <div style={{flex:1,fontSize:".82rem",fontWeight:700,color:"var(--wh2)"}}>Participantes Online / Híbrido</div>
-              <span style={{padding:".25rem .65rem",background:"rgba(6,182,212,.12)",border:"1px solid rgba(6,182,212,.28)",borderRadius:6,fontSize:".7rem",fontWeight:700,color:"var(--ac)"}}>{lista.length} participantes</span>
-            </div>
-            {lista.length===0 ? (
-              <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"40vh",gap:".75rem",color:"var(--mu)"}}>
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="4" y="10" width="32" height="22" rx="3"/><path d="M14 36h12M20 32v4"/></svg>
-                <div style={{fontSize:".88rem",fontWeight:600,color:"var(--wh2)"}}>Sin participantes online registrados</div>
-              </div>
-            ) : (
-              <div className="table-card">
-                <div className="table-head">
-                  <div className="table-title">{lista.length} participantes online</div>
-                </div>
-                <div style={{overflowX:"auto"}}>
-                  <table>
-                    <thead><tr><th>Paleta</th><th>Nombre</th><th>RUT</th><th>Email</th><th>Teléfono</th><th>Modalidad</th><th>Estado</th></tr></thead>
-                    <tbody>
-                      {lista.map((p,i)=>(
-                        <tr key={p.id||i}>
-                          <td style={{fontWeight:700,color:"var(--ac)"}}>#{String(p.nComprador||i+1).padStart(2,"0")}</td>
-                          <td style={{fontWeight:600}}>{p.name||p.razonSocial||"—"}</td>
-                          <td style={{fontFamily:"monospace",fontSize:".78rem"}}>{p.rut||"—"}</td>
-                          <td style={{fontSize:".78rem"}}>{p.email||"—"}</td>
-                          <td style={{fontSize:".78rem"}}>{p.tel||"—"}</td>
-                          <td><span style={{padding:".2rem .5rem",background:"rgba(6,182,212,.08)",border:"1px solid rgba(6,182,212,.22)",borderRadius:5,fontSize:".68rem",fontWeight:700,color:"var(--ac)"}}>{p.modalidad||"—"}</span></td>
-                          <td><span style={{padding:".2rem .5rem",background:"rgba(52,211,153,.1)",border:"1px solid rgba(52,211,153,.25)",borderRadius:5,fontSize:".68rem",fontWeight:700,color:"var(--gr)"}}>{p.estado||"activo"}</span></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* ══ GENERAR LIQUIDACIONES MASIVO ══ */}
-      {page==="liq-masivo" && (()=>{
-        const cerrados = REMATES_MERGED.filter(r=>r.estado==="cerrado");
-        const [remSel, setRemSel] = React.useState(null);
-        const remate = cerrados.find(r=>r.id===remSel||r.supabaseId===remSel);
-        const adjDeRemate = ADJUDICACIONES.filter(a=>!remSel||(a.remateId===remSel||a.remate_id===remSel));
-        const compradores = [...new Set(adjDeRemate.map(a=>a.postor).filter(Boolean))];
-        return (
-          <div className="page">
-            <div style={{marginBottom:"1.5rem",fontSize:".82rem",color:"var(--mu)"}}>
-              Genera liquidaciones para todos los compradores de un remate de una sola vez.
-            </div>
-            <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.5rem",flexWrap:"wrap"}}>
-              <select className="fsel" value={remSel||""} onChange={e=>setRemSel(e.target.value||null)} style={{maxWidth:340}}>
-                <option value="">— Selecciona un remate cerrado —</option>
-                {cerrados.map(r=><option key={r.id} value={r.supabaseId||r.id}>{r.name} · {r.fecha}</option>)}
-              </select>
-            </div>
-            {remSel && (
-              <div style={{padding:"1.25rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.2)",borderRadius:10,marginBottom:"1.2rem"}}>
-                <div style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",marginBottom:".5rem"}}>{remate?.name}</div>
-                <div style={{fontSize:".75rem",color:"var(--mu)"}}>
-                  {adjDeRemate.length} adjudicaciones · {compradores.length} compradores distintos
-                </div>
-                <button
-                  onClick={()=>{setPage("liquidac");setSelectedRemate(remSel);notify("Seleccionado. Genera la liquidación desde esta página.","inf");}}
-                  className="btn-primary" style={{marginTop:".85rem",fontSize:".78rem"}}>
-                  Ir a Liquidar Compradores →
-                </button>
-              </div>
-            )}
-            {cerrados.length===0 && (
-              <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"35vh",gap:".75rem",color:"var(--mu)"}}>
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M8 36V14l12-8 12 8v22"/><path d="M16 36v-8h8v8"/></svg>
-                <div style={{fontSize:".88rem",fontWeight:600,color:"var(--wh2)"}}>No hay remates cerrados</div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* ══ ENVIAR LIQUIDACIONES MASIVO ══ */}
-      {page==="env-masivo" && (()=>{
-        const liqConEmail = liquidaciones.filter(l=>l.email&&!l.enviado);
-        const liqEnviadas = liquidaciones.filter(l=>l.enviado);
-        return (
-          <div className="page">
-            <div style={{marginBottom:"1.5rem",fontSize:".82rem",color:"var(--mu)"}}>
-              Envía las liquidaciones generadas a todos los compradores por email de una vez.
-            </div>
-            <div style={{display:"flex",gap:"1rem",marginBottom:"1.5rem",flexWrap:"wrap"}}>
-              <div style={{flex:1,minWidth:180,padding:"1rem 1.25rem",background:"rgba(6,182,212,.07)",border:"1px solid rgba(6,182,212,.2)",borderRadius:10}}>
-                <div style={{fontSize:"1.8rem",fontWeight:900,color:"var(--ac)"}}>{liqConEmail.length}</div>
-                <div style={{fontSize:".75rem",color:"var(--mu)"}}>pendientes de envío</div>
-              </div>
-              <div style={{flex:1,minWidth:180,padding:"1rem 1.25rem",background:"rgba(52,211,153,.07)",border:"1px solid rgba(52,211,153,.2)",borderRadius:10}}>
-                <div style={{fontSize:"1.8rem",fontWeight:900,color:"var(--gr)"}}>{liqEnviadas.length}</div>
-                <div style={{fontSize:".75rem",color:"var(--mu)"}}>ya enviadas</div>
-              </div>
-            </div>
-            {liqConEmail.length===0 ? (
-              <div style={{padding:"1.5rem",background:"rgba(52,211,153,.06)",border:"1px solid rgba(52,211,153,.2)",borderRadius:10,textAlign:"center",fontSize:".85rem",color:"var(--gr)",fontWeight:600}}>
-                ✓ Todas las liquidaciones ya fueron enviadas
-              </div>
-            ) : (
-              <div>
-                <div style={{marginBottom:".75rem",fontSize:".75rem",fontWeight:700,color:"var(--mu2)",textTransform:"uppercase",letterSpacing:".05em"}}>
-                  Compradores con email pendiente
-                </div>
-                <div style={{display:"flex",flexDirection:"column",gap:".5rem",marginBottom:"1.25rem"}}>
-                  {liqConEmail.map((l,i)=>(
-                    <div key={i} style={{display:"flex",alignItems:"center",gap:".75rem",padding:".65rem .85rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:8}}>
-                      <div style={{flex:1}}>
-                        <div style={{fontWeight:600,fontSize:".82rem",color:"var(--wh2)"}}>{l.postor||"—"}</div>
-                        <div style={{fontSize:".72rem",color:"var(--mu)"}}>{l.email} · {l.lote}</div>
-                      </div>
-                      <span style={{fontSize:".72rem",fontWeight:700,color:"var(--ac)"}}>${(l.monto||0).toLocaleString("es-CL")}</span>
-                    </div>
-                  ))}
-                </div>
-                <button className="btn-primary" onClick={()=>{ notify("Función de envío masivo disponible desde Liquidar Compradores.","inf"); setPage("liquidac"); }}>
-                  Ir a Liquidar Compradores →
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      </div>{/* end main-wrap */}
+      </div>
 
       {/* ══ MODAL IA: Descripción de lote ══ */}
       {aiLoteModal && (

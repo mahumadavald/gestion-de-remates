@@ -4,9 +4,9 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = 'force-dynamic';
 
-const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = SUPA_URL ? createClient(SUPA_URL, SUPA_KEY) : null;
+const SUPA_URL = "https://xqkfcqibukghtyfjcwfb.supabase.co";
+const SUPA_KEY = "sb_publishable_m2bABYE65JScB4oCJUBmFg_3eVzUuIR";
+const supabase = createClient(SUPA_URL, SUPA_KEY);
 
 const fmt = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n);
 
@@ -280,32 +280,6 @@ const CSS = `
   }
   .disp-footer-txt { font-size: .68rem; color: var(--mu); }
   .disp-footer-url { font-size: .7rem; font-weight: 600; color: var(--ac); }
-
-  /* ── MOBILE ── */
-  @media (max-width: 700px) {
-    html, body { overflow: auto; height: auto; }
-    .disp-root { height: auto; min-height: 100dvh; overflow: visible; grid-template-rows: auto auto auto; }
-    .disp-header { padding: .55rem 1rem; }
-    .disp-body {
-      grid-template-columns: 1fr;
-      overflow: visible;
-      padding: .75rem;
-      gap: .75rem;
-      height: auto;
-    }
-    .disp-left { overflow: visible; min-height: 0; }
-    .disp-photo-wrap { min-height: 220px; max-height: 260px; flex: none; }
-    .disp-lot-title { font-size: 1rem; }
-    .disp-timer-num { font-size: 1.3rem; }
-    .disp-right { overflow: visible; }
-    .disp-bid-amount { font-size: 2.2rem; }
-    .disp-hist-card { display: none; }
-    .disp-footer { padding: .4rem 1rem; }
-    .disp-footer-txt { display: none; }
-    .disp-waiting-title { font-size: 1.4rem; }
-    .disp-sold-badge { font-size: 2.2rem; }
-    .disp-sold-monto { font-size: 1.8rem; }
-  }
 `;
 
 export default function DisplayPage({ params }) {
@@ -323,39 +297,15 @@ export default function DisplayPage({ params }) {
   const [flash,      setFlash]      = useState(false);
   const [photoIdx,   setPhotoIdx]   = useState(0);
 
-  const remateIdsRef  = React.useRef(null);
+  const remateIdsRef  = React.useRef(null); // null = cargando, Set = listo
   const loteActivoRef = React.useRef(null);
-  const [remateIds,   setRemateIds]   = useState(null);
 
-  // Auth
-  const [authChecked, setAuthChecked] = useState(false);
-  const [accesoDenegado, setAccesoDenegado] = useState(false);
-
-  useEffect(()=>{
-    if (!supabase || !slug) return;
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session) { window.location.href = "/postor"; return; }
-
-      // Admins y martilleros pasan siempre
-      const { data: perfil } = await supabase.from("usuarios").select("roles").eq("id", session.user.id).maybeSingle();
-      const isStaff = perfil?.roles?.some(r => ["admin","martillero"].includes(r));
-      if (isStaff) { setAuthChecked(true); return; }
-
-      // Postores: verificar que estén verificados en un remate de esta casa
-      const { data: casaRow } = await supabase.from("casas").select("id").eq("slug", slug).single();
-      if (!casaRow) { setAccesoDenegado(true); setAuthChecked(true); return; }
-
-      const { data: postorRow } = await supabase.from("postores")
-        .select("id").eq("user_id", session.user.id).eq("casa_id", casaRow.id).eq("estado","verificado").maybeSingle();
-
-      if (!postorRow) { setAccesoDenegado(true); }
-      setAuthChecked(true);
-    });
-  },[slug]);
+  // Estado para disparar la suscripción realtime DESPUÉS de tener los IDs
+  const [remateIds, setRemateIds] = useState(null);
 
   /* Cargar casa + remates + lote activo inicial */
   useEffect(()=>{
-    if (!authChecked || accesoDenegado || !slug) return;
+    if (!slug) return;
     supabase.from("casas").select("*").eq("slug",slug).single()
       .then(async ({ data: casaData }) => {
         if (!casaData) { setRemateIds([]); return; }
@@ -380,9 +330,9 @@ export default function DisplayPage({ params }) {
       });
   },[slug]);
 
-  /* Realtime — se suscribe SOLO después de tener remateIds cargados y auth OK */
+  /* Realtime — se suscribe SOLO después de tener remateIds cargados */
   useEffect(()=>{
-    if (remateIds === null || !authChecked || accesoDenegado) return;
+    if (remateIds === null) return; // todavía cargando, no suscribir aún
     const remateIdsSet = new Set(remateIds);
 
     const ch = supabase.channel(`display-live-${slug}`)
@@ -436,29 +386,6 @@ export default function DisplayPage({ params }) {
   const timerPct   = (timer/15)*100;
   const badgeCls   = estado==="live" ? "disp-live-badge" : estado==="sold" ? "disp-live-badge sold" : "disp-live-badge wait";
 
-  if (!authChecked) return (
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0a0f1a",color:"#8ab4d4",fontSize:".9rem",gap:".75rem",flexDirection:"column"}}>
-      <div style={{width:28,height:28,border:"2.5px solid #1a3a5c",borderTopColor:"#38B2F6",borderRadius:"50%",animation:"spin .8s linear infinite"}}/>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      Verificando acceso...
-    </div>
-  );
-
-  if (accesoDenegado) return (
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0a0f1a",color:"#e0eaf4",fontFamily:"Inter,sans-serif",padding:"2rem"}}>
-      <div style={{textAlign:"center",maxWidth:380}}>
-        <div style={{fontSize:"3rem",marginBottom:"1rem"}}>🔒</div>
-        <div style={{fontSize:"1.2rem",fontWeight:700,marginBottom:".75rem"}}>Acceso restringido</div>
-        <div style={{fontSize:".88rem",color:"#5a7fa8",lineHeight:1.6,marginBottom:"1.5rem"}}>
-          Debes estar inscrito y verificado en este remate para acceder a la sala en vivo.
-        </div>
-        <a href="/postor" style={{display:"inline-block",padding:".75rem 1.75rem",background:"#38B2F6",color:"#fff",borderRadius:10,fontWeight:700,textDecoration:"none",fontSize:".9rem"}}>
-          Ir a mi portal →
-        </a>
-      </div>
-    </div>
-  );
-
   return (
     <div className="disp-root">
       <style>{CSS}</style>
@@ -466,14 +393,16 @@ export default function DisplayPage({ params }) {
       {/* ── Header turquesa ── */}
       <div className="disp-header">
         <div style={{display:"flex",alignItems:"center",gap:"1.1rem"}}>
+          {/* Logo GR blanco */}
           <div style={{display:"flex",alignItems:"center",gap:".55rem",flexShrink:0}}>
-            <svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="3" width="32" height="9" rx="3" fill="rgba(255,255,255,.92)"/>
-              <polygon points="13,12 24,12 18,34 13,34" fill="rgba(255,255,255,.92)"/>
-              <polygon points="18,34 24,12 24,34" fill="rgba(255,255,255,.48)"/>
+            <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
+              <rect width="36" height="36" rx="8" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.3)" strokeWidth="1"/>
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.6)" strokeWidth="3.2" strokeLinecap="round" fill="none"/>
             </svg>
-            <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:".88rem",color:"#fff",letterSpacing:".08em"}}>
-              TAKKA
+            <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:".82rem",color:"#fff",lineHeight:1.2}}>
+              Auction Software
+              <div style={{fontSize:".58rem",color:"rgba(255,255,255,.65)",fontWeight:400,letterSpacing:".05em",textTransform:"uppercase",marginTop:1}}>Gestión de Remates</div>
             </div>
           </div>
 
@@ -620,7 +549,7 @@ export default function DisplayPage({ params }) {
       {/* ── Footer ── */}
       <div className="disp-footer">
         <div className="disp-footer-txt">Participa desde tu celular</div>
-        <div className="disp-footer-url">takka.cl/participar/{slug}</div>
+        <div className="disp-footer-url">gestionderemates.cl/participar/{slug}</div>
         <div className="disp-footer-txt">{new Date().toLocaleString("es-CL",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"short"})}</div>
       </div>
     </div>

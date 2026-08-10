@@ -5,9 +5,9 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = 'force-dynamic';
 
-const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = SUPA_URL ? createClient(SUPA_URL, SUPA_KEY) : null;
+const SUPA_URL = "https://xqkfcqibukghtyfjcwfb.supabase.co";
+const SUPA_KEY = "sb_publishable_m2bABYE65JScB4oCJUBmFg_3eVzUuIR";
+const supabase = createClient(SUPA_URL, SUPA_KEY);
 
 // ── RUT validator (Chile) ────────────────────────────────────────
 function validarRut(rut) {
@@ -251,9 +251,8 @@ const CSS = `
 
 function ParticiparContent() {
   const searchParams = useSearchParams();
-  const idParam      = searchParams.get("id")     || "";
-  const slugParam    = searchParams.get("casa")   || "";
-  const remateParam  = searchParams.get("remate") || "";
+  const idParam   = searchParams.get("id")   || "";   // nuevo: ?id=UUID
+  const slugParam = searchParams.get("casa") || "";   // legado: ?casa=slug
   const returnUrl = (() => {
     try { return searchParams.get("return") ? decodeURIComponent(searchParams.get("return")) : ""; }
     catch { return ""; }
@@ -279,12 +278,10 @@ function ParticiparContent() {
   const [giro,      setGiro]      = useState("");
   const [direccion, setDireccion] = useState("");
   const [comuna,    setComuna]    = useState("");
-  const [banco,          setBanco]          = useState("");
-  const [tipoCta,        setTipoCta]        = useState("CUENTA CORRIENTE");
-  const [numCta,         setNumCta]         = useState("");
-  const [cuentasGuardadas, setCuentasGuardadas] = useState([]);
-  const [cuentaSelIdx,   setCuentaSelIdx]   = useState(""); // "" = nueva / índice
-  const [remateId,  setRemateId]  = useState(remateParam);
+  const [banco,     setBanco]     = useState("");
+  const [tipoCta,   setTipoCta]   = useState("CUENTA CORRIENTE");
+  const [numCta,    setNumCta]    = useState("");
+  const [remateId,  setRemateId]  = useState("");
   const [modalidad, setModalidad] = useState("PRESENCIAL");
   const [comprobante, setComprobante] = useState(null);
   const [suscribir, setSuscribir] = useState(true);
@@ -301,12 +298,10 @@ function ParticiparContent() {
           .from("casas").select("*").eq("id", idParam).single();
         if (!casaData) { setNotFound(true); setLoading(false); return; }
         setCasa(casaData);
-        const hoy = new Date(); hoy.setDate(hoy.getDate() - 1); const fechaMin = hoy.toISOString().slice(0,10);
         const { data: rematesData } = await supabase
           .from("remates").select("*")
           .eq("casa_id", casaData.id)
           .in("estado", ["publicado","en_vivo","activo"])
-          .gte("fecha", fechaMin)
           .order("fecha");
         setRemates(rematesData || []);
         setLoading(false);
@@ -327,12 +322,10 @@ function ParticiparContent() {
       if (!casaData) { setNotFound(true); setLoading(false); return; }
       setCasa(casaData);
 
-      const hoy2 = new Date(); hoy2.setDate(hoy2.getDate() - 1); const fechaMin2 = hoy2.toISOString().slice(0,10);
       const { data: rematesData } = await supabase
         .from("remates").select("*")
         .eq("casa_id", casaData.id)
         .in("estado", ["publicado","en_vivo","activo"])
-        .gte("fecha", fechaMin2)
         .order("fecha");
 
       setRemates(rematesData || []);
@@ -348,17 +341,17 @@ function ParticiparContent() {
   );
 
   // ── Lookup de postor existente cuando RUT es válido ─────────────
-  // Prioridad: 1) Supabase  →  2) MySQL Ahumada (si es su casa)
+  // Prioridad: 1) Supabase (GR)  →  2) MySQL Ahumada (si es su casa)
   useEffect(() => {
     if (rutStatus !== "ok") { setReturningUser(false); setLookingUp(false); return; }
     let cancelled = false;
     const lookup = async () => {
       setLookingUp(true);
 
-      // 1. Buscar en Supabase (base de datos de TAKKA)
+      // 1. Buscar en Supabase (base de datos de GR Auction Software)
       const { data } = await supabase
         .from("postores")
-        .select("nombre, email, telefono, empresa, direccion, comuna, banco, tipo_cuenta, numero_cuenta, cuentas_banco")
+        .select("nombre, email, telefono, empresa, direccion, comuna, banco, tipo_cuenta, numero_cuenta")
         .eq("rut", rut)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -372,22 +365,9 @@ function ParticiparContent() {
         setGiro(data.empresa || "");
         setDireccion(data.direccion || "");
         setComuna(data.comuna || "");
-        // Cargar cuentas guardadas si existen
-        const savedCuentas = data.cuentas_banco || [];
-        setCuentasGuardadas(savedCuentas);
-        if (savedCuentas.length > 0) {
-          // Pre-seleccionar la primera cuenta guardada
-          const first = savedCuentas[0];
-          setBanco(first.banco || "");
-          setTipoCta(first.tipoCuenta || "CUENTA CORRIENTE");
-          setNumCta(first.nCuenta || "");
-          setCuentaSelIdx("0");
-        } else {
-          setBanco(data.banco || "");
-          setTipoCta(data.tipo_cuenta || "CUENTA CORRIENTE");
-          setNumCta(data.numero_cuenta || "");
-          setCuentaSelIdx("");
-        }
+        setBanco(data.banco || "");
+        setTipoCta(data.tipo_cuenta || "CUENTA CORRIENTE");
+        setNumCta(data.numero_cuenta || "");
         setReturningUser(true);
         setLookingUp(false);
         return;
@@ -459,17 +439,6 @@ function ParticiparContent() {
 
   const remateSeleccionado = remates.find(r => r.id === remateId);
 
-  const isInscripcionCerrada = (r) => {
-    if (!r.hora || !r.fecha) return false;
-    try {
-      const [h, m] = r.hora.split(":").map(Number);
-      const [year, month, day] = r.fecha.split("-").map(Number);
-      const remateDate = new Date(year, month - 1, day, h, m, 0, 0); // hora local, no UTC
-      const cutoff = new Date(remateDate.getTime() - 60 * 60 * 1000); // 1 hora antes
-      return new Date() >= cutoff;
-    } catch { return false; }
-  };
-
   const handleSubmit = async () => {
     setError("");
     if (!rut || rutStatus !== "ok")   { setError("RUT inválido. Verifica el formato."); return; }
@@ -480,11 +449,6 @@ function ParticiparContent() {
     if (!banco)                       { setError("Selecciona el banco para la devolución de garantía."); return; }
     if (!numCta.trim())               { setError("El número de cuenta es obligatorio para devolver la garantía."); return; }
     if (!remateId)                    { setError("Selecciona un remate para inscribirte."); return; }
-    const remateSelObj = remates.find(r => r.id === remateId);
-    if (remateSelObj && isInscripcionCerrada(remateSelObj)) {
-      setError("Las inscripciones online para este remate están cerradas (menos de 1 hora para el inicio). Para participar de forma presencial, dirígete directamente a la sala.");
-      return;
-    }
     if (!comprobante)                 { setError("Debes adjuntar el comprobante de transferencia."); return; }
 
     setSubmitting(true);
@@ -579,10 +543,9 @@ function ParticiparContent() {
         direccion:     direccion.trim(),
         comuna:        comuna || null,
         banco:         banco,
-        tipo_cuenta:    tipoCta,
-        numero_cuenta:  numCta.trim(),
-        modalidad:      modalidad,
-        comprobante_url: comprobanteUrl || null,
+        tipo_cuenta:   tipoCta,
+        numero_cuenta: numCta.trim(),
+        modalidad:     modalidad,
       };
 
       // 5a. Email de bienvenida con credenciales (si se creó cuenta nueva)
@@ -644,7 +607,7 @@ function ParticiparContent() {
             suscribir:       suscribir,
             comprobante_url: comprobanteUrl || "",
           }),
-        }).catch(() => {}); // No bloquear si falla — ya guardó en Supabase
+        }).catch(() => {}); // No bloquear si falla — GR ya guardó en Supabase
       }
 
       setSuccess({
@@ -674,7 +637,7 @@ function ParticiparContent() {
       <style>{CSS}</style>
       <div style={{textAlign:"center"}}>
         <div style={{fontSize:"1.2rem",fontWeight:700,color:"var(--wh)",marginBottom:".5rem"}}>Casa de remates no encontrada</div>
-        <div style={{fontSize:".85rem",color:"var(--mu)"}}>Verifica la URL o contacta a TAKKA.</div>
+        <div style={{fontSize:".85rem",color:"var(--mu)"}}>Verifica la URL o contacta a GR Auction Software.</div>
       </div>
     </div>
   );
@@ -719,15 +682,14 @@ function ParticiparContent() {
         </div>
         <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",flex:1,minHeight:0}}>
 
-          {/* Logo TAKKA + nombre plataforma */}
+          {/* Logo GR + nombre plataforma */}
           <div className="hero-topbar">
-            <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="3" width="32" height="9" rx="3" fill="rgba(255,255,255,.92)"/>
-              <polygon points="13,12 24,12 18,34 13,34" fill="rgba(255,255,255,.92)"/>
-              <polygon points="18,34 24,12 24,34" fill="rgba(255,255,255,.48)"/>
+            <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.5)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
             </svg>
             <div>
-              <div className="hero-topbar-name">TAKKA</div>
+              <div className="hero-topbar-name">GR Auction Software</div>
             </div>
           </div>
 
@@ -743,13 +705,12 @@ function ParticiparContent() {
 
 
           <div style={{marginTop:"2rem",paddingTop:"1.25rem",borderTop:"1px solid rgba(255,255,255,.15)",display:"flex",alignItems:"center",gap:".6rem"}}>
-            <svg width="20" height="20" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="3" width="32" height="9" rx="3" fill="rgba(255,255,255,.92)"/>
-              <polygon points="13,12 24,12 18,34 13,34" fill="rgba(255,255,255,.92)"/>
-              <polygon points="18,34 24,12 24,34" fill="rgba(255,255,255,.48)"/>
+            <svg width="20" height="20" viewBox="0 0 36 36" fill="none">
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="rgba(255,255,255,.9)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.4)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
             </svg>
             <span style={{fontFamily:"'Inter',sans-serif",fontSize:".7rem",color:"rgba(255,255,255,.6)",letterSpacing:".04em"}}>
-              Powered by <strong style={{color:"rgba(255,255,255,.9)"}}>TAKKA</strong> · takka.cl
+              Powered by <strong style={{color:"rgba(255,255,255,.9)"}}>GR Auction Software</strong> · gestionderemates.cl
             </span>
           </div>
         </div>
@@ -795,15 +756,14 @@ function ParticiparContent() {
           </div>
         ) : (
           <>
-            {/* Logo TAKKA — visible en todas las pantallas */}
+            {/* Logo GR Auction Software — visible en todas las pantallas */}
             <div className="form-topbar">
-              <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
-                <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
-                <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
+              <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
+                <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1a1a1a" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
               </svg>
               <div>
-                <div className="form-topbar-label">TAKKA</div>
+                <div className="form-topbar-label">GR Auction Software</div>
               </div>
             </div>
 
@@ -891,35 +851,6 @@ function ParticiparContent() {
                 </div>
 
                 <div className="sec-title fade-up">Datos para devolución de garantía</div>
-
-                {/* Dropdown cuentas guardadas — solo si el postor ya tiene cuentas */}
-                {cuentasGuardadas.length > 0 && (
-                  <div className="field-grid fade-up" style={{marginBottom:"1rem"}}>
-                    <div className="field-wrap field-full">
-                      <label className="field-label">¿A qué cuenta quieres recibir tu garantía?</label>
-                      <select className="field-select" value={cuentaSelIdx}
-                        onChange={e => {
-                          const v = e.target.value;
-                          setCuentaSelIdx(v);
-                          if (v === "") { setBanco(""); setTipoCta("CUENTA CORRIENTE"); setNumCta(""); }
-                          else {
-                            const c = cuentasGuardadas[Number(v)];
-                            setBanco(c.banco || ""); setTipoCta(c.tipoCuenta || "CUENTA CORRIENTE"); setNumCta(c.nCuenta || "");
-                          }
-                        }}>
-                        {cuentasGuardadas.map((c, i) => (
-                          <option key={c.id || i} value={String(i)}>
-                            {c.banco} · {c.tipoCuenta} · {c.nCuenta}{c.titular ? ` (${c.titular})` : ""}
-                          </option>
-                        ))}
-                        <option value="">+ Ingresar otra cuenta manualmente</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-
-                {/* Campos manuales — siempre visibles si no hay cuentas guardadas, o si elige "otra" */}
-                {(cuentasGuardadas.length === 0 || cuentaSelIdx === "") && (
                 <div className="field-grid fade-up fade-up-1">
                   <div className="field-wrap">
                     <label className="field-label">Banco *</label>
@@ -941,7 +872,6 @@ function ParticiparContent() {
                     <input className="field-input" style={{fontFamily:"var(--mono)"}} placeholder="123456789" value={numCta} onChange={e=>setNumCta(e.target.value)}/>
                   </div>
                 </div>
-                )}
 
                 <div className="sec-title fade-up">Selección de remate *</div>
                 <div className="remate-grid fade-up fade-up-1">
@@ -949,40 +879,22 @@ function ParticiparContent() {
                     <div style={{padding:"1.5rem",textAlign:"center",color:"var(--mu)",fontSize:".82rem",background:"var(--s1)",borderRadius:10,border:"1px solid var(--b1)"}}>
                       No hay remates activos en este momento.
                     </div>
-                  ) : remates.map(r => {
-                    const cerrada = isInscripcionCerrada(r);
-                    return (
-                      <div key={r.id}
-                        className={`remate-card${!cerrada && remateId===r.id?" sel":""}${cerrada?" disabled":""}`}
-                        onClick={cerrada ? undefined : ()=>setRemateId(r.id)}
-                        style={cerrada ? {opacity:.7,cursor:"not-allowed"} : undefined}
-                      >
-                        <div className="remate-card-radio"><div className="remate-card-dot"/></div>
-                        <div className="remate-card-info">
-                          <div className="remate-card-name">{r.nombre}</div>
-                          <div className="remate-card-meta">
-                            {new Date(r.fecha).toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
-                            {r.hora && ` · ${r.hora}`}
-                            {" · "}{r.modalidad}
-                          </div>
-                          {cerrada && (
-                            <div style={{fontSize:".71rem",color:"#b45309",marginTop:".3rem"}}>
-                              Inscripciones online cerradas — el remate comienza pronto
-                            </div>
-                          )}
+                  ) : remates.map(r => (
+                    <div key={r.id} className={`remate-card${remateId===r.id?" sel":""}`} onClick={()=>setRemateId(r.id)}>
+                      <div className="remate-card-radio"><div className="remate-card-dot"/></div>
+                      <div className="remate-card-info">
+                        <div className="remate-card-name">{r.nombre}</div>
+                        <div className="remate-card-meta">
+                          {new Date(r.fecha).toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+                          {r.hora && ` · ${r.hora}`}
+                          {" · "}{r.modalidad}
                         </div>
-                        {cerrada ? (
-                          <span className="remate-card-badge" style={{background:"rgba(245,158,11,.15)",color:"#b45309",border:"1px solid rgba(245,158,11,.35)"}}>
-                            ⏰ Inscripciones cerradas
-                          </span>
-                        ) : (
-                          <span className={`remate-card-badge ${r.estado==="en_vivo"||r.estado==="activo"?"rb-activo":"rb-publicado"}`}>
-                            {r.estado==="en_vivo"||r.estado==="activo"?"● En vivo":"Próximo"}
-                          </span>
-                        )}
                       </div>
-                    );
-                  })}
+                      <span className={`remate-card-badge ${r.estado==="en_vivo"||r.estado==="activo"?"rb-activo":"rb-publicado"}`}>
+                        {r.estado==="en_vivo"||r.estado==="activo"?"● En vivo":"Próximo"}
+                      </span>
+                    </div>
+                  ))}
                 </div>
 
                 {remateSeleccionado && (
