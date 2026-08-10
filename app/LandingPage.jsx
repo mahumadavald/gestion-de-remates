@@ -39,7 +39,7 @@ export default function LandingPage() {
       <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       <path d="M4 12 Q4 5 12 5 L20 5" stroke="#14B8A6" stroke-width="3" stroke-linecap="round" fill="none"/>
     </svg>
-    <span class="nav-logo-text">Pecker</span>
+    <span class="nav-logo-text">TAKKA</span>
   </a>
   <div class="nav-cta">
     <a href="#contact" class="btn-nav btn-ghost">Agendar demo</a>
@@ -78,11 +78,11 @@ export default function LandingPage() {
         <div class="dash-dot" style="background:#f85149"></div>
         <div class="dash-dot" style="background:#d29922"></div>
         <div class="dash-dot" style="background:#3fb950"></div>
-        <span class="dash-url">pecker.cl/sala</span>
+        <span class="dash-url">takka.cl/sala</span>
       </div>
       <div class="dash-body">
         <div class="dash-sidebar">
-          <div class="ds-logo">Pecker</div>
+          <div class="ds-logo">TAKKA</div>
           <div class="ds-item active">● Sala en vivo</div>
           <div class="ds-item">  Lotes</div>
           <div class="ds-item">  Postores</div>
@@ -301,10 +301,10 @@ export default function LandingPage() {
 
   <div class="pricing-grid">
 
-    <!-- ── Pecker Básico ── -->
+    <!-- ── TAKKA Básico ── -->
     <div class="plan-card reveal">
       <div class="plan-bird plan-bird--basic">
-        <!-- TODO: reemplazar por logo final de Pecker (pájaro) en color turquesa -->
+        <!-- TODO: reemplazar por logo final de TAKKA (pájaro) en color turquesa -->
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
           <ellipse cx="20" cy="30" rx="13" ry="10" fill="#06B6D4"/>
           <circle cx="33" cy="18" r="8" fill="#06B6D4"/>
@@ -315,7 +315,7 @@ export default function LandingPage() {
         </svg>
       </div>
       <div class="plan-tier" style="color:#06B6D4">BÁSICO</div>
-      <div class="plan-name">Pecker Básico</div>
+      <div class="plan-name">TAKKA Básico</div>
       <div class="plan-price">Consulta con nosotros</div>
       <div class="plan-price-sub">Adaptado a tu volumen</div>
       <div class="plan-divider"></div>
@@ -329,11 +329,11 @@ export default function LandingPage() {
       <a href="#contact" class="btn-plan-outline">Consultar precio →</a>
     </div>
 
-    <!-- ── Pecker Gold ── -->
+    <!-- ── TAKKA Gold ── -->
     <div class="plan-card plan-card--gold featured reveal">
       <div class="plan-popular plan-popular--gold">Más popular</div>
       <div class="plan-bird plan-bird--gold">
-        <!-- TODO: reemplazar por logo final de Pecker (pájaro) en color dorado -->
+        <!-- TODO: reemplazar por logo final de TAKKA (pájaro) en color dorado -->
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
           <ellipse cx="20" cy="30" rx="13" ry="10" fill="#F59E0B"/>
           <circle cx="33" cy="18" r="8" fill="#F59E0B"/>
@@ -344,7 +344,7 @@ export default function LandingPage() {
         </svg>
       </div>
       <div class="plan-tier" style="color:#F59E0B">GOLD</div>
-      <div class="plan-name">Pecker Gold</div>
+      <div class="plan-name">TAKKA Gold</div>
       <div class="plan-price">Consulta con nosotros</div>
       <div class="plan-price-sub">Adaptado a tu volumen</div>
       <div class="plan-divider"></div>
@@ -359,10 +359,10 @@ export default function LandingPage() {
       <a href="#contact" class="btn-plan-gold">Consultar precio →</a>
     </div>
 
-    <!-- ── Pecker Platinum ── -->
+    <!-- ── TAKKA Platinum ── -->
     <div class="plan-card plan-card--platinum reveal">
       <div class="plan-bird plan-bird--platinum">
-        <!-- TODO: reemplazar por logo final de Pecker (pájaro) en color platinum -->
+        <!-- TODO: reemplazar por logo final de TAKKA (pájaro) en color platinum -->
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
           <ellipse cx="20" cy="30" rx="13" ry="10" fill="#8B5CF6"/>
           <circle cx="33" cy="18" r="8" fill="#8B5CF6"/>
@@ -373,7 +373,7 @@ export default function LandingPage() {
         </svg>
       </div>
       <div class="plan-tier" style="color:#8B5CF6">PLATINUM</div>
-      <div class="plan-name">Pecker Platinum</div>
+      <div class="plan-name">TAKKA Platinum</div>
       <div class="plan-price">A convenir</div>
       <div class="plan-price-sub">Cotización personalizada</div>
       <div class="plan-divider"></div>
@@ -402,11 +402,11 @@ export default function LandingPage() {
             <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
             <path d="M4 12 Q4 5 12 5 L20 5" stroke="#14B8A6" stroke-width="2.8" stroke-linecap="round" fill="none"/>
           </svg>
-          <span class="footer-brand-name">Pecker</span>
+          <span class="footer-brand-name">TAKKA</span>
         </div>
         <p class="footer-desc">Software profesional para gestionar, operar y escalar remates en cualquier lugar de Chile.</p>
         <div class="footer-socials">
-          <a href="mailto:contacto@pecker.cl" class="footer-social-btn" title="Email">
+          <a href="mailto:contacto@takka.cl" class="footer-social-btn" title="Email">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
           </a>
           <a href="https://wa.me/56912345678" target="_blank" class="footer-social-btn" title="WhatsApp">
@@ -424,7 +424,7 @@ export default function LandingPage() {
         </div>
         <div class="footer-col">
           <div class="footer-col-title">INFORMACIÓN</div>
-          <a href="mailto:contacto@pecker.cl" class="footer-col-link">Contacto</a>
+          <a href="mailto:contacto@takka.cl" class="footer-col-link">Contacto</a>
           <a href="/participar" class="footer-col-link">Participar</a>
           <a href="#" class="footer-col-link">Privacidad</a>
           <a href="#" class="footer-col-link">Términos de uso</a>
@@ -432,7 +432,7 @@ export default function LandingPage() {
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2025 Pecker — Auction Software · pecker.cl</span>
+      <span>© 2025 TAKKA — Auction Software · takka.cl</span>
       <span>Hecho en Chile 🇨🇱</span>
     </div>
   </div>
@@ -979,7 +979,7 @@ function DemoForm() {
       });
       setDone(true);
     } catch {
-      setErr("Hubo un problema al enviar. Intenta de nuevo o escríbenos a contacto@pecker.cl");
+      setErr("Hubo un problema al enviar. Intenta de nuevo o escríbenos a contacto@takka.cl");
     } finally {
       setLoading(false);
     }
@@ -1006,7 +1006,7 @@ function DemoForm() {
         <h2 style={{fontFamily:"'Poppins',sans-serif", fontSize:"clamp(2rem,4vw,3rem)", fontWeight:800, color:"#1a1a1a", lineHeight:1.1, letterSpacing:"-.025em", marginBottom:".75rem"}}>
           Agenda tu demo<br/><em style={{fontStyle:"normal", background:"linear-gradient(135deg,#06B6D4,#14B8A6)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text"}}>sin compromiso</em>
         </h2>
-        <p style={{fontSize:".95rem", color:"#6b7280", maxWidth:460, margin:"0 auto", lineHeight:1.7}}>Cuéntanos sobre tu casa de remates y te mostramos cómo Pecker se adapta a tu operación.</p>
+        <p style={{fontSize:".95rem", color:"#6b7280", maxWidth:460, margin:"0 auto", lineHeight:1.7}}>Cuéntanos sobre tu casa de remates y te mostramos cómo TAKKA se adapta a tu operación.</p>
       </div>
 
       {/* Card del formulario */}

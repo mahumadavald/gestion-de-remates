@@ -196,11 +196,12 @@ export default function PostorPage() {
       {/* Topbar */}
       <div className="topbar">
         <div className="topbar-brand">
-          <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
-            <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1a1a1a" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+          <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="4" width="32" height="9" rx="3" fill="#0891b2"/>
+            <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#0891b2"/>
+            <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
           </svg>
-          <span style={{fontWeight:700,fontSize:".95rem",color:"var(--wh)"}}>Pecker</span>
+          <span style={{fontWeight:800,fontSize:".95rem",color:"var(--wh)",letterSpacing:".08em"}}>TAKKA</span>
         </div>
         <div className="topbar-user">
           <span className="topbar-name">{postor?.nombre || authUser?.email}</span>
@@ -366,10 +367,12 @@ export default function PostorPage() {
       )}
 
         <div style={{marginTop:"3rem",paddingTop:"1.5rem",borderTop:"1px solid var(--b1)",display:"flex",alignItems:"center",gap:".6rem",justifyContent:"center"}}>
-          <svg width="16" height="16" viewBox="0 0 36 36" fill="none">
-            <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#9ca3af" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          <svg width="16" height="16" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="4" width="32" height="9" rx="3" fill="#9ca3af"/>
+            <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#9ca3af"/>
+            <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.6)"/>
           </svg>
-          <span style={{fontSize:".72rem",color:"var(--mu2)"}}>Pecker · <a href="https://pecker.cl" style={{color:"var(--mu2)",textDecoration:"none"}}>pecker.cl</a></span>
+          <span style={{fontSize:".72rem",color:"var(--mu2)"}}>TAKKA · <a href="https://takka.cl" style={{color:"var(--mu2)",textDecoration:"none"}}>takka.cl</a></span>
         </div>
       </div>
     </div>

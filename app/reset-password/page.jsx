@@ -74,11 +74,12 @@ export default function ResetPasswordPage() {
       <div className="wrap">
         <div className="card">
           <div className="logo">
-            <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
-              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1a1a1a" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+            <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="4" width="32" height="9" rx="3" fill="#0891b2"/>
+              <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#0891b2"/>
+              <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
             </svg>
-            <span style={{fontWeight:700,fontSize:".88rem",color:"#374151",letterSpacing:"-.01em"}}>Pecker</span>
+            <span style={{fontWeight:700,fontSize:".88rem",color:"#374151",letterSpacing:"-.01em"}}>TAKKA</span>
           </div>
 
           {done ? (

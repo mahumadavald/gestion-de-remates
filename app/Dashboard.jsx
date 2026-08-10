@@ -10,16 +10,16 @@ const supabase = SUPA_URL ? createClient(SUPA_URL, SUPA_KEY) : null;
 
 
 // ── BRAND ─────────────────────────────────────────────────────────
-const PeckerLogo = ({ collapsed = false }) => (
+const TakkaLogo = ({ collapsed = false }) => (
   <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <path d="M18 3C9.716 3 3 9.716 3 18s6.716 15 15 15 15-6.716 15-15S26.284 3 18 3z" fill="none"/>
-      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-      <path d="M4 12 Q4 5 12 5 L20 5" stroke="white" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="4" width="32" height="9" rx="3" fill="#0891b2"/>
+      <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#0891b2"/>
+      <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
     </svg>
     {!collapsed && (
-      <div style={{ fontFamily:"'Poppins',sans-serif", fontWeight:700, fontSize:".88rem", color:"#fff", letterSpacing:".02em" }}>
-        Auction Software
+      <div style={{ fontFamily:"'Poppins',sans-serif", fontWeight:800, fontSize:".92rem", color:"#fff", letterSpacing:".1em" }}>
+        TAKKA
       </div>
     )}
   </div>
@@ -235,7 +235,7 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
 </div>
 
 <div class="footer">
-  Documento generado por Pecker · ${new Date().toLocaleDateString("es-CL")} · pecker.cl
+  Documento generado por TAKKA · ${new Date().toLocaleDateString("es-CL")} · takka.cl
 </div>
 
 <script>window.onload=()=>{window.print();}<\/script>
@@ -974,7 +974,7 @@ const Icon = ({ name }) => {
 
 // Mock credentials — replace with Supabase Auth in production
 const USERS = [
-  { id:"u1", email:"admin@pecker.cl",           password:"admin2026",      role:"admin",      name:"Max Ahumada",        casa:null,            casaNombre:"Pecker" },
+  { id:"u1", email:"admin@takka.cl",           password:"admin2026",      role:"admin",      name:"Max Ahumada",        casa:null,            casaNombre:"TAKKA" },
   { id:"u2", email:"martillero@rematesahumada.cl", password:"remates2026", role:"martillero", name:"Remates Ahumada",    casa:"remates-ahumada", casaNombre:"Remates Ahumada" },
   { id:"u3", email:"demo@casaderemates.cl",     password:"demo2026",       role:"martillero", name:"Casa Demo",          casa:"casa-demo",       casaNombre:"Casa Demo S.A." },
 ];
@@ -1230,7 +1230,7 @@ function AuthScreen({ onLogin }) {
     if (!forgotEmail.trim()) { setError("Ingresa tu correo."); return; }
     setLoading(true); setError("");
     await supabase.auth.resetPasswordForEmail(forgotEmail.trim(), {
-      redirectTo: "https://pecker.cl/reset-password",
+      redirectTo: "https://takka.cl/reset-password",
     });
     setForgotSent(true);
     setLoading(false);
@@ -1244,7 +1244,7 @@ function AuthScreen({ onLogin }) {
         const { data, error: authErr } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (authErr) { setError("Credenciales incorrectas."); setLoading(false); return; }
         // Buscar perfil — con fallback si no existe en tabla usuarios
-        let sessionData = { id:data.user.id, email:data.user.email, name:"Admin", role:"admin", roles:["admin"], casa:null, casaNombre:"Pecker", activo:true };
+        let sessionData = { id:data.user.id, email:data.user.email, name:"Admin", role:"admin", roles:["admin"], casa:null, casaNombre:"TAKKA", activo:true };
         try {
           const { data: perfil } = await supabase
             .from("usuarios")
@@ -1254,17 +1254,17 @@ function AuthScreen({ onLogin }) {
           if (perfil) {
             const r = Array.isArray(perfil.roles) && perfil.roles.length > 0 ? perfil.roles[0] : "admin";
             if (!perfil.activo) { setError("Usuario inactivo. Contacta al administrador."); await supabase.auth.signOut(); setLoading(false); return; }
-            // ── Verificar licencia (solo para no-admin Pecker) ──
+            // ── Verificar licencia (solo para no-admin TAKKA) ──
             if (perfil.casas && r !== "admin") {
               const lic = perfil.casas.licencia_estado;
               const vence = perfil.casas.licencia_vence ? new Date(perfil.casas.licencia_vence) : null;
               const vencida = vence && vence < new Date();
               if (lic === "bloqueado") {
-                setError("Acceso bloqueado. Contacta a Pecker: contacto@pecker.cl");
+                setError("Acceso bloqueado. Contacta a TAKKA: contacto@takka.cl");
                 await supabase.auth.signOut(); setLoading(false); return;
               }
               if (lic === "suspendido" || vencida) {
-                setError("Tu licencia está suspendida o venció. Contacta a Pecker para renovar.");
+                setError("Tu licencia está suspendida o venció. Contacta a TAKKA para renovar.");
                 await supabase.auth.signOut(); setLoading(false); return;
               }
             }
@@ -1272,7 +1272,7 @@ function AuthScreen({ onLogin }) {
               id: data.user.id, email: data.user.email, name: perfil.nombre, role: r,
               roles: perfil.roles||[r], casa: perfil.casas?.slug||null,
               casaId: perfil.casas?.id||null,
-              casaNombre: perfil.casas?.nombre||"Pecker",
+              casaNombre: perfil.casas?.nombre||"TAKKA",
               licencia: perfil.casas?.licencia_estado||"activo",
               licenciaPlan: perfil.casas?.licencia_plan||"trial",
               licenciaVence: perfil.casas?.licencia_vence||null,
@@ -1381,7 +1381,7 @@ function AuthScreen({ onLogin }) {
             <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
             <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.6)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
           </svg>
-          <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:"1.2rem",color:"#fff",letterSpacing:".01em"}}>Pecker</div>
+          <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:"1.2rem",color:"#fff",letterSpacing:".01em"}}>TAKKA</div>
         </div>
 
         <div className="auth-brand-title">La plataforma<br/>de remates<br/>en Chile.</div>
@@ -1412,7 +1412,7 @@ function AuthScreen({ onLogin }) {
               <path d="M4 12 Q4 5 12 5 L20 5" stroke="#0e7490" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
             </svg>
             <div>
-              <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:"1.1rem",color:"#06B6D4",letterSpacing:".01em"}}>Pecker</div>
+              <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:"1.1rem",color:"#06B6D4",letterSpacing:".01em"}}>TAKKA</div>
               <div style={{fontSize:".7rem",color:"#9ca3af",letterSpacing:".04em",textTransform:"uppercase",marginTop:1}}>Auction Software</div>
             </div>
           </div>
@@ -1632,7 +1632,7 @@ function BuyerView({ user, onLogout }) {
       {/* Header */}
       <div className="bv-header">
         <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
-          <PeckerLogo/>
+          <TakkaLogo/>
           <div style={{width:1,height:24,background:"rgba(255,255,255,.1)"}}/>
           <div className="bv-casa">{user.casaNombre}</div>
           <div className="bv-paleta">Paleta {user.token||user.numero||"—"}</div>
@@ -1883,7 +1883,7 @@ function SpotterView({ user, onLogout }) {
 
       <div className="sp-header">
         <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
-          <PeckerLogo/>
+          <TakkaLogo/>
           <span style={{fontSize:".78rem",fontWeight:700,color:"#7a9ab8"}}>Digitador de sala</span>
         </div>
         <button style={{background:"transparent",border:"1px solid rgba(255,255,255,.1)",color:"#4a6a8a",fontSize:".72rem",padding:".3rem .7rem",borderRadius:5,cursor:"pointer"}} onClick={onLogout}>Salir</button>
@@ -1997,7 +1997,7 @@ export default function Root() {
         .select("*, casas(slug, nombre)")
         .eq("id", uid)
         .single();
-      if (!data) return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"Pecker", activo:true };
+      if (!data) return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"TAKKA", activo:true };
       const role = Array.isArray(data.roles) && data.roles.length > 0 ? data.roles[0] : "martillero";
       return {
         id:         uid,
@@ -2005,11 +2005,11 @@ export default function Root() {
         role:       role,
         roles:      data.roles || [],
         casa:       data.casas?.slug   || null,
-        casaNombre: data.casas?.nombre || "Pecker",
+        casaNombre: data.casas?.nombre || "TAKKA",
         activo:     data.activo,
       };
     } catch(e) {
-      return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"Pecker", activo:true };
+      return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"TAKKA", activo:true };
     }
   };
 
@@ -2372,20 +2372,20 @@ function Dashboard({ session, onLogout }) {
 
   // ── Vendedores: persistencia en localStorage ──────────────────────
   useEffect(() => {
-    try { const s = localStorage.getItem("pecker_vendedores"); if(s) setDbVendedores(JSON.parse(s)); } catch {}
+    try { const s = localStorage.getItem("takka_vendedores"); if(s) setDbVendedores(JSON.parse(s)); } catch {}
   }, []);
   useEffect(() => {
-    try { localStorage.setItem("pecker_vendedores", JSON.stringify(dbVendedores)); } catch {}
+    try { localStorage.setItem("takka_vendedores", JSON.stringify(dbVendedores)); } catch {}
   }, [dbVendedores]);
 
   // ── Remate activo: persistencia y sincronización global ───────────
   useEffect(() => {
-    try { const s = localStorage.getItem("pecker_remate_activo"); if(s) setRemateActivo(JSON.parse(s)); } catch {}
+    try { const s = localStorage.getItem("takka_remate_activo"); if(s) setRemateActivo(JSON.parse(s)); } catch {}
   }, []);
   useEffect(() => {
     try {
-      if(remateActivo) localStorage.setItem("pecker_remate_activo", JSON.stringify(remateActivo));
-      else localStorage.removeItem("pecker_remate_activo");
+      if(remateActivo) localStorage.setItem("takka_remate_activo", JSON.stringify(remateActivo));
+      else localStorage.removeItem("takka_remate_activo");
     } catch {}
   }, [remateActivo]);
   // Cuando cambia el remate activo, sincroniza todos los filtros derivados
@@ -2918,7 +2918,7 @@ function exportCSV(){
     doc.rect(0, 0, W, 3.5, "F");
     y = 10;
 
-    // Header: logo casa (izquierda) | título centrado | logo Pecker (derecha)
+    // Header: logo casa (izquierda) | título centrado | logo TAKKA (derecha)
 
     // Logo casa (izquierda)
     if (logoUrl) {
@@ -2934,7 +2934,7 @@ function exportCSV(){
       } catch {}
     }
 
-    // Logo Pecker (derecha, pequeño) — TODO: reemplazar por logo final de Pecker
+    // Logo TAKKA (derecha, pequeño) — TODO: reemplazar por logo final de TAKKA
     try {
       const grCanvas = document.createElement("canvas");
       grCanvas.width = 72; grCanvas.height = 72;
@@ -2951,7 +2951,7 @@ function exportCSV(){
       ctx2.lineTo(40,10); ctx2.stroke();
       doc.addImage(grCanvas.toDataURL("image/png"), "PNG", W - 14 - 16, y + 1, 16, 16, undefined, "FAST");
       doc.setFont("helvetica","normal"); doc.setFontSize(5.5); doc.setTextColor(...GRAY);
-      doc.text("Pecker", W - 14 - 8, y + 20, { align:"center" });
+      doc.text("TAKKA", W - 14 - 8, y + 20, { align:"center" });
     } catch {}
 
     // Título centrado
@@ -3113,7 +3113,7 @@ function exportCSV(){
     doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
     doc.line(14, fy - 3, W - 14, fy - 3);
     doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
-    doc.text(`${casaNombre} · Powered by Pecker · pecker.cl`, 14, fy + 1);
+    doc.text(`${casaNombre} · Powered by TAKKA · takka.cl`, 14, fy + 1);
     doc.text(`Remate ${fechaRemate} · Comprador N° ${num}`, W - 14, fy + 1, { align:"right" });
 
     doc.save(`liquidacion-comprador-${num}-${fechaRemate.replace(/\//g,"-")}.pdf`);
@@ -3829,7 +3829,7 @@ function exportCSV(){
 
         {/* Logo + toggle */}
         <div className="sb-logo">
-          {!sidebarCollapsed && <PeckerLogo/>}
+          {!sidebarCollapsed && <TakkaLogo/>}
           {sidebarCollapsed && (
             <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
               <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
@@ -3848,7 +3848,7 @@ function exportCSV(){
           <div className="sb-ava">{session?.name?.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()||"??"}</div>
           <div className="sb-user-info">
             <div className="sb-uname">{session?.name||"Usuario"}</div>
-            <div className="sb-urole">{session?.casaNombre||"Pecker"} · <span style={{color:"#1d4ed8",fontWeight:600}}>{session?.role}</span></div>
+            <div className="sb-urole">{session?.casaNombre||"TAKKA"} · <span style={{color:"#1d4ed8",fontWeight:600}}>{session?.role}</span></div>
           </div>
         </div>
 
@@ -4652,7 +4652,7 @@ function exportCSV(){
             doc.setFillColor(...TEAL);
             doc.rect(0, H - 5, W, 5, "F");
             doc.setFont("helvetica", "normal"); doc.setFontSize(6); doc.setTextColor(...GRAY);
-            doc.text("Powered by Pecker · pecker.cl", W / 2, H - 7, { align: "center" });
+            doc.text("Powered by TAKKA · takka.cl", W / 2, H - 7, { align: "center" });
 
             doc.save(`boleta-postor-${postor.nComprador || postor.numero || postor.supabaseId || postor.id}.pdf`);
           };
@@ -4810,10 +4810,10 @@ function exportCSV(){
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M4 7h6M7 4l3 3-3 3"/></svg>
               <span style={{fontSize:".75rem",color:"var(--mu2)"}}>Link de inscripción pública:</span>
               <code style={{fontSize:".73rem",color:"var(--ac)",fontFamily:"Inter,sans-serif",flex:1}}>
-                pecker.cl/participar?id={session?.casaId||session?.casa||"—"}
+                takka.cl/participar?id={session?.casaId||session?.casa||"—"}
               </code>
               <button className="btn-sec" style={{fontSize:".68rem"}} onClick={()=>{
-                navigator.clipboard.writeText(`https://pecker.cl/participar?id=${session?.casaId||session?.casa||""}`);
+                navigator.clipboard.writeText(`https://takka.cl/participar?id=${session?.casaId||session?.casa||""}`);
                 notify("Link copiado al portapapeles.","sold");
               }}>Copiar link</button>
             </div>
@@ -4859,7 +4859,7 @@ function exportCSV(){
                     // Header
                     doc.setFillColor(7,15,28); doc.rect(0,0,W,32,"F");
                     doc.setTextColor(56,178,246); doc.setFontSize(9); doc.setFont("helvetica","bold");
-                    doc.text("PECKER",14,10);
+                    doc.text("TAKKA",14,10);
                     doc.setTextColor(255,255,255); doc.setFontSize(15);
                     doc.text("LIQUIDACIÓN AL MARTILLERO",14,20);
                     doc.setFontSize(8); doc.setFont("helvetica","normal"); doc.setTextColor(90,127,168);
@@ -4904,7 +4904,7 @@ function exportCSV(){
                     y+=33;
                     doc.setFillColor(56,178,246); doc.rect(10,y,W-20,10,"F");
                     doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont("helvetica","bold");
-                    doc.text("TOTAL A PAGAR A PECKER:",14,y+7);
+                    doc.text("TOTAL A PAGAR A TAKKA:",14,y+7);
                     doc.text(fmtCL(neto),W-14,y+7,{align:"right"});
 
                     doc.save(`balance-martillero-${remateNom.replace(/\s/g,"-")}.pdf`);
@@ -5125,7 +5125,7 @@ function exportCSV(){
                               // Header
                               doc.setFillColor(7,15,28); doc.rect(0,0,W,28,"F");
                               doc.setTextColor(56,178,246); doc.setFontSize(8); doc.setFont("helvetica","bold");
-                              doc.text("PECKER — AUCTION SOFTWARE",14,9);
+                              doc.text("TAKKA — AUCTION SOFTWARE",14,9);
                               doc.setTextColor(255,255,255); doc.setFontSize(13);
                               doc.text("BALANCE POR VENDEDOR",14,18);
                               doc.setFontSize(7.5); doc.setFont("helvetica","normal"); doc.setTextColor(90,127,168);
@@ -5537,7 +5537,7 @@ function exportCSV(){
             doc.setFontSize(11); doc.setTextColor(...NAVY);
             doc.text("VENDEDOR", W - 14, y + 16, {align:"right"});
             doc.setFont("helvetica","normal"); doc.setFontSize(6.5); doc.setTextColor(...GRAY);
-            doc.text("Powered by Pecker", W - 14, y + 32, {align:"right"});
+            doc.text("Powered by TAKKA", W - 14, y + 32, {align:"right"});
 
             y = 42;
             doc.setDrawColor(...TEAL); doc.setLineWidth(0.5);
@@ -5660,7 +5660,7 @@ function exportCSV(){
             doc.setDrawColor(...BORDER); doc.setLineWidth(0.2);
             doc.line(14, fy - 3, W - 14, fy - 3);
             doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
-            doc.text(`${casaNombre} · Powered by Pecker · pecker.cl`, 14, fy + 1);
+            doc.text(`${casaNombre} · Powered by TAKKA · takka.cl`, 14, fy + 1);
             doc.text(new Date().toLocaleDateString("es-CL"), W - 14, fy + 1, {align:"right"});
             doc.save(`liquidacion-vendedor-${(vendedorSel||"vendedor").replace(/\s+/g,"-").toLowerCase()}.pdf`);
           };
@@ -5945,7 +5945,7 @@ function exportCSV(){
                     // Header oscuro
                     doc.setFillColor(7,15,28); doc.rect(0,0,W,32,"F");
                     doc.setTextColor(56,178,246); doc.setFontSize(9); doc.setFont("helvetica","bold");
-                    doc.text("PECKER — AUCTION SOFTWARE",14,10);
+                    doc.text("TAKKA — AUCTION SOFTWARE",14,10);
                     doc.setTextColor(255,255,255); doc.setFontSize(15);
                     doc.text("ESTADÍSTICAS DE REMATE",14,20);
                     doc.setFontSize(8); doc.setFont("helvetica","normal"); doc.setTextColor(90,127,168);
@@ -6255,8 +6255,8 @@ function exportCSV(){
         )}
         {/* ══ USUARIOS ══ */}
         {page==="usuarios" && session?.role==="admin" && (()=>{
-          // Casas reales desde Supabase — incluye "Pecker" para admin global
-          const CASAS_LISTA_REAL = [{ id: null, nombre: "Pecker (Admin global)" }, ...dbLicencias];
+          // Casas reales desde Supabase — incluye "TAKKA" para admin global
+          const CASAS_LISTA_REAL = [{ id: null, nombre: "TAKKA (Admin global)" }, ...dbLicencias];
           const toggleRol = (rol) => {
             setUsuarioForm(f=>({...f, roles: f.roles.includes(rol) ? f.roles.filter(r=>r!==rol) : [...f.roles, rol]}));
           };
@@ -6695,7 +6695,7 @@ function exportCSV(){
 
         {/* ══ CASAS DE REMATES ══ */}
         {page==="casas" && session?.role==="admin" && (()=>{
-          const BASE_URL = "https://pecker.cl";
+          const BASE_URL = "https://takka.cl";
 
           const toSlug = (nombre) => nombre.toLowerCase()
             .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
@@ -6868,7 +6868,7 @@ function exportCSV(){
                         {casaForm.nombre && (
                           <div style={{marginTop:".4rem",fontSize:".7rem",color:"var(--mu2)",fontFamily:"Inter,sans-serif"}}>
                             Slug: <span style={{color:"var(--ac)"}}>{toSlug(casaForm.nombre)}</span>
-                            <span style={{color:"var(--mu)",marginLeft:".5rem"}}>→ pecker.cl/participar/{toSlug(casaForm.nombre)}</span>
+                            <span style={{color:"var(--mu)",marginLeft:".5rem"}}>→ takka.cl/participar/{toSlug(casaForm.nombre)}</span>
                           </div>
                         )}
                       </div>

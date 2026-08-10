@@ -67,10 +67,14 @@ function tr(label, value) {
 const FOOTER = `
   <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 36px;text-align:center;">
     <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:6px;">
-      <div style="display:inline-block;background:rgba(6,182,212,.15);border:1.5px solid rgba(6,182,212,.35);border-radius:8px;width:30px;height:30px;line-height:30px;text-align:center;font-size:13px;font-weight:800;color:#0891b2;font-family:Arial,sans-serif;">P</div>
-      <span style="font-size:13px;font-weight:700;color:#374151;letter-spacing:-.01em;">Pecker</span>
+      <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;">
+        <rect x="2" y="4" width="32" height="9" rx="3" fill="#0891b2"/>
+        <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#0891b2"/>
+        <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
+      </svg>
+      <span style="font-size:13px;font-weight:800;color:#374151;letter-spacing:.08em;">TAKKA</span>
     </div>
-    <div style="font-size:11px;color:#9ca3af;margin-top:2px;"><a href="https://pecker.cl" style="color:#9ca3af;text-decoration:none;">pecker.cl</a></div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:2px;"><a href="https://takka.cl" style="color:#9ca3af;text-decoration:none;">takka.cl</a></div>
   </div>
 `;
 
@@ -402,7 +406,7 @@ export async function POST(req) {
       const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
       <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
         <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
-          ${buildHeader({ casa:"Pecker", logo_url:null, titulo:"Nueva solicitud de demo", subtitulo:"Alguien quiere conocer Pecker" })}
+          ${buildHeader({ casa:"TAKKA", logo_url:null, titulo:"Nueva solicitud de demo", subtitulo:"Alguien quiere conocer Pecker" })}
           <div style="background:#ffffff;padding:28px 36px;">
             <p style="font-size:14px;color:#374151;margin:0 0 20px;line-height:1.6;">Se recibió una nueva solicitud de demo a través de la landing page.</p>
             <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;">
@@ -421,7 +425,7 @@ export async function POST(req) {
       </body></html>`;
 
       const r = await sendMail({
-        to: "contacto@pecker.cl",
+        to: "contacto@takka.cl",
         subject: `Nueva solicitud de demo — ${nombre} (${casaDemo})`,
         html,
       });

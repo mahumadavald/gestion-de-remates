@@ -225,12 +225,12 @@ export default function CatalogoPage({ params }) {
         <div style={styles.footer}>
           Powered by{" "}
           <a
-            href="https://pecker.cl"
+            href="https://takka.cl"
             style={{ color: "#0e7490", fontWeight: 700, textDecoration: "none" }}
           >
             Pecker
           </a>
-          {" · pecker.cl"}
+          {" · takka.cl"}
         </div>
       </div>
     </div>

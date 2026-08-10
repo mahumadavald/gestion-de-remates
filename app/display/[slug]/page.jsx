@@ -466,16 +466,14 @@ export default function DisplayPage({ params }) {
       {/* ── Header turquesa ── */}
       <div className="disp-header">
         <div style={{display:"flex",alignItems:"center",gap:"1.1rem"}}>
-          {/* Logo Pecker blanco — TODO: reemplazar por logo final de Pecker */}
           <div style={{display:"flex",alignItems:"center",gap:".55rem",flexShrink:0}}>
-            <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
-              <rect width="36" height="36" rx="8" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.3)" strokeWidth="1"/>
-              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <path d="M4 12 Q4 5 12 5 L20 5" stroke="rgba(255,255,255,.6)" strokeWidth="3.2" strokeLinecap="round" fill="none"/>
+            <svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="4" width="32" height="9" rx="3" fill="rgba(255,255,255,0.9)"/>
+              <rect x="13.5" y="13" width="9" height="19" rx="3" fill="rgba(255,255,255,0.9)"/>
+              <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.3)"/>
             </svg>
-            <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontSize:".82rem",color:"#fff",lineHeight:1.2}}>
-              Auction Software
-              <div style={{fontSize:".58rem",color:"rgba(255,255,255,.65)",fontWeight:400,letterSpacing:".05em",textTransform:"uppercase",marginTop:1}}>Pecker</div>
+            <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:".88rem",color:"#fff",letterSpacing:".08em"}}>
+              TAKKA
             </div>
           </div>
 
@@ -622,7 +620,7 @@ export default function DisplayPage({ params }) {
       {/* ── Footer ── */}
       <div className="disp-footer">
         <div className="disp-footer-txt">Participa desde tu celular</div>
-        <div className="disp-footer-url">pecker.cl/participar/{slug}</div>
+        <div className="disp-footer-url">takka.cl/participar/{slug}</div>
         <div className="disp-footer-txt">{new Date().toLocaleString("es-CL",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"short"})}</div>
       </div>
     </div>

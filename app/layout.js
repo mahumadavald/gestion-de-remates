@@ -1,10 +1,10 @@
 export const metadata = {
-  title: 'Pecker — Auction Software',
+  title: 'TAKKA — Auction Software',
   description: 'Plataforma digital para gestionar, operar y escalar remates en cualquier lugar.',
   openGraph: {
-    title: 'Pecker — Auction Software',
+    title: 'TAKKA — Auction Software',
     description: 'Plataforma digital para gestionar, operar y escalar remates en cualquier lugar.',
-    siteName: 'Pecker',
+    siteName: 'TAKKA',
   },
 }
 
