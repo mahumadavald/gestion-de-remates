@@ -12,6 +12,9 @@ node_modules/
 .next/
 out/
 
+# Claude Code internal files
+.claude/
+
 # Misc
 .DS_Store
 *.log
