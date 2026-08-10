@@ -13,10 +13,9 @@ const supabase = SUPA_URL ? createClient(SUPA_URL, SUPA_KEY) : null;
 const TakkaLogo = ({ collapsed = false }) => (
   <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="34" height="8" rx="2" fill="rgba(255,255,255,.92)"/>
-      <rect x="1" y="9" width="11" height="26" rx="1" fill="rgba(255,255,255,.92)"/>
-      <polygon points="12,9 35,1 35,21 18,27 12,27" fill="rgba(255,255,255,.92)"/>
-      <polygon points="12,31 18,31 35,25 35,35 12,35" fill="rgba(255,255,255,.92)"/>
+      <rect x="2" y="3" width="32" height="9" rx="3" fill="rgba(255,255,255,.92)"/>
+      <polygon points="13,12 24,12 18,34 13,34" fill="rgba(255,255,255,.92)"/>
+      <polygon points="18,34 24,12 24,34" fill="rgba(255,255,255,.48)"/>
     </svg>
     {!collapsed && (
       <div style={{ fontFamily:"'Poppins',sans-serif", fontWeight:800, fontSize:".92rem", color:"#fff", letterSpacing:".1em" }}>
@@ -145,12 +144,11 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
 <div class="header">
   <div class="logo-area">
     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="34" height="8" rx="2" fill="#0891b2"/>
-      <rect x="1" y="9" width="11" height="26" rx="1" fill="#0891b2"/>
-      <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#0891b2"/>
-      <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#0891b2"/>
+      <rect width="36" height="36" rx="8" fill="#EBF4FF" stroke="#93C5FD" stroke-width="1"/>
+      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1e3a5f" stroke-width="3.5" stroke-linecap="round" fill="none"/>
     </svg>
-    <span class="logo-text">TAKKA</span>
+    <span class="logo-text">Auction Software</span>
   </div>
   <div class="doc-title">
     <h1>Liquidación</h1>
@@ -1338,10 +1336,9 @@ function AuthScreen({ onLogin }) {
       <div className="auth-left">
         <div style={{display:"flex",alignItems:"center",gap:"14px",marginBottom:"2.2rem"}}>
           <svg width="52" height="52" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="34" height="8" rx="2" fill="rgba(255,255,255,.92)"/>
-            <rect x="1" y="9" width="11" height="26" rx="1" fill="rgba(255,255,255,.92)"/>
-            <polygon points="12,9 35,1 35,21 18,27 12,27" fill="rgba(255,255,255,.92)"/>
-            <polygon points="12,31 18,31 35,25 35,35 12,35" fill="rgba(255,255,255,.92)"/>
+            <rect x="2" y="3" width="32" height="9" rx="3" fill="rgba(255,255,255,.92)"/>
+            <polygon points="13,12 24,12 18,34 13,34" fill="rgba(255,255,255,.92)"/>
+            <polygon points="18,34 24,12 24,34" fill="rgba(255,255,255,.48)"/>
           </svg>
           <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:"1.2rem",color:"#fff",letterSpacing:".08em"}}>TAKKA</div>
         </div>
@@ -1352,10 +1349,9 @@ function AuthScreen({ onLogin }) {
         <div className="auth-card">
           <div className="auth-logo-mob">
             <svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="34" height="8" rx="2" fill="#0891b2"/>
-              <rect x="1" y="9" width="11" height="26" rx="1" fill="#0891b2"/>
-              <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#0891b2"/>
-              <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#0891b2"/>
+              <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
+              <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
+              <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
             </svg>
           </div>
           <h2 className="auth-title">Nueva contraseña</h2>
@@ -1386,10 +1382,9 @@ function AuthScreen({ onLogin }) {
         {/* Logo blanco */}
         <div style={{display:"flex",alignItems:"center",gap:"14px",marginBottom:"2.2rem",position:"relative"}}>
           <svg width="52" height="52" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="34" height="8" rx="2" fill="rgba(255,255,255,.92)"/>
-            <rect x="1" y="9" width="11" height="26" rx="1" fill="rgba(255,255,255,.92)"/>
-            <polygon points="12,9 35,1 35,21 18,27 12,27" fill="rgba(255,255,255,.92)"/>
-            <polygon points="12,31 18,31 35,25 35,35 12,35" fill="rgba(255,255,255,.92)"/>
+            <rect x="2" y="3" width="32" height="9" rx="3" fill="rgba(255,255,255,.92)"/>
+            <polygon points="13,12 24,12 18,34 13,34" fill="rgba(255,255,255,.92)"/>
+            <polygon points="18,34 24,12 24,34" fill="rgba(255,255,255,.48)"/>
           </svg>
           <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:"1.2rem",color:"#fff",letterSpacing:".08em"}}>TAKKA</div>
         </div>
@@ -1417,10 +1412,9 @@ function AuthScreen({ onLogin }) {
           {/* Logo pequeño en el card */}
           <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"1.6rem"}}>
             <svg width="38" height="38" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="34" height="8" rx="2" fill="#0891b2"/>
-              <rect x="1" y="9" width="11" height="26" rx="1" fill="#0891b2"/>
-              <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#0891b2"/>
-              <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#0891b2"/>
+              <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
+              <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
+              <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
             </svg>
             <div>
               <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:"1.1rem",color:"#0891b2",letterSpacing:".06em"}}>TAKKA</div>
@@ -3842,11 +3836,9 @@ function exportCSV(){
         <div className="sb-logo">
           {!sidebarCollapsed && <TakkaLogo/>}
           {sidebarCollapsed && (
-            <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="34" height="8" rx="2" fill="rgba(255,255,255,.92)"/>
-              <rect x="1" y="9" width="11" height="26" rx="1" fill="rgba(255,255,255,.92)"/>
-              <polygon points="12,9 35,1 35,21 18,27 12,27" fill="rgba(255,255,255,.92)"/>
-              <polygon points="12,31 18,31 35,25 35,35 12,35" fill="rgba(255,255,255,.92)"/>
+            <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
+              <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M4 12 Q4 5 12 5 L20 5" stroke="#1d4ed8" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
             </svg>
           )}
           <button className="sb-toggle" title={sidebarCollapsed?"Expandir menú":"Colapsar menú"} onClick={()=>setSidebarCollapsed(c=>!c)}>

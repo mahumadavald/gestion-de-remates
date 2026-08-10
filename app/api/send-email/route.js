@@ -68,10 +68,9 @@ const FOOTER = `
   <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 36px;text-align:center;">
     <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:6px;">
       <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;">
-        <rect x="1" y="1" width="34" height="8" rx="2" fill="#0891b2"/>
-        <rect x="1" y="9" width="11" height="26" rx="1" fill="#0891b2"/>
-        <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#0891b2"/>
-        <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#0891b2"/>
+        <rect x="2" y="4" width="32" height="9" rx="3" fill="#0891b2"/>
+        <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#0891b2"/>
+        <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
       </svg>
       <span style="font-size:13px;font-weight:800;color:#374151;letter-spacing:.08em;">TAKKA</span>
     </div>

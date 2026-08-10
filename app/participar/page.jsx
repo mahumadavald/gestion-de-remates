@@ -722,10 +722,9 @@ function ParticiparContent() {
           {/* Logo TAKKA + nombre plataforma */}
           <div className="hero-topbar">
             <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="34" height="8" rx="2" fill="rgba(255,255,255,.92)"/>
-              <rect x="1" y="9" width="11" height="26" rx="1" fill="rgba(255,255,255,.92)"/>
-              <polygon points="12,9 35,1 35,21 18,27 12,27" fill="rgba(255,255,255,.92)"/>
-              <polygon points="12,31 18,31 35,25 35,35 12,35" fill="rgba(255,255,255,.92)"/>
+              <rect x="2" y="3" width="32" height="9" rx="3" fill="rgba(255,255,255,.92)"/>
+              <polygon points="13,12 24,12 18,34 13,34" fill="rgba(255,255,255,.92)"/>
+              <polygon points="18,34 24,12 24,34" fill="rgba(255,255,255,.48)"/>
             </svg>
             <div>
               <div className="hero-topbar-name">TAKKA</div>
@@ -745,10 +744,9 @@ function ParticiparContent() {
 
           <div style={{marginTop:"2rem",paddingTop:"1.25rem",borderTop:"1px solid rgba(255,255,255,.15)",display:"flex",alignItems:"center",gap:".6rem"}}>
             <svg width="20" height="20" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="34" height="8" rx="2" fill="rgba(255,255,255,.92)"/>
-              <rect x="1" y="9" width="11" height="26" rx="1" fill="rgba(255,255,255,.92)"/>
-              <polygon points="12,9 35,1 35,21 18,27 12,27" fill="rgba(255,255,255,.92)"/>
-              <polygon points="12,31 18,31 35,25 35,35 12,35" fill="rgba(255,255,255,.92)"/>
+              <rect x="2" y="3" width="32" height="9" rx="3" fill="rgba(255,255,255,.92)"/>
+              <polygon points="13,12 24,12 18,34 13,34" fill="rgba(255,255,255,.92)"/>
+              <polygon points="18,34 24,12 24,34" fill="rgba(255,255,255,.48)"/>
             </svg>
             <span style={{fontFamily:"'Inter',sans-serif",fontSize:".7rem",color:"rgba(255,255,255,.6)",letterSpacing:".04em"}}>
               Powered by <strong style={{color:"rgba(255,255,255,.9)"}}>TAKKA</strong> · takka.cl
@@ -800,10 +798,9 @@ function ParticiparContent() {
             {/* Logo TAKKA — visible en todas las pantallas */}
             <div className="form-topbar">
               <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="1" y="1" width="34" height="8" rx="2" fill="#0891b2"/>
-                <rect x="1" y="9" width="11" height="26" rx="1" fill="#0891b2"/>
-                <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#0891b2"/>
-                <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#0891b2"/>
+                <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
+                <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
+                <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
               </svg>
               <div>
                 <div className="form-topbar-label">TAKKA</div>

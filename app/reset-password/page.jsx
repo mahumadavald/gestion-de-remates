@@ -75,10 +75,9 @@ export default function ResetPasswordPage() {
         <div className="card">
           <div className="logo">
             <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="34" height="8" rx="2" fill="#0891b2"/>
-              <rect x="1" y="9" width="11" height="26" rx="1" fill="#0891b2"/>
-              <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#0891b2"/>
-              <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#0891b2"/>
+              <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
+              <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
+              <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
             </svg>
             <span style={{fontWeight:700,fontSize:".88rem",color:"#374151",letterSpacing:"-.01em"}}>TAKKA</span>
           </div>

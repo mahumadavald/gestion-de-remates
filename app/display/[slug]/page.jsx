@@ -468,10 +468,9 @@ export default function DisplayPage({ params }) {
         <div style={{display:"flex",alignItems:"center",gap:"1.1rem"}}>
           <div style={{display:"flex",alignItems:"center",gap:".55rem",flexShrink:0}}>
             <svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="34" height="8" rx="2" fill="rgba(255,255,255,.92)"/>
-              <rect x="1" y="9" width="11" height="26" rx="1" fill="rgba(255,255,255,.92)"/>
-              <polygon points="12,9 35,1 35,21 18,27 12,27" fill="rgba(255,255,255,.92)"/>
-              <polygon points="12,31 18,31 35,25 35,35 12,35" fill="rgba(255,255,255,.92)"/>
+              <rect x="2" y="3" width="32" height="9" rx="3" fill="rgba(255,255,255,.92)"/>
+              <polygon points="13,12 24,12 18,34 13,34" fill="rgba(255,255,255,.92)"/>
+              <polygon points="18,34 24,12 24,34" fill="rgba(255,255,255,.48)"/>
             </svg>
             <div style={{fontFamily:"'Poppins',sans-serif",fontWeight:800,fontSize:".88rem",color:"#fff",letterSpacing:".08em"}}>
               TAKKA

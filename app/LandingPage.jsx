@@ -35,10 +35,9 @@ export default function LandingPage() {
 <nav id="navbar">
   <a href="#" class="nav-logo">
     <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="34" height="8" rx="2" fill="#0891b2"/>
-      <rect x="1" y="9" width="11" height="26" rx="1" fill="#0891b2"/>
-      <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#0891b2"/>
-      <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#0891b2"/>
+      <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
+      <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
+      <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
     </svg>
     <span class="nav-logo-text">TAKKA</span>
   </a>
@@ -306,10 +305,9 @@ export default function LandingPage() {
     <div class="plan-card reveal">
       <div class="plan-bird plan-bird--basic">
         <svg width="48" height="48" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="1" width="34" height="8" rx="2" fill="#06B6D4"/>
-          <rect x="1" y="9" width="11" height="26" rx="1" fill="#06B6D4"/>
-          <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#06B6D4"/>
-          <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#06B6D4"/>
+          <rect x="2" y="3" width="32" height="9" rx="3" fill="#06B6D4"/>
+          <polygon points="13,12 24,12 18,34 13,34" fill="#06B6D4"/>
+          <polygon points="18,34 24,12 24,34" fill="#0891b2"/>
         </svg>
       </div>
       <div class="plan-tier" style="color:#06B6D4">BÁSICO</div>
@@ -332,10 +330,9 @@ export default function LandingPage() {
       <div class="plan-popular plan-popular--gold">Más popular</div>
       <div class="plan-bird plan-bird--gold">
         <svg width="48" height="48" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="1" width="34" height="8" rx="2" fill="#F59E0B"/>
-          <rect x="1" y="9" width="11" height="26" rx="1" fill="#F59E0B"/>
-          <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#F59E0B"/>
-          <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#F59E0B"/>
+          <rect x="2" y="3" width="32" height="9" rx="3" fill="#F59E0B"/>
+          <polygon points="13,12 24,12 18,34 13,34" fill="#F59E0B"/>
+          <polygon points="18,34 24,12 24,34" fill="#D97706"/>
         </svg>
       </div>
       <div class="plan-tier" style="color:#F59E0B">GOLD</div>
@@ -358,10 +355,9 @@ export default function LandingPage() {
     <div class="plan-card plan-card--platinum reveal">
       <div class="plan-bird plan-bird--platinum">
         <svg width="48" height="48" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="1" width="34" height="8" rx="2" fill="#8B5CF6"/>
-          <rect x="1" y="9" width="11" height="26" rx="1" fill="#8B5CF6"/>
-          <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#8B5CF6"/>
-          <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#8B5CF6"/>
+          <rect x="2" y="3" width="32" height="9" rx="3" fill="#8B5CF6"/>
+          <polygon points="13,12 24,12 18,34 13,34" fill="#8B5CF6"/>
+          <polygon points="18,34 24,12 24,34" fill="#7C3AED"/>
         </svg>
       </div>
       <div class="plan-tier" style="color:#8B5CF6">PLATINUM</div>
@@ -390,10 +386,9 @@ export default function LandingPage() {
       <div class="footer-top">
         <div class="footer-brand">
           <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="34" height="8" rx="2" fill="#0891b2"/>
-            <rect x="1" y="9" width="11" height="26" rx="1" fill="#0891b2"/>
-            <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#0891b2"/>
-            <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#0891b2"/>
+            <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
+            <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
+            <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
           </svg>
           <span class="footer-brand-name">TAKKA</span>
         </div>
