@@ -34,10 +34,10 @@ export default function LandingPage() {
 
 <nav id="navbar">
   <a href="#" class="nav-logo">
-    <svg width="34" height="34" viewBox="0 0 36 36" fill="none">
-      <rect width="36" height="36" rx="9" fill="rgba(56,178,246,.12)" stroke="rgba(56,178,246,.3)" stroke-width="1"/>
-      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#38B2F6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <path d="M4 12 Q4 5 12 5 L20 5" stroke="#14B8A6" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="4" width="32" height="9" rx="3" fill="#0891b2"/>
+      <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#0891b2"/>
+      <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
     </svg>
     <span class="nav-logo-text">TAKKA</span>
   </a>
@@ -304,14 +304,10 @@ export default function LandingPage() {
     <!-- ── TAKKA Básico ── -->
     <div class="plan-card reveal">
       <div class="plan-bird plan-bird--basic">
-        <!-- TODO: reemplazar por logo final de TAKKA (pájaro) en color turquesa -->
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <ellipse cx="20" cy="30" rx="13" ry="10" fill="#06B6D4"/>
-          <circle cx="33" cy="18" r="8" fill="#06B6D4"/>
-          <path d="M41 15 L48 13 L41 20Z" fill="#06B6D4"/>
-          <path d="M8 28 L1 35 L9 37Z" fill="#06B6D4" opacity=".65"/>
-          <ellipse cx="20" cy="28" rx="9" ry="6" fill="white" opacity=".15"/>
-          <circle cx="35" cy="16" r="2" fill="white" opacity=".9"/>
+        <svg width="48" height="48" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="4" width="32" height="9" rx="3" fill="#06B6D4"/>
+          <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#06B6D4"/>
+          <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
         </svg>
       </div>
       <div class="plan-tier" style="color:#06B6D4">BÁSICO</div>
@@ -333,14 +329,10 @@ export default function LandingPage() {
     <div class="plan-card plan-card--gold featured reveal">
       <div class="plan-popular plan-popular--gold">Más popular</div>
       <div class="plan-bird plan-bird--gold">
-        <!-- TODO: reemplazar por logo final de TAKKA (pájaro) en color dorado -->
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <ellipse cx="20" cy="30" rx="13" ry="10" fill="#F59E0B"/>
-          <circle cx="33" cy="18" r="8" fill="#F59E0B"/>
-          <path d="M41 15 L48 13 L41 20Z" fill="#D97706"/>
-          <path d="M8 28 L1 35 L9 37Z" fill="#F59E0B" opacity=".65"/>
-          <ellipse cx="20" cy="28" rx="9" ry="6" fill="white" opacity=".15"/>
-          <circle cx="35" cy="16" r="2" fill="white" opacity=".9"/>
+        <svg width="48" height="48" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="4" width="32" height="9" rx="3" fill="#F59E0B"/>
+          <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#F59E0B"/>
+          <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
         </svg>
       </div>
       <div class="plan-tier" style="color:#F59E0B">GOLD</div>
@@ -362,14 +354,10 @@ export default function LandingPage() {
     <!-- ── TAKKA Platinum ── -->
     <div class="plan-card plan-card--platinum reveal">
       <div class="plan-bird plan-bird--platinum">
-        <!-- TODO: reemplazar por logo final de TAKKA (pájaro) en color platinum -->
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <ellipse cx="20" cy="30" rx="13" ry="10" fill="#8B5CF6"/>
-          <circle cx="33" cy="18" r="8" fill="#8B5CF6"/>
-          <path d="M41 15 L48 13 L41 20Z" fill="#7C3AED"/>
-          <path d="M8 28 L1 35 L9 37Z" fill="#8B5CF6" opacity=".65"/>
-          <ellipse cx="20" cy="28" rx="9" ry="6" fill="white" opacity=".15"/>
-          <circle cx="35" cy="16" r="2" fill="white" opacity=".9"/>
+        <svg width="48" height="48" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="4" width="32" height="9" rx="3" fill="#8B5CF6"/>
+          <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#8B5CF6"/>
+          <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
         </svg>
       </div>
       <div class="plan-tier" style="color:#8B5CF6">PLATINUM</div>
@@ -397,10 +385,10 @@ export default function LandingPage() {
     <div class="footer-card reveal">
       <div class="footer-top">
         <div class="footer-brand">
-          <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
-            <rect width="36" height="36" rx="9" fill="rgba(6,182,212,.1)" stroke="rgba(6,182,212,.25)" stroke-width="1"/>
-            <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="#06B6D4" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            <path d="M4 12 Q4 5 12 5 L20 5" stroke="#14B8A6" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+          <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="4" width="32" height="9" rx="3" fill="#0891b2"/>
+            <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#0891b2"/>
+            <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
           </svg>
           <span class="footer-brand-name">TAKKA</span>
         </div>
