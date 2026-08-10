@@ -197,9 +197,10 @@ export default function PostorPage() {
       <div className="topbar">
         <div className="topbar-brand">
           <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
-            <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
-            <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
+            <rect x="1" y="1" width="34" height="8" rx="2" fill="#0891b2"/>
+            <rect x="1" y="9" width="11" height="26" rx="1" fill="#0891b2"/>
+            <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#0891b2"/>
+            <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#0891b2"/>
           </svg>
           <span style={{fontWeight:800,fontSize:".95rem",color:"var(--wh)",letterSpacing:".08em"}}>TAKKA</span>
         </div>
@@ -368,9 +369,10 @@ export default function PostorPage() {
 
         <div style={{marginTop:"3rem",paddingTop:"1.5rem",borderTop:"1px solid var(--b1)",display:"flex",alignItems:"center",gap:".6rem",justifyContent:"center"}}>
           <svg width="16" height="16" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="3" width="32" height="9" rx="3" fill="#9ca3af"/>
-            <polygon points="13,12 24,12 18,34 13,34" fill="#9ca3af"/>
-            <polygon points="18,34 24,12 24,34" fill="#6b7280"/>
+            <rect x="1" y="1" width="34" height="8" rx="2" fill="#9ca3af"/>
+            <rect x="1" y="9" width="11" height="26" rx="1" fill="#9ca3af"/>
+            <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#9ca3af"/>
+            <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#9ca3af"/>
           </svg>
           <span style={{fontSize:".72rem",color:"var(--mu2)"}}>TAKKA · <a href="https://takka.cl" style={{color:"var(--mu2)",textDecoration:"none"}}>takka.cl</a></span>
         </div>

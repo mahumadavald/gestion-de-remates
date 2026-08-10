@@ -176,9 +176,10 @@ function ProximosRemates() {
       <div className="topbar">
         <a className="topbar-brand" href="https://takka.cl">
           <svg width="26" height="26" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="3" width="32" height="9" rx="3" fill="#0891b2"/>
-            <polygon points="13,12 24,12 18,34 13,34" fill="#0891b2"/>
-            <polygon points="18,34 24,12 24,34" fill="#0d9488"/>
+            <rect x="1" y="1" width="34" height="8" rx="2" fill="#0891b2"/>
+            <rect x="1" y="9" width="11" height="26" rx="1" fill="#0891b2"/>
+            <polygon points="12,9 35,1 35,21 18,27 12,27" fill="#0891b2"/>
+            <polygon points="12,31 18,31 35,25 35,35 12,35" fill="#0891b2"/>
           </svg>
           <span className="topbar-name">TAKKA</span>
         </a>
@@ -229,8 +230,11 @@ function ProximosRemates() {
                 ? <img src={casa.logo_url} alt={casa.nombre} className="casa-logo"/>
                 : (
                   <div className="casa-logo-ph">
-                    <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
-                      <path d="M8 12 Q8 7 14 7 L22 7 Q30 7 30 14 Q30 19 24 20 L30 28" stroke="rgba(255,255,255,.9)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                    <svg width="22" height="22" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="1" y="1" width="34" height="8" rx="2" fill="rgba(255,255,255,.9)"/>
+                      <rect x="1" y="9" width="11" height="26" rx="1" fill="rgba(255,255,255,.9)"/>
+                      <polygon points="12,9 35,1 35,21 18,27 12,27" fill="rgba(255,255,255,.9)"/>
+                      <polygon points="12,31 18,31 35,25 35,35 12,35" fill="rgba(255,255,255,.9)"/>
                     </svg>
                   </div>
                 )
