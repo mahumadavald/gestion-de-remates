@@ -2092,6 +2092,9 @@ function Dashboard({ session, onLogout }) {
   const [aiLoteCat,     setAiLoteCat]     = useState("");
   const [aiLoteResult,  setAiLoteResult]  = useState(null);      // { titulo, descripcion }
   const [aiLoteLoading, setAiLoteLoading] = useState(false);
+  const [selectedLoteIds, setSelectedLoteIds] = useState(new Set());
+  const [asignarLoteId,   setAsignarLoteId]   = useState(null);
+  const [asignarRemateId, setAsignarRemateId] = useState("");
 
   // ── IA: Resumen post-remate ──
   const [aiRemateModal,   setAiRemateModal]   = useState(null);  // null | remate object
@@ -3679,8 +3682,23 @@ function exportCSV(){
               </div>
             </>}
 
+            {modal==="asignar-remate" && <>
+              <div className="modal-title">{asignarLoteId ? "Asignar lote a remate" : `Asignar ${selectedLoteIds.size} lote${selectedLoteIds.size!==1?"s":""} a remate`}</div>
+              <div className="form-grid">
+                <div className="fg full">
+                  <label className="fl">Seleccionar remate</label>
+                  <select className="fsel" value={asignarRemateId} onChange={e=>setAsignarRemateId(e.target.value)}>
+                    <option value="">— Sin asignar (quitar de remate) —</option>
+                    {REMATES_MERGED.filter(r=>r.estado!=="cerrado").map(r=>(
+                      <option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </>}
+
             <div className="modal-actions">
-              <button className="btn-cancel" onClick={()=>{setModal(null);resetWiz();setNuevoVendedorForm({nombre:"",rut:"",giro:"",direccion:"",telefono:"",email:""});setEditLoteData(null);}}>Cancelar</button>
+              <button className="btn-cancel" onClick={()=>{setModal(null);resetWiz();setNuevoVendedorForm({nombre:"",rut:"",giro:"",direccion:"",telefono:"",email:""});setEditLoteData(null);setAsignarLoteId(null);setAsignarRemateId("");}}>Cancelar</button>
               {modal==="editar-lote" ? (
                 <button className="btn-confirm" onClick={async ()=>{
                   if(!editLoteData.nombre.trim()){notify("El nombre no puede estar vacío.","inf");return;}
@@ -3701,6 +3719,21 @@ function exportCSV(){
                   setDbLotes(prev=>prev.map(l=>l.id===editLoteData.id?{...l,...editLoteData,base:parseFloat(editLoteData.base)||0,minimo:parseFloat(editLoteData.minimo)||0,comision:parseFloat(editLoteData.comision)||5,orden:parseInt(editLoteData.orden)||1,cantidad:parseInt(editLoteData.cantidad)||1,precio_por_unidad:editLoteData.ppu||false,afecto_iva:editLoteData.afectoIva||false}:l));
                   setModal(null); setEditLoteData(null); notify("Lote actualizado.","sold");
                 }}>Guardar cambios</button>
+              ) : modal==="asignar-remate" ? (
+                <button className="btn-confirm" onClick={async()=>{
+                  const ids = asignarLoteId ? [asignarLoteId] : [...selectedLoteIds];
+                  if(!ids.length){notify("No hay lotes seleccionados.","inf");return;}
+                  for(const id of ids){
+                    await supabase.from("lotes").update({remate_id: asignarRemateId||null}).eq("id",id);
+                  }
+                  const {data} = await supabase.from("lotes").select("*").order("orden");
+                  if(data) setDbLotes(data);
+                  setSelectedLoteIds(new Set());
+                  setAsignarLoteId(null);
+                  setAsignarRemateId("");
+                  setModal(null);
+                  notify(ids.length>1?`${ids.length} lotes asignados correctamente.`:"Lote asignado correctamente.","sold");
+                }}>Confirmar asignación</button>
               ) : modal==="nuevo-vendedor" ? (
                 <button className="btn-confirm" onClick={()=>{
                   if(!nuevoVendedorForm.nombre.trim()){notify("Ingresa el nombre del vendedor.","inf");return;}
@@ -4415,7 +4448,9 @@ function exportCSV(){
           ).slice().sort((a,b)=>(a.orden||0)-(b.orden||0));
           const lotesMostrar = filterTab==="todos"
             ? lotesOrdenados
-            : lotesOrdenados.filter(l=>l.estado===filterTab);
+            : filterTab==="sin-asignar"
+              ? lotesOrdenados.filter(l=>!l.remate_id)
+              : lotesOrdenados.filter(l=>l.estado===filterTab);
           const fmtClp = n => n ? Number(n).toLocaleString("es-CL") : "—";
 
           const moverLote = async (loteId, dir) => {
@@ -4443,8 +4478,8 @@ function exportCSV(){
           return (
           <div className="page">
             <div className="filter-row" style={{marginBottom:"1rem"}}>
-              {["todos","publicado","vendido","sin vender"].map(f => (
-                <button key={f} className={`filter-btn${filterTab===f?" on":""}`} onClick={()=>setFilterTab(f)}>{f}</button>
+              {[["todos","Todos"],["sin-asignar","Sin remate"],["publicado","Publicado"],["vendido","Vendido"],["sin vender","Sin vender"]].map(([val,label]) => (
+                <button key={val} className={`filter-btn${filterTab===val?" on":""}`} onClick={()=>{setFilterTab(val);setSelectedLoteIds(new Set());}}>{label}</button>
               ))}
             </div>
             <div className="table-card">
@@ -4455,6 +4490,14 @@ function exportCSV(){
                 <table>
                   <thead>
                     <tr>
+                      <th style={{width:36,textAlign:"center"}}>
+                        <input type="checkbox"
+                          checked={lotesMostrar.length>0 && lotesMostrar.every(l=>selectedLoteIds.has(l.id))}
+                          onChange={e=>{
+                            if(e.target.checked) setSelectedLoteIds(new Set(lotesMostrar.map(l=>l.id)));
+                            else setSelectedLoteIds(new Set());
+                          }}/>
+                      </th>
                       <th style={{textAlign:"center",width:56}}>Lote</th>
                       <th style={{textAlign:"center",width:52}}>Cant.</th>
                       <th>Descripción</th>
@@ -4468,7 +4511,7 @@ function exportCSV(){
                   </thead>
                   <tbody>
                     {lotesMostrar.length === 0 ? (
-                      <tr><td colSpan={9} style={{textAlign:"center",color:"var(--mu)",padding:"2rem",fontSize:".8rem"}}>
+                      <tr><td colSpan={10} style={{textAlign:"center",color:"var(--mu)",padding:"2rem",fontSize:".8rem"}}>
                         {lotesFiltroRemate ? "Este remate no tiene lotes aún. Usa + Agregar lote." : "No hay lotes registrados."}
                       </td></tr>
                     ) : lotesMostrar.map((l,i) => {
@@ -4477,6 +4520,10 @@ function exportCSV(){
                       const puedeBajar = idxTotal < lotesOrdenados.length-1;
                       return (
                         <tr key={l.id}>
+                          <td style={{textAlign:"center"}}>
+                            <input type="checkbox" checked={selectedLoteIds.has(l.id)}
+                              onChange={e=>{setSelectedLoteIds(prev=>{const n=new Set(prev);e.target.checked?n.add(l.id):n.delete(l.id);return n;});}}/>
+                          </td>
                           <td style={{textAlign:"center"}}>
                             <span style={{fontWeight:900,fontSize:".88rem",color:"var(--ac)",fontFamily:"Inter,sans-serif"}}>{l.orden??idxTotal+1}</span>
                           </td>
@@ -4512,6 +4559,10 @@ function exportCSV(){
                                 });
                                 setModal("editar-lote");
                               }}>Editar</button>
+                            <button className="btn-sec" style={{fontSize:".68rem",padding:".2rem .65rem",marginTop:3,background:"rgba(6,182,212,.08)",color:"var(--ac)",borderColor:"rgba(6,182,212,.3)"}}
+                              onClick={()=>{setAsignarLoteId(l.id);setAsignarRemateId(l.remate_id||"");setModal("asignar-remate");}}>
+                              {l.remate_id?"Reasignar":"Asignar"}
+                            </button>
                           </td>
                           <td style={{textAlign:"center"}}>
                             <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
@@ -4532,6 +4583,22 @@ function exportCSV(){
                 </table>
               </div>
             </div>
+            {selectedLoteIds.size > 0 && (
+              <div style={{position:"fixed",bottom:"1.5rem",left:"50%",transform:"translateX(-50%)",
+                background:"#1f2937",color:"#fff",borderRadius:12,padding:".75rem 1.25rem",
+                display:"flex",alignItems:"center",gap:"1rem",boxShadow:"0 8px 30px rgba(0,0,0,.3)",
+                zIndex:200,fontSize:".82rem",fontWeight:600,whiteSpace:"nowrap"}}>
+                <span style={{color:"rgba(255,255,255,.75)"}}>{selectedLoteIds.size} lote{selectedLoteIds.size!==1?"s":""} seleccionado{selectedLoteIds.size!==1?"s":""}</span>
+                <button onClick={()=>{setAsignarLoteId(null);setAsignarRemateId("");setModal("asignar-remate");}}
+                  style={{background:"var(--ac)",color:"#fff",border:"none",borderRadius:8,padding:".4rem .9rem",fontWeight:700,cursor:"pointer",fontSize:".78rem"}}>
+                  Asignar a remate
+                </button>
+                <button onClick={()=>setSelectedLoteIds(new Set())}
+                  style={{background:"transparent",color:"rgba(255,255,255,.55)",border:"1px solid rgba(255,255,255,.18)",borderRadius:8,padding:".4rem .75rem",cursor:"pointer",fontSize:".75rem"}}>
+                  Cancelar
+                </button>
+              </div>
+            )}
           </div>
           );
         })()}
