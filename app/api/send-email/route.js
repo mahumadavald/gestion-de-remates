@@ -1,7 +1,32 @@
 import { NextResponse } from "next/server";
+import { requireAuth } from "../_lib/auth";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL     = process.env.FROM_EMAIL || "noreply@gestionderemates.cl";
+
+// Tipos que requieren sesión activa (llamados desde el Dashboard)
+const TIPOS_INTERNOS = new Set(["verificado", "bienvenida_postor", "no_comprador"]);
+
+// Escapa caracteres HTML peligrosos en datos de usuario
+function esc(s) {
+  if (s == null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// Valida que la URL pertenezca al almacenamiento de Supabase (evita SSRF)
+function isSafeStorageUrl(url) {
+  if (!url) return false;
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+    const { hostname } = new URL(url);
+    const { hostname: supaHost } = new URL(supabaseUrl);
+    return hostname === supaHost;
+  } catch { return false; }
+}
 
 async function sendMail({ to, subject, html, attachments }) {
   if (!RESEND_API_KEY) {
@@ -28,8 +53,8 @@ async function sendMail({ to, subject, html, attachments }) {
 // ── Header: título a la izquierda, logo casa a la derecha ─────────
 function buildHeader({ casa, logo_url, titulo, subtitulo }) {
   const logoHtml = logo_url
-    ? `<img src="${logo_url}" alt="${casa}" style="max-height:52px;max-width:160px;object-fit:contain;display:block;" />`
-    : `<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.85);text-align:right;letter-spacing:-.01em;">${casa}</div>`;
+    ? `<img src="${logo_url}" alt="${esc(casa)}" style="max-height:52px;max-width:160px;object-fit:contain;display:block;" />`
+    : `<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.85);text-align:right;letter-spacing:-.01em;">${esc(casa)}</div>`;
 
   return `
     <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0891b2">
@@ -52,13 +77,13 @@ function buildHeader({ casa, logo_url, titulo, subtitulo }) {
   `;
 }
 
-// ── Fila de tabla ─────────────────────────────────────────────────
+// ── Fila de tabla (escapa el valor para evitar HTML injection) ────
 function tr(label, value) {
   if (!value) return "";
   return `
     <tr>
       <td style="padding:11px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;background:#f3f4f6;border-bottom:1px solid #e5e7eb;white-space:nowrap;width:38%;">${label}</td>
-      <td style="padding:11px 16px;font-size:14px;font-weight:700;color:#111827;background:#ffffff;border-bottom:1px solid #e5e7eb;">${value}</td>
+      <td style="padding:11px 16px;font-size:14px;font-weight:700;color:#111827;background:#ffffff;border-bottom:1px solid #e5e7eb;">${esc(value)}</td>
     </tr>
   `;
 }
@@ -81,8 +106,16 @@ const FOOTER = `
 export async function POST(req) {
   try {
     const body = await req.json();
+    const { tipo } = body;
+
+    // Tipos internos requieren sesión activa
+    if (TIPOS_INTERNOS.has(tipo)) {
+      const auth = await requireAuth(req);
+      if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
     const {
-      tipo, nombre, numero, remate, fecha, casa, logo_url,
+      nombre, numero, remate, fecha, casa, logo_url,
       email_cliente, email_casa,
       rut, telefono, giro, direccion, comuna,
       banco, tipo_cuenta, numero_cuenta, modalidad,
@@ -110,8 +143,8 @@ export async function POST(req) {
           })}
 
           <div style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
-            <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${nombre}</strong></p>
-            <p style="font-size:14px;color:#6b7280;margin:0 0 20px;line-height:1.6;">Tu pre-inscripción en <strong style="color:#1a1a1a;">${remate}</strong> de <strong style="color:#1a1a1a;">${casa}</strong> fue recibida correctamente.</p>
+            <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${esc(nombre)}</strong></p>
+            <p style="font-size:14px;color:#6b7280;margin:0 0 20px;line-height:1.6;">Tu pre-inscripción en <strong style="color:#1a1a1a;">${esc(remate)}</strong> de <strong style="color:#1a1a1a;">${esc(casa)}</strong> fue recibida correctamente.</p>
 
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:20px;">
               ${tr("Remate", remate)}
@@ -126,11 +159,11 @@ export async function POST(req) {
             <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#fffbeb">
               <tr><td style="background-color:#fffbeb;border-left:4px solid #f59e0b;padding:14px 16px;font-size:13px;color:#92400e;line-height:1.6;">
                 <strong>Inscripción pendiente de aprobación.</strong><br>
-                ${casa} verificará tu comprobante de transferencia. Cuando sea aprobada recibirás un correo con tu número de postor e instrucciones para participar.
+                ${esc(casa)} verificará tu comprobante de transferencia. Cuando sea aprobada recibirás un correo con tu número de postor e instrucciones para participar.
               </td></tr>
             </table>
 
-            <p style="font-size:13px;color:#6b7280;margin:20px 0 0;line-height:1.6;">¿Dudas? Contacta directamente a ${casa}${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#0891b2;'>" + email_casa + "</a>" : ""}.</p>
+            <p style="font-size:13px;color:#6b7280;margin:20px 0 0;line-height:1.6;">¿Dudas? Contacta directamente a ${esc(casa)}${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#0891b2;'>" + email_casa + "</a>" : ""}.</p>
           </div>
 
           ${FOOTER}
@@ -139,7 +172,7 @@ export async function POST(req) {
 
       const r = await sendMail({
         to: email_cliente,
-        subject: `Pre-inscripción recibida — ${remate} · ${casa}`,
+        subject: `Pre-inscripción recibida — ${esc(remate)} · ${esc(casa)}`,
         html,
       });
       results.push({ destino: "cliente", ...r });
@@ -202,9 +235,9 @@ export async function POST(req) {
         </div>
       </body></html>`;
 
-      // Adjuntar comprobante si existe
+      // Adjuntar comprobante si existe — solo URLs de Supabase Storage (evita SSRF)
       let attachments = [];
-      if (comprobante_url) {
+      if (comprobante_url && isSafeStorageUrl(comprobante_url)) {
         try {
           const fileRes = await fetch(comprobante_url);
           if (fileRes.ok) {
@@ -217,7 +250,7 @@ export async function POST(req) {
       }
       const r = await sendMail({
         to: email_casa,
-        subject: `Nueva inscripción #${numero} — ${nombre} en ${remate}`,
+        subject: `Nueva inscripción #${numero} — ${esc(nombre)} en ${esc(remate)}`,
         html,
         attachments,
       });
@@ -239,7 +272,7 @@ export async function POST(req) {
         : `<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0fdf4" style="margin:20px 0;">
             <tr><td style="background-color:#f0fdf4;border-left:4px solid #0891b2;padding:14px 16px;font-size:13px;color:#0e7490;line-height:1.6;font-family:Arial,sans-serif;">
               <strong>Participación presencial:</strong><br>
-              Preséntate con tu número de postor el día del remate en el lugar indicado por <strong>${casa}</strong>.
+              Preséntate con tu número de postor el día del remate en el lugar indicado por <strong>${esc(casa)}</strong>.
             </td></tr>
           </table>`;
 
@@ -252,22 +285,22 @@ export async function POST(req) {
           <tr><td>${buildHeader({ casa, logo_url, titulo: "Inscripción confirmada", subtitulo: remate + (fechaStr ? " · " + fechaStr : "") })}</td></tr>
 
           <tr><td style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
-            <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${nombre}</strong></p>
+            <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${esc(nombre)}</strong></p>
             <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">
-              Hemos confirmado tu garantía y te damos la bienvenida al remate <strong style="color:#1a1a1a;">${remate}</strong> de <strong style="color:#1a1a1a;">${casa}</strong>.
+              Hemos confirmado tu garantía y te damos la bienvenida al remate <strong style="color:#1a1a1a;">${esc(remate)}</strong> de <strong style="color:#1a1a1a;">${esc(casa)}</strong>.
             </p>
 
             <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0891b2">
               <tr><td align="center" style="background-color:#0891b2;background:linear-gradient(135deg,#0f4c5c,#0891b2);border-radius:12px;padding:24px 16px;text-align:center;">
                 <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#cce9f5;margin-bottom:8px;font-family:Arial,sans-serif;">Tu número de postor confirmado</div>
                 <div style="font-size:58px;font-weight:800;color:#ffffff;line-height:1;font-family:Arial,sans-serif;">#${numero}</div>
-                ${modalidad ? `<div style="font-size:13px;color:#cce9f5;margin-top:10px;text-transform:uppercase;font-family:Arial,sans-serif;">${modalidad}</div>` : ""}
+                ${modalidad ? `<div style="font-size:13px;color:#cce9f5;margin-top:10px;text-transform:uppercase;font-family:Arial,sans-serif;">${esc(modalidad)}</div>` : ""}
               </td></tr>
             </table>
 
             ${mensajeAcceso}
 
-            <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;font-family:Arial,sans-serif;">¿Dudas? Contacta directamente a <strong>${casa}</strong>${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#0891b2;'>" + email_casa + "</a>" : ""}.</p>
+            <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;font-family:Arial,sans-serif;">¿Dudas? Contacta directamente a <strong>${esc(casa)}</strong>${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#0891b2;'>" + email_casa + "</a>" : ""}.</p>
           </td></tr>
 
           <tr><td>${FOOTER}</td></tr>
@@ -278,7 +311,7 @@ export async function POST(req) {
 
       const r = await sendMail({
         to: email_cliente,
-        subject: `¡Inscripción confirmada! — ${remate} · ${casa}`,
+        subject: `¡Inscripción confirmada! — ${esc(remate)} · ${esc(casa)}`,
         html,
       });
       results.push({ destino: "verificado", ...r });
@@ -298,13 +331,13 @@ export async function POST(req) {
           })}
 
           <div style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
-            <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${nombre}</strong></p>
+            <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${esc(nombre)}</strong></p>
             <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">Bienvenido a la plataforma de remates. Aquí encontrarás tus accesos para participar.</p>
 
             <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:20px 24px;margin-bottom:20px;">
               <div style="margin-bottom:14px;">
                 <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:4px;font-family:Arial,sans-serif;">Correo / Usuario</div>
-                <div style="font-size:16px;font-weight:700;color:#1a1a1a;font-family:Arial,sans-serif;">${email_cliente}</div>
+                <div style="font-size:16px;font-weight:700;color:#1a1a1a;font-family:Arial,sans-serif;">${esc(email_cliente)}</div>
               </div>
               ${temp_password ? `
               <div>
@@ -333,7 +366,7 @@ export async function POST(req) {
             </table>
 
             <p style="font-size:12px;color:#9ca3af;text-align:center;margin:0 0 16px;font-family:Arial,sans-serif;">gestionderemates.cl</p>
-            <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;font-family:Arial,sans-serif;">¿Dudas? Contacta a ${casa}${body.email_casa ? " en <a href='mailto:" + body.email_casa + "' style='color:#0891b2;'>" + body.email_casa + "</a>" : ""}.</p>
+            <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;font-family:Arial,sans-serif;">¿Dudas? Contacta a ${esc(casa)}${body.email_casa ? " en <a href='mailto:" + body.email_casa + "' style='color:#0891b2;'>" + body.email_casa + "</a>" : ""}.</p>
           </div>
 
           ${FOOTER}
@@ -342,7 +375,7 @@ export async function POST(req) {
 
       const r = await sendMail({
         to: email_cliente,
-        subject: `Bienvenido a ${casa} — Tus credenciales de acceso`,
+        subject: `Bienvenido a ${esc(casa)} — Tus credenciales de acceso`,
         html,
       });
       results.push({ destino: "bienvenida_postor", ...r });
@@ -363,14 +396,14 @@ export async function POST(req) {
       })}
 
       <div style="background:#ffffff;padding:28px 36px;">
-        <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${nombrePosNc}</strong></p>
+        <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${esc(nombrePosNc)}</strong></p>
         <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">
-          Gracias por participar en el remate <strong style="color:#1a1a1a;">${remateNc}</strong>. En esta oportunidad no resultaste adjudicatario de ningún lote, pero tu garantía está disponible para devolución.
+          Gracias por participar en el remate <strong style="color:#1a1a1a;">${esc(remateNc)}</strong>. En esta oportunidad no resultaste adjudicatario de ningún lote, pero tu garantía está disponible para devolución.
         </p>
 
         <div style="background:linear-gradient(135deg,#f0fdfe,#ecfeff);border:2px solid #0891b2;border-radius:12px;text-align:center;padding:22px 16px;margin-bottom:24px;">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#0e7490;margin-bottom:6px;">Tu número de postor</div>
-          <div style="font-size:48px;font-weight:800;color:#0891b2;line-height:1;letter-spacing:-.02em;">#${numeroPosNc}</div>
+          <div style="font-size:48px;font-weight:800;color:#0891b2;line-height:1;letter-spacing:-.02em;">#${esc(numeroPosNc)}</div>
         </div>
 
         <p style="font-size:14px;color:#374151;margin:0 0 20px;line-height:1.6;">
@@ -393,7 +426,7 @@ export async function POST(req) {
 
       const r = await sendMail({
         to: email_cliente,
-        subject: `Devolución de garantía disponible — ${remateNc} · ${casaNc}`,
+        subject: `Devolución de garantía disponible — ${esc(remateNc)} · ${esc(casaNc)}`,
         html,
       });
       results.push({ destino: "no_comprador", ...r });
@@ -418,7 +451,7 @@ export async function POST(req) {
               ${lotes   ? tr("Lotes / remate", lotes)   : ""}
               ${sistema ? tr("Sistema actual", sistema)  : ""}
             </table>
-            <a href="mailto:${correo}" style="display:block;text-align:center;background:linear-gradient(135deg,#06B6D4,#14B8A6);color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:13px 20px;border-radius:10px;">Responder a ${nombre} →</a>
+            <a href="mailto:${esc(correo)}" style="display:block;text-align:center;background:linear-gradient(135deg,#06B6D4,#14B8A6);color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:13px 20px;border-radius:10px;">Responder a ${esc(nombre)} →</a>
           </div>
           ${FOOTER}
         </div>
@@ -426,7 +459,7 @@ export async function POST(req) {
 
       const r = await sendMail({
         to: "contacto@takka.cl",
-        subject: `Nueva solicitud de demo — ${nombre} (${casaDemo})`,
+        subject: `Nueva solicitud de demo — ${esc(nombre)} (${esc(casaDemo)})`,
         html,
       });
       results.push({ destino: "demo", ...r });

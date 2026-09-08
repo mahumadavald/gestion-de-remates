@@ -1,21 +1,22 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { requireAdmin } from "../../_lib/auth";
 
 export async function POST(req) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
   try {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey) return NextResponse.json({ error: "SUPABASE_SERVICE_ROLE_KEY no configurada en Vercel" }, { status: 500 });
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      serviceKey
-    );
+    if (!serviceKey) return NextResponse.json({ error: "SUPABASE_SERVICE_ROLE_KEY no configurada" }, { status: 500 });
+
+    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, serviceKey);
     const { email, password, nombre, casa_id, bodega_id, roles, activo } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: "Email y contraseña requeridos" }, { status: 400 });
     }
 
-    // Crear usuario en Supabase Auth con admin API (no cierra sesión del admin)
     const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -23,13 +24,10 @@ export async function POST(req) {
       user_metadata: { nombre, needs_password_change: true },
     });
 
-    if (authErr) {
-      return NextResponse.json({ error: authErr.message }, { status: 400 });
-    }
+    if (authErr) return NextResponse.json({ error: authErr.message }, { status: 400 });
 
     const userId = authData.user.id;
 
-    // Insertar perfil en tabla usuarios
     const { error: dbErr } = await supabaseAdmin.from("usuarios").insert({
       id:        userId,
       email,
@@ -41,7 +39,6 @@ export async function POST(req) {
     });
 
     if (dbErr) {
-      // Si falla la inserción en DB, borrar el usuario de Auth para no dejar inconsistencia
       await supabaseAdmin.auth.admin.deleteUser(userId);
       return NextResponse.json({ error: "Error al crear perfil: " + dbErr.message }, { status: 500 });
     }

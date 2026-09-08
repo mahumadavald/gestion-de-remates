@@ -1,6 +1,15 @@
 'use client'
 import React, { useState } from "react";
 
+async function authFetch(supabase, url, opts = {}) {
+  const { data: { session: s } } = await supabase.auth.getSession();
+  const token = s?.access_token;
+  return fetch(url, {
+    ...opts,
+    headers: { ...(opts.headers || {}), ...(token ? { "Authorization": `Bearer ${token}` } : {}) },
+  });
+}
+
 const ROLES_DISPONIBLES = ["admin", "martillero", "spotter", "postremate", "garantias", "solo lectura"];
 
 const ROLE_COLOR = {
@@ -26,7 +35,7 @@ export default function PageUsuarios({ session, supabase, dbBodegas, dbLicencias
     if (usuarioModal === "crear") {
       if (!usuarioForm.pass || usuarioForm.pass.length < 6) { notify("La contraseña debe tener al menos 6 caracteres.", "inf"); return; }
       const { data: casaData } = await supabase.from("casas").select("id").eq("nombre", usuarioForm.casa).single();
-      const res = await fetch("/api/admin/create-user", {
+      const res = await authFetch(supabase, "/api/admin/create-user", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: usuarioForm.email, password: usuarioForm.pass, nombre: usuarioForm.nombre, casa_id: casaData?.id || null, bodega_id: usuarioForm.bodegaId || null, roles: usuarioForm.roles, activo: usuarioForm.activo }),
       });
@@ -55,7 +64,7 @@ export default function PageUsuarios({ session, supabase, dbBodegas, dbLicencias
 
   const eliminarUsuario = async (id) => {
     if (!window.confirm("¿Eliminar este usuario? No podrá iniciar sesión.")) return;
-    const res = await fetch("/api/admin/delete-user", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    const res = await authFetch(supabase, "/api/admin/delete-user", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
     const result = await res.json();
     if (!res.ok) { notify("Error al eliminar: " + result.error, "inf"); return; }
     setUsuarios(u => u.filter(x => x.id !== id));

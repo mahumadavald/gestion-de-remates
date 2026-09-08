@@ -1,8 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { requireAuth } from "../../_lib/auth";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(request) {
+  const auth = await requireAuth(request);
+  if (auth.error) return Response.json({ error: auth.error }, { status: auth.status });
+
   try {
     const { imageBase64, mediaType, name, category } = await request.json();
 

@@ -13,6 +13,19 @@ const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = SUPA_URL ? createClient(SUPA_URL, SUPA_KEY) : null;
 
+// fetch autenticado — adjunta el JWT de Supabase como Bearer token
+async function authFetch(url, opts = {}) {
+  const { data: { session: s } } = await supabase.auth.getSession();
+  const token = s?.access_token;
+  return fetch(url, {
+    ...opts,
+    headers: {
+      ...(opts.headers || {}),
+      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    },
+  });
+}
+
 
 // ── BRAND ─────────────────────────────────────────────────────────
 const TakkaLogo = ({ collapsed = false }) => (
@@ -3475,7 +3488,7 @@ function exportCSV(){
                                 imageBase64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
                                 mediaType = fotoFile.type||"image/jpeg";
                               }
-                              const res = await fetch("/api/ai/describe-lot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imageBase64,mediaType,name:wizDatos.nombre,category:wizTipo})});
+                              const res = await authFetch("/api/ai/describe-lot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imageBase64,mediaType,name:wizDatos.nombre,category:wizTipo})});
                               const data = await res.json();
                               if(data.titulo||data.descripcion){
                                 setAiLoteResult(data);
@@ -4857,7 +4870,7 @@ function exportCSV(){
                                     const chars="ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
                                     const candidatePass = Array.from({length:8},()=>chars[Math.floor(Math.random()*chars.length)]).join("");
                                     try {
-                                      const res = await fetch("/api/admin/create-user",{method:"POST",headers:{"Content-Type":"application/json"},
+                                      const res = await authFetch("/api/admin/create-user",{method:"POST",headers:{"Content-Type":"application/json"},
                                         body:JSON.stringify({email:p.email,password:candidatePass,nombre:p.name,casa_id:p.casa_id||null,roles:["postor"],activo:true})});
                                       const created = await res.json();
                                       if(created.id){
@@ -4871,7 +4884,7 @@ function exportCSV(){
 
                                   // Email 1: inscripción confirmada
                                   try {
-                                    await fetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
+                                    await authFetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
                                       body:JSON.stringify({tipo:"verificado",nombre:p.name,
                                         numero:String(p.nComprador).padStart(3,"0"),
                                         remate:remateInfo?.name||"Remate",fecha:remateInfo?.fecha||null,
@@ -4882,7 +4895,7 @@ function exportCSV(){
 
                                   // Email 2: bienvenida con credenciales (solo si es nuevo)
                                   if(tempPass) try {
-                                    await fetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
+                                    await authFetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
                                       body:JSON.stringify({tipo:"bienvenida_postor",nombre:p.name,email_cliente:p.email,
                                         casa:casaNom,logo_url:casaInfo.logo_url||null,email_casa:casaInfo.email||null,
                                         temp_password:tempPass,portal_url:"https://gestionderemates.cl/postor"})});
@@ -7142,7 +7155,7 @@ function exportCSV(){
                       let enviados = 0;
                       for (const p of sinDevolver) {
                         const devolucionUrl = `https://gestionderemates.cl/devoluciones?p=${p.id}`;
-                        await fetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
+                        await authFetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
                           body:JSON.stringify({tipo:"no_comprador",email_cliente:p.email,nombre:p.nombre||"Postor",
                             numero:p.numero||"—",remate:remateInfo?.name||"Remate",
                             casa:session?.casaNombre||"Casa de Remates",logo_url:null,devolucion_url:devolucionUrl})});
@@ -8296,7 +8309,7 @@ function exportCSV(){
                                 const chars="ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
                                 const candidatePass = Array.from({length:8},()=>chars[Math.floor(Math.random()*chars.length)]).join("");
                                 try {
-                                  const res = await fetch("/api/admin/create-user",{method:"POST",headers:{"Content-Type":"application/json"},
+                                  const res = await authFetch("/api/admin/create-user",{method:"POST",headers:{"Content-Type":"application/json"},
                                     body:JSON.stringify({email:p.email,password:candidatePass,nombre:p.name,casa_id:p.casa_id||null,roles:["postor"],activo:true})});
                                   const created = await res.json();
                                   if(created.id){
@@ -8310,7 +8323,7 @@ function exportCSV(){
 
                               // 3. Email 1: inscripción confirmada (de parte de la casa)
                               try {
-                                await fetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
+                                await authFetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
                                   body:JSON.stringify({tipo:"verificado",nombre:p.name,
                                     numero:String(p.nComprador).padStart(3,"0"),
                                     remate:remateInfo?.name||"Remate",
@@ -8322,7 +8335,7 @@ function exportCSV(){
 
                               // 4. Email 2: bienvenida con credenciales (solo si es usuario nuevo)
                               if(tempPass) try {
-                                await fetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
+                                await authFetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
                                   body:JSON.stringify({tipo:"bienvenida_postor",nombre:p.name,email_cliente:p.email,
                                     casa:casaNom,logo_url:casaInfo.logo_url||null,
                                     email_casa:casaInfo.email||null,
@@ -8622,7 +8635,7 @@ function exportCSV(){
               onClick={async()=>{
                 setAiLoteLoading(true); setAiLoteResult(null);
                 try {
-                  const res = await fetch("/api/ai/describe-lot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imageBase64:aiLoteImg?.base64,mediaType:aiLoteImg?.mediaType,name:aiLoteName,category:aiLoteCat})});
+                  const res = await authFetch("/api/ai/describe-lot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imageBase64:aiLoteImg?.base64,mediaType:aiLoteImg?.mediaType,name:aiLoteName,category:aiLoteCat})});
                   const data = await res.json();
                   if(data.error) throw new Error(data.error);
                   setAiLoteResult(data);
@@ -8690,7 +8703,7 @@ function exportCSV(){
                 onClick={async()=>{
                   setAiRemateLoading(true);
                   try {
-                    const res = await fetch("/api/ai/remate-summary",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({remate:aiRemateModal})});
+                    const res = await authFetch("/api/ai/remate-summary",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({remate:aiRemateModal})});
                     const data = await res.json();
                     if(data.error) throw new Error(data.error);
                     setAiRemateResult(data);
