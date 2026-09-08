@@ -3998,6 +3998,7 @@ function exportCSV(){
             {id:"liq-masivo", icon:"liq",      label:"Generar Liq. Masivo"},
             {id:"env-masivo", icon:"liq",      label:"Enviar Liq. Masivo"},
             {id:"retiro",     icon:"vendedor", label:"Retiro de Bienes",     badge:dbRetiros.filter(r=>r.estado==="pendiente").length||undefined},
+            {id:"entregas",   icon:"adjudic",  label:"Pagos y Entregas"},
           ].map(n=>(
             <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>{setPage(n.id);setMobileMenu(false);}}>
               <span className="sb-icon"><Icon name={n.icon}/></span>
@@ -7565,6 +7566,123 @@ function exportCSV(){
             })}
           </div>
         )}
+
+        {/* ══ ENTREGAS ══ */}
+        {page==="entregas" && (()=>{
+          const remateOpts = REMATES_MERGED.filter(r=>r.estado!=="borrador");
+          const remateEntId = lotesFiltroRemate || (remateOpts[0]?.supabaseId||remateOpts[0]?.id||null);
+          const postoresEnt = dbPostores.filter(p=>!remateEntId||p.remate_id===remateEntId);
+          const fmtE = n => n ? `$${Number(n).toLocaleString("es-CL")}` : "—";
+
+          const togglePagado = async (p) => {
+            const nuevo = !p.pagado;
+            const {error} = await supabase.from("postores").update({pagado: nuevo}).eq("id", p.id);
+            if (!error) setDbPostores(prev => prev.map(x => x.id===p.id ? {...x, pagado: nuevo} : x));
+            else notify("Error al actualizar: "+error.message, "inf");
+          };
+
+          const pagados = postoresEnt.filter(p=>p.pagado).length;
+          const sinPagar = postoresEnt.filter(p=>!p.pagado).length;
+
+          return (
+            <div className="page">
+              {/* Selector de remate */}
+              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".7rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:9}}>
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="13" height="11" rx="2"/><path d="M1 6h13M5 2v4M10 2v4"/></svg>
+                <span style={{fontSize:".75rem",fontWeight:600,color:"var(--mu2)",whiteSpace:"nowrap"}}>Remate:</span>
+                <select className="fsel" style={{flex:1,maxWidth:340}} value={lotesFiltroRemate||""} onChange={e=>setLotesFiltroRemate(e.target.value||null)}>
+                  <option value="">— Todos —</option>
+                  {remateOpts.map(r=><option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>)}
+                </select>
+              </div>
+
+              {/* Stats */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:".75rem",marginBottom:"1.3rem"}}>
+                {[
+                  {label:"Total compradores", val: postoresEnt.length,  color:"var(--ac)"},
+                  {label:"Pagaron",           val: pagados,             color:"var(--gr)"},
+                  {label:"Sin pagar",         val: sinPagar,            color:"var(--yl)"},
+                ].map((s,i)=>(
+                  <div key={i} style={{padding:".85rem 1rem",background:"var(--s2)",border:"1px solid var(--b1)",borderTop:`3px solid ${s.color}`,borderRadius:10}}>
+                    <div style={{fontSize:"1.5rem",fontWeight:800,color:"var(--wh2)",lineHeight:1}}>{s.val}</div>
+                    <div style={{fontSize:".68rem",color:"var(--mu2)",marginTop:".3rem"}}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Link a app móvil */}
+              <div style={{marginBottom:"1.1rem",padding:".75rem 1rem",background:"rgba(20,184,166,.06)",border:"1px solid rgba(20,184,166,.2)",borderRadius:10,display:"flex",alignItems:"center",gap:".75rem"}}>
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--gr)" strokeWidth="1.7" strokeLinecap="round"><rect x="4" y="1" width="10" height="16" rx="2"/><path d="M9 14v.5"/></svg>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:".75rem",fontWeight:700,color:"var(--gr)"}}>App de entregas (celular)</div>
+                  <div style={{fontSize:".68rem",color:"var(--mu)"}}>Comparte el link con el entregador:</div>
+                </div>
+                <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}}
+                  onClick={()=>{ navigator.clipboard.writeText(window.location.origin+"/entregar"); notify("Link copiado.","sold"); }}>
+                  Copiar link
+                </button>
+              </div>
+
+              {/* Lista compradores */}
+              {postoresEnt.length === 0 ? (
+                <div style={{textAlign:"center",padding:"3rem",color:"var(--mu)",fontSize:".8rem",background:"var(--s2)",borderRadius:10,border:"1px solid var(--b1)"}}>
+                  No hay compradores en este remate.
+                </div>
+              ) : (
+                <div className="table-card">
+                  <div className="table-head">
+                    <div className="table-title">Compradores — {pagados} pagaron · {sinPagar} pendientes</div>
+                  </div>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th style={{textAlign:"center",width:60}}>N°</th>
+                        <th>Nombre</th>
+                        <th style={{textAlign:"center"}}>Pago</th>
+                        <th style={{textAlign:"center"}}>Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {postoresEnt
+                        .slice().sort((a,b)=>(a.numero||0)-(b.numero||0))
+                        .map(p => (
+                        <tr key={p.id} style={{opacity: p.pagado ? .75 : 1}}>
+                          <td style={{textAlign:"center",fontWeight:900,color:"var(--ac)",fontFamily:"Inter,sans-serif"}}>
+                            #{String(p.numero||0).padStart(2,"0")}
+                          </td>
+                          <td>
+                            <div style={{fontWeight:600,fontSize:".88rem"}}>{p.nombre}</div>
+                            {p.rut && <div style={{fontSize:".7rem",color:"var(--mu)"}}>{p.rut}</div>}
+                          </td>
+                          <td style={{textAlign:"center"}}>
+                            <span style={{fontSize:".65rem",fontWeight:700,padding:".2rem .5rem",borderRadius:6,
+                              background: p.pagado?"rgba(20,184,166,.1)":"rgba(245,158,11,.08)",
+                              color: p.pagado?"#0d9488":"#b45309",
+                              border:`1px solid ${p.pagado?"rgba(20,184,166,.25)":"rgba(245,158,11,.2)"}`}}>
+                              {p.pagado ? "✓ Pagó" : "⏳ Pendiente"}
+                            </span>
+                          </td>
+                          <td style={{textAlign:"center"}}>
+                            <button
+                              style={{
+                                padding:".3rem .75rem",borderRadius:8,cursor:"pointer",fontFamily:"inherit",
+                                fontSize:".72rem",fontWeight:700,border:"none",transition:"all .15s",
+                                background: p.pagado ? "rgba(239,68,68,.1)" : "rgba(20,184,166,.12)",
+                                color: p.pagado ? "#dc2626" : "#0d9488",
+                              }}
+                              onClick={()=>togglePagado(p)}>
+                              {p.pagado ? "✕ Quitar pago" : "✓ Marcar pagado"}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ══ DEVOLUCIONES ══ */}
         {page==="devoluciones" && (()=>{
