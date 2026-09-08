@@ -9,7 +9,7 @@ export async function POST(req) {
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       serviceKey
     );
-    const { email, password, nombre, casa_id, roles, activo } = await req.json();
+    const { email, password, nombre, casa_id, bodega_id, roles, activo } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: "Email y contraseña requeridos" }, { status: 400 });
@@ -31,12 +31,13 @@ export async function POST(req) {
 
     // Insertar perfil en tabla usuarios
     const { error: dbErr } = await supabaseAdmin.from("usuarios").insert({
-      id:      userId,
+      id:        userId,
       email,
       nombre,
-      casa_id: casa_id || null,
-      roles:   roles   || [],
-      activo:  activo  ?? true,
+      casa_id:   casa_id   || null,
+      bodega_id: bodega_id || null,
+      roles:     roles     || [],
+      activo:    activo    ?? true,
     });
 
     if (dbErr) {

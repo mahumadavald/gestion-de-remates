@@ -1276,7 +1276,8 @@ function AuthScreen({ onLogin }) {
               licencia: perfil.casas?.licencia_estado||"activo",
               licenciaPlan: perfil.casas?.licencia_plan||"trial",
               licenciaVence: perfil.casas?.licencia_vence||null,
-              activo: perfil.activo
+              activo: perfil.activo,
+              bodegaId: perfil.bodega_id||null,
             };
           }
         } catch(e) { /* usar fallback */ }
@@ -2050,9 +2051,9 @@ function Dashboard({ session, onLogout }) {
   const [wizFotos,   setWizFotos]   = useState({frente:null,izq:null,der:null,trasera:null});
   const [wizItems,   setWizItems]   = useState([{id:1,nombre:"",foto:null}]);
   const [wizDocs,    setWizDocs]    = useState([]);
-  const [wizDatos, setWizDatos] = useState({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",incremento:"",descripcion:"",ubicacion:"",remateId:"",cantidad:"1",ppu:false,afectoIva:false});
+  const [wizDatos, setWizDatos] = useState({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",incremento:"",descripcion:"",ubicacion:"",remateId:"",bodegaId:"",cantidad:"1",ppu:false,afectoIva:false});
   const [editLoteData, setEditLoteData] = useState(null);
-  const resetWiz = () => { setWizStep(1); setWizTipo(null); setWizVehTipo(""); setWizFotos({frente:null,izq:null,der:null,trasera:null}); setWizItems([{id:1,nombre:"",foto:null}]); setWizDocs([]); setLoteForm({ tipoRemate:"judicial", motorizado:false, comCustom:"" }); setWizDatos({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",incremento:"",descripcion:"",ubicacion:"",remateId:"",cantidad:"1",ppu:false,afectoIva:false}); };
+  const resetWiz = () => { setWizStep(1); setWizTipo(null); setWizVehTipo(""); setWizFotos({frente:null,izq:null,der:null,trasera:null}); setWizItems([{id:1,nombre:"",foto:null}]); setWizDocs([]); setLoteForm({ tipoRemate:"judicial", motorizado:false, comCustom:"" }); setWizDatos({nombre:"",exp:"",mandante:"",propietario:"",patente:"",year:"",km:"",color:"",rolSII:"",superficie:"",base:"",minimo:"",incremento:"",descripcion:"",ubicacion:"",remateId:"",bodegaId:"",cantidad:"1",ppu:false,afectoIva:false}); };
 
   // ── Retiro de bienes ──
   const [dbRetiros, setDbRetiros] = useState([]);
@@ -2067,9 +2068,9 @@ function Dashboard({ session, onLogout }) {
   // ── Usuarios (solo admin) ──
   const ROLES_DISPONIBLES = ["admin","martillero","spotter","postremate","garantias","solo lectura"];
   const [usuarios, setUsuarios] = useState([]);
-  const [usuarioForm, setUsuarioForm] = useState({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
+  const [usuarioForm, setUsuarioForm] = useState({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",bodegaId:null,activo:true});
   const [usuarioModal, setUsuarioModal] = useState(false); // false | "crear" | "editar"
-  const resetUsuarioForm = () => setUsuarioForm({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",activo:true});
+  const resetUsuarioForm = () => setUsuarioForm({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",bodegaId:null,activo:true});
 
   // ── Formulario nuevo remate ──
   const [remateForm, setRemateForm] = useState({nombre:"",fecha:"",hora:"10:00",modalidad:"Híbrido",tipo:"judicial",comCustom:"",estado:"activo"});
@@ -2095,6 +2096,9 @@ function Dashboard({ session, onLogout }) {
   const [selectedLoteIds, setSelectedLoteIds] = useState(new Set());
   const [asignarLoteId,   setAsignarLoteId]   = useState(null);
   const [asignarRemateId, setAsignarRemateId] = useState("");
+  const [dbBodegas, setDbBodegas] = useState([]);
+  const [bodegaForm, setBodegaForm] = useState({id:null,nombre:"",ciudad:"",activa:true});
+  const [bodegaModal, setBodegaModal] = useState(false);
 
   // ── IA: Resumen post-remate ──
   const [aiRemateModal,   setAiRemateModal]   = useState(null);  // null | remate object
@@ -2348,26 +2352,32 @@ function Dashboard({ session, onLogout }) {
       setDbLoading(true);
       try {
         const timeout = new Promise((_,rej) => setTimeout(()=>rej(new Error("timeout")), 5000));
+        const lotesQuery = session?.bodegaId
+          ? supabase.from("lotes").select("*").eq("bodega_id", session.bodegaId).order("orden")
+          : supabase.from("lotes").select("*").order("orden");
         const fetches = Promise.all([
           supabase.from("remates").select("*, casas(slug)").order("created_at", {ascending:false}),
-          supabase.from("lotes").select("*").order("orden"),
+          lotesQuery,
           supabase.from("postores").select("*").order("numero"),
           supabase.from("usuarios").select("*, casas(nombre)").order("nombre"),
+          supabase.from("bodegas").select("*").order("nombre"),
         ]);
-        const [remRes, lotRes, posRes, usrRes] = await Promise.race([fetches, timeout]);
+        const [remRes, lotRes, posRes, usrRes, bodRes] = await Promise.race([fetches, timeout]);
         if (mounted) {
           if (remRes?.data) setDbRemates(remRes.data);
           if (lotRes?.data) setDbLotes(lotRes.data);
           if (posRes?.data) setDbPostores(posRes.data);
           if (usrRes?.data) setUsuarios(usrRes.data.map(u=>({
-            id:      u.id,
-            nombre:  u.nombre,
-            usuario: u.email?.split("@")[0]||"",
-            email:   u.email,
-            roles:   u.roles||[],
-            casa:    u.casas?.nombre||"",
-            activo:  u.activo,
+            id:        u.id,
+            nombre:    u.nombre,
+            usuario:   u.email?.split("@")[0]||"",
+            email:     u.email,
+            roles:     u.roles||[],
+            casa:      u.casas?.nombre||"",
+            activo:    u.activo,
+            bodegaId:  u.bodega_id||null,
           })));
+          if (bodRes?.data) setDbBodegas(bodRes.data);
         }
       } catch(e) {
         console.warn("Supabase no disponible, usando mock:", e.message);
@@ -3274,6 +3284,18 @@ function exportCSV(){
                         </select>
                       </div>
                     )}
+                    {dbBodegas.length > 0 && (
+                      <div className="fg full">
+                        <label className="fl">Bodega</label>
+                        <select className="fsel" value={wizDatos.bodegaId||session?.bodegaId||""} onChange={e=>setWizDatos(f=>({...f,bodegaId:e.target.value}))} disabled={!!session?.bodegaId}>
+                          <option value="">— Sin bodega —</option>
+                          {dbBodegas.filter(b=>b.activa).map(b=>(
+                            <option key={b.id} value={b.id}>{b.nombre}{b.ciudad?` — ${b.ciudad}`:""}</option>
+                          ))}
+                        </select>
+                        {session?.bodegaId && <div style={{fontSize:".68rem",color:"var(--mu)",marginTop:".3rem"}}>Bodega asignada a tu usuario</div>}
+                      </div>
+                    )}
                     <div className="fg full"><label className="fl">Nombre del artículo</label>
                       <input className="fi" placeholder={wizTipo==="VEHICULOS"?"Toyota Hilux 2020 4x4":wizTipo==="INMUEBLES"?"Parcela 315 — Coinco VI Region":"Enseres varios — Hogar"} value={wizDatos.nombre} onChange={e=>setWizDatos(f=>({...f,nombre:e.target.value}))}/>
                     </div>
@@ -3801,6 +3823,7 @@ function exportCSV(){
                           cantidad:    parseInt(wizDatos.cantidad)||1,
                           precio_por_unidad: wizDatos.ppu||false,
                           estado:      "disponible",
+                          bodega_id:   wizDatos.bodegaId || session?.bodegaId || null,
                           orden: (()=>{ const rid=wizDatos.remateId||lotesFiltroRemate||null; const ls=rid?dbLotes.filter(l=>l.remate_id===rid):[]; return ls.length>0?Math.max(...ls.map(l=>l.orden||0))+1:1; })(),
                           imagenes:    imagenes.length>0 ? imagenes : null,
                         });
@@ -4041,6 +4064,10 @@ function exportCSV(){
               <span className="sb-label">Casas de remates</span>
             </div>
           )}
+          <div className={`sb-item${page==="bodegas"?" on":""}`} onClick={()=>{setPage("bodegas");setMobileMenu(false);}}>
+            <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="6" width="14" height="9" rx="1.5"/><path d="M4 6V4a4 4 0 018 0v2"/><path d="M8 9v3"/><circle cx="8" cy="9" r=".8" fill="currentColor"/></svg></span>
+            <span className="sb-label">Bodegas</span>
+          </div>
         </nav>
 
         {/* Footer */}
@@ -4503,6 +4530,7 @@ function exportCSV(){
                       <th style={{textAlign:"center",width:52}}>Cant.</th>
                       <th>Descripción</th>
                       <th>Propietario</th>
+                      {dbBodegas.length > 0 && <th style={{textAlign:"center"}}>Bodega</th>}
                       <th style={{textAlign:"right"}}>Mínimo</th>
                       <th style={{textAlign:"center"}}>Com.</th>
                       <th style={{textAlign:"center"}}>Estado</th>
@@ -4512,7 +4540,7 @@ function exportCSV(){
                   </thead>
                   <tbody>
                     {lotesMostrar.length === 0 ? (
-                      <tr><td colSpan={10} style={{textAlign:"center",color:"var(--mu)",padding:"2rem",fontSize:".8rem"}}>
+                      <tr><td colSpan={dbBodegas.length>0?11:10} style={{textAlign:"center",color:"var(--mu)",padding:"2rem",fontSize:".8rem"}}>
                         {lotesFiltroRemate ? "Este remate no tiene lotes aún. Usa + Agregar lote." : "No hay lotes registrados."}
                       </td></tr>
                     ) : lotesMostrar.map((l,i) => {
@@ -4531,6 +4559,15 @@ function exportCSV(){
                           <td style={{textAlign:"center"}}>{l.cantidad||1}</td>
                           <td style={{fontWeight:600}}>{l.nombre||"—"}</td>
                           <td className="mono">{l.propietario||"—"}</td>
+                          {dbBodegas.length > 0 && (
+                            <td style={{textAlign:"center"}}>
+                              {l.bodega_id ? (
+                                <span style={{fontSize:".65rem",fontWeight:700,padding:"2px 7px",borderRadius:20,background:"rgba(6,182,212,.1)",color:"var(--ac)",border:"1px solid rgba(6,182,212,.25)",whiteSpace:"nowrap"}}>
+                                  {dbBodegas.find(b=>b.id===l.bodega_id)?.nombre||"—"}
+                                </span>
+                              ) : <span style={{color:"var(--mu)",fontSize:".7rem"}}>—</span>}
+                            </td>
+                          )}
                           <td style={{textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:600}}>${fmtClp(l.base)}</td>
                           <td style={{textAlign:"center"}}>
                             <span style={{color:"var(--ac)",fontWeight:700,fontFamily:"Inter,sans-serif",fontSize:".76rem"}}>{l.comision||3}%</span>
@@ -6343,12 +6380,13 @@ function exportCSV(){
                 method:"POST",
                 headers:{"Content-Type":"application/json"},
                 body: JSON.stringify({
-                  email:   usuarioForm.email,
-                  password:usuarioForm.pass,
-                  nombre:  usuarioForm.nombre,
-                  casa_id: casaData?.id||null,
-                  roles:   usuarioForm.roles,
-                  activo:  usuarioForm.activo,
+                  email:     usuarioForm.email,
+                  password:  usuarioForm.pass,
+                  nombre:    usuarioForm.nombre,
+                  casa_id:   casaData?.id||null,
+                  bodega_id: usuarioForm.bodegaId||null,
+                  roles:     usuarioForm.roles,
+                  activo:    usuarioForm.activo,
                 }),
               });
               const result = await res.json();
@@ -6365,10 +6403,11 @@ function exportCSV(){
               // Editar usuario existente
               const {data:casaData} = await supabase.from("casas").select("id").eq("nombre",usuarioForm.casa).single();
               const {error:uErr} = await supabase.from("usuarios").update({
-                nombre:   usuarioForm.nombre,
-                casa_id:  casaData?.id||null,
-                roles:    usuarioForm.roles,
-                activo:   usuarioForm.activo,
+                nombre:    usuarioForm.nombre,
+                casa_id:   casaData?.id||null,
+                roles:     usuarioForm.roles,
+                activo:    usuarioForm.activo,
+                bodega_id: usuarioForm.bodegaId||null,
               }).eq("id", usuarioForm.id);
               if(uErr){ notify("Error al actualizar: "+uErr.message,"inf"); return; }
               // Si ingresó nueva contraseña, enviar email de reset al usuario
@@ -6391,7 +6430,7 @@ function exportCSV(){
             setUsuarioModal(false); resetUsuarioForm();
           };
           const editarUsuario = (u) => {
-            setUsuarioForm({...u, pass:""});
+            setUsuarioForm({...u, pass:"", bodegaId: u.bodegaId||null});
             setUsuarioModal("editar");
           };
           const eliminarUsuario = async (id) => {
@@ -6599,6 +6638,17 @@ function exportCSV(){
                           {CASAS_LISTA_REAL.map(c=><option key={c.id||"admin"} value={c.nombre}>{c.nombre}</option>)}
                         </select>
                       </div>
+                      {dbBodegas.length > 0 && (
+                        <div>
+                          <label className="fl">Bodega asignada</label>
+                          <select className="fsel" value={usuarioForm.bodegaId||""} onChange={e=>setUsuarioForm(f=>({...f,bodegaId:e.target.value||null}))}>
+                            <option value="">— Sin bodega (ve todo) —</option>
+                            {dbBodegas.filter(b=>b.activa).map(b=>(
+                              <option key={b.id} value={b.id}>{b.nombre}{b.ciudad?` — ${b.ciudad}`:""}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </div>
 
                     {/* Roles */}
@@ -7681,6 +7731,161 @@ function exportCSV(){
                 </div>
               )}
             </div>
+          );
+        })()}
+
+        {/* ══ BODEGAS ══ */}
+        {page==="bodegas" && (()=>{
+          const guardarBodega = async () => {
+            if (!bodegaForm.nombre.trim()) { notify("Ingresa el nombre de la bodega.", "inf"); return; }
+            if (bodegaForm.id) {
+              const {error} = await supabase.from("bodegas").update({
+                nombre: bodegaForm.nombre.trim(),
+                ciudad: bodegaForm.ciudad.trim()||null,
+                activa: bodegaForm.activa,
+              }).eq("id", bodegaForm.id);
+              if (error) { notify("Error: "+error.message, "inf"); return; }
+              setDbBodegas(prev => prev.map(b => b.id===bodegaForm.id ? {...b, ...bodegaForm, nombre:bodegaForm.nombre.trim(), ciudad:bodegaForm.ciudad.trim()||null} : b));
+              notify("Bodega actualizada.", "sold");
+            } else {
+              const {data:casaData} = await supabase.from("casas").select("id").eq("slug", session?.casa||"rematesahumada").single();
+              const {data, error} = await supabase.from("bodegas").insert({
+                nombre:  bodegaForm.nombre.trim(),
+                ciudad:  bodegaForm.ciudad.trim()||null,
+                activa:  true,
+                casa_id: casaData?.id||null,
+              }).select().single();
+              if (error) { notify("Error: "+error.message, "inf"); return; }
+              setDbBodegas(prev => [...prev, data].sort((a,b)=>a.nombre.localeCompare(b.nombre)));
+              notify("Bodega creada.", "sold");
+            }
+            setBodegaModal(false);
+            setBodegaForm({id:null,nombre:"",ciudad:"",activa:true});
+          };
+
+
+          return (
+          <div className="page">
+            <div className="table-card">
+              <div className="table-head">
+                <div className="table-title">Bodegas ({dbBodegas.length})</div>
+                <div style={{display:"flex",gap:".5rem"}}>
+                  {dbBodegas.length===0 && (
+                    <button className="btn-sec" style={{fontSize:".76rem"}} onClick={async ()=>{
+                      const {data:casaData} = await supabase.from("casas").select("id").eq("slug", session?.casa||"rematesahumada").single();
+                      const seeds = [
+                        {nombre:"MALLOA",      ciudad:"Malloa, VI Región"},
+                        {nombre:"QUILPUÉ",     ciudad:"Quilpué, V Región"},
+                        {nombre:"SANTIAGO",    ciudad:"Santiago, RM"},
+                        {nombre:"CONCEPCIÓN",  ciudad:"Concepción, VIII Región"},
+                      ];
+                      const rows = seeds.map(s=>({...s, activa:true, casa_id:casaData?.id||null}));
+                      const {data, error} = await supabase.from("bodegas").insert(rows).select();
+                      if (error) { notify("Error: "+error.message,"inf"); return; }
+                      setDbBodegas(data.sort((a,b)=>a.nombre.localeCompare(b.nombre)));
+                      notify("4 bodegas creadas.", "sold");
+                    }}>⚡ Crear bodegas Ahumada</button>
+                  )}
+                  <button className="btn-primary" onClick={()=>{setBodegaForm({id:null,nombre:"",ciudad:"",activa:true});setBodegaModal(true);}}>+ Nueva bodega</button>
+                </div>
+              </div>
+              <div style={{overflowX:"auto"}}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Ciudad</th>
+                      <th style={{textAlign:"center"}}>Estado</th>
+                      <th style={{textAlign:"center"}}>Usuarios</th>
+                      <th style={{textAlign:"center"}}>Lotes</th>
+                      <th style={{textAlign:"center"}}>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dbBodegas.length === 0 ? (
+                      <tr><td colSpan={6} style={{textAlign:"center",color:"var(--mu)",padding:"2rem",fontSize:".8rem"}}>
+                        No hay bodegas registradas. Crea la primera con el botón de arriba.
+                      </td></tr>
+                    ) : dbBodegas.map(b=>{
+                      const usuariosB = usuarios.filter(u=>u.bodegaId===b.id);
+                      const lotesB    = dbLotes.filter(l=>l.bodega_id===b.id);
+                      return (
+                        <tr key={b.id}>
+                          <td style={{fontWeight:700,color:"var(--wh2)"}}>{b.nombre}</td>
+                          <td style={{color:"var(--mu2)"}}>{b.ciudad||"—"}</td>
+                          <td style={{textAlign:"center"}}>
+                            <span style={{fontSize:".68rem",fontWeight:700,padding:"2px 8px",borderRadius:20,
+                              background:b.activa?"rgba(20,184,166,.12)":"rgba(100,100,100,.1)",
+                              color:b.activa?"var(--gr)":"var(--mu)",
+                              border:`1px solid ${b.activa?"rgba(20,184,166,.3)":"rgba(100,100,100,.2)"}`}}>
+                              {b.activa?"Activa":"Inactiva"}
+                            </span>
+                          </td>
+                          <td style={{textAlign:"center"}}>
+                            <span style={{fontWeight:600,color:"var(--ac)",fontFamily:"Inter,sans-serif"}}>{usuariosB.length}</span>
+                            {usuariosB.length > 0 && (
+                              <div style={{fontSize:".65rem",color:"var(--mu)",marginTop:2}}>
+                                {usuariosB.slice(0,2).map(u=>u.nombre).join(", ")}{usuariosB.length>2?` +${usuariosB.length-2}`:""}
+                              </div>
+                            )}
+                          </td>
+                          <td style={{textAlign:"center",fontWeight:600,color:"var(--ac)",fontFamily:"Inter,sans-serif"}}>{lotesB.length}</td>
+                          <td style={{textAlign:"center"}}>
+                            <button className="btn-sec" style={{fontSize:".68rem",padding:".2rem .65rem"}}
+                              onClick={()=>{setBodegaForm({id:b.id,nombre:b.nombre,ciudad:b.ciudad||"",activa:b.activa});setBodegaModal(true);}}>
+                              Editar
+                            </button>
+                            <button className="btn-sec" style={{fontSize:".68rem",padding:".2rem .65rem",marginTop:3,
+                              background:b.activa?"rgba(224,82,82,.06)":"rgba(20,184,166,.06)",
+                              color:b.activa?"var(--rd)":"var(--gr)",
+                              borderColor:b.activa?"rgba(224,82,82,.25)":"rgba(20,184,166,.25)"}}
+                              onClick={async ()=>{
+                                const {error} = await supabase.from("bodegas").update({activa:!b.activa}).eq("id",b.id);
+                                if (!error) setDbBodegas(prev=>prev.map(x=>x.id===b.id?{...x,activa:!b.activa}:x));
+                                else notify("Error: "+error.message,"inf");
+                              }}>
+                              {b.activa?"Desactivar":"Activar"}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Modal bodega */}
+            {bodegaModal && (
+              <div className="ov" onClick={()=>{setBodegaModal(false);setBodegaForm({id:null,nombre:"",ciudad:"",activa:true});}}>
+                <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:380}}>
+                  <div className="modal-title">{bodegaForm.id?"Editar bodega":"Nueva bodega"}</div>
+                  <div className="form-grid">
+                    <div className="fg full">
+                      <label className="fl">Nombre *</label>
+                      <input className="fi" placeholder="MALLOA" value={bodegaForm.nombre} onChange={e=>setBodegaForm(f=>({...f,nombre:e.target.value.toUpperCase()}))} style={{textTransform:"uppercase",fontWeight:700}}/>
+                    </div>
+                    <div className="fg full">
+                      <label className="fl">Ciudad</label>
+                      <input className="fi" placeholder="Malloa, VI Región" value={bodegaForm.ciudad} onChange={e=>setBodegaForm(f=>({...f,ciudad:e.target.value}))}/>
+                    </div>
+                    {bodegaForm.id && (
+                      <div className="fg full" style={{display:"flex",alignItems:"center",gap:".75rem"}}>
+                        <label className="fl" style={{margin:0}}>Activa</label>
+                        <div onClick={()=>setBodegaForm(f=>({...f,activa:!f.activa}))} style={{width:40,height:22,borderRadius:11,background:bodegaForm.activa?"var(--gr)":"var(--b2)",cursor:"pointer",position:"relative",transition:"background .2s",flexShrink:0}}>
+                          <div style={{width:16,height:16,borderRadius:"50%",background:"#fff",position:"absolute",top:3,left:bodegaForm.activa?20:4,transition:"left .2s"}}/>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="modal-actions">
+                    <button className="btn-sec" onClick={()=>{setBodegaModal(false);setBodegaForm({id:null,nombre:"",ciudad:"",activa:true});}}>Cancelar</button>
+                    <button className="btn-confirm" onClick={guardarBodega}>{bodegaForm.id?"Guardar cambios":"Crear bodega"}</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
           );
         })()}
 

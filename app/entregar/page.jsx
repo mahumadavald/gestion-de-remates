@@ -193,14 +193,16 @@ export default function EntregarPage() {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!data.session) { setScreen("login"); return; }
       const { data: perfil } = await supabase.from("usuarios")
-        .select("*, casas(id,nombre,slug)").eq("id", data.session.user.id).single();
+        .select("*, casas(id,nombre,slug), bodegas(nombre)").eq("id", data.session.user.id).single();
       if (!perfil) { await supabase.auth.signOut(); setScreen("login"); return; }
       const roles = perfil.roles || [];
       if (!roles.some(r => ["admin","martillero","entregador"].includes(r))) {
         await supabase.auth.signOut(); setScreen("login"); return;
       }
       setSession({ id: perfil.id, name: perfil.nombre, email: perfil.email,
-        role: roles[0], casaId: perfil.casas?.id, casaNombre: perfil.casas?.nombre || "TAKKA" });
+        role: roles[0], casaId: perfil.casas?.id, casaNombre: perfil.casas?.nombre || "TAKKA",
+        bodegaId: perfil.bodega_id || null,
+        bodegaNombre: perfil.bodegas?.nombre || null });
       cargarRemates(perfil.casas?.id || null, roles.includes("admin"));
     });
   }, []);
@@ -221,14 +223,15 @@ export default function EntregarPage() {
     const { data, error } = await supabase.auth.signInWithPassword({ email: loginEmail.trim(), password: loginPass });
     if (error) { setLoginErr("Credenciales incorrectas."); setLoginLoading(false); return; }
     const { data: perfil } = await supabase.from("usuarios")
-      .select("*, casas(id,nombre,slug)").eq("id", data.user.id).single();
+      .select("*, casas(id,nombre,slug), bodegas(nombre)").eq("id", data.user.id).single();
     if (!perfil) { setLoginErr("Usuario no encontrado."); await supabase.auth.signOut(); setLoginLoading(false); return; }
     const roles = perfil.roles || [];
     if (!roles.some(r => ["admin","martillero","entregador"].includes(r))) {
       setLoginErr("Sin permiso de acceso a esta sección."); await supabase.auth.signOut(); setLoginLoading(false); return;
     }
     setSession({ id: perfil.id, name: perfil.nombre, email: perfil.email,
-      role: roles[0], casaId: perfil.casas?.id, casaNombre: perfil.casas?.nombre || "TAKKA" });
+      role: roles[0], casaId: perfil.casas?.id, casaNombre: perfil.casas?.nombre || "TAKKA",
+      bodegaId: perfil.bodega_id || null });
     setLoginLoading(false);
     cargarRemates(perfil.casas?.id || null, roles.includes("admin"));
   };
@@ -250,9 +253,11 @@ export default function EntregarPage() {
   const cargarTodoDelRemate = async (remateId) => {
     if (!supabase) return;
     setLoadingAll(true);
+    let lotesQ = supabase.from("lotes").select("*").eq("remate_id", remateId);
+    if (session?.bodegaId) lotesQ = lotesQ.eq("bodega_id", session.bodegaId);
     const [{ data: ps }, { data: ls }, { data: pujs }] = await Promise.all([
       supabase.from("postores").select("*").eq("remate_id", remateId),
-      supabase.from("lotes").select("*").eq("remate_id", remateId),
+      lotesQ,
       supabase.from("pujas").select("lote_id,numero_postor,monto").eq("remate_id", remateId),
     ]);
     setAllPostores(ps || []);
@@ -345,7 +350,7 @@ export default function EntregarPage() {
           <TakkaLogo size={24}/>
           <div>
             <div className="topbar-title">Entregas</div>
-            <div className="topbar-sub">{session?.casaNombre}</div>
+            <div className="topbar-sub">{session?.casaNombre}{session?.bodegaNombre ? ` · ${session.bodegaNombre}` : ""}</div>
           </div>
         </div>
         <button className="logout-btn" onClick={handleLogout}>Salir</button>
@@ -399,7 +404,7 @@ export default function EntregarPage() {
           <TakkaLogo size={24}/>
           <div>
             <div className="topbar-title">Entregas</div>
-            <div className="topbar-sub">{session?.casaNombre}</div>
+            <div className="topbar-sub">{session?.casaNombre}{session?.bodegaNombre ? ` · ${session.bodegaNombre}` : ""}</div>
           </div>
         </div>
         <button className="logout-btn" onClick={handleLogout}>Salir</button>
