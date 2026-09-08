@@ -3839,10 +3839,9 @@ function exportCSV(){
                 <button className="btn-confirm" onClick={async ()=>{
                   if(modal==="nuevo-remate"){
                     if(!remateForm.nombre||!remateForm.fecha){notify("Completa nombre y fecha.","inf");return;}
-                    const {data:casaData} = await supabase.from("casas").select("id").eq("slug","rematesahumada").single();
                     const codigo = `R-${String(Date.now()).slice(-4)}`;
                     const {error} = await supabase.from("remates").insert({
-                      casa_id:   casaData?.id||null,
+                      casa_id:   session?.casaId||null,
                       codigo,
                       nombre:    remateForm.nombre,
                       fecha:     remateForm.fecha,
@@ -3857,10 +3856,9 @@ function exportCSV(){
                     setModal(null); resetRemateForm(); notify("Remate creado correctamente.","sold");
                   } else if(modal==="nuevo-postor"){
                     if(!postorForm.nombre){notify("Ingresa el nombre del postor.","inf");return;}
-                    const {data:casaData} = await supabase.from("casas").select("id").eq("slug","rematesahumada").single();
                     const numero = (dbPostores.length||POSTORES_MERGED.length) + 1;
                     const {error} = await supabase.from("postores").insert({
-                      casa_id:  casaData?.id||null,
+                      casa_id:  session?.casaId||null,
                       numero,
                       nombre:   postorForm.nombre,
                       rut:      postorForm.rut,
