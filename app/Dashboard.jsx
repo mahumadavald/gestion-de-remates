@@ -7363,6 +7363,7 @@ function exportCSV(){
                               </div>
                             </>
                           )}
+                          {ctrlTab==="control" && <>
                           <button onClick={()=>removePhoto(idx, photoIdx%item.imgs.length)}
                             style={{position:"absolute",top:6,left:6,background:"rgba(224,82,82,.7)",border:"none",borderRadius:4,padding:".12rem .35rem",fontSize:".62rem",color:"#fff",cursor:"pointer"}}>
                             Quitar
@@ -7373,6 +7374,7 @@ function exportCSV(){
                             Foto
                             <input id={`phadd${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
                           </label>
+                          </>}
                         </>
                       ) : (
                         <label htmlFor={`ph${idx}`} className="sala-photo-placeholder" style={{cursor:"pointer"}}>
@@ -7382,7 +7384,8 @@ function exportCSV(){
                         </label>
                       )}
 
-                      {/* Botón cámara — overlay esquina inferior izquierda */}
+                      {/* Botón cámara — solo visible en tab control */}
+                      {ctrlTab==="control" && (
                       <button
                         onClick={camActiva ? detenerCamara : activarCamara}
                         style={{position:"absolute",bottom:6,left:6,display:"flex",alignItems:"center",gap:".3rem",padding:".22rem .55rem",background:camActiva?"rgba(224,82,82,.82)":"rgba(0,0,0,.58)",border:"none",borderRadius:5,color:"#fff",fontSize:".62rem",fontWeight:700,cursor:"pointer",backdropFilter:"blur(4px)"}}
@@ -7391,6 +7394,7 @@ function exportCSV(){
                         <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M1 3h8l3 3v5H1V3z"/><circle cx="5" cy="8" r="1.5"/></svg>
                         {camActiva ? "Apagar cam" : "Cámara"}
                       </button>
+                      )}
 
                       {/* Indicador REC grabación de pantalla */}
                       {grabando && (
@@ -7641,85 +7645,74 @@ function exportCSV(){
 
                     {/* POSTOR TAB */}
                     {ctrlTab==="postor" && (
-                      <div className="ba-card" style={{padding:0,background:"transparent",border:"none"}}>
-                        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:".75rem",padding:".4rem .7rem",background:"var(--s1)",borderRadius:7,border:"1px solid var(--b1)"}}>
-                          <div style={{fontSize:".72rem",color:"var(--mu2)"}}>Estado</div>
-                          <div style={{fontSize:".78rem",fontWeight:700,color:sColor}}>{sLabel}</div>
-                        </div>
-                        <div className="bal">Oferta actual</div>
-                        <div className={`bap${flash?" flash":""}`}>{fmt(bid.current)}</div>
-                        {aState==="live"&&bidTimer!==null&&bidTimer>0
-                          ? <BidRing seconds={bidTimer} total={BID_TIMER} nextAmount={bid.current+curInc} increment={curInc}/>
-                          : <div className="banl">Proxima puja: <span>{fmt(bid.current+curInc)}</span> · Incremento: <span>{fmtS(curInc)}</span></div>
-                        }
-                        {aState==="live" && iAmWinning && (
-                          <div className="bb-winning">
-                            <div className="bw-icon"><div className="bw-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg></div></div>
-                            <div className="bw-text"><div className="bw-main">Vas ganando</div><div className="bw-sub">Tu oferta de {fmt(bid.current)} es la mas alta</div></div>
-                          </div>
-                        )}
-                        {aState==="live" && lastBidder!==null && !iAmWinning && (
-                          <div className="bb-losing">
-                            <div className="bl-alert">!</div>
-                            <div className="bl-text">
-                              <div className="bl-main">Te lo estas perdiendo</div>
-                              <div className="bl-sub">Oferta actual: <span>{fmt(bid.current)}</span> — Puja <span>{fmt(bid.current+curInc)}</span> para liderar</div>
+                      <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
+
+                        {/* Oferta actual — bloque central */}
+                        <div style={{textAlign:"center",padding:"1rem .5rem .5rem"}}>
+                          <div style={{fontSize:".6rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".1em",marginBottom:".4rem"}}>Oferta actual</div>
+                          <div className={`bap${flash?" flash":""}`} style={{fontSize:"2.8rem",lineHeight:1}}>{fmt(bid.current)}</div>
+                          {aState==="live" && (
+                            <div style={{fontSize:".75rem",color:"var(--mu)",marginTop:".4rem"}}>
+                              Siguiente: <strong style={{color:"var(--wh)"}}>{fmt(bid.current+curInc)}</strong>
                             </div>
-                            <button className="bl-action" onClick={placeBid}>Pujar {fmtS(bid.current+curInc)}</button>
-                          </div>
-                        )}
-                        {aState==="live"&&lastBidder===null && <button className="bb" onClick={placeBid}>Pujar {fmt(bid.current+curInc)}</button>}
-                        {aState==="waiting" && <button className="bb" disabled>Esperando inicio...</button>}
-                        {aState==="paused"  && <button className="bb" disabled>Pausado</button>}
-                        {aState==="sold"    && <button className="bb sold" disabled>Adjudicado</button>}
-                        {aState==="live" && (
-                          <div style={{display:"flex",gap:".5rem",marginTop:".5rem"}}>
-                            <input
-                              type="text"
-                              placeholder="Monto personalizado..."
-                              value={postorCustom}
-                              onChange={e=>{const v=e.target.value.replace(/\D/g,"");setPostorCustom(v?Number(v).toLocaleString("es-CL"):"")} }
-                              onKeyDown={e=>{
-                                if(e.key==="Enter"){
-                                  const m=parseInt(postorCustom.replace(/\D/g,""));
-                                  if(!m||m<=bid.current){notify("El monto debe ser mayor a la oferta actual","inf");return;}
-                                  setCurInc(m-bid.current); placeBid(); setPostorCustom("");
-                                }
-                              }}
-                              style={{flex:1,padding:".65rem .9rem",borderRadius:8,border:"1px solid var(--b1)",background:"var(--s2)",color:"var(--tx)",fontSize:".9rem"}}
-                            />
-                            <button
-                              style={{padding:".65rem 1.1rem",borderRadius:8,background:"var(--ac)",color:"#fff",border:"none",cursor:"pointer",fontWeight:700,fontSize:".9rem"}}
-                              onClick={()=>{
-                                const m=parseInt(postorCustom.replace(/\D/g,""));
-                                if(!m||m<=bid.current){notify("El monto debe ser mayor a la oferta actual","inf");return;}
-                                setCurInc(m-bid.current); placeBid(); setPostorCustom("");
-                              }}
-                            >Pujar</button>
-                          </div>
-                        )}
-                        <div className="bst">
-                          <div className="bsc"><div className="bsv">{bid.count}</div><div className="bsl">Pujas totales</div></div>
-                          <div className="bsc"><div className="bsv">{fmtS(bid.current-item.base)}</div><div className="bsl">Sobre base</div></div>
+                          )}
                         </div>
+
+                        {/* Timer */}
+                        {aState==="live"&&bidTimer!==null&&bidTimer>0 &&
+                          <BidRing seconds={bidTimer} total={BID_TIMER} nextAmount={bid.current+curInc} increment={curInc}/>
+                        }
+
+                        {/* Estado ganando — botón verde oscuro */}
+                        {aState==="live" && iAmWinning && (
+                          <button className="sala-place-bid-btn" disabled
+                            style={{background:"rgba(20,184,166,.15)",color:"var(--gr)",border:"1px solid rgba(20,184,166,.35)",fontSize:"1rem",padding:"1rem",cursor:"default"}}>
+                            ✓ Vas ganando
+                          </button>
+                        )}
+
+                        {/* Estado perdiendo — botón PUJAR prominente */}
+                        {aState==="live" && lastBidder!==null && !iAmWinning && (<>
+                          <div style={{textAlign:"center",fontSize:".72rem",color:"var(--rd)",fontWeight:600}}>
+                            Te superaron — puja para recuperar el lote
+                          </div>
+                          <button className="sala-place-bid-btn" onClick={placeBid}
+                            style={{fontSize:"1.05rem",padding:"1rem",letterSpacing:".01em"}}>
+                            Pujar {fmt(bid.current+curInc)}
+                          </button>
+                        </>)}
+
+                        {/* Sin pujas aún */}
+                        {aState==="live" && lastBidder===null && (
+                          <button className="sala-place-bid-btn" onClick={placeBid}
+                            style={{fontSize:"1.05rem",padding:"1rem",letterSpacing:".01em"}}>
+                            Pujar {fmt(bid.current+curInc)}
+                          </button>
+                        )}
+
+                        {aState==="waiting" && <button className="sala-place-bid-btn" disabled style={{padding:"1rem",fontSize:".95rem"}}>Esperando inicio...</button>}
+                        {aState==="paused"  && <button className="sala-place-bid-btn" disabled style={{padding:"1rem",fontSize:".95rem"}}>Pausado</button>}
+                        {aState==="sold"    && <button className="sala-place-bid-btn adj" disabled style={{padding:"1rem",fontSize:".95rem"}}>✓ Adjudicado</button>}
                       </div>
                     )}
 
-                    {/* ── Quick Bid row ── */}
-                    <div className="sala-quick-bids" style={{marginTop:"auto",paddingTop:".75rem"}}>
-                      {getSmartIncs(item?.base||0).map((inc,i) => (
-                        <button
-                          key={inc}
-                          className={`sala-quick-card c${i}`}
-                          disabled={aState!=="live"}
-                          onClick={()=>{ setCurInc(inc); placeBid(inc); }}
-                          title={`Pujar con incremento ${fmtS(inc)}`}
-                        >
-                          <div className="sala-quick-label">Quick Bid</div>
-                          <div className="sala-quick-amount">{fmtS(inc)}</div>
-                        </button>
-                      ))}
-                    </div>
+                    {/* ── Quick Bid row — solo en tab control ── */}
+                    {ctrlTab==="control" && (
+                      <div className="sala-quick-bids" style={{marginTop:"auto",paddingTop:".75rem"}}>
+                        {getSmartIncs(item?.base||0).map((inc,i) => (
+                          <button
+                            key={inc}
+                            className={`sala-quick-card c${i}`}
+                            disabled={aState!=="live"}
+                            onClick={()=>{ setCurInc(inc); placeBid(inc); }}
+                            title={`Pujar con incremento ${fmtS(inc)}`}
+                          >
+                            <div className="sala-quick-label">Quick Bid</div>
+                            <div className="sala-quick-amount">{fmtS(inc)}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
                   </div>{/* end sala-bid-card */}
 
