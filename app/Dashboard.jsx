@@ -2360,7 +2360,9 @@ function Dashboard({ session, onLogout }) {
           lotesQuery,
           supabase.from("postores").select("*").order("numero"),
           supabase.from("usuarios").select("*, casas(nombre)").order("nombre"),
-          supabase.from("bodegas").select("*").order("nombre"),
+          (session?.role==="admin"
+            ? supabase.from("bodegas").select("*").order("nombre")
+            : supabase.from("bodegas").select("*").eq("casa_id", session?.casaId).order("nombre")),
         ]);
         const [remRes, lotRes, posRes, usrRes, bodRes] = await Promise.race([fetches, timeout]);
         if (mounted) {
@@ -7748,12 +7750,11 @@ function exportCSV(){
               setDbBodegas(prev => prev.map(b => b.id===bodegaForm.id ? {...b, ...bodegaForm, nombre:bodegaForm.nombre.trim(), ciudad:bodegaForm.ciudad.trim()||null} : b));
               notify("Bodega actualizada.", "sold");
             } else {
-              const {data:casaData} = await supabase.from("casas").select("id").eq("slug", session?.casa||"rematesahumada").single();
               const {data, error} = await supabase.from("bodegas").insert({
                 nombre:  bodegaForm.nombre.trim(),
                 ciudad:  bodegaForm.ciudad.trim()||null,
                 activa:  true,
-                casa_id: casaData?.id||null,
+                casa_id: session?.casaId||null,
               }).select().single();
               if (error) { notify("Error: "+error.message, "inf"); return; }
               setDbBodegas(prev => [...prev, data].sort((a,b)=>a.nombre.localeCompare(b.nombre)));
@@ -7770,21 +7771,20 @@ function exportCSV(){
               <div className="table-head">
                 <div className="table-title">Bodegas ({dbBodegas.length})</div>
                 <div style={{display:"flex",gap:".5rem"}}>
-                  {dbBodegas.length===0 && (
+                  {dbBodegas.length===0 && session?.casa==="rematesahumada" && (
                     <button className="btn-sec" style={{fontSize:".76rem"}} onClick={async ()=>{
-                      const {data:casaData} = await supabase.from("casas").select("id").eq("slug", session?.casa||"rematesahumada").single();
                       const seeds = [
                         {nombre:"MALLOA",      ciudad:"Malloa, VI Región"},
                         {nombre:"QUILPUÉ",     ciudad:"Quilpué, V Región"},
                         {nombre:"SANTIAGO",    ciudad:"Santiago, RM"},
                         {nombre:"CONCEPCIÓN",  ciudad:"Concepción, VIII Región"},
                       ];
-                      const rows = seeds.map(s=>({...s, activa:true, casa_id:casaData?.id||null}));
+                      const rows = seeds.map(s=>({...s, activa:true, casa_id:session.casaId}));
                       const {data, error} = await supabase.from("bodegas").insert(rows).select();
                       if (error) { notify("Error: "+error.message,"inf"); return; }
                       setDbBodegas(data.sort((a,b)=>a.nombre.localeCompare(b.nombre)));
                       notify("4 bodegas creadas.", "sold");
-                    }}>⚡ Crear bodegas Ahumada</button>
+                    }}>⚡ Cargar mis bodegas</button>
                   )}
                   <button className="btn-primary" onClick={()=>{setBodegaForm({id:null,nombre:"",ciudad:"",activa:true});setBodegaModal(true);}}>+ Nueva bodega</button>
                 </div>
