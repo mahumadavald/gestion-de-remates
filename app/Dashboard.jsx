@@ -1990,8 +1990,14 @@ export default function Root() {
         setLoading(false);
       });
     } else {
-      // Carga normal — siempre pedir login
-      supabase.auth.signOut().then(() => setLoading(false));
+      // Carga normal — restaurar sesión existente si la hay
+      supabase.auth.getSession().then(async ({ data: { session: s } }) => {
+        if (s?.user) {
+          const perfil = await fetchPerfil(s.user.id);
+          setSession(perfil);
+        }
+        setLoading(false);
+      });
     }
 
     return () => subscription.unsubscribe();
