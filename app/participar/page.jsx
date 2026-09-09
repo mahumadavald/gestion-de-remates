@@ -356,9 +356,10 @@ function ParticiparContent() {
       setLookingUp(true);
 
       // 1. Buscar en Supabase (base de datos de TAKKA)
+      // Nota: solo se traen campos no sensibles; datos bancarios nunca se exponen por RUT público
       const { data } = await supabase
         .from("postores")
-        .select("nombre, email, telefono, empresa, direccion, comuna, banco, tipo_cuenta, numero_cuenta, cuentas_banco")
+        .select("nombre, email, telefono, empresa, direccion, comuna")
         .eq("rut", rut)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -372,22 +373,12 @@ function ParticiparContent() {
         setGiro(data.empresa || "");
         setDireccion(data.direccion || "");
         setComuna(data.comuna || "");
-        // Cargar cuentas guardadas si existen
-        const savedCuentas = data.cuentas_banco || [];
-        setCuentasGuardadas(savedCuentas);
-        if (savedCuentas.length > 0) {
-          // Pre-seleccionar la primera cuenta guardada
-          const first = savedCuentas[0];
-          setBanco(first.banco || "");
-          setTipoCta(first.tipoCuenta || "CUENTA CORRIENTE");
-          setNumCta(first.nCuenta || "");
-          setCuentaSelIdx("0");
-        } else {
-          setBanco(data.banco || "");
-          setTipoCta(data.tipo_cuenta || "CUENTA CORRIENTE");
-          setNumCta(data.numero_cuenta || "");
-          setCuentaSelIdx("");
-        }
+        // Datos bancarios no se pre-rellenan — el postor los ingresa manualmente por seguridad
+        setCuentasGuardadas([]);
+        setBanco("");
+        setTipoCta("CUENTA CORRIENTE");
+        setNumCta("");
+        setCuentaSelIdx("");
         setReturningUser(true);
         setLookingUp(false);
         return;

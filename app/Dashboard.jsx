@@ -2322,17 +2322,22 @@ function Dashboard({ session, onLogout }) {
   const [statsMes,   setStatsMes]   = useState(new Date().getMonth());
   const [adjCountdown,    setAdjCountdown]    = useState(null); // countdown auto-avance
 
-  const timerRef    = useRef(null);
-  const bidTimerRef = useRef(null);
-  const feedRef     = useRef(null);
-  const chatRef     = useRef(null);
+  const timerRef       = useRef(null);
+  const bidTimerRef    = useRef(null);
+  const feedRef        = useRef(null);
+  const chatRef        = useRef(null);
+  const adjudicandoRef = useRef(false); // guard contra doble adjudicación
+  const doAdjudicarRef = useRef(null);  // ref siempre actualizada para evitar stale closure en timer
 
   const notify = (msg, type="ok") => { setNotif({msg,type}); setTimeout(()=>setNotif(null),4000); };
+
+  // Mantener ref actualizada para que el timer nunca capture una versión stale
+  useEffect(() => { doAdjudicarRef.current = doAdjudicar; });
 
   // bidTimer: 15s countdown después de cada puja — auto-adjudica si nadie supera
   useEffect(() => {
     if (bidTimer===null||aState!=="live") return;
-    if (bidTimer<=0) { doAdjudicar(); return; }
+    if (bidTimer<=0) { doAdjudicarRef.current?.(); return; }
     bidTimerRef.current = setTimeout(()=>setBidTimer(t=>t-1),1000);
     return () => clearTimeout(bidTimerRef.current);
   }, [bidTimer, aState]);
@@ -2355,6 +2360,7 @@ function Dashboard({ session, onLogout }) {
   };
 
   const revertirAdjudicacion = () => {
+    adjudicandoRef.current = false; // permitir adjudicar nuevamente tras revertir
     setBids(p => { const n=[...p]; n[idx]={...n[idx], status:"live", winner: n[idx].history?.[0]?.bidder||null}; return n; });
     setAState("live"); setBidTimer(BID_TIMER);
     setAdjCountdown(null);
@@ -2492,13 +2498,16 @@ function Dashboard({ session, onLogout }) {
   const placeBid = (overrideInc) => {
     const inc = overrideInc ?? curInc;
     const amt = (bids[idx]?.current||0) + inc;
-    setBids(p=>{const n=[...p];const c=n[idx];n[idx]={...c,current:amt,count:c.count+1,history:[{bidder:"Tu (P-0245)",amount:amt,time:new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),mine:true},...c.history.slice(0,19)],winner:"Tu (P-0245)"};return n;});
+    const bidderName = session?.name ? `${session.name} (Online)` : "Postor Online";
+    setBids(p=>{const n=[...p];const c=n[idx];n[idx]={...c,current:amt,count:c.count+1,history:[{bidder:bidderName,amount:amt,time:new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),mine:true},...c.history.slice(0,19)],winner:bidderName};return n;});
     setLastBidder("me"); setBidTimer(BID_TIMER); 
     setFlash(true); setTimeout(()=>setFlash(false),600); notify("Puja registrada.");
   };
 
   // ── ADJUDICACIÓN + generación automática de liquidaciones/devoluciones ──
   const doAdjudicar = (manual=false) => {
+    if (adjudicandoRef.current) return; // evita doble ejecución (timer + click simultáneo)
+    adjudicandoRef.current = true;
     const winner   = bids[idx]?.winner || null;
     const montoUnitario = bids[idx]?.current || lots[idx]?.base;
     const loteNom  = lots[idx]?.name;
@@ -2520,17 +2529,20 @@ function Dashboard({ session, onLogout }) {
 
     if (winner) {
       // Liquidación automática — comisión según tipo + gastos admin si motorizado
-      const gar     = 300000;
+      const winnerClean = winner.replace(" (Online)","").replace(" (Presencial)","");
+      const garantiaReg = GARANTIAS.find(g => g.postor===winnerClean && g.estado==="aprobada");
+      const gar     = garantiaReg?.monto || 300000;
       const com     = Math.round(monto * (comPct / 100));
       const saldo   = Math.max(0, monto - gar);
       const totalAPagar = saldo + com + gastosAdm;
       const remateActivo = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===salaRemateId);
+      const postorReg = POSTORES_MERGED.find(p => p.name===winnerClean || p.razonSocial===winnerClean);
       const newLiq  = {
         id: `LIQ-${Date.now()}`,
         lote: loteNom,
         exp: loteReal.exp || "",
         postor: winner,
-        email: winner.includes("Online") ? "postor@email.cl" : "rfuentes@gmail.com",
+        email: postorReg?.email || "",
         monto, gar, saldo, com, gastosAdm, totalAPagar,
         tipoRemate, motorizado, comPct,
         ppu, cantidadLote: ppu ? cantidadLote : 1, montoUnitario: ppu ? montoUnitario : null, afectoIva,
@@ -2730,7 +2742,7 @@ function Dashboard({ session, onLogout }) {
     setBids(prev => { const n=[...prev]; n[idx]={current:lots[idx]?.base||0,count:0,history:[],status:"waiting",winner:null}; return n; });
     notify(`Lote repetido — ${lots[idx]?.name}`,"inf");
   };
-  const resetAuction  = () => { setAState("waiting"); setBidTimer(null); setLastBidder(null); setBids(lots.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null}))); };
+  const resetAuction  = () => { adjudicandoRef.current = false; setAState("waiting"); setBidTimer(null); setLastBidder(null); setBids(lots.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null}))); };
 
   const registrarPresencial = () => {
     const montoNum = parseInt((presMonto||"").replace(/\D/g,""));
