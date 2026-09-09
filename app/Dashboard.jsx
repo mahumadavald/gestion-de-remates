@@ -2572,7 +2572,7 @@ function Dashboard({ session, onLogout }) {
         postor:        newLiq.postor,
         email:         newLiq.email,
         monto:         newLiq.monto,
-        gar:           newLiq.gar,
+        garantia:      newLiq.gar,
         saldo:         newLiq.saldo,
         com:           newLiq.com,
         gastos_adm:    newLiq.gastosAdm,
