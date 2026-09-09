@@ -7547,12 +7547,11 @@ function exportCSV(){
                           </div>
                         </div>
 
-                        {/* Acciones — 2 filas de 3 */}
+                        {/* Acciones */}
                         <div style={{display:"flex",flexDirection:"column",gap:".25rem"}}>
-                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".25rem"}}>
-                            <button className="ab g"  onClick={startAuction} disabled={aState==="live"}>▶ Iniciar</button>
-                            <button className="ab y"  onClick={pauseAuction} disabled={aState!=="live"}>⏸ Pausar</button>
-                            <button className="ab bl" onClick={adjudicar}    disabled={aState==="sold"}>✓ Adj.</button>
+                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".25rem"}}>
+                            <button className="ab g" onClick={startAuction} disabled={aState==="live"}>▶ Iniciar</button>
+                            <button className="ab y" onClick={pauseAuction} disabled={aState!=="live"}>⏸ Pausar</button>
                           </div>
                           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".25rem"}}>
                             <button className="ab" style={{background:"rgba(167,139,250,.08)",color:"#a78bfa",border:"1px solid rgba(167,139,250,.2)",fontSize:".68rem"}} onClick={repetirLote}>↺ Repetir</button>
@@ -7581,13 +7580,21 @@ function exportCSV(){
                         </div>
 
                         {/* CTA principal */}
-                        <button
-                          className={`sala-place-bid-btn${aState==="live"?" adj":""}`}
-                          onClick={aState==="live" ? adjudicar : startAuction}
-                          disabled={aState==="sold"}
-                        >
-                          {aState==="live" ? "✓ Adjudicar lote" : aState==="sold" ? "Lote adjudicado" : "▶ Iniciar subasta"}
-                        </button>
+                        {aState!=="live" && (
+                          <button
+                            className="sala-place-bid-btn"
+                            onClick={startAuction}
+                            disabled={aState==="sold"}
+                          >
+                            {aState==="sold" ? "✓ Lote adjudicado" : "▶ Iniciar subasta"}
+                          </button>
+                        )}
+                        {aState==="live" && (
+                          <button onClick={adjudicar}
+                            style={{width:"100%",padding:".4rem",background:"transparent",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,color:"var(--mu)",fontSize:".68rem",cursor:"pointer",letterSpacing:".03em"}}>
+                            Adjudicar manualmente
+                          </button>
+                        )}
 
                         {/* Estado */}
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".35rem"}}>
