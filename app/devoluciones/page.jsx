@@ -1,13 +1,8 @@
 'use client'
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = 'force-dynamic';
-
-const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = SUPA_URL ? createClient(SUPA_URL, SUPA_KEY) : null;
 
 const BANCOS = [
   "Banco de Chile",
@@ -71,45 +66,19 @@ function DevolucionesContent() {
       return;
     }
     const load = async () => {
-      // Fetch postor
-      const { data: postorData, error: postorErr } = await supabase
-        .from("postores")
-        .select("id, numero, nombre, rut, banco, tipo_cuenta, numero_cuenta, remate_id, casa_id")
-        .eq("id", pParam)
-        .single();
+      const res = await fetch(`/api/devoluciones?p=${encodeURIComponent(pParam)}`);
+      if (res.status === 400) { setError("enlace_invalido"); setLoading(false); return; }
+      if (res.status === 404) { setError("no_encontrado");   setLoading(false); return; }
+      if (!res.ok)            { setError("no_encontrado");   setLoading(false); return; }
 
-      if (postorErr || !postorData) {
-        setError("no_encontrado");
-        setLoading(false);
-        return;
-      }
+      const { postor: postorData, remate: remateData, casa: casaData } = await res.json();
 
       setPostor(postorData);
-
-      // Pre-fill if already has data
-      if (postorData.banco) setBanco(postorData.banco);
-      if (postorData.tipo_cuenta) setTipoCta(postorData.tipo_cuenta);
+      if (postorData.banco)         setBanco(postorData.banco);
+      if (postorData.tipo_cuenta)   setTipoCta(postorData.tipo_cuenta);
       if (postorData.numero_cuenta) setNumCta(postorData.numero_cuenta);
-
-      // Fetch remate
-      if (postorData.remate_id) {
-        const { data: remateData } = await supabase
-          .from("remates")
-          .select("nombre, fecha")
-          .eq("id", postorData.remate_id)
-          .single();
-        if (remateData) setRemate(remateData);
-      }
-
-      // Fetch casa
-      if (postorData.casa_id) {
-        const { data: casaData } = await supabase
-          .from("casas")
-          .select("nombre, logo_url")
-          .eq("id", postorData.casa_id)
-          .single();
-        if (casaData) setCasa(casaData);
-      }
+      if (remateData) setRemate(remateData);
+      if (casaData)   setCasa(casaData);
 
       setLoading(false);
     };
@@ -128,40 +97,21 @@ function DevolucionesContent() {
     setSaving(true);
 
     try {
-      const updatePayload = {
-        banco,
-        tipo_cuenta: tipoCta,
-        numero_cuenta: numCta.trim(),
-      };
-
-      // Try to save titular_cuenta — gracefully handle if column doesn't exist
-      try {
-        const { error: updateErr } = await supabase
-          .from("postores")
-          .update({ ...updatePayload, titular_cuenta: titular.trim() })
-          .eq("id", postor.id);
-
-        if (updateErr) {
-          // If titular_cuenta column doesn't exist, retry without it
-          if (updateErr.message?.includes("titular_cuenta") || updateErr.code === "PGRST204") {
-            const { error: retryErr } = await supabase
-              .from("postores")
-              .update(updatePayload)
-              .eq("id", postor.id);
-            if (retryErr) throw new Error(retryErr.message);
-          } else {
-            throw new Error(updateErr.message);
-          }
-        }
-      } catch (innerErr) {
-        // Final fallback: save without titular_cuenta
-        const { error: fallbackErr } = await supabase
-          .from("postores")
-          .update(updatePayload)
-          .eq("id", postor.id);
-        if (fallbackErr) throw new Error(fallbackErr.message);
+      const res = await fetch("/api/devoluciones", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          postorId:     postor.id,
+          banco,
+          tipoCuenta:   tipoCta,
+          numeroCuenta: numCta.trim(),
+          titular:      titular.trim(),
+        }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || "Error al guardar");
       }
-
       setDone(true);
     } catch (err) {
       setSaveError("Error al guardar: " + err.message);

@@ -355,14 +355,15 @@ function ParticiparContent() {
     const lookup = async () => {
       setLookingUp(true);
 
-      // 1. Buscar en Supabase (base de datos de TAKKA)
-      const { data } = await supabase
-        .from("postores")
-        .select("nombre, email, telefono, empresa, direccion, comuna, banco, tipo_cuenta, numero_cuenta, cuentas_banco")
-        .eq("rut", rut)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // 1. Buscar en TAKKA vía API route server-side (no expone la anon key al cliente)
+      let data = null;
+      try {
+        const res = await fetch(`/api/postor-lookup?rut=${encodeURIComponent(rut)}`);
+        if (!cancelled && res.ok) {
+          const json = await res.json();
+          if (json.found) data = json.data;
+        }
+      } catch(e) { /* si falla, el usuario completa manualmente */ }
       if (cancelled) return;
 
       if (data) {
@@ -372,22 +373,12 @@ function ParticiparContent() {
         setGiro(data.empresa || "");
         setDireccion(data.direccion || "");
         setComuna(data.comuna || "");
-        // Cargar cuentas guardadas si existen
-        const savedCuentas = data.cuentas_banco || [];
-        setCuentasGuardadas(savedCuentas);
-        if (savedCuentas.length > 0) {
-          // Pre-seleccionar la primera cuenta guardada
-          const first = savedCuentas[0];
-          setBanco(first.banco || "");
-          setTipoCta(first.tipoCuenta || "CUENTA CORRIENTE");
-          setNumCta(first.nCuenta || "");
-          setCuentaSelIdx("0");
-        } else {
-          setBanco(data.banco || "");
-          setTipoCta(data.tipo_cuenta || "CUENTA CORRIENTE");
-          setNumCta(data.numero_cuenta || "");
-          setCuentaSelIdx("");
-        }
+        // Datos bancarios no se pre-rellenan — el postor los ingresa manualmente por seguridad
+        setCuentasGuardadas([]);
+        setBanco("");
+        setTipoCta("CUENTA CORRIENTE");
+        setNumCta("");
+        setCuentaSelIdx("");
         setReturningUser(true);
         setLookingUp(false);
         return;
@@ -490,22 +481,7 @@ function ParticiparContent() {
     setSubmitting(true);
 
     try {
-      // 0. Verificar que el RUT no esté ya inscrito en ESTE remate específico
-      if (remateId) {
-        const { data: yaInscrito } = await supabase
-          .from("postores")
-          .select("id")
-          .eq("rut", rut.trim())
-          .eq("remate_id", remateId)
-          .maybeSingle();
-        if (yaInscrito) {
-          setError(`Ya estás inscrito en este remate con el RUT ${rut}. Si tienes dudas, contacta a ${casa?.nombre}.`);
-          setSubmitting(false);
-          return;
-        }
-      }
-
-      // 1. Crear cuenta Supabase Auth para el postor
+      // 1. Crear cuenta Supabase Auth para el postor (client-side: usa anon key, es intencional)
       let userId = null;
       let tempPassword = null;
       try {
@@ -519,7 +495,7 @@ function ParticiparContent() {
         }
       } catch(e) { /* continuar sin user_id si falla */ }
 
-      // 2. Subir comprobante
+      // 2. Subir comprobante (storage upload con anon key está permitido)
       let comprobanteUrl = null;
       try {
         const ext = comprobante.name.split(".").pop();
@@ -532,37 +508,40 @@ function ParticiparContent() {
         }
       } catch(e) {}
 
-      // 3. Número de postor
-      const { data: maxPostor } = await supabase
-        .from("postores").select("numero")
-        .eq("remate_id", remateId).order("numero", { ascending: false }).limit(1).single();
-      const numero = (maxPostor?.numero || 0) + 1;
+      // 3 + 4. Duplicate check + numero + INSERT — via server route (service key, no expone anon)
+      const inscribirRes = await fetch("/api/inscribir", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rut:            rut.trim(),
+          nombre:         nombre.trim(),
+          email:          email.trim(),
+          telefono:       telefono.trim(),
+          giro:           giro.trim(),
+          direccion:      direccion.trim(),
+          comuna:         comuna || null,
+          banco:          banco || null,
+          tipoCta:        tipoCta || null,
+          numCta:         numCta.trim() || null,
+          remateId,
+          casaId:         casa.id,
+          modalidad,
+          comprobanteUrl,
+          suscribir,
+          userId,
+        }),
+      });
 
-      // 4. Insertar postor
-      const { data: postorData, error: postorErr } = await supabase
-        .from("postores").insert({
-          casa_id:         casa.id,
-          remate_id:       remateId,
-          numero,
-          nombre:          nombre.trim(),
-          rut:             rut.trim(),
-          email:           email.trim(),
-          telefono:        telefono.trim(),
-          tipo:            giro ? "empresa" : "natural",
-          empresa:         giro.trim() || null,
-          direccion:       direccion.trim() || null,
-          comuna:          comuna || null,
-          estado:          "pendiente",
-          modalidad:       modalidad,
-          banco:           banco || null,
-          tipo_cuenta:     tipoCta || null,
-          numero_cuenta:   numCta.trim() || null,
-          comprobante_url: comprobanteUrl,
-          suscrito:        suscribir,
-          user_id:         userId,
-        }).select().single();
-
-      if (postorErr) throw new Error(postorErr.message);
+      if (inscribirRes.status === 409) {
+        setError(`Ya estás inscrito en este remate con el RUT ${rut}. Si tienes dudas, contacta a ${casa?.nombre}.`);
+        setSubmitting(false);
+        return;
+      }
+      if (!inscribirRes.ok) {
+        const errJson = await inscribirRes.json().catch(() => ({}));
+        throw new Error(errJson.error || "Error al inscribir");
+      }
+      const { numero } = await inscribirRes.json();
 
       const emailPayload = {
         nombre,
