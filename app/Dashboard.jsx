@@ -2712,7 +2712,7 @@ function Dashboard({ session, onLogout }) {
     setRemateTerminado(true);
     // Agrupar todas las adjudicaciones (demo + generadas en vivo) por comprador
     const todasLiq = [...ADJUDICACIONES.map(a=>({
-      lote:a.lote, exp:"", monto:a.monto, comPct:3, motorizado:false,
+      lote:a.lote, exp:"", monto:a.monto, comPct:a.comPct||10, motorizado:a.motorizado||false,
       postor:a.postor, rut:a.rut||"—", email:"",
     })), ...liquidaciones];
 
@@ -2732,9 +2732,33 @@ function Dashboard({ session, onLogout }) {
       facturado: false,
     }));
 
-    setLiqReview({ compradores, fecha: new Date().toLocaleDateString("es-CL"), remateNombre: "Remate Industrial Marzo 2026", remateId:"R-044" });
+    const remateActualNombre = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===salaRemateId)?.name || "Remate";
+    setLiqReview({ compradores, fecha: new Date().toLocaleDateString("es-CL"), remateNombre: remateActualNombre, remateId: salaRemateId||"" });
     notify("Remate cerrado. Revisando liquidaciones antes de enviar.", "sold");
     setPage("liquidac");
+
+    // Auto-generar devoluciones para postores con garantía que NO adjudicaron ningún lote
+    const winners = new Set(
+      [...ADJUDICACIONES.map(a=>a.postor), ...liquidaciones.map(l=>l.postor)]
+        .map(p=>p.replace(" (Online)","").replace(" (Presencial)",""))
+    );
+    const devsCierre = GARANTIAS
+      .filter(g => g.estado==="aprobada" && (g.monto||0) > 0 && !winners.has(g.postor))
+      .map(g => ({
+        id: `DEV-${g.id}-cierre`,
+        postor: g.postor, rut: g.rut||"", email: g.email||"",
+        cuenta: "Por confirmar", monto: g.monto,
+        estado: "pendiente", enviado: false,
+        lote: "—", fecha: new Date().toLocaleDateString("es-CL"),
+      }));
+    if (devsCierre.length) {
+      setDevoluciones(p => {
+        const ya = new Set(p.map(d=>d.postor));
+        const nuevas = devsCierre.filter(d=>!ya.has(d.postor));
+        if (nuevas.length) notify(`${nuevas.length} devolución${nuevas.length>1?"es":""} de garantía generada${nuevas.length>1?"s":""} automáticamente.`, "inf");
+        return [...p, ...nuevas];
+      });
+    }
 
     // Auto-borrar fotos de Supabase Storage para liberar espacio (los datos de adjudicación no llevan fotos)
     (async () => {
@@ -5399,14 +5423,15 @@ function exportCSV(){
                               </div>
 
                               {/* Números del vendedor */}
-                              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0,borderBottom:"1px solid var(--b1)"}}>
+                              <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:0,borderBottom:"1px solid var(--b1)"}}>
                                 {[
-                                  {label:"Total martillo",     val:fmt(d.totalMartillo),         color:"var(--wh2)"},
-                                  {label:`Com. venta ${d.pctVenta}% → vendedor paga`, val:fmt(d.comVenta), color:"#f87171"},
-                                  {label:"Com. compra → comprador paga", val:fmt(d.comCompra),   color:"var(--gr)"},
-                                  {label:"Total comisiones casa",         val:fmt(d.comVenta+d.comCompra), color:"var(--ac)"},
+                                  {label:"Total martillo",                   val:fmt(d.totalMartillo),              color:"var(--wh2)"},
+                                  {label:`Com. venta ${d.pctVenta}% (casa)`, val:fmt(d.comVenta),                  color:"#f87171"},
+                                  {label:"Neto al vendedor",                 val:fmt(d.totalMartillo-d.comVenta),   color:"var(--gr)"},
+                                  {label:"Com. compra (comprador paga)",     val:fmt(d.comCompra),                  color:"var(--mu2)"},
+                                  {label:"Total comisiones casa",            val:fmt(d.comVenta+d.comCompra),       color:"var(--ac)"},
                                 ].map((c,i)=>(
-                                  <div key={i} style={{padding:".75rem 1rem",borderRight:i<3?"1px solid var(--b1)":"none",textAlign:"center"}}>
+                                  <div key={i} style={{padding:".75rem 1rem",borderRight:i<4?"1px solid var(--b1)":"none",textAlign:"center"}}>
                                     <div style={{fontSize:".57rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:".25rem",lineHeight:1.3}}>{c.label}</div>
                                     <div style={{fontFamily:"Inter,sans-serif",fontSize:".9rem",fontWeight:800,color:c.color}}>{c.val}</div>
                                   </div>
