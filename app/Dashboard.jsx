@@ -2514,6 +2514,9 @@ function Dashboard({ session, onLogout }) {
   // ── ADJUDICACIÓN + generación automática de liquidaciones/devoluciones ──
   const doAdjudicar = (manual=false) => {
     if (adjudicandoRef.current) return; // evita doble ejecución (timer + click simultáneo)
+    if (manual && (bids[idx]?.count || 0) === 0) {
+      if (!window.confirm("Este lote no tiene pujas. ¿Adjudicar al precio base sin comprador registrado?")) return;
+    }
     adjudicandoRef.current = true;
     const winner   = bids[idx]?.winner || null;
     const montoUnitario = bids[idx]?.current || lots[idx]?.base;
@@ -4514,10 +4517,10 @@ function exportCSV(){
                               if(mapped.length>0){
                                 setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
                                 setIdx(0); setAState("waiting"); setBidTimer(null);
-                                setPage("sala"); notify("Sala abierta.","sold");
+                                setRemateActivo(r); setPage("sala"); notify("Sala abierta.","sold");
                               } else {
                                 setIdx(0); setAState("waiting"); setBidTimer(null);
-                                setPage("sala");
+                                setRemateActivo(r); setPage("sala");
                               }
                             }}>Abrir sala</button>
                           )}
