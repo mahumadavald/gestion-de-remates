@@ -91,13 +91,13 @@ const calcLiquidacion = (lotes, postor) => {
   const lineas = [];
   lotes.forEach(l => {
     const afecto    = l.afectoIva || false;
-    const com       = Math.round(l.monto * (l.comPct ?? 3) / 100);
+    const com       = Math.round(l.monto * (l.comPct ?? 10) / 100);
     const gastosAdm = l.motorizado ? GASTO_ADMIN_MOTORIZADO : 0;
     if(afecto) { totalAf += l.monto; } else { totalEx += l.monto; }
     totalCom      += com;
     totalGastosAdm+= gastosAdm;
     totalAf       += gastosAdm;
-    lineas.push({ lote:l.lote, exp:l.exp||"", monto:l.monto, com, gastosAdm, motorizado:l.motorizado, comPct:l.comPct??3, afectoIva:afecto });
+    lineas.push({ lote:l.lote, exp:l.exp||"", monto:l.monto, com, gastosAdm, motorizado:l.motorizado, comPct:l.comPct??10, afectoIva:afecto });
   });
   const ivaBase   = totalCom + totalAf; // comisión AF + lotes AF + gastos admin
   const iva       = Math.round(ivaBase * IVA);
@@ -2344,6 +2344,7 @@ function Dashboard({ session, onLogout }) {
 
   // adjCountdown: se activa al adjudicar — avance MANUAL por el martillero
   const avanzarSiguienteLote = () => {
+    adjudicandoRef.current = false; // permite adjudicar el siguiente lote
     setAdjCountdown(null);
     setIdx(prev => {
       const next = prev + 1;
@@ -2531,10 +2532,11 @@ function Dashboard({ session, onLogout }) {
       // Liquidación automática — comisión según tipo + gastos admin si motorizado
       const winnerClean = winner.replace(" (Online)","").replace(" (Presencial)","");
       const garantiaReg = GARANTIAS.find(g => g.postor===winnerClean && g.estado==="aprobada");
-      const gar     = garantiaReg?.monto || 300000;
+      const gar     = garantiaReg?.monto || 0; // garantía solo como referencia; se descuenta una vez en calcLiquidacion
       const com     = Math.round(monto * (comPct / 100));
-      const saldo   = Math.max(0, monto - gar);
-      const totalAPagar = saldo + com + gastosAdm;
+      const saldo   = monto; // sin descuento por lote — la garantía se aplica sobre el total consolidado
+      const ivaAdm  = Math.round((com + gastosAdm) * 0.19);
+      const totalAPagar = saldo + com + gastosAdm + ivaAdm;
       const remateActivo = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===salaRemateId);
       const postorReg = POSTORES_MERGED.find(p => p.name===winnerClean || p.razonSocial===winnerClean);
       const newLiq  = {
@@ -2543,10 +2545,10 @@ function Dashboard({ session, onLogout }) {
         exp: loteReal.exp || "",
         postor: winner,
         email: postorReg?.email || "",
-        monto, gar, saldo, com, gastosAdm, totalAPagar,
+        monto, gar, saldo, com, gastosAdm, ivaAdm, totalAPagar,
         tipoRemate, motorizado, comPct,
         ppu, cantidadLote: ppu ? cantidadLote : 1, montoUnitario: ppu ? montoUnitario : null, afectoIva,
-        estado: saldo===0 ? "pagado" : "saldo pendiente",
+        estado: "saldo pendiente",
         enviado: false,
         retiro: null,
         fecha: new Date().toLocaleDateString("es-CL"),
@@ -6669,9 +6671,31 @@ function exportCSV(){
                 </div>
               </div>
               {liqReview && (
-                <button className="btn-primary" onClick={()=>{
-                  setLiqReview(r=>({...r,compradores:r.compradores.map(c=>({...c,enviado:true}))}));
-                  notify(`Liquidaciones enviadas a ${liqReview.compradores.length} compradores.`,"sold");
+                <button className="btn-primary" onClick={async ()=>{
+                  const pendientes = liqReview.compradores.filter(c=>!c.enviado);
+                  if (!pendientes.length) { notify("Todos ya enviados.", "inf"); return; }
+                  let ok = 0, err = 0;
+                  for (const comp of pendientes) {
+                    const email = comp.postorData?.email || "";
+                    if (!email) { err++; continue; }
+                    try {
+                      const res = await authFetch("/api/liquidaciones/send", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          to: email,
+                          postorNombre: comp.postorData?.name || "Comprador",
+                          rut: comp.postorData?.rut || "",
+                          liq: comp.liq,
+                          remateNombre: liqReview.remateNombre,
+                          fecha: liqReview.fecha,
+                        }),
+                      });
+                      if (res.ok) { ok++; setLiqReview(r=>({...r,compradores:r.compradores.map(c=>c===comp?{...c,enviado:true}:c)})); }
+                      else err++;
+                    } catch { err++; }
+                  }
+                  notify(`${ok} enviados${err ? ` · ${err} sin email o con error` : ""}.`, ok?"ok":"inf");
                 }}>
                   Enviar a todos ({liqReview?.compradores?.filter(c=>!c.enviado).length} pendientes)
                 </button>
@@ -6914,10 +6938,31 @@ function exportCSV(){
                         <button
                           className="btn-primary"
                           style={{fontSize:".73rem", background: c.enviado?"rgba(20,184,166,.12)":"var(--ac)", color: c.enviado?"var(--gr)":"#fff", border: c.enviado?"1px solid rgba(20,184,166,.3)":"none"}}
-                          onClick={()=>{
-                            generarPDFLiquidacion(c, liqReview.fecha);
-                            setLiqReview(r=>({...r,compradores:r.compradores.map((x,xi)=>xi===ci?{...x,enviado:true}:x)}));
-                            notify(`PDF generado — envía a ${p?.email||c.postorData?.email||"comprador"} manualmente.`,"sold");
+                          onClick={async ()=>{
+                            const email = p?.email || c.postorData?.email || "";
+                            if (!email) { notify("Sin email — descarga el PDF manualmente.", "inf"); generarPDFLiquidacion(c, liqReview.fecha); return; }
+                            try {
+                              const res = await authFetch("/api/liquidaciones/send", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                  to: email,
+                                  postorNombre: p?.name || c.postorData?.name || "Comprador",
+                                  rut: p?.rut || c.postorData?.rut || "",
+                                  liq: c.liq,
+                                  remateNombre: liqReview.remateNombre,
+                                  fecha: liqReview.fecha,
+                                }),
+                              });
+                              const data = await res.json();
+                              if (res.ok) {
+                                setLiqReview(r=>({...r,compradores:r.compradores.map((x,xi)=>xi===ci?{...x,enviado:true}:x)}));
+                                notify(`Liquidación enviada a ${email}`, "ok");
+                              } else {
+                                notify(`Error al enviar: ${data.error||"intenta de nuevo"}`, "inf");
+                                generarPDFLiquidacion(c, liqReview.fecha);
+                              }
+                            } catch { notify("Error de red — PDF descargado.", "inf"); generarPDFLiquidacion(c, liqReview.fecha); }
                           }}>
                           <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{marginRight:".3rem"}}><path d="M1 1l12 6-12 6V9l8-2-8-2V1z"/></svg>
                           {c.enviado ? "Reenviar correo" : "Enviar liquidación"}
