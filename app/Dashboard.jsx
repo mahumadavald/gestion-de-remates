@@ -7702,23 +7702,6 @@ function exportCSV(){
                       </div>
                     )}
 
-                    {/* ── Quick Bid row — solo en tab control ── */}
-                    {ctrlTab==="control" && (
-                      <div className="sala-quick-bids" style={{marginTop:"auto",paddingTop:".75rem"}}>
-                        {getSmartIncs(item?.base||0).map((inc,i) => (
-                          <button
-                            key={inc}
-                            className={`sala-quick-card c${i}`}
-                            disabled={aState!=="live"}
-                            onClick={()=>{ setCurInc(inc); placeBid(inc); }}
-                            title={`Pujar con incremento ${fmtS(inc)}`}
-                          >
-                            <div className="sala-quick-label">Quick Bid</div>
-                            <div className="sala-quick-amount">{fmtS(inc)}</div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
 
                   </div>{/* end sala-bid-card */}
 
