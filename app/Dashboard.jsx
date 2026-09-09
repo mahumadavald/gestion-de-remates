@@ -7511,75 +7511,76 @@ function exportCSV(){
 
                     {/* CONTROL TAB */}
                     {ctrlTab==="control" && (
-                      <>
-                        {/* ── Lote selector ── */}
-                        <div style={{marginBottom:".6rem"}}>
-                          <div style={{fontSize:".63rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:".3rem"}}>Lote activo</div>
+                      <div style={{display:"flex",flexDirection:"column",gap:".6rem"}}>
+
+                        {/* Lote activo */}
+                        <div>
+                          <div style={{fontSize:".6rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".28rem"}}>Lote activo</div>
                           <select className="asel" style={{marginBottom:0}} value={idx} onChange={e=>{setIdx(Number(e.target.value));resetAuction();setCurInc(lots[Number(e.target.value)]?.inc||500000);}}>
                             {lots.map((it,i) => <option key={i} value={i}>Lote {String(i+1).padStart(2,"0")} — {it.name}</option>)}
                           </select>
                         </div>
 
-                        {/* ── 2-col: incremento + acciones ── */}
-                        <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:".65rem",marginBottom:".6rem",alignItems:"stretch"}}>
-                          {/* Incremento */}
-                          <div className="inc-ctrl" style={{marginBottom:0}}>
-                            <div style={{display:"flex",alignItems:"baseline",gap:".5rem",marginBottom:".35rem"}}>
-                              <div className="inc-title" style={{marginBottom:0}}>Incremento</div>
-                              <div className="inc-cur" style={{marginBottom:0,fontSize:"1.25rem"}}>{fmtS(curInc)}</div>
-                            </div>
-                            <div className="inc-btns" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:".22rem"}}>
-                              {INC_OPTIONS.map(v => (
-                                <button key={v} className={`inc-btn${curInc===v?" on":""}`} onClick={()=>setCurInc(v)}>{fmtS(v)}</button>
-                              ))}
-                            </div>
-                            <div style={{display:"flex",gap:".35rem",marginTop:".4rem",alignItems:"center"}}>
-                              <input
-                                placeholder="Personalizado..."
-                                value={customMonto}
-                                onChange={e=>setCustomMonto(e.target.value)}
-                                onKeyDown={e=>{ if(e.key==="Enter"&&customMonto){ const n=parseInt(customMonto.replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} } }}
-                                style={{flex:1,padding:".28rem .5rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".7rem",fontFamily:"Inter,sans-serif"}}
-                              />
-                              <button
-                                onClick={()=>{ const n=parseInt((customMonto||"").replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} }}
-                                style={{padding:".28rem .55rem",background:"var(--ac)",border:"none",borderRadius:6,color:"#fff",fontSize:".67rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
-                                Usar
-                              </button>
-                            </div>
+                        {/* Incremento */}
+                        <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:10,padding:".6rem .7rem"}}>
+                          <div style={{display:"flex",alignItems:"baseline",gap:".5rem",marginBottom:".4rem"}}>
+                            <span style={{fontSize:".6rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em"}}>Incremento</span>
+                            <span style={{fontSize:"1.15rem",fontWeight:800,color:"var(--ac)"}}>{fmtS(curInc)}</span>
                           </div>
-
-                          {/* Botones acción */}
-                          <div style={{display:"flex",flexDirection:"column",gap:".32rem",minWidth:108}}>
-                            <button className="ab g"  style={{flex:1}} onClick={startAuction} disabled={aState==="live"}>▶ Iniciar</button>
-                            <button className="ab y"  style={{flex:1}} onClick={pauseAuction} disabled={aState!=="live"}>⏸ Pausar</button>
-                            <button className="ab bl" style={{flex:1}} onClick={adjudicar}    disabled={aState==="sold"}>✓ Adjudicar</button>
-                            <button className="ab"    style={{flex:1,background:"rgba(167,139,250,.1)",color:"#a78bfa",border:"1px solid rgba(167,139,250,.25)"}} onClick={repetirLote}>↺ Repetir</button>
-                            <button className="ab"    style={{flex:1,background:"rgba(255,255,255,.04)",color:"var(--mu2)",border:"1px solid var(--b2)"}} onClick={pasarLote} disabled={idx>=lots.length-1}>→ Pasar</button>
-                            <button className="ab r"  style={{flex:1}} onClick={resetAuction}>⟳ Reset</button>
+                          <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:".2rem",marginBottom:".35rem"}}>
+                            {INC_OPTIONS.map(v => (
+                              <button key={v} className={`inc-btn${curInc===v?" on":""}`} onClick={()=>setCurInc(v)}>{fmtS(v)}</button>
+                            ))}
+                          </div>
+                          <div style={{display:"flex",gap:".3rem"}}>
+                            <input
+                              placeholder="Personalizado..."
+                              value={customMonto}
+                              onChange={e=>setCustomMonto(e.target.value)}
+                              onKeyDown={e=>{ if(e.key==="Enter"&&customMonto){ const n=parseInt(customMonto.replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} } }}
+                              style={{flex:1,padding:".28rem .5rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".7rem",fontFamily:"Inter,sans-serif"}}
+                            />
+                            <button onClick={()=>{ const n=parseInt((customMonto||"").replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} }}
+                              style={{padding:".28rem .6rem",background:"var(--ac)",border:"none",borderRadius:6,color:"#fff",fontSize:".67rem",fontWeight:700,cursor:"pointer"}}>
+                              Usar
+                            </button>
                           </div>
                         </div>
 
-                        {/* ── Postura presencial ── */}
-                        <div style={{padding:".5rem .7rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:8,marginBottom:".6rem"}}>
-                          <div style={{fontSize:".65rem",fontWeight:700,color:"var(--yl)",marginBottom:".35rem",display:"flex",alignItems:"center",gap:".3rem"}}>
-                            <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
+                        {/* Acciones — 2 filas de 3 */}
+                        <div style={{display:"flex",flexDirection:"column",gap:".25rem"}}>
+                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".25rem"}}>
+                            <button className="ab g"  onClick={startAuction} disabled={aState==="live"}>▶ Iniciar</button>
+                            <button className="ab y"  onClick={pauseAuction} disabled={aState!=="live"}>⏸ Pausar</button>
+                            <button className="ab bl" onClick={adjudicar}    disabled={aState==="sold"}>✓ Adj.</button>
+                          </div>
+                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".25rem"}}>
+                            <button className="ab" style={{background:"rgba(167,139,250,.08)",color:"#a78bfa",border:"1px solid rgba(167,139,250,.2)",fontSize:".68rem"}} onClick={repetirLote}>↺ Repetir</button>
+                            <button className="ab" style={{background:"transparent",color:"var(--mu2)",border:"1px solid var(--b2)",fontSize:".68rem"}} onClick={pasarLote} disabled={idx>=lots.length-1}>→ Pasar</button>
+                            <button className="ab r" style={{fontSize:".68rem"}} onClick={resetAuction}>⟳ Reset</button>
+                          </div>
+                        </div>
+
+                        {/* Postura presencial */}
+                        <div style={{padding:".5rem .65rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:8}}>
+                          <div style={{fontSize:".6rem",fontWeight:700,color:"var(--yl)",marginBottom:".3rem",display:"flex",alignItems:"center",gap:".3rem"}}>
+                            <svg width="9" height="9" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
                             Postura presencial
                           </div>
-                          <div style={{display:"flex",gap:".35rem"}}>
+                          <div style={{display:"flex",gap:".3rem"}}>
                             <input placeholder="Paleta" value={presPaleta} onChange={e=>setPresPaleta(e.target.value)}
-                              style={{width:60,padding:".28rem .45rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
+                              style={{width:58,padding:".28rem .4rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
                             <input placeholder="Monto" value={presMonto} onChange={e=>setPresMonto(e.target.value)}
                               onKeyDown={e=>e.key==="Enter"&&registrarPresencial()}
-                              style={{flex:1,padding:".28rem .45rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
+                              style={{flex:1,padding:".28rem .4rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
                             <button onClick={registrarPresencial}
-                              style={{padding:".28rem .55rem",background:"rgba(246,173,85,.2)",border:"1px solid rgba(246,173,85,.4)",borderRadius:6,color:"var(--yl)",fontSize:".72rem",fontWeight:700,cursor:"pointer"}}>
+                              style={{padding:".28rem .55rem",background:"rgba(246,173,85,.2)",border:"1px solid rgba(246,173,85,.4)",borderRadius:6,color:"var(--yl)",fontSize:".75rem",fontWeight:700,cursor:"pointer"}}>
                               ✓
                             </button>
                           </div>
                         </div>
 
-                        {/* ── Adjudicar / Iniciar big button ── */}
+                        {/* CTA principal */}
                         <button
                           className={`sala-place-bid-btn${aState==="live"?" adj":""}`}
                           onClick={aState==="live" ? adjudicar : startAuction}
@@ -7588,26 +7589,28 @@ function exportCSV(){
                           {aState==="live" ? "✓ Adjudicar lote" : aState==="sold" ? "Lote adjudicado" : "▶ Iniciar subasta"}
                         </button>
 
-                        {/* ── Estado en tiempo real ── */}
-                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".45rem",marginTop:".55rem"}}>
-                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:9,padding:".5rem .6rem",textAlign:"center"}}>
-                            <div style={{fontSize:".62rem",color:"var(--mu)",marginBottom:".15rem",textTransform:"uppercase",letterSpacing:".04em"}}>Oferta</div>
-                            <div style={{fontSize:".8rem",fontWeight:800,color:"var(--wh2)",fontVariantNumeric:"tabular-nums"}}>{fmt(bid.current)}</div>
+                        {/* Estado */}
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".35rem"}}>
+                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:".45rem .5rem",textAlign:"center"}}>
+                            <div style={{fontSize:".58rem",color:"var(--mu)",marginBottom:".12rem",textTransform:"uppercase",letterSpacing:".04em"}}>Oferta</div>
+                            <div style={{fontSize:".75rem",fontWeight:800,color:"var(--wh2)",fontVariantNumeric:"tabular-nums"}}>{fmt(bid.current)}</div>
                           </div>
-                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:9,padding:".5rem .6rem",textAlign:"center"}}>
-                            <div style={{fontSize:".62rem",color:"var(--mu)",marginBottom:".15rem",textTransform:"uppercase",letterSpacing:".04em"}}>Pujas</div>
-                            <div style={{fontSize:".8rem",fontWeight:800,color:"var(--wh2)"}}>{bid.count}</div>
+                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:".45rem .5rem",textAlign:"center"}}>
+                            <div style={{fontSize:".58rem",color:"var(--mu)",marginBottom:".12rem",textTransform:"uppercase",letterSpacing:".04em"}}>Pujas</div>
+                            <div style={{fontSize:".75rem",fontWeight:800,color:"var(--wh2)"}}>{bid.count}</div>
                           </div>
-                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:9,padding:".5rem .6rem",textAlign:"center"}}>
-                            <div style={{fontSize:".62rem",color:"var(--mu)",marginBottom:".15rem",textTransform:"uppercase",letterSpacing:".04em"}}>Estado</div>
-                            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:".3rem"}}>
-                              <div style={{width:6,height:6,borderRadius:"50%",background:sColor,boxShadow:`0 0 5px ${sColor}`,flexShrink:0}}/>
-                              <div style={{fontSize:".72rem",fontWeight:700,color:sColor,whiteSpace:"nowrap"}}>{sLabel}</div>
+                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:".45rem .5rem",textAlign:"center"}}>
+                            <div style={{fontSize:".58rem",color:"var(--mu)",marginBottom:".12rem",textTransform:"uppercase",letterSpacing:".04em"}}>Estado</div>
+                            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:".28rem"}}>
+                              <div style={{width:5,height:5,borderRadius:"50%",background:sColor,flexShrink:0}}/>
+                              <div style={{fontSize:".65rem",fontWeight:700,color:sColor,whiteSpace:"nowrap"}}>{sLabel}</div>
                             </div>
                           </div>
                         </div>
+
+                        {/* BidTicker */}
                         {bidTimer!==null&&bidTimer>0&&aState==="live" && (
-                          <div className={`bid-ticker${bidTimer<=5?" urgent":""}${bidTimer<=2?" critical":""}`} style={{marginTop:".5rem"}}>
+                          <div className={`bid-ticker${bidTimer<=5?" urgent":""}${bidTimer<=2?" critical":""}`}>
                             <div className="bt-num" style={{color:bidTimer>8?"var(--gr)":bidTimer>4?"var(--yl)":"var(--rd)",fontSize:bidTimer<=3?"1.7rem":"1.35rem"}}>{bidTimer}</div>
                             <div>
                               <div className="bt-info">{bidTimer<=2?"¡ADJUDICANDO AHORA!":bidTimer<=5?"⚠ Última oportunidad":"Adjudica en"}</div>
@@ -7615,32 +7618,28 @@ function exportCSV(){
                             </div>
                           </div>
                         )}
-                        {/* Panel post-adjudicación — control manual del martillero */}
+
+                        {/* Panel post-adjudicación */}
                         {adjCountdown && (
-                          <div style={{marginTop:".5rem",background:"rgba(20,184,166,.07)",border:"1px solid rgba(20,184,166,.35)",borderRadius:10,padding:".75rem .9rem",display:"flex",flexDirection:"column",gap:".5rem"}}>
-                            <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
-                              <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="var(--gr)" strokeWidth="1.5"/><path d="M5 8l2 2 4-4" stroke="var(--gr)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                              <div style={{fontSize:".75rem",fontWeight:700,color:"var(--gr)"}}>Lote adjudicado correctamente</div>
+                          <div style={{background:"rgba(20,184,166,.07)",border:"1px solid rgba(20,184,166,.35)",borderRadius:10,padding:".7rem .85rem",display:"flex",flexDirection:"column",gap:".45rem"}}>
+                            <div style={{display:"flex",alignItems:"center",gap:".45rem"}}>
+                              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="var(--gr)" strokeWidth="1.5"/><path d="M5 8l2 2 4-4" stroke="var(--gr)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                              <div style={{fontSize:".73rem",fontWeight:700,color:"var(--gr)"}}>Lote adjudicado correctamente</div>
                             </div>
-                            <div style={{display:"flex",gap:".45rem"}}>
-                              <button
-                                onClick={avanzarSiguienteLote}
-                                disabled={idx >= lots.length-1}
-                                style={{flex:1,padding:".5rem",background:"var(--gr)",border:"none",borderRadius:7,color:"#fff",fontSize:".78rem",fontWeight:700,cursor:"pointer",opacity:idx>=lots.length-1?.4:1}}>
+                            <div style={{display:"flex",gap:".4rem"}}>
+                              <button onClick={avanzarSiguienteLote} disabled={idx>=lots.length-1}
+                                style={{flex:1,padding:".48rem",background:"var(--gr)",border:"none",borderRadius:7,color:"#fff",fontSize:".76rem",fontWeight:700,cursor:"pointer",opacity:idx>=lots.length-1?.4:1}}>
                                 Siguiente lote →
                               </button>
-                              <button
-                                onClick={revertirAdjudicacion}
-                                style={{padding:".5rem .75rem",background:"rgba(239,68,68,.1)",border:"1px solid rgba(239,68,68,.3)",borderRadius:7,color:"#f87171",fontSize:".75rem",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>
+                              <button onClick={revertirAdjudicacion}
+                                style={{padding:".48rem .7rem",background:"rgba(239,68,68,.1)",border:"1px solid rgba(239,68,68,.3)",borderRadius:7,color:"#f87171",fontSize:".73rem",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>
                                 ↩ Revertir
                               </button>
                             </div>
-                            {idx >= lots.length-1 && (
-                              <div style={{fontSize:".65rem",color:"var(--mu)",textAlign:"center"}}>Último lote — remate finalizado</div>
-                            )}
+                            {idx>=lots.length-1 && <div style={{fontSize:".63rem",color:"var(--mu)",textAlign:"center"}}>Último lote — remate finalizado</div>}
                           </div>
                         )}
-                      </>
+                      </div>
                     )}
 
                     {/* POSTOR TAB */}
