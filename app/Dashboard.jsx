@@ -85,14 +85,14 @@ const fmtS = n => n>=1000000?`$${(n/1000000).toFixed(1)}M`:n>=1000?`$${(n/1000).
 
 // ── Calcula liquidación completa por comprador (puede tener varios lotes) ──
 // Separa EX (artículos) vs AF (comisión + gastos admin), aplica IVA 19% solo a AF
-const calcLiquidacion = (lotes, postor) => {
+const calcLiquidacion = (lotes, postor, gastoAdminMotorizado = 72000) => {
   const IVA = 0.19;
   let totalEx = 0, totalAf = 0, totalCom = 0, totalGastosAdm = 0;
   const lineas = [];
   lotes.forEach(l => {
     const afecto    = l.afectoIva || false;
     const com       = Math.round(l.monto * (l.comPct ?? 10) / 100);
-    const gastosAdm = l.motorizado ? GASTO_ADMIN_MOTORIZADO : 0;
+    const gastosAdm = l.motorizado ? gastoAdminMotorizado : 0;
     if(afecto) { totalAf += l.monto; } else { totalEx += l.monto; }
     totalCom      += com;
     totalGastosAdm+= gastosAdm;
@@ -2763,7 +2763,7 @@ function Dashboard({ session, onLogout }) {
 
     const compradores = Object.values(byComprador).map(c => ({
       ...c,
-      liq: calcLiquidacion(c.lotes, c.postorData),
+      liq: calcLiquidacion(c.lotes, c.postorData, GASTO_ADMIN_MOTORIZADO),
       enviado: false,
       facturado: false,
     }));
@@ -6697,7 +6697,7 @@ function exportCSV(){
                             if(!byComprador[key]) byComprador[key]={postorData:pd,lotes:[],key};
                             byComprador[key].lotes.push(l);
                           });
-                          const compradores = Object.values(byComprador).map(c=>({...c,liq:calcLiquidacion(c.lotes,c.postorData),enviado:false,facturado:false}));
+                          const compradores = Object.values(byComprador).map(c=>({...c,liq:calcLiquidacion(c.lotes,c.postorData,GASTO_ADMIN_MOTORIZADO),enviado:false,facturado:false}));
                           setLiqReview({compradores,fecha:r.fecha,remateNombre:r.name,remateId:r.id});
                         }
                       } else {
@@ -7223,7 +7223,7 @@ function exportCSV(){
                 ...liquidaciones.filter(l => l.postor===nombre || l.postor===p.razon_social),
                 ...dbLotes.filter(l => (l.postor===nombre || l.postor===p.razon_social) && (!selectedRemate||l.remate_id===selectedRemate)),
               ].filter((l,i,arr)=>arr.findIndex(x=>x.lote===l.lote)===i);
-              if (lotesP.length) totalDeuda = calcLiquidacion(lotesP, null).total;
+              if (lotesP.length) totalDeuda = calcLiquidacion(lotesP, null, GASTO_ADMIN_MOTORIZADO).total;
             }
             const montoDevolver = Math.max(0, montoGar - totalDeuda);
             return {...p, montoGar, totalDeuda, montoDevolver, esComprador};
