@@ -61,7 +61,7 @@ const COMISIONES = {
   concursal: { label:"Concursal",  com: 7,   desc:"Liquidación concursal — comisión fija 7% por ley." },
   privado:   { label:"Privado",    com: null, desc:"Remate privado — comisión personalizada según acuerdo." },
 };
-const GASTO_ADMIN_MOTORIZADO = 50000; // CLP — solo vehículos motorizados
+// GASTO_ADMIN_MOTORIZADO se define dentro de Dashboard() usando session.gastoAdminMotorizado
 
 const LOTES_REALES = [];
 const ADJUDICACIONES = [];
@@ -2024,19 +2024,20 @@ export default function Root() {
 
       const { data } = await supabase
         .from("usuarios")
-        .select("*, casas(slug, nombre)")
+        .select("*, casas(slug, nombre, gasto_admin_motorizado)")
         .eq("id", uid)
         .single();
       if (!data) return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"TAKKA", activo:true };
       const role = Array.isArray(data.roles) && data.roles.length > 0 ? data.roles[0] : "martillero";
       return {
-        id:         uid,
-        name:       data.nombre,
-        role:       role,
-        roles:      data.roles || [],
-        casa:       data.casas?.slug   || null,
-        casaNombre: data.casas?.nombre || "TAKKA",
-        activo:     data.activo,
+        id:                    uid,
+        name:                  data.nombre,
+        role:                  role,
+        roles:                 data.roles || [],
+        casa:                  data.casas?.slug   || null,
+        casaNombre:            data.casas?.nombre || "TAKKA",
+        activo:                data.activo,
+        gastoAdminMotorizado:  data.casas?.gasto_admin_motorizado ?? null,
       };
     } catch(e) {
       return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"TAKKA", activo:true };
@@ -2056,6 +2057,9 @@ export default function Root() {
 
 // ─────────────────────────────────────────────────────────────────
 function Dashboard({ session, onLogout }) {
+  // Gastos admin por vehículo motorizado — configurable por casa de remates
+  const GASTO_ADMIN_MOTORIZADO = session.gastoAdminMotorizado ?? 72000;
+
   const [page,             setPage]             = useState("dashboard");
   const [mobileMenu,       setMobileMenu]       = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -3457,7 +3461,7 @@ function exportCSV(){
                           </div>
                         )}
                     </div>
-                    {wizTipo==="VEHICULOS" && <div className="fg full" style={{padding:".5rem .75rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:7,fontSize:".72rem",color:"var(--yl)"}}>Vehículo motorizado — se agregarán $50.000 gastos administrativos en la liquidación.</div>}
+                    {wizTipo==="VEHICULOS" && <div className="fg full" style={{padding:".5rem .75rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:7,fontSize:".72rem",color:"var(--yl)"}}>{`Vehículo motorizado — se agregarán $${GASTO_ADMIN_MOTORIZADO.toLocaleString("es-CL")} gastos administrativos en la liquidación.`}</div>}
                     <div className="fg"><label className="fl">Precio base</label>
                       <input className="fi" placeholder="$8.000.000" value={wizDatos.base} onChange={e=>setWizDatos(f=>({...f,base:e.target.value}))}/>
                     </div>
