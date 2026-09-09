@@ -2556,6 +2556,37 @@ function Dashboard({ session, onLogout }) {
       };
       setLiquidaciones(p => [newLiq, ...p]);
 
+      // Persistir en Supabase (optimista — no bloquea el flujo del remate)
+      supabase.from("liquidaciones").insert({
+        id:            newLiq.id,
+        lote:          newLiq.lote,
+        exp:           newLiq.exp,
+        postor:        newLiq.postor,
+        email:         newLiq.email,
+        monto:         newLiq.monto,
+        gar:           newLiq.gar,
+        saldo:         newLiq.saldo,
+        com:           newLiq.com,
+        gastos_adm:    newLiq.gastosAdm,
+        total_a_pagar: newLiq.totalAPagar,
+        tipo_remate:   newLiq.tipoRemate,
+        motorizado:    newLiq.motorizado,
+        com_pct:       newLiq.comPct,
+        ppu:           newLiq.ppu,
+        cantidad_lote: newLiq.cantidadLote,
+        monto_unitario:newLiq.montoUnitario,
+        afecto_iva:    newLiq.afectoIva,
+        estado:        newLiq.estado,
+        enviado:       newLiq.enviado,
+        fecha:         newLiq.fecha,
+        fecha_iso:     newLiq.fechaISO,
+        remate_id:     newLiq.remateId,
+        remate_nombre: newLiq.remateNombre,
+        casa_id:       session?.casaId || null,
+      }).then(({ error }) => {
+        if (error) console.error("[liquidaciones] Error al persistir:", error.message);
+      });
+
       // Devolución automática para los NO adjudicados en este lote
       const adjPostors = new Set([...(bids[idx]?.history||[]).map(h=>h.bidder)]);
       const devs = GARANTIAS
