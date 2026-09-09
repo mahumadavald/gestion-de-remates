@@ -1286,6 +1286,13 @@ function AuthScreen({ onLogin }) {
                 await supabase.auth.signOut(); setLoading(false); return;
               }
             }
+            let gastoAdminMotorizado = null;
+            if (perfil.casas?.id) {
+              const { data: casaConf } = await supabase
+                .from("casas").select("gasto_admin_motorizado").eq("id", perfil.casas.id).single()
+                .then(r => r.error ? { data: null } : r);
+              gastoAdminMotorizado = casaConf?.gasto_admin_motorizado ?? null;
+            }
             sessionData = {
               id: data.user.id, email: data.user.email, name: perfil.nombre, role: r,
               roles: perfil.roles||[r], casa: perfil.casas?.slug||null,
@@ -1296,6 +1303,7 @@ function AuthScreen({ onLogin }) {
               licenciaVence: perfil.casas?.licencia_vence||null,
               activo: perfil.activo,
               bodegaId: perfil.bodega_id||null,
+              gastoAdminMotorizado,
             };
           }
         } catch(e) { /* usar fallback */ }
@@ -2024,20 +2032,34 @@ export default function Root() {
 
       const { data } = await supabase
         .from("usuarios")
-        .select("*, casas(slug, nombre, gasto_admin_motorizado)")
+        .select("*, casas(id, slug, nombre)")
         .eq("id", uid)
         .single();
       if (!data) return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"TAKKA", activo:true };
       const role = Array.isArray(data.roles) && data.roles.length > 0 ? data.roles[0] : "martillero";
+
+      // Fetch gasto_admin_motorizado por separado — columna opcional, puede no existir aún
+      let gastoAdminMotorizado = null;
+      if (data.casas?.id) {
+        const { data: casaConf } = await supabase
+          .from("casas")
+          .select("gasto_admin_motorizado")
+          .eq("id", data.casas.id)
+          .single()
+          .then(r => r.error ? { data: null } : r);
+        gastoAdminMotorizado = casaConf?.gasto_admin_motorizado ?? null;
+      }
+
       return {
         id:                    uid,
         name:                  data.nombre,
         role:                  role,
         roles:                 data.roles || [],
         casa:                  data.casas?.slug   || null,
+        casaId:                data.casas?.id     || null,
         casaNombre:            data.casas?.nombre || "TAKKA",
         activo:                data.activo,
-        gastoAdminMotorizado:  data.casas?.gasto_admin_motorizado ?? null,
+        gastoAdminMotorizado,
       };
     } catch(e) {
       return { id:uid, name:"Admin", role:"admin", casa:null, casaNombre:"TAKKA", activo:true };
