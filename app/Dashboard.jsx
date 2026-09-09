@@ -7746,7 +7746,10 @@ function exportCSV(){
                           </button>
                         )}
                         {aState==="live" && (
-                          <button onClick={adjudicar}
+                          <button onClick={()=>{
+                            if(bids[idx]?.count===0 && !window.confirm("Este lote no tiene pujas. ¿Adjudicar sin ganador?")) return;
+                            adjudicar();
+                          }}
                             style={{width:"100%",padding:".4rem",background:"transparent",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,color:"var(--mu)",fontSize:".68rem",cursor:"pointer",letterSpacing:".03em"}}>
                             Adjudicar manualmente
                           </button>
