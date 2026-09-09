@@ -2550,7 +2550,7 @@ function Dashboard({ session, onLogout }) {
     // Look up matching lote from DB for tipo/motorizado/ppu
     const loteReal = LOTES_MERGED.find(l => l.name === loteNom) || {};
     const tipoRemate  = loteReal.tipoRemate || "judicial";
-    const motorizado  = loteReal.motorizado || lots[idx]?.cat==="Vehiculo" || false;
+    const motorizado  = loteReal.motorizado || lots[idx]?.cat==="Vehículo" || false;
     const comPct      = loteReal.com ?? COMISIONES[tipoRemate]?.com ?? 10;
     const gastosAdm   = motorizado ? GASTO_ADMIN_MOTORIZADO : 0;
     const cantidadLote = loteReal.cantidad || lots[idx]?.cantidad || 1;
@@ -2595,7 +2595,6 @@ function Dashboard({ session, onLogout }) {
 
       // Persistir en Supabase (optimista — no bloquea el flujo del remate)
       supabase.from("liquidaciones").insert({
-        id:            newLiq.id,
         lote:          newLiq.lote,
         exp:           newLiq.exp,
         postor:        newLiq.postor,
@@ -2620,8 +2619,10 @@ function Dashboard({ session, onLogout }) {
         remate_id:     newLiq.remateId,
         remate_nombre: newLiq.remateNombre,
         casa_id:       session?.casaId || null,
-      }).then(({ error }) => {
-        if (error) console.error("[liquidaciones] Error al persistir:", error.message);
+      }).select("id").single().then(({ data: row, error }) => {
+        if (error) { console.error("[liquidaciones] Error al persistir:", error.message); return; }
+        // Sync DB UUID back into local state so subsequent updates hit the right row
+        if (row?.id) setLiquidaciones(p => p.map(l => l.id === newLiq.id ? { ...l, id: row.id } : l));
       });
 
       // Devolución automática para los NO adjudicados en este lote
