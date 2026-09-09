@@ -7682,7 +7682,7 @@ function exportCSV(){
                           <div style={{textAlign:"center",fontSize:".72rem",color:"var(--rd)",fontWeight:600}}>
                             Te superaron — puja para recuperar el lote
                           </div>
-                          <button className="sala-place-bid-btn" onClick={placeBid}
+                          <button className="sala-place-bid-btn" onClick={()=>placeBid()}
                             style={{fontSize:"1.05rem",padding:"1rem",letterSpacing:".01em"}}>
                             Pujar {fmt(bid.current+curInc)}
                           </button>
@@ -7690,7 +7690,7 @@ function exportCSV(){
 
                         {/* Sin pujas aún */}
                         {aState==="live" && lastBidder===null && (
-                          <button className="sala-place-bid-btn" onClick={placeBid}
+                          <button className="sala-place-bid-btn" onClick={()=>placeBid()}
                             style={{fontSize:"1.05rem",padding:"1rem",letterSpacing:".01em"}}>
                             Pujar {fmt(bid.current+curInc)}
                           </button>
