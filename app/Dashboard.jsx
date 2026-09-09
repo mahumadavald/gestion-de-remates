@@ -5047,7 +5047,7 @@ function exportCSV(){
 
                     let totalMonto=0,totalCom=0,totalGAdm=0;
                     adjFiltradas.forEach(a=>{
-                      const com = a.com||Math.round((a.monto||0)*(a.comPct??3)/100);
+                      const com = a.com||Math.round((a.monto||0)*(a.comPct??10)/100);
                       const gadm = a.gastosAdm||0;
                       totalMonto+=a.monto||0; totalCom+=com; totalGAdm+=gadm;
                       if(y>270){doc.addPage();y=20;}
@@ -5100,7 +5100,7 @@ function exportCSV(){
               // Comisiones por tramo
               const tramos = {};
               adjAll.forEach(a=>{
-                const pct = a.comPct ?? 3;
+                const pct = a.comPct ?? 10;
                 if(!tramos[pct]) tramos[pct]={pct,lotes:[],subtotalMonto:0,subtotalCom:0};
                 tramos[pct].lotes.push(a);
                 tramos[pct].subtotalMonto += a.monto||0;
@@ -5205,7 +5205,7 @@ function exportCSV(){
                           <thead><tr><th>Comprador</th><th>Lote</th><th>Tipo</th><th>Monto</th><th>Com %</th><th>Comisión</th><th>G.Adm.</th><th>Total empresa</th></tr></thead>
                           <tbody>
                             {adjAll.map((a,i)=>{
-                              const com     = a.com||Math.round((a.monto||0)*(a.comPct??3)/100);
+                              const com     = a.com||Math.round((a.monto||0)*(a.comPct??10)/100);
                               const gadm    = a.gastosAdm||0;
                               const postorD = POSTORES_MERGED.find(p=>p.name===a.postor||p.razonSocial===a.postor);
                               const loteR   = LOTES_REALES.find(l=>l.name===a.lote);
@@ -5224,7 +5224,7 @@ function exportCSV(){
                                     {loteR?.tipoRemate && <span className="pill" style={{fontSize:".6rem",background:"rgba(56,178,246,.08)",color:"var(--ac)",border:"1px solid rgba(56,178,246,.2)"}}>{COMISIONES[loteR.tipoRemate]?.label||loteR.tipoRemate}</span>}
                                   </td>
                                   <td className="gt">{fmt(a.monto||0)}</td>
-                                  <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:700,color:"var(--ac)",textAlign:"center"}}>{a.comPct??3}%</td>
+                                  <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:700,color:"var(--ac)",textAlign:"center"}}>{a.comPct??10}%</td>
                                   <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:700,color:"var(--gr)",textAlign:"right"}}>{fmt(com)}</td>
                                   <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",color: gadm?"var(--yl)":"var(--mu)",textAlign:"right"}}>{gadm?fmt(gadm):"—"}</td>
                                   <td style={{fontFamily:"Inter,sans-serif",fontSize:".78rem",fontWeight:800,color:"var(--wh2)",textAlign:"right"}}>{fmt(com+gadm)}</td>
@@ -5234,7 +5234,7 @@ function exportCSV(){
                           </tbody>
                           <tfoot>
                             {(()=>{
-                              const tCom  = adjAll.reduce((s,a)=>s+(a.com||Math.round((a.monto||0)*(a.comPct??3)/100)),0);
+                              const tCom  = adjAll.reduce((s,a)=>s+(a.com||Math.round((a.monto||0)*(a.comPct??10)/100)),0);
                               const tGadm = adjAll.reduce((s,a)=>s+(a.gastosAdm||0),0);
                               return (
                                 <tr style={{borderTop:"2px solid var(--b2)",background:"rgba(255,255,255,.02)"}}>
@@ -5265,7 +5265,7 @@ function exportCSV(){
                       const adjV   = adjAll.filter(a=>lotesV.some(l=>l.nombre===a.lote||l.id===a.loteId||l.name===a.lote));
                       const noVend = lotesV.filter(l=>!adjV.some(a=>a.lote===l.nombre||a.lote===l.name||a.loteId===l.id));
                       const totalMartillo = adjV.reduce((s,a)=>s+(a.monto||0),0);
-                      const comCompra     = adjV.reduce((s,a)=>s+(a.com||Math.round((a.monto||0)*(a.comPct??3)/100)),0);
+                      const comCompra     = adjV.reduce((s,a)=>s+(a.com||Math.round((a.monto||0)*(a.comPct??10)/100)),0);
                       const pctVenta      = comVentaPorVend[v]??5;
                       const comVenta      = Math.round(totalMartillo*(pctVenta/100));
                       return {v, lotesV, adjV, noVend, totalMartillo, comCompra, comVenta, pctVenta};
@@ -5354,7 +5354,7 @@ function exportCSV(){
                                   startY:18,
                                   head:[["Lote","Comprador","Monto martillo","Com. compra","Com. venta vendedor"]],
                                   body:d.adjV.map(a=>{
-                                    const comC=a.com||Math.round((a.monto||0)*(a.comPct??3)/100);
+                                    const comC=a.com||Math.round((a.monto||0)*(a.comPct??10)/100);
                                     const comV=Math.round((a.monto||0)*(d.pctVenta/100));
                                     return [a.lote||"—",a.postor||"—",fmtCL(a.monto||0),fmtCL(comC),fmtCL(comV)];
                                   }),
@@ -5420,7 +5420,7 @@ function exportCSV(){
                                     <thead><tr><th>Lote</th><th>Comprador</th><th style={{textAlign:"right"}}>Martillo</th><th style={{textAlign:"right"}}>Com. compra</th><th style={{textAlign:"right"}}>Com. venta</th><th style={{textAlign:"right"}}>Total casa</th></tr></thead>
                                     <tbody>
                                       {d.adjV.map((a,ai)=>{
-                                        const comC=a.com||Math.round((a.monto||0)*(a.comPct??3)/100);
+                                        const comC=a.com||Math.round((a.monto||0)*(a.comPct??10)/100);
                                         const comV=Math.round((a.monto||0)*(d.pctVenta/100));
                                         return (
                                           <tr key={ai}>
@@ -6958,6 +6958,9 @@ function exportCSV(){
                               if (res.ok) {
                                 setLiqReview(r=>({...r,compradores:r.compradores.map((x,xi)=>xi===ci?{...x,enviado:true}:x)}));
                                 notify(`Liquidación enviada a ${email}`, "ok");
+                                // Persistir enviado en Supabase para todos los lotes del comprador
+                                const ids = c.lotes?.map(l=>l.id).filter(Boolean)||[];
+                                if (ids.length && supabase) supabase.from("liquidaciones").update({enviado:true}).in("id",ids).then(({error})=>{ if(error) console.error("[liq] enviado:",error.message); });
                               } else {
                                 notify(`Error al enviar: ${data.error||"intenta de nuevo"}`, "inf");
                                 generarPDFLiquidacion(c, liqReview.fecha);
@@ -6968,6 +6971,26 @@ function exportCSV(){
                           {c.enviado ? "Reenviar correo" : "Enviar liquidación"}
                         </button>
 
+                        {/* Marcar como pagado */}
+                        {!c.pagado
+                          ? <button
+                              className="btn-sec"
+                              style={{fontSize:".73rem", borderColor:"rgba(20,184,166,.4)", color:"#34d399"}}
+                              onClick={()=>{
+                                setLiqReview(r=>({...r,compradores:r.compradores.map((x,xi)=>xi===ci?{...x,pagado:true}:x)}));
+                                notify(`Pago registrado para ${p?.name||c.postorData?.name||"comprador"}.`,"ok");
+                                const ids = c.lotes?.map(l=>l.id).filter(Boolean)||[];
+                                if (ids.length && supabase) supabase.from("liquidaciones").update({estado:"pagado"}).in("id",ids).then(({error})=>{ if(error) console.error("[liq] pagado:",error.message); });
+                              }}>
+                              <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{marginRight:".3rem"}}><path d="M2 7l4 4 6-7"/></svg>
+                              Marcar como pagado
+                            </button>
+                          : <div style={{display:"flex",alignItems:"center",gap:".35rem",fontSize:".72rem",color:"var(--gr)",padding:".35rem .7rem",background:"rgba(20,184,166,.07)",border:"1px solid rgba(20,184,166,.2)",borderRadius:6}}>
+                              <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M2 7l4 4 6-7"/></svg>
+                              Pagado
+                            </div>
+                        }
+
                         {/* Facturar */}
                         {!c.facturado
                           ? <button
@@ -6976,6 +6999,8 @@ function exportCSV(){
                               onClick={()=>{
                                 setLiqReview(r=>({...r,compradores:r.compradores.map((x,xi)=>xi===ci?{...x,facturado:true}:x)}));
                                 notify(`Factura marcada para ${p?.name||c.postorData?.name||"comprador"}.`,"sold");
+                                const ids = c.lotes?.map(l=>l.id).filter(Boolean)||[];
+                                if (ids.length && supabase) supabase.from("liquidaciones").update({facturado:true}).in("id",ids).then(({error})=>{ if(error) console.error("[liq] facturado:",error.message); });
                               }}>
                               <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{marginRight:".3rem"}}><rect x="2" y="1" width="10" height="12" rx="1"/><path d="M5 5h4M5 8h4M5 11h2"/></svg>
                               Marcar como facturado
