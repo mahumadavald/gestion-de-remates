@@ -982,6 +982,7 @@ const Icon = ({ name }) => {
     adjudic:   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2.5 2.5L11 5"/></svg>,
     liq:       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M5 5h6M5 8h4"/><path d="M9 11l2-2 2 2"/></svg>,
     dev:       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M8 3v9M4 8l4 4 4-4"/><path d="M2 14h12"/></svg>,
+    kpis:      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/></svg>,
 
   };
   return icons[name] || null;
@@ -4175,7 +4176,7 @@ function exportCSV(){
           {/* ── ESTADÍSTICAS ── */}
           <div className="sb-section">Estadísticas</div>
           <div className={`sb-item${page==="kpis"?" on":""}`} onClick={()=>{setPage("kpis");setMobileMenu(false);}}>
-            <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/></svg></span>
+            <span className="sb-icon"><Icon name="kpis"/></span>
             <span className="sb-label">KPIs</span>
           </div>
           <div className={`sb-item${page==="reportes"?" on":""}`} onClick={()=>{setPage("reportes");setMobileMenu(false);}}>
