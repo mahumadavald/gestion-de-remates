@@ -8,320 +8,343 @@ const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = SUPA_URL ? createClient(SUPA_URL, SUPA_KEY) : null;
 
-const fmtClp = n => n && n > 0 ? `$${Number(n).toLocaleString("es-CL")}` : null;
+const fmtClp = n => n && n > 0 ? `$${Number(n).toLocaleString("es-CL")}` : "—";
 
-function LoteCard({ lote }) {
-  const [hover, setHover] = useState(false);
-  const imgs = Array.isArray(lote.imagenes) ? lote.imagenes : lote.imagenes ? [lote.imagenes] : [];
-  const img = imgs[0] || null;
-  const precio = fmtClp(lote.base);
-  const precioMin = fmtClp(lote.minimo);
-
-  return (
-    <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        background: "#0d1117",
-        border: `1px solid ${hover ? "#06B6D4" : "#21262d"}`,
-        borderRadius: 14,
-        overflow: "hidden",
-        transition: "all .2s ease",
-        transform: hover ? "translateY(-4px)" : "none",
-        boxShadow: hover ? "0 12px 40px rgba(6,182,212,.18)" : "0 2px 8px rgba(0,0,0,.3)",
-        cursor: "pointer",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* Image */}
-      <div style={{ position: "relative", width: "100%", paddingTop: "72%", background: "#161b22", overflow: "hidden" }}>
-        {img ? (
-          <img
-            src={img}
-            alt={lote.nombre}
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
-              transition: "transform .3s ease", transform: hover ? "scale(1.04)" : "scale(1)" }}
-          />
-        ) : (
-          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center",
-            justifyContent: "center", background: "linear-gradient(135deg,#161b22,#0d1117)" }}>
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#30363d" strokeWidth="1.5">
-              <rect x="4" y="8" width="32" height="24" rx="3"/>
-              <circle cx="14" cy="16" r="3"/>
-              <path d="M4 26l8-6 6 5 5-4 13 9"/>
-            </svg>
-            <span style={{ color: "#30363d", fontSize: ".65rem", marginTop: ".5rem" }}>Sin imagen</span>
-          </div>
-        )}
-        {/* Category badge */}
-        {lote.categoria && (
-          <div style={{ position: "absolute", top: 10, left: 10, background: "rgba(6,182,212,.15)",
-            border: "1px solid rgba(6,182,212,.4)", backdropFilter: "blur(8px)",
-            color: "#06B6D4", fontSize: ".6rem", fontWeight: 800, padding: ".2rem .55rem",
-            borderRadius: 5, letterSpacing: ".05em", textTransform: "uppercase" }}>
-            {lote.categoria}
-          </div>
-        )}
-        {/* Lot code */}
-        {lote.codigo && (
-          <div style={{ position: "absolute", top: 10, right: 10, background: "rgba(0,0,0,.6)",
-            backdropFilter: "blur(8px)", color: "rgba(255,255,255,.6)",
-            fontSize: ".58rem", fontWeight: 700, padding: ".2rem .45rem", borderRadius: 4 }}>
-            #{lote.codigo}
-          </div>
-        )}
-      </div>
-
-      {/* Body */}
-      <div style={{ padding: "1rem", flex: 1, display: "flex", flexDirection: "column", gap: ".5rem" }}>
-        <div style={{ fontSize: ".88rem", fontWeight: 700, color: "#e6edf3", lineHeight: 1.35,
-          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-          {lote.nombre}
-        </div>
-
-        {/* Remate */}
-        <div style={{ display: "flex", alignItems: "center", gap: ".35rem" }}>
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#6b7280" strokeWidth="1.5">
-            <rect x="1" y="2" width="8" height="7" rx="1"/>
-            <path d="M3 1v2M7 1v2M1 5h8"/>
-          </svg>
-          <span style={{ fontSize: ".65rem", color: "#6b7280" }}>
-            {lote.remates?.nombre || "Próximo remate"}
-            {lote.remates?.fecha ? ` · ${new Date(lote.remates.fecha).toLocaleDateString("es-CL",{day:"2-digit",month:"short"})}` : ""}
-          </span>
-        </div>
-
-        {/* Prices */}
-        <div style={{ marginTop: "auto", paddingTop: ".5rem", borderTop: "1px solid #21262d", display: "flex", flexDirection: "column", gap: ".3rem" }}>
-          {precio && (
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <span style={{ fontSize: ".65rem", color: "#6b7280", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".04em" }}>Base</span>
-              <span style={{ fontSize: "1rem", fontWeight: 800, color: "#06B6D4" }}>{precio}</span>
-            </div>
-          )}
-          {precioMin && precioMin !== precio && (
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <span style={{ fontSize: ".65rem", color: "#6b7280", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".04em" }}>Mínimo</span>
-              <span style={{ fontSize: ".85rem", fontWeight: 700, color: "#14B8A6" }}>{precioMin}</span>
-            </div>
-          )}
-          {!precio && (
-            <div style={{ fontSize: ".75rem", color: "#4b5563", fontStyle: "italic" }}>Precio a consultar</div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function CatalogoPage() {
-  const [lotes, setLotes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [busqueda, setBusqueda] = useState("");
-  const [catFiltro, setCatFiltro] = useState("");
-  const [remateFiltro, setRemateFiltro] = useState("");
-  const [sort, setSort] = useState("reciente");
-  const [page, setPage] = useState(1);
-  const PER_PAGE = 12;
+export default function CatalogoInternoPage() {
+  const [remates,  setRemates]  = useState([]);
+  const [lotes,    setLotes]    = useState([]);
+  const [rId,      setRId]      = useState("");
+  const [loading,  setLoading]  = useState(true);
+  const [genPDF,   setGenPDF]   = useState(false);
 
   useEffect(() => {
     if (!supabase) { setLoading(false); return; }
-    supabase.from("lotes")
-      .select("*, remates(nombre, fecha)")
-      .eq("estado", "publicado")
-      .order("created_at", { ascending: false })
-      .then(({ data }) => { setLotes(data || []); setLoading(false); });
+    Promise.all([
+      supabase.from("remates").select("id,nombre,fecha,codigo").order("fecha", { ascending: false }),
+      supabase.from("lotes").select("*,remates(nombre,fecha)").order("orden"),
+    ]).then(([{ data: rData }, { data: lData }]) => {
+      setRemates(rData || []);
+      setLotes(lData || []);
+      if (rData?.length) setRId(rData[0].id);
+      setLoading(false);
+    });
   }, []);
 
-  const categorias = useMemo(() => [...new Set(lotes.map(l => l.categoria).filter(Boolean))].sort(), [lotes]);
-  const remates    = useMemo(() => [...new Set(lotes.map(l => l.remates?.nombre).filter(Boolean))].sort(), [lotes]);
+  const lotesFiltrados = useMemo(() =>
+    lotes
+      .filter(l => rId ? l.remate_id === rId : false)
+      .sort((a, b) => (a.orden || 999) - (b.orden || 999)),
+    [lotes, rId]
+  );
 
-  const filtrados = useMemo(() => {
-    let r = lotes.filter(l => {
-      const q = busqueda.toLowerCase();
-      const matchQ = !q || l.nombre?.toLowerCase().includes(q) || l.codigo?.toLowerCase().includes(q) || l.categoria?.toLowerCase().includes(q);
-      const matchC = !catFiltro    || l.categoria === catFiltro;
-      const matchR = !remateFiltro || l.remates?.nombre === remateFiltro;
-      return matchQ && matchC && matchR;
-    });
-    if (sort === "precio-asc") r = [...r].sort((a,b) => (a.base||0)-(b.base||0));
-    if (sort === "precio-desc") r = [...r].sort((a,b) => (b.base||0)-(a.base||0));
-    if (sort === "nombre") r = [...r].sort((a,b) => (a.nombre||"").localeCompare(b.nombre||"","es"));
-    return r;
-  }, [lotes, busqueda, catFiltro, remateFiltro, sort]);
+  const remateActual = remates.find(r => r.id === rId);
 
-  const totalPages = Math.ceil(filtrados.length / PER_PAGE);
-  const slice = filtrados.slice((page-1)*PER_PAGE, page*PER_PAGE);
+  const generarPDF = async () => {
+    if (!lotesFiltrados.length) return alert("No hay lotes para este remate.");
+    setGenPDF(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const { default: autoTable } = await import("jspdf-autotable");
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const W = doc.internal.pageSize.getWidth();
+      const H = doc.internal.pageSize.getHeight();
+      const nombre = remateActual?.nombre || "Remate";
+      const fecha  = remateActual?.fecha
+        ? new Date(remateActual.fecha).toLocaleDateString("es-CL", { weekday:"long", day:"2-digit", month:"long", year:"numeric" })
+        : "";
 
-  const reset = () => { setBusqueda(""); setCatFiltro(""); setRemateFiltro(""); setSort("reciente"); setPage(1); };
+      // ── Portada ──
+      doc.setFillColor(10, 12, 16);
+      doc.rect(0, 0, W, H, "F");
+
+      // Borde lateral cyan
+      doc.setFillColor(6, 182, 212);
+      doc.rect(0, 0, 4, H, "F");
+
+      doc.setTextColor(6, 182, 212);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.text("REMATES AHUMADA", 14, 36);
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont("helvetica", "bold");
+      const lines = doc.splitTextToSize(nombre, W - 28);
+      doc.text(lines, 14, 52);
+
+      if (fecha) {
+        doc.setTextColor(139, 148, 158);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text(fecha, 14, 52 + lines.length * 9 + 6);
+      }
+
+      // Separador
+      doc.setDrawColor(30, 38, 45);
+      doc.setLineWidth(0.5);
+      doc.line(14, H / 2 - 10, W - 14, H / 2 - 10);
+
+      doc.setTextColor(6, 182, 212);
+      doc.setFontSize(28);
+      doc.setFont("helvetica", "bold");
+      doc.text("CATÁLOGO", 14, H / 2 + 5);
+
+      doc.setTextColor(139, 148, 158);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${lotesFiltrados.length} lote${lotesFiltrados.length !== 1 ? "s" : ""} · Generado ${new Date().toLocaleDateString("es-CL")}`, 14, H - 20);
+      doc.text("TAKKA — Sistema de Gestión de Remates", 14, H - 13);
+
+      // ── Páginas de lotes ──
+      for (let i = 0; i < lotesFiltrados.length; i++) {
+        const l = lotesFiltrados[i];
+        doc.addPage();
+
+        // Header de página
+        doc.setFillColor(10, 12, 16);
+        doc.rect(0, 0, W, 18, "F");
+        doc.setFillColor(6, 182, 212);
+        doc.rect(0, 0, W, 1.5, "F");
+        doc.setTextColor(6, 182, 212);
+        doc.setFontSize(7);
+        doc.setFont("helvetica", "bold");
+        doc.text("REMATES AHUMADA", 14, 8);
+        doc.setTextColor(139, 148, 158);
+        doc.text(nombre.toUpperCase(), 14, 13);
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(8);
+        doc.text(`Lote ${l.orden || i + 1} / ${lotesFiltrados.length}`, W - 14, 10, { align: "right" });
+
+        // Número de lote grande
+        doc.setTextColor(6, 182, 212);
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.text(`LOTE ${String(l.orden || i + 1).padStart(2, "0")}`, 14, 30);
+
+        // Nombre del lote
+        doc.setTextColor(20, 20, 20);
+        doc.setFillColor(245, 247, 250);
+        doc.roundedRect(14, 33, W - 28, 18, 2, 2, "F");
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(10, 12, 16);
+        const nameLines = doc.splitTextToSize(l.nombre || "Sin nombre", W - 36);
+        doc.text(nameLines.slice(0, 2), 20, 42);
+
+        // Imagen (si existe)
+        let yAfterImg = 58;
+        const imgs = Array.isArray(l.imagenes) ? l.imagenes : l.imagenes ? [l.imagenes] : [];
+        if (imgs[0]) {
+          try {
+            const imgData = await loadImageAsBase64(imgs[0]);
+            if (imgData) {
+              doc.addImage(imgData, "JPEG", 14, 58, 80, 60, "", "FAST");
+              yAfterImg = 58;
+            }
+          } catch { /* sin imagen */ }
+        }
+
+        // Datos del lote (columna derecha si hay imagen, o completo si no)
+        const dataX = imgs[0] ? 100 : 14;
+        const dataW = imgs[0] ? W - 114 : W - 28;
+
+        const campos = [
+          ["Código",      l.codigo || "—"],
+          ["Categoría",   l.categoria || "—"],
+          ["Base",        fmtClp(l.base)],
+          ["Mínimo",      fmtClp(l.minimo)],
+          ["Cantidad",    String(l.cantidad || 1)],
+          ["Tipo IVA",    l.tipo_iva === "AF" ? "Afecto" : "Exento"],
+        ].filter(([, v]) => v && v !== "—" || true);
+
+        let dy = imgs[0] ? 62 : 62;
+        doc.setFontSize(8);
+        campos.forEach(([label, val]) => {
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(100, 110, 120);
+          doc.text(label.toUpperCase(), dataX, dy);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(10, 12, 16);
+          doc.text(String(val), dataX + dataW * 0.45, dy);
+          dy += 8;
+        });
+
+        // Descripción
+        if (l.descripcion) {
+          const descY = Math.max(yAfterImg + 64, dy + 6);
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(100, 110, 120);
+          doc.text("DESCRIPCIÓN", 14, descY);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(50, 50, 50);
+          const descLines = doc.splitTextToSize(l.descripcion, W - 28);
+          doc.text(descLines.slice(0, 5), 14, descY + 5);
+        }
+
+        // Footer
+        doc.setDrawColor(230, 233, 237);
+        doc.setLineWidth(0.3);
+        doc.line(14, H - 14, W - 14, H - 14);
+        doc.setTextColor(180, 185, 190);
+        doc.setFontSize(7);
+        doc.text("Remates Ahumada · Generado con TAKKA", 14, H - 8);
+        doc.text(`Pág. ${i + 2}`, W - 14, H - 8, { align: "right" });
+      }
+
+      // ── Tabla resumen final ──
+      doc.addPage();
+      doc.setFillColor(10, 12, 16);
+      doc.rect(0, 0, W, 18, "F");
+      doc.setFillColor(6, 182, 212);
+      doc.rect(0, 0, W, 1.5, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("RESUMEN COMPLETO DE LOTES", 14, 12);
+
+      autoTable(doc, {
+        startY: 22,
+        head: [["#", "Código", "Descripción", "Categoría", "Base", "Mínimo"]],
+        body: lotesFiltrados.map((l, i) => [
+          String(l.orden || i + 1).padStart(2, "0"),
+          l.codigo || "—",
+          (l.nombre || "").slice(0, 45),
+          l.categoria || "—",
+          fmtClp(l.base),
+          fmtClp(l.minimo),
+        ]),
+        styles: { fontSize: 7.5, cellPadding: 3 },
+        headStyles: { fillColor: [6, 182, 212], textColor: [255, 255, 255], fontStyle: "bold" },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        columnStyles: { 0: { halign: "center", cellWidth: 10 }, 4: { halign: "right" }, 5: { halign: "right" } },
+      });
+
+      const slug = nombre.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+      doc.save(`catalogo-${slug}.pdf`);
+    } catch (e) {
+      alert("Error generando PDF: " + e.message);
+    } finally {
+      setGenPDF(false);
+    }
+  };
 
   return (
     <>
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { background: #0a0c10; color: #e6edf3; font-family: 'Inter',-apple-system,sans-serif; min-height: 100vh; }
-
-        /* Header */
-        .cat-header { background: linear-gradient(180deg,#0d1117 0%,#0a0c10 100%); border-bottom: 1px solid #21262d; padding: 0 1.5rem; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
-        .cat-header-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; height: 60px; }
-        .cat-logo { font-size: 1.1rem; font-weight: 900; letter-spacing: -.03em; color: #fff; text-decoration: none; display: flex; align-items: center; gap: .4rem; }
-        .cat-logo span { color: #06B6D4; }
-        .cat-search { flex: 1; max-width: 400px; position: relative; }
-        .cat-search input { width: 100%; background: #161b22; border: 1px solid #30363d; color: #e6edf3; border-radius: 9px; padding: .5rem 1rem .5rem 2.4rem; font-size: .82rem; outline: none; transition: border-color .15s; font-family: inherit; }
-        .cat-search input:focus { border-color: #06B6D4; }
-        .cat-search svg { position: absolute; left: .75rem; top: 50%; transform: translateY(-50%); pointer-events: none; }
-        .cat-badge { background: rgba(6,182,212,.12); border: 1px solid rgba(6,182,212,.3); color: #06B6D4; font-size: .7rem; font-weight: 700; padding: .2rem .6rem; border-radius: 20px; }
-
-        /* Hero */
-        .cat-hero { background: linear-gradient(135deg,#0d1117 0%,#0e2233 50%,#0d1117 100%); border-bottom: 1px solid #21262d; padding: 3rem 1.5rem; text-align: center; position: relative; overflow: hidden; }
-        .cat-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 50% 0%,rgba(6,182,212,.12) 0%,transparent 70%); pointer-events: none; }
-        .cat-hero-title { font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 900; letter-spacing: -.03em; margin-bottom: .5rem; }
-        .cat-hero-title span { color: #06B6D4; }
-        .cat-hero-sub { color: #8b949e; font-size: .875rem; max-width: 440px; margin: 0 auto; }
-
-        /* Layout */
-        .cat-body { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem 4rem; display: grid; grid-template-columns: 220px 1fr; gap: 2rem; }
-
-        /* Sidebar */
-        .cat-sidebar { display: flex; flex-direction: column; gap: 1.25rem; }
-        .cat-filter-box { background: #0d1117; border: 1px solid #21262d; border-radius: 12px; padding: 1rem; }
-        .cat-filter-title { font-size: .65rem; font-weight: 800; color: #6b7280; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .75rem; }
-        .cat-filter-item { display: flex; align-items: center; gap: .5rem; padding: .4rem .5rem; border-radius: 7px; cursor: pointer; transition: background .12s; font-size: .78rem; color: #8b949e; }
-        .cat-filter-item:hover { background: #161b22; color: #e6edf3; }
-        .cat-filter-item.active { background: rgba(6,182,212,.08); color: #06B6D4; border: 1px solid rgba(6,182,212,.2); }
-        .cat-filter-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-        .cat-btn-reset { width: 100%; background: transparent; border: 1px solid #30363d; color: #8b949e; border-radius: 8px; padding: .5rem; font-size: .72rem; font-weight: 600; cursor: pointer; transition: all .15s; }
-        .cat-btn-reset:hover { border-color: #06B6D4; color: #06B6D4; }
-
-        /* Grid area */
-        .cat-main { min-width: 0; }
-        .cat-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; gap: .75rem; flex-wrap: wrap; }
-        .cat-count { font-size: .78rem; color: #8b949e; }
-        .cat-sort { background: #0d1117; border: 1px solid #30363d; color: #e6edf3; border-radius: 8px; padding: .4rem .75rem; font-size: .75rem; cursor: pointer; font-family: inherit; outline: none; }
-        .cat-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap: 1rem; }
-
-        /* Pagination */
-        .cat-pagination { display: flex; gap: .4rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap; }
-        .cat-page-btn { background: #0d1117; border: 1px solid #30363d; color: #8b949e; border-radius: 7px; padding: .4rem .8rem; font-size: .78rem; cursor: pointer; transition: all .15s; font-family: inherit; }
-        .cat-page-btn:hover { border-color: #06B6D4; color: #06B6D4; }
-        .cat-page-btn.active { background: #06B6D4; border-color: #06B6D4; color: #fff; font-weight: 700; }
-
-        /* Spinner */
+        html, body { background: var(--bg, #f4f6f9); color: var(--wh, #111827); font-family: 'Inter',-apple-system,sans-serif; min-height: 100vh; }
+        @media (prefers-color-scheme: dark) { html,body { --bg:#0d1117; --wh:#e6edf3; --s2:#161b22; --b1:#21262d; --mu:#8b949e; } }
+        .page { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+        .header { margin-bottom: 1.5rem; }
+        .header h1 { font-size: 1.3rem; font-weight: 900; letter-spacing: -.02em; }
+        .header p { font-size: .78rem; color: var(--mu, #6b7280); margin-top: .25rem; }
+        .controls { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; padding: 1rem 1.25rem; background: var(--s2, #fff); border: 1px solid var(--b1, #e5e7eb); border-radius: 12px; }
+        .fsel { background: var(--s2,#fff); border: 1px solid var(--b1,#e5e7eb); color: var(--wh,#111); border-radius: 8px; padding: .45rem .75rem; font-size: .82rem; font-family: inherit; outline: none; flex: 1; min-width: 200px; }
+        .btn-pdf { background: #06B6D4; color: #fff; border: none; border-radius: 8px; padding: .5rem 1.25rem; font-size: .82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: .4rem; transition: opacity .15s; white-space: nowrap; }
+        .btn-pdf:hover { opacity: .88; }
+        .btn-pdf:disabled { opacity: .5; cursor: not-allowed; }
+        .stat-row { display: flex; gap: .75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+        .stat { background: var(--s2,#fff); border: 1px solid var(--b1,#e5e7eb); border-radius: 10px; padding: .75rem 1.1rem; flex: 1; min-width: 120px; }
+        .stat-label { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--mu,#6b7280); margin-bottom: .2rem; }
+        .stat-value { font-size: 1.1rem; font-weight: 800; color: #06B6D4; }
+        table { width: 100%; border-collapse: collapse; font-size: .82rem; background: var(--s2,#fff); border: 1px solid var(--b1,#e5e7eb); border-radius: 12px; overflow: hidden; }
+        thead { background: #06B6D4; }
+        thead th { color: #fff; font-weight: 700; padding: .65rem .9rem; text-align: left; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
+        tbody tr { border-bottom: 1px solid var(--b1,#e5e7eb); transition: background .1s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: rgba(6,182,212,.04); }
+        td { padding: .6rem .9rem; color: var(--wh,#111); vertical-align: middle; }
+        .lote-num { font-weight: 800; color: #06B6D4; font-size: .9rem; text-align: center; }
+        .lote-cod { font-size: .7rem; color: var(--mu,#6b7280); }
+        .lote-nombre { font-weight: 600; max-width: 260px; }
+        .lote-cat { font-size: .68rem; background: rgba(6,182,212,.08); color: #06B6D4; border: 1px solid rgba(6,182,212,.2); border-radius: 4px; padding: .1rem .4rem; display: inline-block; }
+        .lote-precio { font-weight: 700; text-align: right; color: #06B6D4; }
+        .lote-min { font-size: .75rem; color: var(--mu,#6b7280); text-align: right; }
+        .empty { text-align: center; padding: 4rem 1rem; color: var(--mu,#6b7280); }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .spin { width: 32px; height: 32px; border: 3px solid #21262d; border-top-color: #06B6D4; border-radius: 50%; animation: spin .8s linear infinite; margin: 4rem auto; }
-
-        /* Empty */
-        .cat-empty { text-align: center; padding: 5rem 1rem; color: #4b5563; }
-        .cat-empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: .4; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-          .cat-body { grid-template-columns: 1fr; }
-          .cat-sidebar { flex-direction: row; overflow-x: auto; gap: .75rem; }
-          .cat-filter-box { min-width: 180px; flex-shrink: 0; }
-          .cat-hero { padding: 2rem 1rem; }
-          .cat-header-inner { gap: .6rem; }
-          .cat-grid { grid-template-columns: repeat(auto-fill,minmax(160px,1fr)); gap: .75rem; }
-        }
+        .spin { width: 28px; height: 28px; border: 3px solid var(--b1,#e5e7eb); border-top-color: #06B6D4; border-radius: 50%; animation: spin .8s linear infinite; margin: 3rem auto; }
       `}</style>
 
-      {/* Header */}
-      <header className="cat-header">
-        <div className="cat-header-inner">
-          <a className="cat-logo" href="https://rematesahumada.cl">
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect width="22" height="22" rx="5" fill="#06B6D4"/><path d="M6 16l4-10 4 10M7.5 12h7" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
-            Remates<span>Ahumada</span>
-          </a>
-          <div className="cat-search">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" strokeWidth="1.5">
-              <circle cx="6" cy="6" r="4.5"/><path d="M10 10l3 3"/>
-            </svg>
-            <input placeholder="Buscar lotes..." value={busqueda} onChange={e=>{setBusqueda(e.target.value);setPage(1);}}/>
-          </div>
-          <span className="cat-badge">{filtrados.length} lotes</span>
+      <div className="page">
+        <div className="header">
+          <h1>Catálogo de Remate</h1>
+          <p>Lista de lotes en orden de subasta · Genera el PDF descargable para el sitio web</p>
         </div>
-      </header>
 
-      {/* Hero */}
-      <div className="cat-hero">
-        <div className="cat-hero-title">Catálogo de Remates <span>Ahumada</span></div>
-        <div className="cat-hero-sub">Lotes disponibles para el próximo remate. Todos los precios en pesos chilenos.</div>
-      </div>
-
-      <div className="cat-body">
-        {/* Sidebar filters */}
-        <aside className="cat-sidebar">
-          {/* Categories */}
-          <div className="cat-filter-box">
-            <div className="cat-filter-title">Categoría</div>
-            {["", ...categorias].map(c => (
-              <div key={c} className={`cat-filter-item${catFiltro===c?" active":""}`} onClick={()=>{setCatFiltro(c);setPage(1);}}>
-                <div className="cat-filter-dot"/>
-                {c || "Todas"}
-                {c && <span style={{marginLeft:"auto",fontSize:".65rem",color:"#4b5563"}}>{lotes.filter(l=>l.categoria===c).length}</span>}
-              </div>
+        <div className="controls">
+          <select className="fsel" value={rId} onChange={e => setRId(e.target.value)}>
+            <option value="">— Selecciona un remate —</option>
+            {remates.map(r => (
+              <option key={r.id} value={r.id}>
+                {r.nombre}{r.fecha ? ` · ${new Date(r.fecha).toLocaleDateString("es-CL")}` : ""}
+              </option>
             ))}
-          </div>
+          </select>
+          <button className="btn-pdf" disabled={!rId || !lotesFiltrados.length || genPDF} onClick={generarPDF}>
+            {genPDF
+              ? <><span style={{width:14,height:14,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",animation:"spin .7s linear infinite",display:"inline-block"}}/> Generando...</>
+              : <>⬇ Descargar PDF Catálogo</>}
+          </button>
+        </div>
 
-          {/* Remates */}
-          {remates.length > 0 && (
-            <div className="cat-filter-box">
-              <div className="cat-filter-title">Remate</div>
-              {["", ...remates].map(r => (
-                <div key={r} className={`cat-filter-item${remateFiltro===r?" active":""}`} onClick={()=>{setRemateFiltro(r);setPage(1);}}>
-                  <div className="cat-filter-dot"/>
-                  <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r || "Todos"}</span>
-                </div>
-              ))}
+        {loading ? (
+          <div className="spin"/>
+        ) : !rId ? (
+          <div className="empty">Selecciona un remate para ver los lotes</div>
+        ) : lotesFiltrados.length === 0 ? (
+          <div className="empty">No hay lotes asignados a este remate</div>
+        ) : (
+          <>
+            <div className="stat-row">
+              <div className="stat"><div className="stat-label">Total lotes</div><div className="stat-value">{lotesFiltrados.length}</div></div>
+              <div className="stat"><div className="stat-label">Base total</div><div className="stat-value">{fmtClp(lotesFiltrados.reduce((s,l)=>s+(l.base||0),0))}</div></div>
+              <div className="stat"><div className="stat-label">Con imagen</div><div className="stat-value">{lotesFiltrados.filter(l=>l.imagenes&&(Array.isArray(l.imagenes)?l.imagenes.length>0:true)).length}</div></div>
+              <div className="stat"><div className="stat-label">Remate</div><div className="stat-value" style={{fontSize:".78rem"}}>{remateActual?.nombre}</div></div>
             </div>
-          )}
 
-          <button className="cat-btn-reset" onClick={reset}>↺ Limpiar filtros</button>
-        </aside>
-
-        {/* Main grid */}
-        <main className="cat-main">
-          <div className="cat-toolbar">
-            <div className="cat-count">
-              {loading ? "Cargando..." : `${filtrados.length} lote${filtrados.length!==1?"s":""}`}
-            </div>
-            <select className="cat-sort" value={sort} onChange={e=>{setSort(e.target.value);setPage(1);}}>
-              <option value="reciente">Más recientes</option>
-              <option value="precio-asc">Precio: menor a mayor</option>
-              <option value="precio-desc">Precio: mayor a menor</option>
-              <option value="nombre">Nombre A-Z</option>
-            </select>
-          </div>
-
-          {loading ? (
-            <div className="spin"/>
-          ) : slice.length === 0 ? (
-            <div className="cat-empty">
-              <div className="cat-empty-icon">📦</div>
-              <div style={{fontWeight:700,fontSize:"1rem",marginBottom:".4rem",color:"#6b7280"}}>
-                {busqueda||catFiltro||remateFiltro ? "Sin resultados" : "No hay lotes disponibles"}
-              </div>
-              <div style={{fontSize:".82rem"}}>{busqueda||catFiltro||remateFiltro ? "Prueba otros filtros." : "Vuelve pronto."}</div>
-            </div>
-          ) : (
-            <>
-              <div className="cat-grid">
-                {slice.map(lote => <LoteCard key={lote.id} lote={lote}/>)}
-              </div>
-              {totalPages > 1 && (
-                <div className="cat-pagination">
-                  {Array.from({length:totalPages},(_,i)=>i+1).map(p=>(
-                    <button key={p} className={`cat-page-btn${p===page?" active":""}`} onClick={()=>{setPage(p);window.scrollTo({top:0,behavior:"smooth"});}}>
-                      {p}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </main>
+            <table>
+              <thead>
+                <tr>
+                  <th style={{width:50}}>Orden</th>
+                  <th>Descripción</th>
+                  <th>Categoría</th>
+                  <th style={{textAlign:"right"}}>Base</th>
+                  <th style={{textAlign:"right"}}>Mínimo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lotesFiltrados.map((l, i) => (
+                  <tr key={l.id}>
+                    <td className="lote-num">{String(l.orden || i+1).padStart(2,"0")}</td>
+                    <td>
+                      <div className="lote-nombre">{l.nombre}</div>
+                      {l.codigo && <div className="lote-cod">#{l.codigo}</div>}
+                    </td>
+                    <td>{l.categoria && <span className="lote-cat">{l.categoria}</span>}</td>
+                    <td className="lote-precio">{fmtClp(l.base)}</td>
+                    <td className="lote-min">{fmtClp(l.minimo)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
       </div>
     </>
   );
+}
+
+async function loadImageAsBase64(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch { return null; }
 }

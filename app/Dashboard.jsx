@@ -4127,7 +4127,7 @@ function exportCSV(){
               </div>
             ));
           })()}
-          <div className="sb-item" onClick={()=>window.open("/catalogo","_blank")}>
+          <div className="sb-item" onClick={()=>window.open("/lotes","_blank")}>
             <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 6h6M5 9h4"/></svg></span>
             <span className="sb-label">Catálogo público ↗</span>
           </div>
