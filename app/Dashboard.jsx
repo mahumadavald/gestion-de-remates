@@ -3965,7 +3965,7 @@ function exportCSV(){
                           afecto_iva:  wizDatos.afectoIva||false,
                           cantidad:    parseInt(wizDatos.cantidad)||1,
                           precio_por_unidad: wizDatos.ppu||false,
-                          estado:      "disponible",
+                          estado:      session?.roles?.includes("administrador bodega") ? "pendiente_revision" : "disponible",
                           bodega_id:   wizDatos.bodegaId || session?.bodegaId || null,
                           orden: (()=>{ const rid=wizDatos.remateId||lotesFiltroRemate||null; const ls=rid?dbLotes.filter(l=>l.remate_id===rid):[]; return ls.length>0?Math.max(...ls.map(l=>l.orden||0))+1:1; })(),
                           imagenes:    imagenes.length>0 ? imagenes : null,
@@ -3973,7 +3973,13 @@ function exportCSV(){
                         if(error){notify("Error al guardar lote: "+error.message,"inf");console.error(error);return;}
                         const {data:lotData} = await supabase.from("lotes").select("*").order("orden");
                         if(lotData) setDbLotes(lotData);
-                        setModal(null); resetWiz(); notify("Lote guardado correctamente.","sold");
+                        // Notificar por email al admin si es bodega
+                        if(session?.roles?.includes("administrador bodega")){
+                          const loteGuardado = lotData?.[lotData.length-1] || {};
+                          fetch("/api/notify-lote",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lote:{nombre:wizDatos.nombre,codigo:loteGuardado.codigo,categoria:loteGuardado.categoria,base:baseNum,descripcion:loteGuardado.descripcion},bodegaAdmin:session?.name})}).catch(()=>{});
+                        }
+                        setModal(null); resetWiz();
+                        notify(session?.roles?.includes("administrador bodega") ? "✓ Lote enviado a revisión." : "Lote guardado correctamente.","sold");
                       }}>Guardar lote</button>}
                 </>
               ) : (
