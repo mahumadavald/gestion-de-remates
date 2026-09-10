@@ -4486,6 +4486,93 @@ function exportCSV(){
               </div>
 
             </div>
+
+            {/* ── ANALYTICS SECTION ── */}
+            {(()=>{
+              const now = new Date();
+              // Ingresos últimos 6 meses
+              const ventasMes = Array.from({length:6},(_,i)=>{
+                const d = new Date(now.getFullYear(), now.getMonth()-5+i, 1);
+                const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+                const total = liquidaciones
+                  .filter(l=>l.fechaISO&&l.fechaISO.startsWith(key))
+                  .reduce((s,l)=>s+(l.monto||0),0);
+                return {mes:d.toLocaleDateString("es-CL",{month:"short"}), monto:total};
+              });
+              // Top 5 remates por monto
+              const porRemate = {};
+              liquidaciones.forEach(l=>{
+                const k = l.remateNombre||"Sin remate";
+                porRemate[k] = (porRemate[k]||0)+(l.monto||0);
+              });
+              const topRemates = Object.entries(porRemate)
+                .sort(([,a],[,b])=>b-a).slice(0,5)
+                .map(([nombre,monto])=>({nombre:nombre.length>22?nombre.slice(0,22)+"…":nombre, monto}));
+              // KPIs
+              const totalVendido   = liquidaciones.reduce((s,l)=>s+(l.monto||0),0);
+              const pendienteCobro = liquidaciones.filter(l=>l.estado==="saldo pendiente").reduce((s,l)=>s+(l.totalAPagar||0),0);
+              const lotesAdj       = liquidaciones.length;
+              const hasData        = liquidaciones.length>0;
+              return (
+                <div style={{marginTop:"1.5rem",display:"flex",flexDirection:"column",gap:"1rem"}}>
+                  {/* Mini KPIs */}
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"1rem"}}>
+                    {[
+                      {label:"Total martillo (histórico)", val:hasData?`$${(totalVendido/1000000).toFixed(1)}M`:"—", color:"#06B6D4"},
+                      {label:"Pendiente de cobro",          val:hasData?`$${(pendienteCobro/1000000).toFixed(1)}M`:"—", color:"#f59e0b"},
+                      {label:"Lotes adjudicados",           val:hasData?lotesAdj:"—",                                    color:"#34d399"},
+                    ].map((k,i)=>(
+                      <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:14,padding:"1rem 1.2rem",borderLeft:`3px solid ${k.color}`}}>
+                        <div style={{fontSize:".68rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em",marginBottom:".4rem"}}>{k.label}</div>
+                        <div style={{fontSize:"1.6rem",fontWeight:800,color:"var(--wh2)",lineHeight:1}}>{k.val}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Charts */}
+                  <div style={{display:"grid",gridTemplateColumns:"1.6fr 1fr",gap:"1rem"}}>
+                    {/* Line chart — ingresos por mes */}
+                    <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:16,padding:"1.2rem 1.4rem"}}>
+                      <div style={{fontSize:".82rem",fontWeight:700,color:"var(--wh2)",marginBottom:"1rem"}}>Ingresos últimos 6 meses</div>
+                      {hasData ? (
+                        <ResponsiveContainer width="100%" height={160}>
+                          <LineChart data={ventasMes} margin={{top:4,right:8,left:0,bottom:0}}>
+                            <XAxis dataKey="mes" tick={{fontSize:11,fill:"var(--mu)"}} axisLine={false} tickLine={false}/>
+                            <YAxis tick={{fontSize:10,fill:"var(--mu)"}} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000000?`$${(v/1000000).toFixed(1)}M`:v>=1000?`$${(v/1000).toFixed(0)}K`:"$0"} width={52}/>
+                            <Tooltip formatter={v=>`$${Number(v).toLocaleString("es-CL")}`} contentStyle={{background:"var(--s3)",border:"1px solid var(--b1)",borderRadius:8,fontSize:".75rem"}}/>
+                            <Line type="monotone" dataKey="monto" stroke="#06B6D4" strokeWidth={2.5} dot={{r:4,fill:"#06B6D4"}} activeDot={{r:6}}/>
+                          </LineChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div style={{height:160,display:"flex",alignItems:"center",justifyContent:"center",color:"var(--mu)",fontSize:".8rem"}}>
+                          Sin datos — los ingresos aparecerán al cerrar remates.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Bar chart — top remates */}
+                    <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:16,padding:"1.2rem 1.4rem"}}>
+                      <div style={{fontSize:".82rem",fontWeight:700,color:"var(--wh2)",marginBottom:"1rem"}}>Top remates por monto</div>
+                      {topRemates.length>0 ? (
+                        <ResponsiveContainer width="100%" height={160}>
+                          <BarChart data={topRemates} layout="vertical" margin={{top:0,right:8,left:0,bottom:0}}>
+                            <XAxis type="number" hide/>
+                            <YAxis type="category" dataKey="nombre" tick={{fontSize:10,fill:"var(--mu)"}} axisLine={false} tickLine={false} width={110}/>
+                            <Tooltip formatter={v=>`$${Number(v).toLocaleString("es-CL")}`} contentStyle={{background:"var(--s3)",border:"1px solid var(--b1)",borderRadius:8,fontSize:".75rem"}}/>
+                            <Bar dataKey="monto" fill="#7c3aed" radius={[0,4,4,0]} barSize={14}/>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div style={{height:160,display:"flex",alignItems:"center",justifyContent:"center",color:"var(--mu)",fontSize:".8rem"}}>
+                          Sin datos aún.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
           </div>
         )}
 
@@ -8200,8 +8287,13 @@ function exportCSV(){
                           <td>{l.nombre||"—"}</td>
                           <td style={{fontSize:".75rem",color:"var(--mu2)"}}>{l.propietario||"—"}</td>
                           <td style={{textAlign:"right",fontWeight:600}}>${fmtClp(l.base)}</td>
-                          <td style={{fontSize:".75rem",color:"var(--mu)"}}></td>
-                          <td style={{textAlign:"right"}}></td>
+                          {(()=>{
+                            const adjLote = liquidaciones.find(liq=>liq.lote===l.nombre&&(!lotesFiltroRemate||(liq.remateId===lotesFiltroRemate)));
+                            return (<>
+                              <td style={{fontSize:".75rem",color:"var(--wh2)",fontWeight:adjLote?600:400}}>{adjLote?adjLote.postor.replace(" (Online)","").replace(" (Presencial)",""):"—"}</td>
+                              <td style={{textAlign:"right",fontWeight:adjLote?700:400,color:adjLote?"var(--gr)":"var(--mu)"}}>{adjLote?`$${fmtClp(adjLote.monto)}`:"—"}</td>
+                            </>);
+                          })()}
                         </tr>
                       ))}
                     </tbody>
