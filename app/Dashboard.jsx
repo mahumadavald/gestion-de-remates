@@ -4175,16 +4175,18 @@ function exportCSV(){
 
           {/* ── ESTADÍSTICAS ── */}
           <div className="sb-section">Estadísticas</div>
-          {[
-            {id:"kpis",     icon:"kpis",     label:"KPIs"},
-            {id:"reportes", icon:"reportes", label:"Estadísticas"},
-            {id:"factura",  icon:"reportes", label:"Balance por Remate"},
-          ].map(n=>(
-            <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>{setPage(n.id);setMobileMenu(false);}}>
-              <span className="sb-icon"><Icon name={n.icon}/></span>
-              <span className="sb-label">{n.label}</span>
-            </div>
-          ))}
+          <div className={`sb-item${page==="kpis"?" on":""}`} onClick={()=>{setPage("kpis");setMobileMenu(false);}}>
+            <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/></svg></span>
+            <span className="sb-label">KPIs</span>
+          </div>
+          <div className={`sb-item${page==="reportes"?" on":""}`} onClick={()=>{setPage("reportes");setMobileMenu(false);}}>
+            <span className="sb-icon"><Icon name="reportes"/></span>
+            <span className="sb-label">Estadísticas</span>
+          </div>
+          <div className={`sb-item${page==="factura"?" on":""}`} onClick={()=>{setPage("factura");setMobileMenu(false);}}>
+            <span className="sb-icon"><Icon name="reportes"/></span>
+            <span className="sb-label">Balance por Remate</span>
+          </div>
 
           {/* ── SISTEMA ── */}
           <div className="sb-section">Sistema</div>
