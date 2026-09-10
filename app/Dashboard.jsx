@@ -4179,15 +4179,11 @@ function exportCSV(){
             </div>
           ))}
 
-          {/* ── ESTADÍSTICAS ── */}
-          <div className="sb-section">Estadísticas</div>
-          <div className={`sb-item${page==="kpis"?" on":""}`} onClick={()=>{setPage("kpis");setMobileMenu(false);}}>
+          {/* ── ANALYTICS ── */}
+          <div className="sb-section">Analytics</div>
+          <div className={`sb-item${(page==="kpis"||page==="reportes")?" on":""}`} onClick={()=>{setPage("kpis");setMobileMenu(false);}}>
             <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/></svg></span>
-            <span className="sb-label">KPIs</span>
-          </div>
-          <div className={`sb-item${page==="reportes"?" on":""}`} onClick={()=>{setPage("reportes");setMobileMenu(false);}}>
-            <span className="sb-icon"><Icon name="reportes"/></span>
-            <span className="sb-label">Estadísticas</span>
+            <span className="sb-label">TAKKA Board</span>
           </div>
           <div className={`sb-item${page==="factura"?" on":""}`} onClick={()=>{setPage("factura");setMobileMenu(false);}}>
             <span className="sb-icon"><Icon name="reportes"/></span>

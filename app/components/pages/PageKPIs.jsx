@@ -555,18 +555,18 @@ export default function PageKPIs({ session, liquidaciones = [], dbLotes = [], db
         <div style={{ position: "absolute", right: -30, top: -30, width: 140, height: 140, borderRadius: "50%", background: "radial-gradient(circle,rgba(6,182,212,.12) 0%,transparent 70%)", pointerEvents: "none" }} />
         <div>
           <div style={{ fontSize: ".58rem", fontWeight: 700, color: "#06B6D4", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: ".2rem" }}>
-            ● Analytics Dashboard
+            ● TAKKA
           </div>
           <div style={{ fontSize: "1.1rem", fontWeight: 900, color: "var(--wh)", letterSpacing: "-.01em" }}>
-            Indicadores de Rendimiento
+            TAKKA Board
           </div>
           <div style={{ fontSize: ".65rem", color: "var(--mu)", marginTop: ".15rem" }}>
-            KPIs en tiempo real de remates y resultado mensual
+            Resumen interactivo de remates, ingresos y rendimiento
           </div>
         </div>
         {/* Tab switcher */}
         <div style={{ display: "flex", background: "var(--bg,var(--s1))", border: "1px solid var(--b1)", borderRadius: 9, padding: 3, gap: 2 }}>
-          {[["remate", "Por remate"], ["mensual", "Mensual"]].map(([v, l]) => (
+          {[["remate", "Por Remate"], ["mensual", "Visión Mensual"]].map(([v, l]) => (
             <button key={v} onClick={() => setTab(v)} style={{
               padding: ".4rem 1.1rem", fontSize: ".73rem", fontWeight: 700, border: "none",
               borderRadius: 7, cursor: "pointer",
