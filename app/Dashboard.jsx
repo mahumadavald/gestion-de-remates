@@ -7,6 +7,7 @@ import PageUsuarios from "./components/pages/PageUsuarios";
 import PageLicencias from "./components/pages/PageLicencias";
 import PageCasas    from "./components/pages/PageCasas";
 import PageConfig   from "./components/pages/PageConfig";
+import PageKPIs     from "./components/pages/PageKPIs";
 
 // ── Supabase client ───────────────────────────────────────────────
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -4173,6 +4174,10 @@ function exportCSV(){
 
           {/* ── ESTADÍSTICAS ── */}
           <div className="sb-section">Estadísticas</div>
+          <div className={`sb-item${page==="kpis"?" on":""}`} onClick={()=>{setPage("kpis");setMobileMenu(false);}}>
+            <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/></svg></span>
+            <span className="sb-label">KPIs</span>
+          </div>
           <div className={`sb-item${page==="reportes"?" on":""}`} onClick={()=>{setPage("reportes");setMobileMenu(false);}}>
             <span className="sb-icon"><Icon name="reportes"/></span>
             <span className="sb-label">Estadísticas</span>
@@ -6584,6 +6589,9 @@ function exportCSV(){
 
         {/* ══ CASAS DE REMATES ══ */}
         {page==="casas" && session?.role==="admin" && <PageCasas session={session} supabase={supabase} dbLicencias={dbLicencias} setDbLicencias={setDbLicencias} notify={notify} subirLogoCasa={subirLogoCasa} casaModal={casaModal} setCasaModal={setCasaModal}/>}
+
+        {/* ══ KPIs ══ */}
+        {page==="kpis" && <PageKPIs session={session} liquidaciones={liquidaciones} dbLotes={dbLotes} dbPostores={dbPostores} dbRemates={dbRemates}/>}
 
         {/* ══ CONFIG ══ */}
         {page==="config" && <PageConfig session={session} notify={notify}/>}
