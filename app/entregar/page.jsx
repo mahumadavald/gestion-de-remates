@@ -190,6 +190,13 @@ export default function EntregarPage() {
   const [allLiquidaciones,  setAllLiquidaciones]  = useState([]);
   const [loadingAll,        setLoadingAll]        = useState(false);
 
+  // Registro de lotes recibidos en bodega
+  const [loteNombre,    setLoteNombre]    = useState("");
+  const [loteCodigo,    setLoteCodigo]    = useState("");
+  const [loteBase,      setLoteBase]      = useState("");
+  const [guardandoLote, setGuardandoLote] = useState(false);
+  const [loteExito,     setLoteExito]     = useState(false);
+
   useEffect(() => {
     if (!supabase) { setScreen("login"); return; }
     supabase.auth.getSession().then(async ({ data }) => {
@@ -293,6 +300,24 @@ export default function EntregarPage() {
     const wmap = winnersMap();
     setLotesPostor(wmap[num] || []);
     setBuscando(false);
+  };
+
+  const registrarLote = async () => {
+    if (!loteNombre.trim() || !selectedRemate) return;
+    setGuardandoLote(true);
+    const { error } = await supabase.from("lotes").insert({
+      remate_id: selectedRemate.id,
+      nombre: loteNombre.trim(),
+      codigo: loteCodigo.trim() || null,
+      base: loteBase ? Number(String(loteBase).replace(/\D/g,"")) || null : null,
+      bodega_id: session?.bodegaId || null,
+    });
+    setGuardandoLote(false);
+    if (!error) {
+      setLoteNombre(""); setLoteCodigo(""); setLoteBase("");
+      setLoteExito(true);
+      setTimeout(() => setLoteExito(false), 4000);
+    }
   };
 
   // Track delivery via liquidaciones.retiro (synced with Dashboard's "Retiro de Bienes")
@@ -569,6 +594,50 @@ export default function EntregarPage() {
             })}
           </div>
         )}
+        {/* ── TAB RECIBIR ── */}
+        {tab === "recibir" && (
+          <div className="fade">
+            <div className="search-card">
+              <div className="search-title">Registrar lote recibido</div>
+
+              {loteExito && (
+                <div className="fade" style={{padding:".7rem .9rem",background:"rgba(20,184,166,.1)",border:"1px solid rgba(20,184,166,.25)",borderRadius:10,color:"#0d9488",fontWeight:700,fontSize:".82rem",marginBottom:".9rem",display:"flex",alignItems:"center",gap:".5rem"}}>
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="9" r="7"/><path d="M5.5 9l2.5 2.5 4.5-5"/></svg>
+                  Lote registrado correctamente
+                </div>
+              )}
+
+              <div style={{marginBottom:".4rem",fontSize:".75rem",fontWeight:700,color:"var(--mu)"}}>Nombre del lote <span style={{color:"var(--rd)"}}>*</span></div>
+              <input className="fi" placeholder="Ej: Mesa de madera, Refrigerador Samsung..." style={{marginBottom:".85rem",fontSize:".95rem"}}
+                value={loteNombre} onChange={e=>setLoteNombre(e.target.value)}
+                onKeyDown={e=>e.key==="Enter" && registrarLote()}/>
+
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".65rem",marginBottom:".85rem"}}>
+                <div>
+                  <div style={{marginBottom:".4rem",fontSize:".75rem",fontWeight:700,color:"var(--mu)"}}>Código / referencia</div>
+                  <input className="fi" placeholder="Ej: L-042" style={{marginBottom:0}}
+                    value={loteCodigo} onChange={e=>setLoteCodigo(e.target.value)}/>
+                </div>
+                <div>
+                  <div style={{marginBottom:".4rem",fontSize:".75rem",fontWeight:700,color:"var(--mu)"}}>Precio base</div>
+                  <input className="fi" type="number" inputMode="numeric" placeholder="$0" style={{marginBottom:0}}
+                    value={loteBase} onChange={e=>setLoteBase(e.target.value)}/>
+                </div>
+              </div>
+
+              <button className="btn-buscar" onClick={registrarLote} disabled={!loteNombre.trim() || guardandoLote}>
+                {guardandoLote ? <Spinner/> : <>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+                  Registrar lote
+                </>}
+              </button>
+            </div>
+
+            <div style={{padding:".75rem 1rem",background:"rgba(6,182,212,.04)",border:"1px solid rgba(6,182,212,.15)",borderRadius:10,fontSize:".75rem",color:"var(--mu)",lineHeight:1.5}}>
+              El lote queda registrado en <strong style={{color:"var(--wh2)"}}>{selectedRemate?.nombre}</strong> y aparece en el Dashboard para ser configurado antes del remate.
+            </div>
+          </div>
+        )}
       </div>
 
       <nav className="tabs">
@@ -579,6 +648,8 @@ export default function EntregarPage() {
             icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="5" width="14" height="12" rx="2"/><path d="M3 9h14M7 5V3h6v2"/></svg> },
           { id:"entregados",   label:"Entregados",
             icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="10" cy="10" r="8"/><path d="M6.5 10l2.5 2.5 4.5-5"/></svg> },
+          { id:"recibir",      label:"Recibir",
+            icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="3" width="14" height="14" rx="2"/><line x1="10" y1="7" x2="10" y2="13"/><line x1="7" y1="10" x2="13" y2="10"/></svg> },
         ].map(t => (
           <button key={t.id} className={`tab${tab===t.id?" on":""}`} onClick={() => setTab(t.id)}>
             {t.icon}
