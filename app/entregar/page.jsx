@@ -311,6 +311,7 @@ export default function EntregarPage() {
       codigo: loteCodigo.trim() || null,
       base: loteBase ? Number(String(loteBase).replace(/\D/g,"")) || null : null,
       bodega_id: session?.bodegaId || null,
+      estado: "pendiente_revision",
     });
     setGuardandoLote(false);
     if (!error) {

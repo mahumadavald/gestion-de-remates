@@ -2455,6 +2455,21 @@ function Dashboard({ session, onLogout }) {
     try { localStorage.setItem("takka_vendedores", JSON.stringify(dbVendedores)); } catch {}
   }, [dbVendedores]);
 
+  // ── Notificación realtime: lotes pendientes de revisión de bodega ──
+  useEffect(() => {
+    if (!supabase || !session) return;
+    const ch = supabase.channel("lotes-bodega")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "lotes",
+          filter: "estado=eq.pendiente_revision" }, (payload) => {
+        const nuevo = payload.new;
+        if (!nuevo) return;
+        setDbLotes(prev => prev.find(l=>l.id===nuevo.id) ? prev : [...prev, nuevo]);
+        notify(`📦 Nuevo lote en bodega: ${nuevo.nombre}`, "sold");
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [session]);
+
   // ── Remate activo: persistencia y sincronización global ───────────
   useEffect(() => {
     try { const s = localStorage.getItem("takka_remate_activo"); if(s) setRemateActivo(JSON.parse(s)); } catch {}
@@ -3796,8 +3811,9 @@ function exportCSV(){
                 </div>
                 <div className="fg"><label className="fl">Estado</label>
                   <select className="fsel" value={editLoteData.estado} onChange={e=>setEditLoteData(f=>({...f,estado:e.target.value}))}>
-                    <option value="disponible">Disponible</option>
-                    <option value="publicado">Publicado</option>
+                    <option value="pendiente_revision">⏳ Pendiente revisión</option>
+                    <option value="publicado">✓ Publicado (en catálogo)</option>
+                    <option value="disponible">Disponible (en remate)</option>
                     <option value="vendido">Vendido</option>
                     <option value="sin vender">Sin vender</option>
                   </select>
@@ -4087,23 +4103,25 @@ function exportCSV(){
             <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M8 3v10M3 8h10"/></svg></span>
             <span className="sb-label">Nuevo Remate</span>
           </div>
-          {[
-            {id:"ingreso-vendedores", icon:"vendedor", label:"Ingreso Vendedores"},
-            {id:"lotes",              icon:"lotes",    label:"Ingreso Lotes"},
-            {id:"planilla",           icon:"lotes",    label:"Planilla"},
-            {id:"lotes-vendedor",     icon:"vendedor", label:"Lotes por Vendedor"},
-          ].map(n=>(
-            <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>{setPage(n.id);setMobileMenu(false);}}>
-              <span className="sb-icon"><Icon name={n.icon}/></span><span className="sb-label">{n.label}</span>
-            </div>
-          ))}
-          <div className="sb-item" onClick={()=>{
-            const rem = REMATES_MERGED.find(r=>r.supabaseId||r.id);
-            if(rem) window.open(`/catalogo/${rem.supabaseId||rem.id}`,"_blank");
-            else notify("Selecciona un remate primero.","inf");
-          }}>
+          {(()=>{
+            const pendRevCount = dbLotes.filter(l=>l.estado==="pendiente_revision").length;
+            return [
+              {id:"ingreso-vendedores", icon:"vendedor", label:"Ingreso Vendedores"},
+              {id:"lotes",              icon:"lotes",    label:"Ingreso Lotes"},
+              {id:"lotes-revision",     icon:"lotes",    label:"Revisar Lotes",  badge: pendRevCount||null},
+              {id:"planilla",           icon:"lotes",    label:"Planilla"},
+              {id:"lotes-vendedor",     icon:"vendedor", label:"Lotes por Vendedor"},
+            ].map(n=>(
+              <div key={n.id} className={`sb-item${page===n.id?" on":""}`} onClick={()=>{setPage(n.id);setMobileMenu(false);}}>
+                <span className="sb-icon"><Icon name={n.icon}/></span>
+                <span className="sb-label">{n.label}</span>
+                {n.badge ? <span className="sb-badge">{n.badge}</span> : null}
+              </div>
+            ));
+          })()}
+          <div className="sb-item" onClick={()=>window.open("/catalogo","_blank")}>
             <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 6h6M5 9h4"/></svg></span>
-            <span className="sb-label">Catálogo ↗</span>
+            <span className="sb-label">Catálogo público ↗</span>
           </div>
 
           {/* ── CLIENTES ── */}
@@ -4590,6 +4608,77 @@ function exportCSV(){
             </div>
           </div>
         )}
+
+        {/* ══ LOTES: REVISIÓN DE BODEGA ══ */}
+        {page==="lotes-revision" && (()=>{
+          const pendientes = dbLotes
+            .filter(l => l.estado === "pendiente_revision")
+            .slice().sort((a,b) => new Date(b.created_at||0) - new Date(a.created_at||0));
+
+          const publicarLote = async (lote) => {
+            const {data} = await supabase.from("lotes").update({estado:"publicado"}).eq("id",lote.id).select().single();
+            if (data) { setDbLotes(prev => prev.map(l => l.id===lote.id ? data : l)); notify("✓ Lote publicado en catálogo.","sold"); }
+            else notify("Error al publicar.","inf");
+          };
+
+          const eliminarLote = async (lote) => {
+            if (!window.confirm(`¿Eliminar "${lote.nombre}"? Esta acción no se puede deshacer.`)) return;
+            await supabase.from("lotes").delete().eq("id",lote.id);
+            setDbLotes(prev => prev.filter(l => l.id !== lote.id));
+            notify("Lote eliminado.","inf");
+          };
+
+          const abrirEdicion = (lote) => {
+            setEditLoteData({
+              id: lote.id, nombre: lote.nombre||"", propietario: lote.propietario||"",
+              categoria: lote.categoria||"", base: lote.base||0, minimo: lote.minimo||0,
+              comision: lote.comision||5, estado: lote.estado||"pendiente_revision",
+              orden: lote.orden||1, cantidad: lote.cantidad||1,
+              ppu: lote.precio_por_unidad||false, afectoIva: lote.afecto_iva||false,
+            });
+            setModal("editar-lote");
+          };
+
+          return (
+            <div className="page">
+              <div style={{marginBottom:"1.5rem"}}>
+                <div style={{fontSize:"1.1rem",fontWeight:800,color:"var(--wh2)"}}>Revisar lotes de bodega</div>
+                <div style={{fontSize:".8rem",color:"var(--mu)",marginTop:".3rem"}}>Lotes registrados por administradores de bodega que esperan revisión y publicación.</div>
+              </div>
+
+              {pendientes.length === 0 ? (
+                <div style={{textAlign:"center",padding:"3.5rem",background:"var(--s2)",borderRadius:12,border:"1px solid var(--b1)"}}>
+                  <div style={{fontSize:"2rem",marginBottom:".75rem"}}>✅</div>
+                  <div style={{fontWeight:700,color:"var(--wh2)",marginBottom:".4rem"}}>Sin lotes pendientes</div>
+                  <div style={{fontSize:".82rem",color:"var(--mu)"}}>Cuando la bodega registre lotes aparecerán aquí para revisión.</div>
+                </div>
+              ) : pendientes.map(lote => {
+                const bodega = dbBodegas?.find(b=>b.id===lote.bodega_id);
+                return (
+                  <div key={lote.id} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderLeft:"3px solid var(--yl)",borderRadius:10,padding:"1rem 1.25rem",marginBottom:".75rem",display:"flex",gap:"1rem",alignItems:"flex-start",flexWrap:"wrap"}}>
+                    <div style={{flex:1,minWidth:200}}>
+                      <div style={{fontWeight:700,fontSize:".95rem",color:"var(--wh2)",marginBottom:".3rem"}}>{lote.nombre}</div>
+                      <div style={{fontSize:".75rem",color:"var(--mu)",display:"flex",gap:".75rem",flexWrap:"wrap"}}>
+                        {lote.codigo && <span>Código: <strong>{lote.codigo}</strong></span>}
+                        {lote.base   && <span>Base: <strong>${Number(lote.base).toLocaleString("es-CL")}</strong></span>}
+                        {bodega      && <span>Bodega: <strong>{bodega.nombre}</strong></span>}
+                        {lote.created_at && <span>Recibido: <strong>{new Date(lote.created_at).toLocaleDateString("es-CL")}</strong></span>}
+                      </div>
+                    </div>
+                    <div style={{display:"flex",gap:".5rem",alignItems:"center",flexShrink:0}}>
+                      <button className="btn-sec" style={{fontSize:".72rem",padding:".28rem .65rem"}}
+                        onClick={()=>abrirEdicion(lote)}>Editar</button>
+                      <button style={{fontSize:".72rem",padding:".32rem .8rem",borderRadius:8,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.06)",color:"#dc2626",cursor:"pointer",fontFamily:"inherit",fontWeight:600}}
+                        onClick={()=>eliminarLote(lote)}>✕ Rechazar</button>
+                      <button className="btn-primary" style={{fontSize:".75rem",padding:".32rem .9rem"}}
+                        onClick={()=>publicarLote(lote)}>✓ Publicar</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
 
         {/* ══ LOTES ══ */}
         {page==="lotes" && (()=>{
