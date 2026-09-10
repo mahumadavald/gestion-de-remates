@@ -2314,6 +2314,10 @@ function Dashboard({ session, onLogout }) {
   const [nuevoVendedorForm, setNuevoVendedorForm] = useState({nombre:"",rut:"",giro:"",direccion:"",telefono:"",email:""});
   const [vendedorLiqGenerada, setVendedorLiqGenerada] = useState(null);
   const [devoluciones,  setDevoluciones]  = useState([]);
+  const [dbGarantias,   setDbGarantias]   = useState([]);
+  const dbGarantiasRef  = useRef([]);
+  const [garForm, setGarForm] = useState({postor:"",rut:"",email:"",telefono:"",remateId:"",metodo:"Transferencia electrónica",cuentaBanco:"",monto:300000});
+  const [garLoading, setGarLoading] = useState(false);
 
   // Estado reactivo para devoluciones de garantía en panel post-remate
   const [noCompradoresState, setNoCompradoresState] = useState([]);
@@ -2338,8 +2342,9 @@ function Dashboard({ session, onLogout }) {
 
   const notify = (msg, type="ok") => { setNotif({msg,type}); setTimeout(()=>setNotif(null),4000); };
 
-  // Mantener ref actualizada para que el timer nunca capture una versión stale
+  // Mantener refs actualizadas para evitar closures stale
   useEffect(() => { doAdjudicarRef.current = doAdjudicar; });
+  useEffect(() => { dbGarantiasRef.current = dbGarantias; }, [dbGarantias]);
 
   // bidTimer: 15s countdown después de cada puja — auto-adjudica si nadie supera
   useEffect(() => {
@@ -2398,8 +2403,11 @@ function Dashboard({ session, onLogout }) {
           (session?.casaId
             ? supabase.from("liquidaciones").select("*").eq("casa_id", session.casaId).order("fecha_iso", {ascending:false})
             : supabase.from("liquidaciones").select("*").order("fecha_iso", {ascending:false})),
+          (session?.casaId
+            ? supabase.from("garantias").select("*").eq("casa_id", session.casaId).order("created_at", {ascending:false})
+            : supabase.from("garantias").select("*").order("created_at", {ascending:false})),
         ]);
-        const [remRes, lotRes, posRes, usrRes, bodRes, liqRes] = await Promise.race([fetches, timeout]);
+        const [remRes, lotRes, posRes, usrRes, bodRes, liqRes, garRes] = await Promise.race([fetches, timeout]);
         if (mounted) {
           if (remRes?.data) setDbRemates(remRes.data);
           if (lotRes?.data) setDbLotes(lotRes.data);
@@ -2415,6 +2423,21 @@ function Dashboard({ session, onLogout }) {
             bodegaId:  u.bodega_id||null,
           })));
           if (bodRes?.data) setDbBodegas(bodRes.data);
+          if (garRes?.data) setDbGarantias(garRes.data.map(g => ({
+            id:          g.id,
+            postor:      g.postor || "",
+            rut:         g.rut || "",
+            email:       g.email || "",
+            remate:      g.remate || "",
+            remateId:    g.remate_id || null,
+            metodo:      g.metodo || "Transferencia electrónica",
+            paleta:      g.paleta || "",
+            comprobante: g.comprobante_url || "",
+            estado:      g.estado || "pendiente",
+            devolucion:  g.devolucion || null,
+            monto:       g.monto || 0,
+            cuentaBanco: g.cuenta_banco || "",
+          })));
           if (liqRes?.data) setLiquidaciones(liqRes.data.map(l => ({
             id:            l.id,
             lote:          l.lote || "",
@@ -2587,7 +2610,7 @@ function Dashboard({ session, onLogout }) {
     if (winner) {
       // Liquidación automática — comisión según tipo + gastos admin si motorizado
       const winnerClean = winner.replace(" (Online)","").replace(" (Presencial)","");
-      const garantiaReg = GARANTIAS.find(g => g.postor===winnerClean && g.estado==="aprobada");
+      const garantiaReg = dbGarantiasRef.current.find(g => g.postor===winnerClean && g.estado==="aprobada");
       const gar     = garantiaReg?.monto || 0; // garantía solo como referencia; se descuenta una vez en calcLiquidacion
       const com     = Math.round(monto * (comPct / 100));
       const saldo   = monto; // sin descuento por lote — la garantía se aplica sobre el total consolidado
@@ -2648,7 +2671,7 @@ function Dashboard({ session, onLogout }) {
 
       // Devolución automática para los NO adjudicados en este lote
       const adjPostors = new Set([...(bids[idx]?.history||[]).map(h=>h.bidder)]);
-      const devs = GARANTIAS
+      const devs = dbGarantiasRef.current
         .filter(g => g.estado==="aprobada" && !g.devolucion)
         .filter(g => !adjPostors.has(g.postor) || g.postor !== winner.replace(" (Online)",""))
         .map(g => ({
@@ -3303,7 +3326,7 @@ function exportCSV(){
     { id:"lotes",        icon:"lotes",     label:"Lotes",        badge:LOTES_REALES.length },
     { id:"sala",         icon:"sala",      label:"Sala en vivo" },
     { id:"postores",     icon:"postores",  label:"Postores" },
-    { id:"garantias",    icon:"garantia",  label:"Garantias",    badge: GARANTIAS.filter(g=>g.estado==="pendiente").length||undefined },
+    { id:"garantias",    icon:"garantia",  label:"Garantias",    badge: dbGarantias.filter(g=>g.estado==="pendiente").length||undefined },
     { id:"adjudicac",    icon:"adjudic",   label:"Adjudicaciones" },
     { id:"liquidac",     icon:"liq",       label:"Liquidaciones", badge: liquidaciones.filter(l=>!l.enviado).length||undefined },
     { id:"devoluciones", icon:"dev",       label:"Devoluciones",  badge: devoluciones.filter(d=>d.estado==="pendiente").length||undefined },
@@ -3739,19 +3762,58 @@ function exportCSV(){
               </div>
             </>}
             {modal==="nueva-garantia" && <>
-              <div className="modal-title">Registrar garantia</div>
-              <div className="gar-info" style={{marginBottom:".9rem"}}>
-                <div className="gar-info-text">Monto de garantia: <strong>$300.000</strong> — Transferir a Banco Estado cta. cte. 123456789 a nombre de <strong>Remates Ahumada</strong> y adjuntar comprobante.</div>
-              </div>
+              <div className="modal-title">Registrar garantía</div>
               <div className="form-grid">
-                <div className="fg full"><label className="fl">Nombre completo</label><input className="fi" placeholder="Juan Perez Soto"/></div>
-                <div className="fg"><label className="fl">RUT</label><input className="fi" placeholder="12.345.678-9"/></div>
-                <div className="fg"><label className="fl">Email</label><input className="fi" placeholder="juan@email.cl"/></div>
-                <div className="fg"><label className="fl">Telefono</label><input className="fi" placeholder="+56 9 1234 5678"/></div>
-                <div className="fg"><label className="fl">Remate</label><select className="fsel"><option>Remate Industrial Marzo</option><option>Remate Agricola Febrero</option></select></div>
-                <div className="fg"><label className="fl">Metodo de pago</label><select className="fsel"><option>Transferencia electronica</option><option>Efectivo (dia del remate)</option></select></div>
-                <div className="fg full"><label className="fl">Comprobante de transferencia</label><input className="fi" type="file" accept=".pdf,.jpg,.png"/></div>
-                <div className="fg full"><label className="fl">Numero de cuenta bancaria (para devolucion)</label><input className="fi" placeholder="Banco Estado N 123456789"/></div>
+                <div className="fg full"><label className="fl">Nombre completo *</label><input className="fi" placeholder="Juan Pérez Soto" value={garForm.postor} onChange={e=>setGarForm(f=>({...f,postor:e.target.value}))}/></div>
+                <div className="fg"><label className="fl">RUT *</label><input className="fi" placeholder="12.345.678-9" value={garForm.rut} onChange={e=>setGarForm(f=>({...f,rut:e.target.value}))}/></div>
+                <div className="fg"><label className="fl">Email</label><input className="fi" type="email" placeholder="juan@email.cl" value={garForm.email} onChange={e=>setGarForm(f=>({...f,email:e.target.value}))}/></div>
+                <div className="fg"><label className="fl">Teléfono</label><input className="fi" placeholder="+56 9 1234 5678" value={garForm.telefono} onChange={e=>setGarForm(f=>({...f,telefono:e.target.value}))}/></div>
+                <div className="fg"><label className="fl">Remate *</label>
+                  <select className="fsel" value={garForm.remateId} onChange={e=>setGarForm(f=>({...f,remateId:e.target.value}))}>
+                    <option value="">— Seleccionar —</option>
+                    {REMATES_MERGED.map(r=><option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>)}
+                  </select>
+                </div>
+                <div className="fg"><label className="fl">Método de pago</label>
+                  <select className="fsel" value={garForm.metodo} onChange={e=>setGarForm(f=>({...f,metodo:e.target.value}))}>
+                    <option>Transferencia electrónica</option>
+                    <option>Efectivo (día del remate)</option>
+                  </select>
+                </div>
+                <div className="fg"><label className="fl">Monto garantía (CLP)</label><input className="fi" type="number" value={garForm.monto} onChange={e=>setGarForm(f=>({...f,monto:parseInt(e.target.value)||0}))}/></div>
+                <div className="fg"><label className="fl">Cuenta bancaria (para devolución)</label><input className="fi" placeholder="Banco Estado Cta. Cte. 123456789" value={garForm.cuentaBanco} onChange={e=>setGarForm(f=>({...f,cuentaBanco:e.target.value}))}/></div>
+              </div>
+              <div style={{display:"flex",gap:".75rem",marginTop:"1rem",justifyContent:"flex-end"}}>
+                <button className="btn-sec" onClick={()=>setModal(null)}>Cancelar</button>
+                <button className="btn-primary" disabled={garLoading||!garForm.postor||!garForm.rut} onClick={async()=>{
+                  if (!garForm.postor||!garForm.rut) { notify("Nombre y RUT son obligatorios.","inf"); return; }
+                  setGarLoading(true);
+                  const remateSelObj = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===garForm.remateId);
+                  const {data,error} = await supabase.from("garantias").insert({
+                    postor:       garForm.postor,
+                    rut:          garForm.rut,
+                    email:        garForm.email,
+                    telefono:     garForm.telefono,
+                    remate:       remateSelObj?.name||"",
+                    remate_id:    garForm.remateId||null,
+                    metodo:       garForm.metodo,
+                    monto:        garForm.monto,
+                    cuenta_banco: garForm.cuentaBanco,
+                    estado:       "pendiente",
+                    casa_id:      session?.casaId||null,
+                  }).select().single();
+                  setGarLoading(false);
+                  if (error) { notify("Error: "+error.message,"inf"); return; }
+                  setDbGarantias(prev=>[{
+                    id:data.id, postor:garForm.postor, rut:garForm.rut, email:garForm.email,
+                    remate:remateSelObj?.name||"", remateId:garForm.remateId||null,
+                    metodo:garForm.metodo, paleta:"", comprobante:"", estado:"pendiente",
+                    devolucion:null, monto:garForm.monto, cuentaBanco:garForm.cuentaBanco,
+                  },...prev]);
+                  setGarForm({postor:"",rut:"",email:"",telefono:"",remateId:"",metodo:"Transferencia electrónica",cuentaBanco:"",monto:300000});
+                  notify("Garantía registrada.","sold");
+                  setModal(null);
+                }}>{garLoading?"Guardando...":"Registrar garantía"}</button>
               </div>
             </>}
             {modal==="nuevo-vendedor" && <>
@@ -4153,7 +4215,7 @@ function exportCSV(){
           <div className="sb-section">Garantía</div>
           {[
             {id:"preinscriptos",       icon:"postores", label:"Pre inscritos web",      badge: dbPostores.filter(p=>p.estado==="pendiente"&&p.modalidad==="web").length||undefined},
-            {id:"garantias",           icon:"garantia", label:"Ingresar Garantía",      badge: GARANTIAS.filter(g=>g.estado==="pendiente").length||undefined},
+            {id:"garantias",           icon:"garantia", label:"Ingresar Garantía",      badge: dbGarantias.filter(g=>g.estado==="pendiente").length||undefined},
             {id:"reimprimir",          icon:"factura",  label:"Reimprimir Comprobante"},
             {id:"devoluciones",        icon:"dev",      label:"Devoluciones",           badge: devoluciones.filter(d=>d.estado==="pendiente").length||undefined},
             {id:"participantes-online",icon:"postores", label:"Participantes Online"},
@@ -6712,9 +6774,9 @@ function exportCSV(){
             {/* Stats */}
             <div className="gar-steps">
               {[
-                {n:"Total recibidas",v:GARANTIAS.length,l:"inscripciones este remate",c:"var(--ac)"},
-                {n:"Aprobadas",v:GARANTIAS.filter(g=>g.estado==="aprobada").length,l:"paletas asignadas",c:"var(--gr)"},
-                {n:"Pendientes",v:GARANTIAS.filter(g=>g.estado==="pendiente").length,l:"sin comprobante o efectivo",c:"var(--yl)"},
+                {n:"Total recibidas",v:dbGarantias.length,l:"inscripciones este remate",c:"var(--ac)"},
+                {n:"Aprobadas",v:dbGarantias.filter(g=>g.estado==="aprobada").length,l:"paletas asignadas",c:"var(--gr)"},
+                {n:"Pendientes",v:dbGarantias.filter(g=>g.estado==="pendiente").length,l:"sin comprobante o efectivo",c:"var(--yl)"},
               ].map((s,i)=>(
                 <div className="gar-step" key={i} style={{"--sc":s.c}}>
                   <div className="gar-step-n">{s.n}</div>
@@ -6724,12 +6786,20 @@ function exportCSV(){
               ))}
             </div>
             {/* Info box */}
-            <div className="gar-info">
-              <div className="gar-info-text">
-                <strong>Cuenta para transferencias:</strong> Banco Estado · Cta. Cte. 123456789 · Remates Ahumada · RUT 76.123.456-7 · mahumada@rematesahumada.cl<br/>
-                Monto garantia: <strong>$300.000</strong> — Devolucion en 5 dias habiles post remate. Si el postor adjudicado no paga, la garantia queda retenida.
-              </div>
-            </div>
+            {(()=>{
+              const licencia = dbLicencias?.find(c=>c.id===session?.casaId)||{};
+              const infoTransf = licencia.banco_nombre
+                ? `${licencia.banco_nombre} · ${licencia.tipo_cuenta||"Cta. Cte."} ${licencia.numero_cuenta||"—"} · ${session?.casaNombre||"Casa"} · ${licencia.rut_casa||"—"} · ${licencia.email_contacto||""}`
+                : "Consulta con la administración para los datos de transferencia.";
+              return (
+                <div className="gar-info">
+                  <div className="gar-info-text">
+                    <strong>Cuenta para transferencias:</strong> {infoTransf}<br/>
+                    Monto garantía: <strong>$300.000</strong> — Devolución en 5 días hábiles post remate.
+                  </div>
+                </div>
+              );
+            })()}
             {/* Filters */}
             <div className="filter-row" style={{marginBottom:".85rem"}}>
               {["todos","aprobada","pendiente","devuelta"].map(f=>(
@@ -6738,19 +6808,22 @@ function exportCSV(){
             </div>
             <div className="table-card">
               <div className="table-head">
-                <div className="table-title">{GARANTIAS.filter(g=>filterTab==="todos"||g.estado===filterTab).length} garantias — Remate Industrial Marzo</div>
+                <div className="table-title">{dbGarantias.filter(g=>filterTab==="todos"||g.estado===filterTab).length} garantías</div>
               </div>
+              {dbGarantias.length===0 ? (
+                <div style={{padding:"3rem",textAlign:"center",color:"var(--mu)",fontSize:".82rem"}}>
+                  No hay garantías registradas. Usa <strong style={{color:"var(--wh2)"}}>+ Registrar garantía</strong> para agregar.
+                </div>
+              ) : (
               <table>
-                <thead><tr><th>ID</th><th>Postor</th><th>RUT</th><th>Email</th><th>Remate</th><th>Metodo</th><th>Paleta</th><th>Comprobante</th><th>Estado</th><th>Devolucion</th></tr></thead>
+                <thead><tr><th>Postor</th><th>RUT</th><th>Remate</th><th>Método</th><th>Paleta</th><th>Comprobante</th><th>Estado</th><th></th></tr></thead>
                 <tbody>
-                  {GARANTIAS.filter(g=>filterTab==="todos"||g.estado===filterTab).map(g=>(
+                  {dbGarantias.filter(g=>filterTab==="todos"||g.estado===filterTab).map(g=>(
                     <tr key={g.id}>
-                      <td className="mono">{g.id}</td>
                       <td style={{fontWeight:600}}>{g.postor}</td>
-                      <td className="mono">{g.rut}</td>
-                      <td className="mono">{g.email}</td>
-                      <td style={{fontSize:".73rem"}}>{g.remate}</td>
-                      <td className="mono">{g.metodo}</td>
+                      <td className="mono" style={{fontSize:".73rem"}}>{g.rut}</td>
+                      <td style={{fontSize:".73rem",color:"var(--mu)"}}>{g.remate||"—"}</td>
+                      <td className="mono" style={{fontSize:".73rem"}}>{g.metodo}</td>
                       <td style={{textAlign:"center"}}>
                         {g.paleta
                           ? <div className="paleta-badge">{g.paleta}</div>
@@ -6758,7 +6831,7 @@ function exportCSV(){
                       </td>
                       <td>
                         {g.comprobante
-                          ? <span style={{color:"var(--gr)",fontSize:".72rem",fontWeight:600}}>Adjunto</span>
+                          ? <a href={g.comprobante} target="_blank" rel="noreferrer" style={{color:"var(--gr)",fontSize:".72rem",fontWeight:600}}>Ver</a>
                           : <span style={{color:"var(--yl)",fontSize:".72rem",fontWeight:600}}>Pendiente</span>}
                       </td>
                       <td>
@@ -6766,11 +6839,29 @@ function exportCSV(){
                           {g.estado==="aprobada"?"Aprobada":g.estado==="pendiente"?"Pendiente":"Devuelta"}
                         </span>
                       </td>
-                      <td className="mono" style={{color:"var(--mu)"}}>{g.devolucion||"—"}</td>
+                      <td>
+                        <div style={{display:"flex",gap:".35rem"}}>
+                          {g.estado==="pendiente" && (
+                            <button className="btn-confirm" style={{fontSize:".68rem",padding:".25rem .6rem"}} onClick={async()=>{
+                              const {error} = await supabase.from("garantias").update({estado:"aprobada"}).eq("id",g.id);
+                              if (!error) { setDbGarantias(prev=>prev.map(x=>x.id===g.id?{...x,estado:"aprobada"}:x)); notify("Garantía aprobada.","sold"); }
+                              else notify("Error: "+error.message,"inf");
+                            }}>✓ Aprobar</button>
+                          )}
+                          {g.estado==="aprobada" && (
+                            <button className="btn-sec" style={{fontSize:".68rem",padding:".25rem .6rem",color:"var(--yl)"}} onClick={async()=>{
+                              const {error} = await supabase.from("garantias").update({estado:"devuelta",devolucion:new Date().toLocaleDateString("es-CL")}).eq("id",g.id);
+                              if (!error) { setDbGarantias(prev=>prev.map(x=>x.id===g.id?{...x,estado:"devuelta",devolucion:new Date().toLocaleDateString("es-CL")}:x)); notify("Garantía marcada como devuelta.","sold"); }
+                              else notify("Error: "+error.message,"inf");
+                            }}>Devuelta</button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              )}
             </div>
           </div>
         )}
@@ -8834,39 +8925,69 @@ function exportCSV(){
 
       {/* ══ GENERAR LIQUIDACIONES MASIVO ══ */}
       {page==="liq-masivo" && (()=>{
-        const cerrados = REMATES_MERGED.filter(r=>r.estado==="cerrado");
-        const [remSel, setRemSel] = React.useState(null);
-        const remate = cerrados.find(r=>r.id===remSel||r.supabaseId===remSel);
-        const adjDeRemate = ADJUDICACIONES.filter(a=>!remSel||(a.remateId===remSel||a.remate_id===remSel));
-        const compradores = [...new Set(adjDeRemate.map(a=>a.postor).filter(Boolean))];
+        const todosRemates = REMATES_MERGED;
+        const [remSel, setRemSel] = React.useState(remateActivo?.supabaseId||remateActivo?.id||"");
+        const remate = todosRemates.find(r=>(r.supabaseId||r.id)===remSel);
+        const liqDeRemate = liquidaciones.filter(l=>!remSel||(l.remateId===remSel));
+        const compradores = [...new Set(liqDeRemate.map(a=>a.postor.replace(" (Online)","").replace(" (Presencial)","")).filter(Boolean))];
+        const totalMartillo = liqDeRemate.reduce((s,l)=>s+(l.monto||0),0);
+        const pendientes = liqDeRemate.filter(l=>l.estado==="saldo pendiente").length;
         return (
           <div className="page">
             <div style={{marginBottom:"1.5rem",fontSize:".82rem",color:"var(--mu)"}}>
-              Genera liquidaciones para todos los compradores de un remate de una sola vez.
+              Vista consolidada de todas las liquidaciones de un remate. Selecciona el remate para revisar adjudicaciones y totales.
             </div>
             <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.5rem",flexWrap:"wrap"}}>
-              <select className="fsel" value={remSel||""} onChange={e=>setRemSel(e.target.value||null)} style={{maxWidth:340}}>
-                <option value="">— Selecciona un remate cerrado —</option>
-                {cerrados.map(r=><option key={r.id} value={r.supabaseId||r.id}>{r.name} · {r.fecha}</option>)}
+              <select className="fsel" value={remSel||""} onChange={e=>setRemSel(e.target.value||"")} style={{maxWidth:360}}>
+                <option value="">— Todos los remates —</option>
+                {todosRemates.map(r=><option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name} · {r.fecha}</option>)}
               </select>
             </div>
-            {remSel && (
-              <div style={{padding:"1.25rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.2)",borderRadius:10,marginBottom:"1.2rem"}}>
-                <div style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",marginBottom:".5rem"}}>{remate?.name}</div>
-                <div style={{fontSize:".75rem",color:"var(--mu)"}}>
-                  {adjDeRemate.length} adjudicaciones · {compradores.length} compradores distintos
+            {/* Stats */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:".75rem",marginBottom:"1.25rem"}}>
+              {[
+                {label:"Lotes adjudicados",  val:liqDeRemate.length,           color:"var(--ac)"},
+                {label:"Compradores únicos",  val:compradores.length,           color:"var(--gr)"},
+                {label:"Total martillo",       val:totalMartillo>0?`$${(totalMartillo/1000000).toFixed(1)}M`:"—", color:"#f59e0b"},
+              ].map((s,i)=>(
+                <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1rem",borderLeft:`3px solid ${s.color}`}}>
+                  <div style={{fontSize:".68rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em",marginBottom:".3rem"}}>{s.label}</div>
+                  <div style={{fontSize:"1.5rem",fontWeight:800,color:"var(--wh2)"}}>{s.val}</div>
                 </div>
-                <button
-                  onClick={()=>{setPage("liquidac");setSelectedRemate(remSel);notify("Seleccionado. Genera la liquidación desde esta página.","inf");}}
-                  className="btn-primary" style={{marginTop:".85rem",fontSize:".78rem"}}>
-                  Ir a Liquidar Compradores →
-                </button>
-              </div>
-            )}
-            {cerrados.length===0 && (
-              <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"35vh",gap:".75rem",color:"var(--mu)"}}>
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M8 36V14l12-8 12 8v22"/><path d="M16 36v-8h8v8"/></svg>
-                <div style={{fontSize:".88rem",fontWeight:600,color:"var(--wh2)"}}>No hay remates cerrados</div>
+              ))}
+            </div>
+            {liqDeRemate.length>0 ? (
+              <>
+                <div className="table-card" style={{marginBottom:"1rem"}}>
+                  <div className="table-head">
+                    <div className="table-title">Adjudicaciones — {remate?.name||"todos los remates"}</div>
+                    <div style={{display:"flex",gap:".5rem"}}>
+                      <button className="btn-sec" style={{fontSize:".72rem"}} onClick={()=>setPage("liquidac")}>Ir a Liquidar Compradores →</button>
+                      {pendientes>0&&<button className="btn-sec" style={{fontSize:".72rem",color:"var(--ac)"}} onClick={()=>setPage("env-masivo")}>Enviar {pendientes} pendientes →</button>}
+                    </div>
+                  </div>
+                  <table>
+                    <thead><tr><th>Postor</th><th>Lote</th><th>Remate</th><th style={{textAlign:"right"}}>Martillo</th><th style={{textAlign:"right"}}>Total a pagar</th><th>Estado</th></tr></thead>
+                    <tbody>
+                      {liqDeRemate.map((l,i)=>(
+                        <tr key={l.id||i}>
+                          <td style={{fontWeight:600}}>{l.postor?.replace(" (Online)","").replace(" (Presencial)","")}</td>
+                          <td style={{fontSize:".75rem",color:"var(--mu2)"}}>{l.lote}</td>
+                          <td style={{fontSize:".72rem",color:"var(--mu)"}}>{l.remateNombre||"—"}</td>
+                          <td style={{textAlign:"right",fontWeight:600}}>${(l.monto||0).toLocaleString("es-CL")}</td>
+                          <td style={{textAlign:"right",color:"var(--ac)",fontWeight:700}}>${(l.totalAPagar||0).toLocaleString("es-CL")}</td>
+                          <td><span className={`pill p-${l.estado==="saldo pendiente"?"pendiente":"publicado"}`}>{l.estado}</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            ) : (
+              <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"30vh",gap:".75rem",color:"var(--mu)"}}>
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="4" y="4" width="32" height="32" rx="4"/><path d="M12 14h16M12 20h16M12 26h8"/></svg>
+                <div style={{fontSize:".88rem",fontWeight:600,color:"var(--wh2)"}}>Sin liquidaciones{remSel?" para este remate":""}</div>
+                <div style={{fontSize:".75rem",textAlign:"center",maxWidth:300}}>Las liquidaciones se generan automáticamente al adjudicar lotes en la Sala en vivo.</div>
               </div>
             )}
           </div>
@@ -8912,8 +9033,39 @@ function exportCSV(){
                     </div>
                   ))}
                 </div>
-                <button className="btn-primary" onClick={()=>{ notify("Función de envío masivo disponible desde Liquidar Compradores.","inf"); setPage("liquidac"); }}>
-                  Ir a Liquidar Compradores →
+                <button className="btn-primary" onClick={async()=>{
+                  let ok=0, err=0, sinEmail=0;
+                  for (const l of liqConEmail) {
+                    if (!l.email) { sinEmail++; continue; }
+                    try {
+                      const postorData = POSTORES_MERGED.find(p=>p.name===l.postor||p.razonSocial===l.postor);
+                      const liqObj = calcLiquidacion(
+                        [{...l, comPct:l.comPct||10}],
+                        postorData,
+                        gastoAdminMotorizado
+                      );
+                      const res = await authFetch("/api/liquidaciones/send",{
+                        method:"POST",
+                        headers:{"Content-Type":"application/json"},
+                        body:JSON.stringify({
+                          to:l.email,
+                          postorNombre:l.postor?.replace(" (Online)","").replace(" (Presencial)",""),
+                          rut:postorData?.rut||"",
+                          liq:liqObj,
+                          remateNombre:l.remateNombre||"",
+                          fecha:l.fecha||"",
+                        }),
+                      });
+                      if (res.ok) {
+                        ok++;
+                        setLiquidaciones(prev=>prev.map(x=>x.id===l.id?{...x,enviado:true}:x));
+                        if (l.id) supabase.from("liquidaciones").update({enviado:true}).eq("id",l.id).then(({error})=>{ if(error) console.error("[env-masivo]",error.message); });
+                      } else err++;
+                    } catch { err++; }
+                  }
+                  notify(`${ok} enviados${err?` · ${err} con error`:""}${sinEmail?` · ${sinEmail} sin email`:""}`, ok?"ok":"inf");
+                }}>
+                  Enviar liquidaciones ({liqConEmail.length})
                 </button>
               </div>
             )}
