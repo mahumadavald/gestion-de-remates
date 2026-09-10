@@ -6391,18 +6391,30 @@ function exportCSV(){
 
               return (
                 <>
-                  {/* 5 cards hero */}
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:".75rem",marginBottom:"1.1rem"}}>
+                  {/* 5 cards hero — PowerBI style */}
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(185px,1fr))",gap:".85rem",marginBottom:"1.1rem"}}>
                     {[
-                      {label:"Venta total",        val:fmt(ventaTotal),  accent:"var(--gr)",  sub:`${lotesSold} lotes adjudicados`},
-                      {label:"Comisiones netas",    val:fmt(totalCom),    accent:"var(--ac)",  sub:"sin IVA"},
-                      {label:"G. adm. motorizados", val:fmt(totalGAdm),   accent:"var(--yl)",  sub:"vehículos"},
-                      {label:"IVA 19%",             val:fmt(iva),         accent:"#f87171",    sub:"sobre ingresos AF"},
-                      {label:"Ingreso neto",        val:fmt(neto),        accent:"#a78bfa",    sub:"empresa"},
+                      {label:"Venta total",        val:fmt(ventaTotal),  accent:"#06B6D4", sub:`${lotesSold} lotes adjudicados`, icon:"🔨"},
+                      {label:"Comisiones netas",    val:fmt(totalCom),    accent:"#14B8A6", sub:"sin IVA", icon:"💰"},
+                      {label:"G. adm. motorizados", val:fmt(totalGAdm),   accent:"#f59e0b", sub:"vehículos", icon:"🚗"},
+                      {label:"IVA 19%",             val:fmt(iva),         accent:"#ef4444", sub:"sobre ingresos AF", icon:"📋"},
+                      {label:"Ingreso neto",        val:fmt(neto),        accent:"#8b5cf6", sub:"empresa", icon:"✅"},
                     ].map((c,i)=>(
-                      <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:12,padding:"1rem 1.1rem",borderBottom:`3px solid ${c.accent}`,textAlign:"center"}}>
-                        <div style={{fontSize:".6rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".35rem"}}>{c.label}</div>
-                        <div style={{fontSize:"1.2rem",fontWeight:900,color:c.accent,lineHeight:1,marginBottom:".2rem"}}>{c.val}</div>
+                      <div key={i} style={{
+                        background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:14,
+                        padding:"1.1rem 1.25rem",borderTop:`3px solid ${c.accent}`,
+                        position:"relative",overflow:"hidden",
+                        transition:"transform .15s,box-shadow .15s",cursor:"default",
+                      }}
+                        onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 8px 24px rgba(0,0,0,.18),0 0 0 1px ${c.accent}33`;}}
+                        onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}
+                      >
+                        <div style={{position:"absolute",top:0,right:0,width:70,height:70,borderRadius:"50%",background:c.accent,opacity:.07,transform:"translate(20px,-20px)",pointerEvents:"none"}}/>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:".35rem"}}>
+                          <div style={{fontSize:".58rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em"}}>{c.label}</div>
+                          <span style={{fontSize:"1rem",opacity:.45}}>{c.icon}</span>
+                        </div>
+                        <div style={{fontSize:"1.3rem",fontWeight:900,color:c.accent,lineHeight:1,marginBottom:".2rem",letterSpacing:"-.02em"}}>{c.val}</div>
                         <div style={{fontSize:".62rem",color:"var(--mu)"}}>{c.sub}</div>
                       </div>
                     ))}
