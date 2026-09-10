@@ -2116,7 +2116,7 @@ function Dashboard({ session, onLogout }) {
   const [adminClienteSel, setAdminClienteSel] = useState(null); // cliente seleccionado en panel admin
 
   // ── Usuarios (solo admin) ──
-  const ROLES_DISPONIBLES = ["admin","martillero","spotter","postremate","garantias","solo lectura"];
+  const ROLES_DISPONIBLES = ["admin","martillero","spotter","postremate","garantias","entregador","solo lectura"];
   const [usuarios, setUsuarios] = useState([]);
   const [usuarioForm, setUsuarioForm] = useState({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",bodegaId:null,activo:true});
   const [usuarioModal, setUsuarioModal] = useState(false); // false | "crear" | "editar"
