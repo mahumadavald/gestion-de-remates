@@ -198,7 +198,7 @@ export default function EntregarPage() {
         .select("*, casas(id,nombre,slug), bodegas(nombre)").eq("id", data.session.user.id).single();
       if (!perfil) { await supabase.auth.signOut(); setScreen("login"); return; }
       const roles = perfil.roles || [];
-      if (!roles.some(r => ["admin","martillero","entregador"].includes(r))) {
+      if (!roles.some(r => ["admin","martillero","administrador bodega"].includes(r))) {
         await supabase.auth.signOut(); setScreen("login"); return;
       }
       setSession({ id: perfil.id, name: perfil.nombre, email: perfil.email,
@@ -228,7 +228,7 @@ export default function EntregarPage() {
       .select("*, casas(id,nombre,slug), bodegas(nombre)").eq("id", data.user.id).single();
     if (!perfil) { setLoginErr("Usuario no encontrado."); await supabase.auth.signOut(); setLoginLoading(false); return; }
     const roles = perfil.roles || [];
-    if (!roles.some(r => ["admin","martillero","entregador"].includes(r))) {
+    if (!roles.some(r => ["admin","martillero","administrador bodega"].includes(r))) {
       setLoginErr("Sin permiso de acceso."); await supabase.auth.signOut(); setLoginLoading(false); return;
     }
     setSession({ id: perfil.id, name: perfil.nombre, email: perfil.email,

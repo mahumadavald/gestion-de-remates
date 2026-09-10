@@ -2116,7 +2116,7 @@ function Dashboard({ session, onLogout }) {
   const [adminClienteSel, setAdminClienteSel] = useState(null); // cliente seleccionado en panel admin
 
   // ── Usuarios (solo admin) ──
-  const ROLES_DISPONIBLES = ["admin","martillero","spotter","postremate","garantias","entregador","solo lectura"];
+  const ROLES_DISPONIBLES = ["admin","martillero","spotter","postremate","garantias","administrador bodega","solo lectura"];
   const [usuarios, setUsuarios] = useState([]);
   const [usuarioForm, setUsuarioForm] = useState({id:null,nombre:"",usuario:"",email:"",pass:"",roles:[],casa:"Remates Ahumada",bodegaId:null,activo:true});
   const [usuarioModal, setUsuarioModal] = useState(false); // false | "crear" | "editar"
@@ -7128,7 +7128,7 @@ function exportCSV(){
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--gr)" strokeWidth="1.7" strokeLinecap="round"><rect x="4" y="1" width="10" height="16" rx="2"/><path d="M9 14v.5"/></svg>
                 <div style={{flex:1}}>
                   <div style={{fontSize:".75rem",fontWeight:700,color:"var(--gr)"}}>App de entregas (celular)</div>
-                  <div style={{fontSize:".68rem",color:"var(--mu)"}}>Comparte el link con el entregador:</div>
+                  <div style={{fontSize:".68rem",color:"var(--mu)"}}>Comparte el link con el administrador de bodega:</div>
                 </div>
                 <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap"}}
                   onClick={()=>{ navigator.clipboard.writeText(window.location.origin+"/entregar"); notify("Link copiado.","sold"); }}>
