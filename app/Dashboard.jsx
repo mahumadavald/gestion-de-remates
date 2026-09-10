@@ -992,20 +992,9 @@ const Icon = ({ name }) => {
 // AUTH SYSTEM
 // ─────────────────────────────────────────────────────────────────
 
-// Mock credentials — replace with Supabase Auth in production
-const USERS = [
-  { id:"u1", email:"admin@takka.cl",           password:"admin2026",      role:"admin",      name:"Max Ahumada",        casa:null,            casaNombre:"TAKKA" },
-  { id:"u2", email:"martillero@rematesahumada.cl", password:"remates2026", role:"martillero", name:"Remates Ahumada",    casa:"remates-ahumada", casaNombre:"Remates Ahumada" },
-  { id:"u3", email:"demo@casaderemates.cl",     password:"demo2026",       role:"martillero", name:"Casa Demo",          casa:"casa-demo",       casaNombre:"Casa Demo S.A." },
-];
-
-// Buyers enter with a paleta token — no password, just their code
-// Format: CASA-PALETA, e.g. "RA-045"
-const PALETAS_ACTIVAS = [
-  { token:"RA-045", nombre:"Rodrigo Fuentes",    rut:"12.345.678-9", casa:"remates-ahumada", casaNombre:"Remates Ahumada" },
-  { token:"RA-012", nombre:"Agricola Del Valle",  rut:"76.543.210-K", casa:"remates-ahumada", casaNombre:"Remates Ahumada" },
-  { token:"RA-007", nombre:"Maria I. Torres",     rut:"9.876.543-2",  casa:"remates-ahumada", casaNombre:"Remates Ahumada" },
-];
+// Auth handled by Supabase — these arrays are intentionally empty
+const USERS = [];
+const PALETAS_ACTIVAS = [];
 
 const AUTH_CSS = `
 
@@ -2318,12 +2307,7 @@ function Dashboard({ session, onLogout }) {
   const [liquidaciones, setLiquidaciones] = useState([]);
 
   // ── Vendedores/Consignatarios ──
-  const VENDEDORES_MOCK = [
-    {id:"V-01", nombre:"JUZGADO CIVIL DE RANCAGUA",    rut:"61.002.000-2", giro:"Organismo Judicial",        direccion:"Av. España 585",      comuna:"Rancagua",   tel:"+56 72 234 5678", email:"civil@pjud.cl"},
-    {id:"V-02", nombre:"AGRICOLA DEL VALLE LTDA.",      rut:"76.543.210-K", giro:"Agricultura y Ganadería",   direccion:"Fundo El Roble s/n",  comuna:"Rengo",      tel:"+56 9 8765 4321", email:"contacto@agrvalle.cl"},
-    {id:"V-03", nombre:"BANCO ESTADO",                  rut:"97.030.000-7", giro:"Servicios Financieros",     direccion:"Av. Libertador 467",  comuna:"Rancagua",   tel:"+56 72 210 0000", email:"remates@bancoestado.cl"},
-    {id:"V-04", nombre:"SUCESION PEREZ GONZALEZ",       rut:"55.123.456-8", giro:"Particular",                direccion:"Los Boldos 234",      comuna:"San Fernando",tel:"+56 9 7654 3210", email:"sucesion@gmail.com"},
-  ];
+  const VENDEDORES_MOCK = [];
   const [vendedorSel,   setVendedorSel]   = useState("");
   const [vendedorForm,  setVendedorForm]  = useState({comVenta:5, comDefensa:2, publicidad:0});
   const [dbVendedores,  setDbVendedores]  = useState([]);
@@ -2332,18 +2316,7 @@ function Dashboard({ session, onLogout }) {
   const [devoluciones,  setDevoluciones]  = useState([]);
 
   // Estado reactivo para devoluciones de garantía en panel post-remate
-  const [noCompradoresState, setNoCompradoresState] = useState([
-    {nPart:22, nombre:"MAXIMILIANO AHUMADA",                  garantia:0,      formaPago:"REMOTO",    devolucion:"N/A"},
-    {nPart:23, nombre:"MACARENA OLGUIN",                      garantia:0,      formaPago:"REMOTO",    devolucion:"N/A"},
-    {nPart:24, nombre:"VICENTE GERARDO RAMÍREZ URZÚA",        garantia:250000, formaPago:"PRESENCIAL",devolucion:"pendiente"},
-    {nPart:25, nombre:"MAURICIO ALEJANDRO ALBORNOZ MORENO",   garantia:250000, formaPago:"PRESENCIAL",devolucion:"pendiente"},
-    {nPart:27, nombre:"ISMAEL MORALES",                       garantia:250000, formaPago:"PRESENCIAL",devolucion:"pendiente"},
-    {nPart:32, nombre:"MARCIAL ALEJANDRO OLMOS BECERRA",      garantia:250000, formaPago:"PRESENCIAL",devolucion:"pendiente"},
-    {nPart:33, nombre:"ARNOLDO FLORES",                       garantia:250000, formaPago:"PRESENCIAL",devolucion:"cheque"},
-    {nPart:34, nombre:"JUAN CARLOS CARO JORQUERA",            garantia:0,      formaPago:"PRESENCIAL",devolucion:"N/A"},
-    {nPart:35, nombre:"LUIS ALARCON",                         garantia:250000, formaPago:"PRESENCIAL",devolucion:"efectivo"},
-    {nPart:36, nombre:"FELIPE ALEJANDRO AQUEVEQUE MUÑOZ",     garantia:0,      formaPago:"REMOTO",    devolucion:"N/A"},
-  ]);
+  const [noCompradoresState, setNoCompradoresState] = useState([]);
   const marcarDevolucion = (nPart, metodo) => {
     setNoCompradoresState(prev => prev.map(c => c.nPart===nPart ? {...c, devolucion:metodo} : c));
   };
@@ -2422,8 +2395,11 @@ function Dashboard({ session, onLogout }) {
           (session?.role==="admin"
             ? supabase.from("bodegas").select("*").order("nombre")
             : supabase.from("bodegas").select("*").eq("casa_id", session?.casaId).order("nombre")),
+          (session?.casaId
+            ? supabase.from("liquidaciones").select("*").eq("casa_id", session.casaId).order("fecha_iso", {ascending:false})
+            : supabase.from("liquidaciones").select("*").order("fecha_iso", {ascending:false})),
         ]);
-        const [remRes, lotRes, posRes, usrRes, bodRes] = await Promise.race([fetches, timeout]);
+        const [remRes, lotRes, posRes, usrRes, bodRes, liqRes] = await Promise.race([fetches, timeout]);
         if (mounted) {
           if (remRes?.data) setDbRemates(remRes.data);
           if (lotRes?.data) setDbLotes(lotRes.data);
@@ -2439,6 +2415,34 @@ function Dashboard({ session, onLogout }) {
             bodegaId:  u.bodega_id||null,
           })));
           if (bodRes?.data) setDbBodegas(bodRes.data);
+          if (liqRes?.data) setLiquidaciones(liqRes.data.map(l => ({
+            id:            l.id,
+            lote:          l.lote || "",
+            exp:           l.exp || "",
+            postor:        l.postor || "",
+            email:         l.email || "",
+            monto:         l.monto || 0,
+            gar:           l.garantia || 0,
+            saldo:         l.saldo || l.monto || 0,
+            com:           l.com || 0,
+            gastosAdm:     l.gastos_adm || 0,
+            ivaAdm:        l.iva_adm || Math.round(((l.com||0) + (l.gastos_adm||0)) * 0.19),
+            totalAPagar:   l.total_a_pagar || 0,
+            tipoRemate:    l.tipo_remate || "",
+            motorizado:    l.motorizado || false,
+            comPct:        l.com_pct || 10,
+            ppu:           l.ppu || false,
+            cantidadLote:  l.cantidad_lote || 1,
+            montoUnitario: l.monto_unitario || null,
+            afectoIva:     l.afecto_iva || false,
+            estado:        l.estado || "saldo pendiente",
+            enviado:       l.enviado || false,
+            retiro:        l.retiro || null,
+            fecha:         l.fecha || "",
+            fechaISO:      l.fecha_iso || "",
+            remateId:      l.remate_id || null,
+            remateNombre:  l.remate_nombre || "",
+          })));
         }
       } catch(e) {
         console.warn("Supabase no disponible, usando mock:", e.message);
@@ -3329,6 +3333,8 @@ function exportCSV(){
     // Resto
     reportes:"Estadísticas", config:"Configuración",
     usuarios:"Usuarios", licencias:"Licencias", casas:"Casas de Remates",
+    kpis:"TAKKA Board", bodegas:"Bodegas", entregas:"Retiro de Bienes",
+    "resultado-remate":"Resultado de Remate", "lotes-revision":"Revisión de Lotes",
   };
 
   return (
@@ -5729,19 +5735,21 @@ function exportCSV(){
                           <td>
                             {r.estado==="pendiente" ? (
                               <button className="btn-confirm" style={{fontSize:".68rem",padding:".28rem .65rem",background:"rgba(20,184,166,.12)",color:"var(--gr)",border:"1px solid rgba(20,184,166,.3)"}}
-                                onClick={()=>{
+                                onClick={async ()=>{
                                   const fecha = new Date().toLocaleDateString("es-CL");
                                   setLiquidaciones(prev=>prev.map(l=>l.id===r.id?{...l,retiro:fecha}:l));
                                   setDbRetiros(prev=>prev.map(x=>x.id===r.id?{...x,estado:"retirado",fechaRetiro:fecha}:x));
+                                  await supabase.from("liquidaciones").update({retiro:fecha}).eq("id", r.id);
                                   notify(`${r.postor} marcado como retirado.`,"sold");
                                 }}>
                                 ✓ Marcar retirado
                               </button>
                             ) : (
                               <button className="btn-sec" style={{fontSize:".68rem",padding:".28rem .65rem"}}
-                                onClick={()=>{
+                                onClick={async ()=>{
                                   setLiquidaciones(prev=>prev.map(l=>l.id===r.id?{...l,retiro:null}:l));
                                   setDbRetiros(prev=>prev.map(x=>x.id===r.id?{...x,estado:"pendiente",fechaRetiro:null}:x));
+                                  await supabase.from("liquidaciones").update({retiro:null}).eq("id", r.id);
                                   notify("Retiro desmarcado.","inf");
                                 }}>
                                 Deshacer
