@@ -2140,6 +2140,10 @@ function Dashboard({ session, onLogout }) {
   const [asignarRemateId, setAsignarRemateId] = useState("");
   const [dbBodegas, setDbBodegas] = useState([]);
   const [dbActas, setDbActas]     = useState([]);
+  const [desdeActaModal, setDesdeActaModal] = useState(false);
+  const [desdeActaSel,   setDesdeActaSel]   = useState(null);    // acta seleccionada
+  const [desdeActaBienes, setDesdeActaBienes] = useState([]);    // [{...bien,checked,base}]
+  const [desdeActaSaving, setDesdeActaSaving] = useState(false);
   const [bodegaForm, setBodegaForm] = useState({id:null,nombre:"",ciudad:"",activa:true});
   const [bodegaModal, setBodegaModal] = useState(false);
 
@@ -4897,8 +4901,125 @@ function exportCSV(){
             ? REMATES_MERGED.find(r=>(r.supabaseId||r.id)===lotesFiltroRemate)?.name||""
             : "";
 
+          // Actas recepcionadas que aún no tienen todos sus lotes creados
+          const actasDisponibles = dbActas.filter(a => a.estado === "recepcionada" && (a.bienes||[]).some(b=>b.descripcion?.trim()));
+
+          const abrirDesdeActa = (acta) => {
+            setDesdeActaSel(acta);
+            setDesdeActaBienes((acta.bienes||[]).filter(b=>b.descripcion?.trim()).map(b=>({...b,checked:true,base:""})));
+          };
+
+          const crearLotesDesdeActa = async () => {
+            const seleccionados = desdeActaBienes.filter(b=>b.checked && b.descripcion?.trim());
+            if (!seleccionados.length) { notify("Selecciona al menos un bien.","inf"); return; }
+            setDesdeActaSaving(true);
+            let ok = 0;
+            for (let i=0; i<seleccionados.length; i++) {
+              const b = seleccionados[i];
+              const base = parseFloat(String(b.base||"0").replace(/\D/g,""))||0;
+              const catMap = {"Vehículo":"Vehículo","Bien Inmueble":"Inmueble"};
+              const { error } = await supabase.from("lotes").insert({
+                casa_id:     session?.casaId||null,
+                bodega_id:   desdeActaSel.bodega_id||session?.bodegaId||null,
+                acta_id:     desdeActaSel.id,
+                codigo:      `L-${String(Date.now()+i).slice(-5)}`,
+                nombre:      b.descripcion.trim(),
+                descripcion: [b.tipo!=="Bien Mueble"?b.tipo:null, b.cantidad>1?`Cantidad: ${b.cantidad}`:null, `Rol: ${desdeActaSel.rol_causa}`, `Mandante: ${desdeActaSel.deudor_nombre}`].filter(Boolean).join(" | "),
+                mandante:    desdeActaSel.deudor_nombre||null,
+                expediente:  desdeActaSel.rol_causa||null,
+                categoria:   catMap[b.tipo]||"Muebles",
+                base, minimo:base||null,
+                incremento:  base?Math.max(Math.round(base*0.05),5000):10000,
+                comision:    7, tipo_iva:"EX", afecto_iva:false,
+                cantidad:    parseInt(b.cantidad)||1,
+                estado:      "pendiente_revision",
+                orden:       dbLotes.length+ok+1,
+              });
+              if (!error) ok++;
+            }
+            const {data:lotData} = await supabase.from("lotes").select("*").order("orden");
+            if (lotData) setDbLotes(lotData);
+            setDesdeActaSaving(false);
+            setDesdeActaModal(false);
+            setDesdeActaSel(null);
+            notify(`${ok} lote${ok!==1?"s":""} creado${ok!==1?"s":""} — aparecen en Revisión de Lotes.`,"sold");
+          };
+
           return (
           <div className="page">
+            {/* Modal Desde Acta */}
+            {desdeActaModal && (
+              <div className="modal-overlay" onClick={()=>{setDesdeActaModal(false);setDesdeActaSel(null);}}>
+                <div className="modal" style={{maxWidth:600,maxHeight:"90vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
+                  <div className="modal-header">
+                    <span className="modal-title">Crear Lotes desde Acta</span>
+                    <button className="modal-close" onClick={()=>{setDesdeActaModal(false);setDesdeActaSel(null);}}>✕</button>
+                  </div>
+                  <div style={{padding:"0 1.2rem 1.2rem",display:"flex",flexDirection:"column",gap:12}}>
+                    {!desdeActaSel ? (
+                      <>
+                        <div style={{fontSize:".8rem",color:"var(--mu)"}}>Selecciona un acta recepcionada para importar sus bienes como lotes.</div>
+                        {actasDisponibles.length === 0 ? (
+                          <div style={{textAlign:"center",padding:"2rem",color:"var(--mu)",fontSize:".85rem"}}>No hay actas recepcionadas con bienes disponibles.</div>
+                        ) : (
+                          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                            {actasDisponibles.map(a => {
+                              const yaCreados = dbLotes.filter(l=>l.acta_id===a.id).length;
+                              return (
+                                <div key={a.id}
+                                  onClick={()=>abrirDesdeActa(a)}
+                                  style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,padding:"10px 14px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                                  <div>
+                                    <div style={{fontWeight:700,fontSize:".85rem",color:"var(--fgp)"}}>{a.deudor_nombre}</div>
+                                    <div style={{fontSize:".75rem",color:"var(--mu)",marginTop:2}}>Rol: {a.rol_causa} · {(a.bienes||[]).filter(b=>b.descripcion?.trim()).length} bienes · {dbBodegas.find(b=>b.id===a.bodega_id)?.nombre||"Sin bodega"}</div>
+                                  </div>
+                                  <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
+                                    {yaCreados>0 && <span style={{fontSize:".72rem",color:"#8b5cf6"}}>{yaCreados} lote{yaCreados!==1?"s":""} ya creado{yaCreados!==1?"s":""}</span>}
+                                    <span style={{fontSize:".75rem",color:"var(--ac)",fontWeight:600}}>Seleccionar →</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:"10px 14px",fontSize:".8rem",color:"var(--mu)"}}>
+                          <b style={{color:"var(--fgp)"}}>{desdeActaSel.deudor_nombre}</b> — Rol {desdeActaSel.rol_causa}
+                          <button onClick={()=>setDesdeActaSel(null)} style={{marginLeft:12,fontSize:".72rem",color:"var(--ac)",background:"none",border:"none",cursor:"pointer"}}>← Cambiar acta</button>
+                        </div>
+                        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                          {desdeActaBienes.map((b,i)=>(
+                            <div key={i} style={{display:"flex",alignItems:"center",gap:10,background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:8,padding:"10px 12px"}}>
+                              <input type="checkbox" checked={b.checked}
+                                onChange={e=>setDesdeActaBienes(p=>p.map((x,j)=>j===i?{...x,checked:e.target.checked}:x))}
+                                style={{width:16,height:16,accentColor:"var(--ac)",cursor:"pointer",flexShrink:0}}/>
+                              <div style={{flex:1,minWidth:0}}>
+                                <div style={{fontWeight:600,fontSize:".82rem",color:"var(--fgp)"}}>{b.descripcion}</div>
+                                <div style={{fontSize:".72rem",color:"var(--mu)"}}>{b.tipo} · {b.cantidad} unid. · {b.estado}</div>
+                              </div>
+                              <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3}}>
+                                <label style={{fontSize:".68rem",color:"var(--mu)"}}>Precio base</label>
+                                <input className="fi" value={b.base} onChange={e=>setDesdeActaBienes(p=>p.map((x,j)=>j===i?{...x,base:e.target.value}:x))}
+                                  placeholder="$ 0" style={{width:110,textAlign:"right",fontSize:".8rem"}} disabled={!b.checked}/>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{display:"flex",gap:8}}>
+                          <button className="btn-primary" onClick={crearLotesDesdeActa} disabled={desdeActaSaving} style={{fontSize:".8rem"}}>
+                            {desdeActaSaving?"Creando...": `Crear ${desdeActaBienes.filter(b=>b.checked).length} lote${desdeActaBienes.filter(b=>b.checked).length!==1?"s":""}`}
+                          </button>
+                          <button className="btn-secondary" onClick={()=>{setDesdeActaModal(false);setDesdeActaSel(null);}} style={{fontSize:".8rem"}}>Cancelar</button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="filter-row" style={{marginBottom:"1rem"}}>
               {[["todos","Todos"],["sin-asignar","Sin remate"],["publicado","Publicado"],["vendido","Vendido"],["sin vender","Sin vender"]].map(([val,label]) => (
                 <button key={val} className={`filter-btn${filterTab===val?" on":""}`} onClick={()=>{setFilterTab(val);setSelectedLoteIds(new Set());}}>{label}</button>
@@ -4907,6 +5028,12 @@ function exportCSV(){
             <div className="table-card">
               <div className="table-head">
                 <div className="table-title">{lotesMostrar.length} lotes{remateName ? ` — ${remateName}` : ""}</div>
+                {actasDisponibles.length > 0 && (
+                  <button onClick={()=>{setDesdeActaModal(true);setDesdeActaSel(null);}}
+                    style={{padding:"5px 14px",borderRadius:8,border:"1px solid #8b5cf6",background:"transparent",color:"#8b5cf6",fontSize:".78rem",fontWeight:600,cursor:"pointer"}}>
+                    📋 Desde Acta
+                  </button>
+                )}
               </div>
               <div style={{overflowX:"auto"}}>
                 <table>
