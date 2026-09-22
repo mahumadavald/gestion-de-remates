@@ -2992,14 +2992,10 @@ function exportCSV(){
 
     if (!lotesFiltrados.length) { notify("No hay lotes para generar el catálogo.", "inf"); return; }
 
-    const remateObj = lotesFiltroRemate
-      ? REMATES_MERGED.find(r => (r.supabaseId || r.id) === lotesFiltroRemate)
-      : null;
-    const remateNombre = remateObj?.name || "Remate";
+    const remateObj    = lotesFiltroRemate ? REMATES_MERGED.find(r => (r.supabaseId || r.id) === lotesFiltroRemate) : null;
+    const remateNombre = remateObj?.name  || "Remate";
     const remateFecha  = remateObj?.fecha || "";
     const casaNombre   = session?.casaNombre || "Casa de Remates";
-
-    const fmtClpLocal = n => n && n > 0 ? `$ ${Number(n).toLocaleString("es-CL")}` : "—";
 
     try {
       const { jsPDF }             = await import("jspdf");
@@ -3008,58 +3004,47 @@ function exportCSV(){
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const W   = doc.internal.pageSize.getWidth();
 
-      // ── Encabezado ──
+      // Encabezado
       doc.setFillColor(15, 23, 42);
-      doc.rect(0, 0, W, 28, "F");
-      doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.setTextColor(255, 255, 255);
-      doc.text(casaNombre.toUpperCase(), W / 2, 11, { align: "center" });
-      doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(148, 163, 184);
-      doc.text(remateNombre, W / 2, 18, { align: "center" });
+      doc.rect(0, 0, W, 30, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(17); doc.setTextColor(255, 255, 255);
+      doc.text(casaNombre.toUpperCase(), W / 2, 12, { align: "center" });
+      doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(200, 210, 230);
+      doc.text(remateNombre.toUpperCase(), W / 2, 20, { align: "center" });
       if (remateFecha) {
-        doc.setFontSize(8);
-        doc.text(remateFecha, W / 2, 24, { align: "center" });
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+        doc.text(remateFecha, W / 2, 27, { align: "center" });
       }
 
-      // ── Tabla de lotes ──
+      // Tabla: solo N° lote y descripción
       const body = lotesFiltrados.map((l, i) => {
-        const extras = [];
-        if (l.anio)    extras.push(`Año: ${l.anio}`);
-        if (l.patente) extras.push(`Patente: ${l.patente}`);
-        const desc = [l.descripcion, extras.join("  ·  ")].filter(Boolean).join("\n");
-        return [
-          l.orden ?? i + 1,
-          l.nombre || "—",
-          desc || "",
-          l.categoria || "—",
-          fmtClpLocal(l.base),
-        ];
+        const partes = [l.nombre || "—"];
+        if (l.descripcion) partes.push(l.descripcion);
+        if (l.anio)        partes.push(`Año ${l.anio}`);
+        if (l.patente)     partes.push(`Patente: ${l.patente}`);
+        return [l.orden ?? i + 1, partes.join(" — ")];
       });
 
       autoTable(doc, {
-        startY: 33,
-        head: [["N°", "Artículo", "Descripción", "Categoría", "Precio Base"]],
+        startY: 35,
+        head: [["N° Lote", "Descripción"]],
         body,
-        headStyles: { fillColor: [15, 23, 42], fontStyle: "bold", fontSize: 8, textColor: [255, 255, 255] },
-        bodyStyles: { fontSize: 8, valign: "top" },
-        alternateRowStyles: { fillColor: [248, 250, 252] },
+        headStyles: { fillColor: [15, 23, 42], fontStyle: "bold", fontSize: 9, textColor: [255, 255, 255], halign: "center" },
+        bodyStyles: { fontSize: 9, valign: "top" },
+        alternateRowStyles: { fillColor: [245, 247, 250] },
         columnStyles: {
-          0: { cellWidth: 10, halign: "center" },
-          1: { cellWidth: 50 },
-          2: { cellWidth: 68, fontSize: 7, textColor: [80, 80, 80] },
-          3: { cellWidth: 28, halign: "center" },
-          4: { cellWidth: 30, halign: "right", fontStyle: "bold" },
+          0: { cellWidth: 20, halign: "center", fontStyle: "bold" },
+          1: { cellWidth: 160 },
         },
         didDrawPage: (data) => {
-          // Footer en cada página
           const H = doc.internal.pageSize.getHeight();
-          doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(150, 150, 150);
-          doc.text(`${casaNombre} · Catálogo de Remate`, 14, H - 6);
+          doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(160, 160, 160);
+          doc.text(casaNombre, 14, H - 6);
           doc.text(`Pág. ${data.pageNumber}`, W - 14, H - 6, { align: "right" });
         },
       });
 
-      const fileName = `catalogo-${remateNombre.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}.pdf`;
-      doc.save(fileName);
+      doc.save(`catalogo-${remateNombre.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}.pdf`);
       notify("Catálogo PDF generado.", "sold");
     } catch (e) {
       console.error(e);
