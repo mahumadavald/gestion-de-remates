@@ -7054,7 +7054,7 @@ function exportCSV(){
         {page==="kpis" && <PageKPIs session={session} liquidaciones={liquidaciones} dbLotes={dbLotes} dbPostores={dbPostores} dbRemates={dbRemates}/>}
 
         {/* ══ CONFIG ══ */}
-        {page==="config" && <PageConfig session={session} notify={notify}/>}
+        {page==="config" && <PageConfig session={session} supabase={supabase} dbLicencias={dbLicencias} notify={notify}/>}
 
         {/* ══ GARANTIAS ══ */}
         {page==="garantias" && (
