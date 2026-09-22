@@ -3100,8 +3100,8 @@ function exportCSV(){
           doc.setFillColor(...TEAL);
           doc.rect(0, H - 5, W, 5, "F");
           doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(...WHITE);
-          doc.text(`${casaNombre} · Powered by TAKKA`, 14, H - 1.5);
-          doc.text(`Pág. ${data.pageNumber}`, W - 14, H - 1.5, { align: "right" });
+          doc.text(casaNombre, 14, H - 1.5);
+          doc.text(`Pág. ${data.pageNumber}  ·  takka.cl`, W - 14, H - 1.5, { align: "right" });
         },
       });
 
