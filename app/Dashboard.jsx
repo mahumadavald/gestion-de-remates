@@ -6,8 +6,9 @@ import PageBodegas  from "./components/pages/PageBodegas";
 import PageUsuarios from "./components/pages/PageUsuarios";
 import PageLicencias from "./components/pages/PageLicencias";
 import PageCasas    from "./components/pages/PageCasas";
-import PageConfig   from "./components/pages/PageConfig";
-import PageKPIs     from "./components/pages/PageKPIs";
+import PageConfig        from "./components/pages/PageConfig";
+import PageKPIs          from "./components/pages/PageKPIs";
+import PageActasEntrega  from "./components/pages/PageActasEntrega";
 
 // ── Supabase client ───────────────────────────────────────────────
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -2138,6 +2139,7 @@ function Dashboard({ session, onLogout }) {
   const [asignarLoteId,   setAsignarLoteId]   = useState(null);
   const [asignarRemateId, setAsignarRemateId] = useState("");
   const [dbBodegas, setDbBodegas] = useState([]);
+  const [dbActas, setDbActas]     = useState([]);
   const [bodegaForm, setBodegaForm] = useState({id:null,nombre:"",ciudad:"",activa:true});
   const [bodegaModal, setBodegaModal] = useState(false);
 
@@ -2406,8 +2408,13 @@ function Dashboard({ session, onLogout }) {
           (session?.casaId
             ? supabase.from("garantias").select("*").eq("casa_id", session.casaId).order("created_at", {ascending:false})
             : supabase.from("garantias").select("*").order("created_at", {ascending:false})),
+          (session?.bodegaId
+            ? supabase.from("actas_entrega").select("*").eq("bodega_id", session.bodegaId).order("created_at",{ascending:false})
+            : session?.casaId
+            ? supabase.from("actas_entrega").select("*").eq("casa_id", session.casaId).order("created_at",{ascending:false})
+            : supabase.from("actas_entrega").select("*").order("created_at",{ascending:false})),
         ]);
-        const [remRes, lotRes, posRes, usrRes, bodRes, liqRes, garRes] = await Promise.race([fetches, timeout]);
+        const [remRes, lotRes, posRes, usrRes, bodRes, liqRes, garRes, actasRes] = await Promise.race([fetches, timeout]);
         if (mounted) {
           if (remRes?.data) setDbRemates(remRes.data);
           if (lotRes?.data) setDbLotes(lotRes.data);
@@ -2422,7 +2429,8 @@ function Dashboard({ session, onLogout }) {
             activo:    u.activo,
             bodegaId:  u.bodega_id||null,
           })));
-          if (bodRes?.data) setDbBodegas(bodRes.data);
+          if (bodRes?.data)   setDbBodegas(bodRes.data);
+          if (actasRes?.data) setDbActas(actasRes.data);
           if (garRes?.data) setDbGarantias(garRes.data.map(g => ({
             id:          g.id,
             postor:      g.postor || "",
@@ -3358,6 +3366,7 @@ function exportCSV(){
     usuarios:"Usuarios", licencias:"Licencias", casas:"Casas de Remates",
     kpis:"TAKKA Board", bodegas:"Bodegas", entregas:"Retiro de Bienes",
     "resultado-remate":"Resultado de Remate", "lotes-revision":"Revisión de Lotes",
+    "actas-entrega":"Actas de Entrega",
   };
 
   return (
@@ -4281,6 +4290,16 @@ function exportCSV(){
               <span className="sb-label">Casas de remates</span>
             </div>
           )}
+          {(()=>{
+            const actasBadge = dbActas.filter(a=>a.estado==="pendiente"||a.estado==="por_recepcionar").length;
+            return (
+              <div className={`sb-item${page==="actas-entrega"?" on":""}`} onClick={()=>{setPage("actas-entrega");setMobileMenu(false);}}>
+                <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M5 6h6M5 9h6M5 12h3"/></svg></span>
+                <span className="sb-label">Actas de Entrega</span>
+                {actasBadge > 0 && <span className="sb-badge">{actasBadge}</span>}
+              </div>
+            );
+          })()}
           <div className={`sb-item${page==="bodegas"?" on":""}`} onClick={()=>{setPage("bodegas");setMobileMenu(false);}}>
             <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="6" width="14" height="9" rx="1.5"/><path d="M4 6V4a4 4 0 018 0v2"/><path d="M8 9v3"/><circle cx="8" cy="9" r=".8" fill="currentColor"/></svg></span>
             <span className="sb-label">Bodegas</span>
@@ -7497,6 +7516,7 @@ function exportCSV(){
 
         {/* ══ BODEGAS ══ */}
         {page==="bodegas" && <PageBodegas session={session} supabase={supabase} dbBodegas={dbBodegas} setDbBodegas={setDbBodegas} dbLotes={dbLotes} usuarios={usuarios} notify={notify}/>}
+        {page==="actas-entrega" && <PageActasEntrega session={session} supabase={supabase} dbActas={dbActas} setDbActas={setDbActas} dbBodegas={dbBodegas} notify={notify}/>}
 
         {/* ══ DEVOLUCIONES ══ */}
         {page==="devoluciones" && (()=>{
