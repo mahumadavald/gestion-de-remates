@@ -2995,7 +2995,22 @@ function exportCSV(){
     const remateObj    = lotesFiltroRemate ? REMATES_MERGED.find(r => (r.supabaseId || r.id) === lotesFiltroRemate) : null;
     const remateNombre = remateObj?.name  || "Remate";
     const remateFecha  = remateObj?.fecha || "";
-    const casaNombre   = session?.casaNombre || "Casa de Remates";
+
+    // Datos de la casa (igual que PDFs de liquidación)
+    const casaData   = dbLicencias.find(x => x.slug === session?.casa) || {};
+    const casaNombre = casaData.nombre    || session?.casaNombre || "Casa de Remates";
+    const logoUrl    = casaData.logo_url  || null;
+    const martillero = casaData.martillero || "";
+    const telCasa    = casaData.telefono_martillero || casaData.telefono || "";
+    const emailCasa  = casaData.email_martillero    || casaData.email    || "";
+
+    // Paleta TAKKA — misma que los demás PDFs del sistema
+    const TEAL   = [20,  184, 166];
+    const NAVY   = [15,  23,  42 ];
+    const GRAY   = [100, 116, 139];
+    const LTGRAY = [248, 250, 252];
+    const BORDER = [226, 232, 240];
+    const WHITE  = [255, 255, 255];
 
     try {
       const { jsPDF }             = await import("jspdf");
@@ -3003,44 +3018,90 @@ function exportCSV(){
 
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const W   = doc.internal.pageSize.getWidth();
+      const H   = doc.internal.pageSize.getHeight();
 
-      // Encabezado
-      doc.setFillColor(15, 23, 42);
-      doc.rect(0, 0, W, 30, "F");
-      doc.setFont("helvetica", "bold"); doc.setFontSize(17); doc.setTextColor(255, 255, 255);
-      doc.text(casaNombre.toUpperCase(), W / 2, 12, { align: "center" });
-      doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(200, 210, 230);
-      doc.text(remateNombre.toUpperCase(), W / 2, 20, { align: "center" });
-      if (remateFecha) {
-        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
-        doc.text(remateFecha, W / 2, 27, { align: "center" });
+      // Barra superior TEAL (igual que PDFs de liquidación)
+      doc.setFillColor(...TEAL);
+      doc.rect(0, 0, W, 3.5, "F");
+
+      // Logo de la casa (si existe)
+      let logoEndX = 14;
+      let headerH  = 10;
+      if (logoUrl) {
+        try {
+          const img = new Image(); img.crossOrigin = "anonymous";
+          await new Promise(res => { img.onload = res; img.onerror = res; img.src = logoUrl; });
+          if (img.naturalWidth > 0) {
+            const ratio = img.naturalWidth / img.naturalHeight;
+            const lw = Math.min(36, 20 * ratio);
+            doc.addImage(img, "PNG", 14, 8, lw, 20, undefined, "FAST");
+            logoEndX = 14 + lw + 6;
+            headerH  = 32;
+          }
+        } catch {}
       }
 
-      // Tabla: solo N° lote y descripción
+      // Nombre de la casa
+      doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(...NAVY);
+      doc.text(casaNombre.toUpperCase(), logoEndX, 14);
+
+      // Contacto de la casa
+      let cy = 20;
+      if (martillero) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(...TEAL);
+        doc.text("MARTILLERO PÚBLICO", logoEndX, cy); cy += 5;
+        doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
+        doc.text(martillero, logoEndX, cy); cy += 4;
+      }
+      if (telCasa || emailCasa) {
+        doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(...GRAY);
+        if (telCasa)   { doc.text(`Tel: ${telCasa}`,    logoEndX, cy); cy += 4; }
+        if (emailCasa) { doc.text(`Email: ${emailCasa}`, logoEndX, cy); cy += 4; }
+      }
+      headerH = Math.max(headerH, cy + 2);
+
+      // Título del documento (derecha)
+      doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(...TEAL);
+      doc.text("CATÁLOGO DE REMATE", W - 14, 14, { align: "right" });
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...GRAY);
+      doc.text(remateNombre, W - 14, 21, { align: "right" });
+      if (remateFecha) {
+        doc.setFontSize(8);
+        doc.text(remateFecha, W - 14, 27, { align: "right" });
+      }
+
+      // Línea separadora
+      const startY = headerH + 6;
+      doc.setDrawColor(...BORDER); doc.setLineWidth(0.4);
+      doc.line(14, startY - 2, W - 14, startY - 2);
+
+      // Tabla: N° Lote | Descripción
       const body = lotesFiltrados.map((l, i) => {
         const partes = [l.nombre || "—"];
         if (l.descripcion) partes.push(l.descripcion);
         if (l.anio)        partes.push(`Año ${l.anio}`);
         if (l.patente)     partes.push(`Patente: ${l.patente}`);
-        return [l.orden ?? i + 1, partes.join(" — ")];
+        return [l.orden ?? i + 1, partes.join(" · ")];
       });
 
       autoTable(doc, {
-        startY: 35,
+        startY,
         head: [["N° Lote", "Descripción"]],
         body,
-        headStyles: { fillColor: [15, 23, 42], fontStyle: "bold", fontSize: 9, textColor: [255, 255, 255], halign: "center" },
-        bodyStyles: { fontSize: 9, valign: "top" },
-        alternateRowStyles: { fillColor: [245, 247, 250] },
+        headStyles: { fillColor: TEAL, fontStyle: "bold", fontSize: 9, textColor: WHITE },
+        bodyStyles: { fontSize: 9, valign: "top", textColor: [30, 30, 30] },
+        alternateRowStyles: { fillColor: LTGRAY },
         columnStyles: {
-          0: { cellWidth: 20, halign: "center", fontStyle: "bold" },
+          0: { cellWidth: 22, halign: "center", fontStyle: "bold" },
           1: { cellWidth: 160 },
         },
         didDrawPage: (data) => {
-          const H = doc.internal.pageSize.getHeight();
-          doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(160, 160, 160);
-          doc.text(casaNombre, 14, H - 6);
-          doc.text(`Pág. ${data.pageNumber}`, W - 14, H - 6, { align: "right" });
+          // Footer en cada página
+          doc.setFillColor(...TEAL);
+          doc.rect(0, H - 5, W, 5, "F");
+          doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(...WHITE);
+          doc.text(`${casaNombre} · Powered by TAKKA`, 14, H - 1.5);
+          doc.text(`Pág. ${data.pageNumber}`, W - 14, H - 1.5, { align: "right" });
         },
       });
 
