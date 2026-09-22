@@ -80,13 +80,16 @@ create table if not exists actas_entrega (
 -- RLS: cada casa solo ve sus propias actas
 alter table actas_entrega enable row level security;
 
-create policy "actas_entrega_casa"
-  on actas_entrega for all
-  using (
-    casa_id = (select casa_id from usuarios where id = auth.uid())
-    or
-    (select role from usuarios where id = auth.uid()) = 'admin'
-  );
+do $$ begin
+  create policy "actas_entrega_casa"
+    on actas_entrega for all
+    using (
+      casa_id = (select casa_id from usuarios where id = auth.uid())
+      or
+      (select role from usuarios where id = auth.uid()) = 'admin'
+    );
+exception when duplicate_object then null;
+end $$;
 
 -- Columna acta_id en lotes (vincula lotes creados desde un acta)
 alter table lotes add column if not exists acta_id uuid references actas_entrega(id);
