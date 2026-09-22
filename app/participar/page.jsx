@@ -321,18 +321,19 @@ function ParticiparContent() {
         return;
       }
 
+      // Si la casa ya fue seleccionada via click (handleSelectCasa ya cargó los remates), no re-fetchar
+      if (casa) { setLoading(false); return; }
+
       const { data: casaData } = await supabase
         .from("casas").select("*").eq("slug", casaSlug).single();
 
       if (!casaData) { setNotFound(true); setLoading(false); return; }
       setCasa(casaData);
 
-      const hoy2 = new Date(); hoy2.setDate(hoy2.getDate() - 1); const fechaMin2 = hoy2.toISOString().slice(0,10);
       const { data: rematesData } = await supabase
         .from("remates").select("*")
         .eq("casa_id", casaData.id)
         .in("estado", ["publicado","en_vivo","activo"])
-        .gte("fecha", fechaMin2)
         .order("fecha");
 
       setRemates(rematesData || []);
