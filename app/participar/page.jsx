@@ -945,7 +945,7 @@ function ParticiparContent() {
                         <div className="remate-card-info">
                           <div className="remate-card-name">{r.nombre}</div>
                           <div className="remate-card-meta">
-                            {new Date(r.fecha).toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+                            {(() => { const [y,m,d] = r.fecha.split("-").map(Number); return new Date(y,m-1,d).toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long",year:"numeric"}); })()}
                             {r.hora && ` · ${r.hora}`}
                             {" · "}{r.modalidad}
                           </div>
