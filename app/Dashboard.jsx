@@ -4551,7 +4551,7 @@ function exportCSV(){
         )}
 
         {/* ══ SELECTOR DE REMATE (pantalla inicial) ══ */}
-        {!remateActivo && !["remates","dashboard","config","usuarios","licencias","casas","clientes"].includes(page) && (
+        {!remateActivo && !["remates","dashboard","config","usuarios","licencias","casas","clientes","actas-entrega","actas-recepcion"].includes(page) && (
           <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"3rem 2rem",gap:"2rem",flexShrink:0}}>
             <div style={{textAlign:"center"}}>
               <svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="var(--ac)" strokeWidth="1.5" strokeLinecap="round" style={{marginBottom:"1rem"}}><rect x="6" y="8" width="40" height="36" rx="4"/><path d="M6 18h40M18 8v10M34 8v10"/></svg>
