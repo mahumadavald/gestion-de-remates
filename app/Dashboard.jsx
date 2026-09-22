@@ -3349,7 +3349,7 @@ function exportCSV(){
     reimprimir:"Reimprimir Comprobante", devoluciones:"Devoluciones de Garantía",
     "participantes-online":"Participantes Online",
     // Post Remate
-    adjudicac:"Participantes", factura:"Liquidar Remate",
+    adjudicac:"Participantes", factura:"Balance por Remate",
     vendedores:"Liquidar Vendedores", liquidac:"Liquidar Compradores",
     "liq-masivo":"Generar Liquidaciones Masivo", "env-masivo":"Enviar Liquidaciones Masivo",
     retiro:"Retiro de Bienes",
@@ -4180,7 +4180,7 @@ function exportCSV(){
             <span className="sb-label">Nuevo Remate</span>
           </div>
           {(()=>{
-            const pendRevCount = dbLotes.filter(l=>l.estado==="pendiente_revision").length;
+            const pendRevCount = dbLotes.filter(l=>l.estado==="pendiente_revision"&&(session?.role==="admin"||!session?.casaId||l.casa_id===session?.casaId)).length;
             return [
               {id:"ingreso-vendedores", icon:"vendedor", label:"Ingreso Vendedores"},
               {id:"lotes",              icon:"lotes",    label:"Ingreso Lotes"},
@@ -4232,7 +4232,7 @@ function exportCSV(){
           {[
             {id:"resultado-remate", icon:"reportes", label:"Resultado de Remate"},
             {id:"adjudicac",  icon:"adjudic",  label:"Participantes"},
-            {id:"factura",    icon:"factura",  label:"Liquidar Remate"},
+            {id:"factura",    icon:"factura",  label:"Balance por Remate"},
             {id:"vendedores", icon:"vendedor", label:"Liquidar Vendedores"},
             {id:"liquidac",   icon:"liq",      label:"Liquidar Compradores", badge:liquidaciones.filter(l=>!l.enviado).length||undefined},
             {id:"liq-masivo", icon:"liq",      label:"Generar Liq. Masivo"},
