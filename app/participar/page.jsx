@@ -301,7 +301,7 @@ function ParticiparContent() {
           .from("casas").select("*").eq("id", idParam).single();
         if (!casaData) { setNotFound(true); setLoading(false); return; }
         setCasa(casaData);
-        const hoy = new Date(); hoy.setDate(hoy.getDate() - 1); const fechaMin = hoy.toISOString().slice(0,10);
+        const fechaMin = new Date().toISOString().slice(0, 10);
         const { data: rematesData } = await supabase
           .from("remates").select("*")
           .eq("casa_id", casaData.id)
@@ -330,10 +330,12 @@ function ParticiparContent() {
       if (!casaData) { setNotFound(true); setLoading(false); return; }
       setCasa(casaData);
 
+      const fechaHoy2 = new Date().toISOString().slice(0, 10);
       const { data: rematesData } = await supabase
         .from("remates").select("*")
         .eq("casa_id", casaData.id)
         .in("estado", ["publicado","en_vivo","activo"])
+        .gte("fecha", fechaHoy2)
         .order("fecha");
 
       setRemates(rematesData || []);
@@ -430,8 +432,10 @@ function ParticiparContent() {
     setCasa(c);
     setCasaSlug(c.slug);
     setLoading(true);
+    const fechaHoy = new Date().toISOString().slice(0, 10);
     const { data } = await supabase.from("remates").select("*")
-      .eq("casa_id", c.id).in("estado", ["publicado","en_vivo","activo"]).order("fecha");
+      .eq("casa_id", c.id).in("estado", ["publicado","en_vivo","activo"])
+      .gte("fecha", fechaHoy).order("fecha");
     setRemates(data || []);
     setLoading(false);
   };
