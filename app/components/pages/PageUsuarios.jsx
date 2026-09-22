@@ -167,7 +167,7 @@ export default function PageUsuarios({ session, supabase, dbBodegas, dbLicencias
                       <button style={{ fontSize: ".68rem", padding: ".25rem .6rem", background: "rgba(224,82,82,.08)", border: "1px solid rgba(224,82,82,.2)", borderRadius: 6, color: "var(--rd)", cursor: "pointer" }}
                         onMouseEnter={e => e.currentTarget.style.background = "rgba(224,82,82,.18)"}
                         onMouseLeave={e => e.currentTarget.style.background = "rgba(224,82,82,.08)"}
-                        onClick={() => eliminarUsuario(u.id)}>🗑 Eliminar</button>
+                        onClick={() => eliminarUsuario(u.id)}>Eliminar</button>
                     )}
                   </div>
                 </td>

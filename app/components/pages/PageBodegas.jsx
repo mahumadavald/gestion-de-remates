@@ -64,7 +64,7 @@ export default function PageBodegas({ session, supabase, dbBodegas, setDbBodegas
           <div className="table-title">Bodegas ({dbBodegas.length})</div>
           <div style={{ display: "flex", gap: ".5rem" }}>
             {dbBodegas.length === 0 && session?.casa === "rematesahumada" && (
-              <button className="btn-sec" style={{ fontSize: ".76rem" }} onClick={seedBodegas}>⚡ Cargar mis bodegas</button>
+              <button className="btn-sec" style={{ fontSize: ".76rem" }} onClick={seedBodegas}>Cargar mis bodegas</button>
             )}
             <button className="btn-primary" onClick={() => { setBodegaForm({ id: null, nombre: "", ciudad: "", activa: true }); setBodegaModal(true); }}>+ Nueva bodega</button>
           </div>

@@ -18,7 +18,7 @@ export async function POST(request) {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to:   [ADMIN_EMAIL],
-      subject: `📦 Nuevo lote pendiente de revisión — ${lote.nombre}`,
+      subject: `Nuevo lote pendiente de revisión — ${lote.nombre}`,
       html: `
         <div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#f9fafb;border-radius:12px;overflow:hidden;">
           <div style="background:linear-gradient(135deg,#0e7490,#06B6D4);padding:2rem;text-align:center;">

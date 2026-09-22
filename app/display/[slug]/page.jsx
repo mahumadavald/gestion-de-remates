@@ -447,7 +447,7 @@ export default function DisplayPage({ params }) {
   if (accesoDenegado) return (
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0a0f1a",color:"#e0eaf4",fontFamily:"Inter,sans-serif",padding:"2rem"}}>
       <div style={{textAlign:"center",maxWidth:380}}>
-        <div style={{fontSize:"3rem",marginBottom:"1rem"}}>🔒</div>
+        <div style={{fontSize:"3rem",marginBottom:"1rem"}}></div>
         <div style={{fontSize:"1.2rem",fontWeight:700,marginBottom:".75rem"}}>Acceso restringido</div>
         <div style={{fontSize:".88rem",color:"#5a7fa8",lineHeight:1.6,marginBottom:"1.5rem"}}>
           Debes estar inscrito y verificado en este remate para acceder a la sala en vivo.

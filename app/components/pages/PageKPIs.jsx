@@ -242,7 +242,7 @@ function TabRemate({ liquidaciones, dbLotes, dbPostores, dbRemates }) {
 
       {!kpis && (
         <div style={{ textAlign: "center", padding: "4rem", color: "var(--mu)", fontSize: ".9rem" }}>
-          <div style={{ fontSize: "2.5rem", marginBottom: "1rem", opacity: .3 }}>📊</div>
+          
           {remates.length === 0 ? "No hay remates cerrados aún." : "Sin datos de liquidaciones para este remate."}
         </div>
       )}
@@ -250,10 +250,10 @@ function TabRemate({ liquidaciones, dbLotes, dbPostores, dbRemates }) {
       {kpis && (<>
         {/* ═══ Row 1: 4 hero KPIs ═══ */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(210px,1fr))", gap: ".85rem", marginBottom: "1rem" }}>
-          <HCard label="Total martillo" value={fmtCLP(kpis.totalMartillo)} sub="precio hammer" icon="🔨" accent="#06B6D4" big />
-          <HCard label="Ingreso bruto casa" value={fmtCLP(kpis.ingresoNeto)} sub="Com. + G. adm." icon="🏛️" accent="#14B8A6" />
-          <HCard label="Total a pagar compradores" value={fmtCLP(kpis.totalComprador)} sub="inc. comisiones" icon="💳" accent="#8b5cf6" />
-          <HCard label="IVA liquidado" value={fmtCLP(kpis.totalIva)} sub="sobre comisiones" icon="📋" accent="#f59e0b" />
+          <HCard label="Total martillo" value={fmtCLP(kpis.totalMartillo)} sub="precio hammer" icon="" accent="#06B6D4" big />
+          <HCard label="Ingreso bruto casa" value={fmtCLP(kpis.ingresoNeto)} sub="Com. + G. adm." icon="" accent="#14B8A6" />
+          <HCard label="Total a pagar compradores" value={fmtCLP(kpis.totalComprador)} sub="inc. comisiones" icon="" accent="#8b5cf6" />
+          <HCard label="IVA liquidado" value={fmtCLP(kpis.totalIva)} sub="sobre comisiones" icon="" accent="#f59e0b" />
         </div>
 
         {/* ═══ Row 2: Charts ═══ */}
@@ -454,17 +454,17 @@ function TabMensual({ liquidaciones, dbLotes, dbRemates }) {
 
       {kpis.nLotes === 0 && kpis.nRemates === 0 ? (
         <div style={{ textAlign: "center", padding: "4rem", color: "var(--mu)", fontSize: ".88rem" }}>
-          <div style={{ fontSize: "2.5rem", marginBottom: "1rem", opacity: .3 }}>📅</div>
+          
           Sin datos para {MESES[mes]} {anio}.
         </div>
       ) : (<>
         {/* ═══ Row 1: KPIs con delta ═══ */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(190px,1fr))", gap: ".85rem", marginBottom: "1rem" }}>
-          <HCard label="Total martillo" value={fmtCLP(kpis.totalMartillo)} prevValue={kpisPrev.totalMartillo} sub={prevLabel} accent="#06B6D4" big icon="🔨" />
-          <HCard label="Ingreso casa" value={fmtCLP(kpis.ingresoNeto)} prevValue={kpisPrev.ingresoNeto} sub="Com. + G. adm." accent="#14B8A6" icon="🏛️" />
-          <HCard label="Remates realizados" value={kpis.nRemates} sub={`${kpis.nLotes} lotes adjudicados`} accent="#06B6D4" icon="📦" />
+          <HCard label="Total martillo" value={fmtCLP(kpis.totalMartillo)} prevValue={kpisPrev.totalMartillo} sub={prevLabel} accent="#06B6D4" big icon="" />
+          <HCard label="Ingreso casa" value={fmtCLP(kpis.ingresoNeto)} prevValue={kpisPrev.ingresoNeto} sub="Com. + G. adm." accent="#14B8A6" icon="" />
+          <HCard label="Remates realizados" value={kpis.nRemates} sub={`${kpis.nLotes} lotes adjudicados`} accent="#06B6D4" icon="" />
           <HCard label="Tasa adjudicación" value={`${kpis.tasaAdj}%`} sub={`${kpis.nLotes}/${kpis.lotesTotales} lotes`} accent={kpis.tasaAdj >= 80 ? "#14B8A6" : "#f59e0b"} />
-          <HCard label="Compradores únicos" value={kpis.nCompradores} prevValue={kpisPrev.nCompradores} accent="#8b5cf6" icon="👥" />
+          <HCard label="Compradores únicos" value={kpis.nCompradores} prevValue={kpisPrev.nCompradores} accent="#8b5cf6" icon="" />
           <HCard label="Precio promedio lote" value={fmtCLP(kpis.precioPromedio)} prevValue={kpisPrev.precioPromedio} accent="#06B6D4" />
         </div>
 

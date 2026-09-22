@@ -347,14 +347,14 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
         </div>
 
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4px 12px", fontSize:".76rem", color:"var(--mu)" }}>
-          <span>🏛 {acta.juzgado || "—"}</span>
-          <span>📦 {totalBienes} bien{totalBienes!==1?"es":""}</span>
-          <span>👤 {acta.liquidador_nombre || "—"}</span>
-          <span>🏗 {bodegaNombre(acta.bodega_id)}</span>
-          {acta.fecha_entrega_esperada && <span style={{color:"#f59e0b",fontWeight:600}}>📅 Esperado: {fmtDate(acta.fecha_entrega_esperada)}</span>}
-          {acta.fecha_recepcion && <span style={{color:"#10b981"}}>✅ Recibido: {fmtDateTime(acta.fecha_recepcion)}</span>}
-          {acta.acta_url && <span style={{color:"var(--ac)"}}>📎 Archivo adjunto</span>}
-          {lotesDeEstaActa.length > 0 && <span style={{color:"#8b5cf6"}}>📋 {lotesDeEstaActa.length} lote{lotesDeEstaActa.length!==1?"s":""} creado{lotesDeEstaActa.length!==1?"s":""}</span>}
+          <span>{acta.juzgado || "—"}</span>
+          <span>{totalBienes} bien{totalBienes!==1?"es":""}</span>
+          <span>{acta.liquidador_nombre || "—"}</span>
+          <span>{bodegaNombre(acta.bodega_id)}</span>
+          {acta.fecha_entrega_esperada && <span style={{color:"#f59e0b",fontWeight:600}}>Esperado: {fmtDate(acta.fecha_entrega_esperada)}</span>}
+          {acta.fecha_recepcion && <span style={{color:"#10b981"}}>Recibido: {fmtDateTime(acta.fecha_recepcion)}</span>}
+          {acta.acta_url && <span style={{color:"var(--ac)"}}>Archivo adjunto</span>}
+          {lotesDeEstaActa.length > 0 && <span style={{color:"#8b5cf6"}}>{lotesDeEstaActa.length} lote{lotesDeEstaActa.length!==1?"s":""} creado{lotesDeEstaActa.length!==1?"s":""}</span>}
         </div>
 
         <div style={{ display:"flex", gap:6, flexWrap:"wrap" }} onClick={e=>e.stopPropagation()}>
@@ -371,7 +371,7 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
             </button>
           )}
           {acta.estado === "enviada_victor" && (
-            <div style={{ fontSize:".72rem", color:"#8b5cf6", fontWeight:600, padding:"5px 0" }}>✔ Enviada {fmtDateTime(acta.fecha_enviada_victor)}</div>
+            <div style={{ fontSize:".72rem", color:"#8b5cf6", fontWeight:600, padding:"5px 0" }}>Enviada {fmtDateTime(acta.fecha_enviada_victor)}</div>
           )}
         </div>
       </div>
@@ -492,7 +492,7 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
               </div>
               {isEditing && modal.acta_url && (
                 <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
-                  <span style={{ fontSize:".78rem", color:"var(--ac)" }}>📎 Archivo actual:</span>
+                  <span style={{ fontSize:".78rem", color:"var(--ac)" }}>Archivo actual:</span>
                   <a href={modal.acta_url} target="_blank" rel="noreferrer"
                     style={{ fontSize:".78rem", color:"var(--ac)", textDecoration:"underline" }}>
                     Ver acta
@@ -604,11 +604,11 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
               <div style={{ background:"var(--s1)", border:"1px solid var(--b1)", borderRadius:8, padding:"10px 14px", fontSize:".76rem", color:"var(--mu)" }}>
                 <b style={{color:"var(--fgp)"}}>Historial</b>
                 <div style={{ marginTop:6, display:"flex", flexDirection:"column", gap:4 }}>
-                  <span>📋 Creada: {fmtDateTime(modal.created_at)}</span>
-                  {modal.fecha_recepcion && <span>✅ Recepcionada: {fmtDateTime(modal.fecha_recepcion)} por <b>{modal.recepcionado_por}</b></span>}
-                  {modal.fecha_enviada_victor && <span>📨 Enviada a Víctor: {fmtDateTime(modal.fecha_enviada_victor)}</span>}
+                  <span>Creada: {fmtDateTime(modal.created_at)}</span>
+                  {modal.fecha_recepcion && <span>Recepcionada: {fmtDateTime(modal.fecha_recepcion)} por <b>{modal.recepcionado_por}</b></span>}
+                  {modal.fecha_enviada_victor && <span>Enviada a Víctor: {fmtDateTime(modal.fecha_enviada_victor)}</span>}
                   {lotesDeEstaActa.length > 0 && (
-                    <span>📋 Lotes creados: <b>{lotesDeEstaActa.map(l=>l.codigo||l.nombre).join(", ")}</b></span>
+                    <span>Lotes creados: <b>{lotesDeEstaActa.map(l=>l.codigo||l.nombre).join(", ")}</b></span>
                   )}
                 </div>
               </div>

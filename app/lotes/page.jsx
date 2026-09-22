@@ -298,7 +298,7 @@ export default function CatalogoPage() {
             <div className="spin"/>
           ) : slice.length === 0 ? (
             <div className="cat-empty">
-              <div className="cat-empty-icon">📦</div>
+              <div className="cat-empty-icon"></div>
               <div style={{fontWeight:700,fontSize:"1rem",marginBottom:".4rem",color:"#6b7280"}}>
                 {busqueda||catFiltro||remateFiltro ? "Sin resultados" : "No hay lotes disponibles"}
               </div>

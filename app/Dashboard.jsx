@@ -177,7 +177,7 @@ const printLiquidacion = (c, liqFecha, remateNombre) => {
 </div>
 
 <div class="remate-banner">
-  📋 ${remateNombre || "Remate"} &nbsp;·&nbsp; Fecha: ${liqFecha}
+  ${remateNombre || "Remate"} &nbsp;·&nbsp; Fecha: ${liqFecha}
 </div>
 
 <div class="datos-grid">
@@ -956,7 +956,7 @@ const BidRing = ({ seconds, total, nextAmount, increment }) => {
         {adjudicando
           ? <div style={{fontWeight:900,fontSize:"1rem",color:"#f56565",letterSpacing:".03em"}}>¡ADJUDICANDO!</div>
           : urgent
-            ? <><div className="bid-ring-label" style={{color:"#f6ad55"}}>⚠ Última oportunidad</div>
+            ? <><div className="bid-ring-label" style={{color:"#f6ad55"}}>Última oportunidad</div>
                 <div className="bid-ring-next">{fmt(nextAmount)}</div>
                 <div className="bid-ring-inc">Incremento: +{fmtS(increment)}</div></>
             : <><div className="bid-ring-label">Próxima puja en</div>
@@ -2505,7 +2505,7 @@ function Dashboard({ session, onLogout }) {
         const nuevo = payload.new;
         if (!nuevo) return;
         setDbLotes(prev => prev.find(l=>l.id===nuevo.id) ? prev : [...prev, nuevo]);
-        notify(`📦 Nuevo lote en bodega: ${nuevo.nombre}`, "sold");
+        notify(`Nuevo lote en bodega: ${nuevo.nombre}`, "sold");
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -3632,7 +3632,7 @@ function exportCSV(){
                     <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"linear-gradient(135deg,rgba(6,182,212,.06),rgba(20,184,166,.06))",border:"1px solid rgba(6,182,212,.2)",borderRadius:10}}>
                       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:"1rem",flexWrap:"wrap"}}>
                         <div>
-                          <div style={{fontSize:".75rem",fontWeight:700,color:"var(--ac)"}}>✨ Describir con IA <span style={{fontWeight:400,color:"var(--mu)",fontSize:".68rem"}}>(opcional)</span></div>
+                          <div style={{fontSize:".75rem",fontWeight:700,color:"var(--ac)"}}>Describir con IA <span style={{fontWeight:400,color:"var(--mu)",fontSize:".68rem"}}>(opcional)</span></div>
                           <div style={{fontSize:".67rem",color:"var(--mu)",marginTop:".15rem"}}>Genera un título y descripción profesional a partir de la foto.</div>
                         </div>
                         <button
@@ -4345,7 +4345,7 @@ function exportCSV(){
               )}
               {page==="remates"   && <button className="btn-primary" onClick={()=>setModal("nuevo-remate")}>+ Nuevo remate</button>}
               {page==="lotes"     && <>
-                <button className="btn-sec" style={{fontSize:".7rem"}} onClick={printPlanillaRemate}>📋 Planilla</button>
+                <button className="btn-sec" style={{fontSize:".7rem"}} onClick={printPlanillaRemate}>Planilla</button>
                 <button className="btn-sec" style={{fontSize:".7rem"}} onClick={async()=>{
                   // Generar Bid Sheets PDF — hoja imprimible por lote
                   if(!LOTES_MERGED.length){ notify("No hay lotes cargados para generar el PDF.","inf"); return; }
@@ -4394,7 +4394,7 @@ function exportCSV(){
                   doc.save("bid-sheets.pdf");
                   notify("Bid sheets generados.","sold");
                   } catch(e){ console.error(e); notify("Error al generar PDF: "+e.message,"inf"); }
-                }}>🖨 Bid Sheets PDF</button>
+                }}>Bid Sheets PDF</button>
                 <button className="btn-sec" style={{fontSize:".7rem",display:"inline-flex",alignItems:"center",gap:".3rem"}} onClick={()=>{setImportModal(true);setImportRows([]);setImportDone(null);}}>
                   ↑ Importar Excel
                 </button>
@@ -4402,7 +4402,7 @@ function exportCSV(){
               </>}
               {(page==="postores"||page==="clientes") && <button className="btn-primary" onClick={()=>setModal("nuevo-postor")}>+ Agregar cliente</button>}
               {page==="garantias" && <button className="btn-primary" onClick={()=>setModal("nueva-garantia")}>+ Registrar garantia</button>}
-              {page==="planilla" && <button className="btn-primary" onClick={printPlanillaRemate}>📋 Abrir / Imprimir</button>}
+              {page==="planilla" && <button className="btn-primary" onClick={printPlanillaRemate}>Abrir / Imprimir</button>}
               {page==="ingreso-vendedores" && <button className="btn-primary" onClick={()=>setModal("nuevo-vendedor")}>+ Agregar Vendedor</button>}
             </div>
           </div>
@@ -4762,7 +4762,7 @@ function exportCSV(){
                             </button>
                             <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap",background:"linear-gradient(135deg,rgba(6,182,212,.12),rgba(20,184,166,.12))",border:"1px solid rgba(6,182,212,.3)",color:"var(--ac)",fontWeight:700}}
                               onClick={()=>{ setAiRemateResult(null); setAiRemateModal(r); }}>
-                              ✨ Resumen IA
+                              Resumen IA
                             </button>
                           </>)}
                           {/* Eliminar remate — solo admin o martillero de la misma casa */}
@@ -4781,7 +4781,7 @@ function exportCSV(){
                                 setDbRemates(prev => prev.filter(x => x.id !== r.supabaseId));
                                 notify(`Remate "${r.name}" eliminado.`, "inf");
                               }}>
-                              🗑 Eliminar
+                              Eliminar
                             </button>
                           )}
                         </div>
@@ -4834,7 +4834,7 @@ function exportCSV(){
 
               {pendientes.length === 0 ? (
                 <div style={{textAlign:"center",padding:"3.5rem",background:"var(--s2)",borderRadius:12,border:"1px solid var(--b1)"}}>
-                  <div style={{fontSize:"2rem",marginBottom:".75rem"}}>✅</div>
+                  <div style={{fontSize:"2rem",marginBottom:".75rem"}}>✓</div>
                   <div style={{fontWeight:700,color:"var(--wh2)",marginBottom:".4rem"}}>Sin lotes pendientes</div>
                   <div style={{fontSize:".82rem",color:"var(--mu)"}}>Cuando la bodega registre lotes aparecerán aquí para revisión.</div>
                 </div>
@@ -5031,7 +5031,7 @@ function exportCSV(){
                 {actasDisponibles.length > 0 && (
                   <button onClick={()=>{setDesdeActaModal(true);setDesdeActaSel(null);}}
                     style={{padding:"5px 14px",borderRadius:8,border:"1px solid #8b5cf6",background:"transparent",color:"#8b5cf6",fontSize:".78rem",fontWeight:600,cursor:"pointer"}}>
-                    📋 Desde Acta
+                    Desde Acta
                   </button>
                 )}
               </div>
@@ -5420,12 +5420,12 @@ function exportCSV(){
                                 const {error} = await supabase.from("postores").delete().eq("id",p.supabaseId);
                                 if(!error){ const {data} = await supabase.from("postores").select("*").order("numero"); if(data) setDbPostores(data); notify(`${p.name} eliminado.`,"inf"); }
                                 else notify("Error al eliminar postor.","inf");
-                              }}>🗑</button>
+                              }}>Eliminar</button>
                           )}
                           {p.supabaseId && (
                             <button className="btn-sec" style={{fontSize:".65rem",padding:".22rem .55rem"}}
                               onClick={()=>generarBoleta(p)}
-                              title="Imprimir boleta">🖨️ Boleta</button>
+                              title="Imprimir boleta">Boleta</button>
                           )}
                         </div>
                       </td>
@@ -6411,10 +6411,10 @@ function exportCSV(){
                   </button>
                   <div style={{display:"flex",gap:".5rem",marginTop:".6rem"}}>
                     <button className="btn-sec" style={{flex:1,fontSize:".75rem"}} onClick={generarPDFLotesVendedor}>
-                      📄 PDF lotes
+                      PDF lotes
                     </button>
                     <button className="btn-sec" style={{flex:1,fontSize:".75rem"}} onClick={exportExcelLotesVendedor}>
-                      📊 Excel lotes
+                      Excel lotes
                     </button>
                   </div>
                 </div>
@@ -6700,11 +6700,11 @@ function exportCSV(){
                   {/* 5 cards hero — PowerBI style */}
                   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(185px,1fr))",gap:".85rem",marginBottom:"1.1rem"}}>
                     {[
-                      {label:"Venta total",        val:fmt(ventaTotal),  accent:"#06B6D4", sub:`${lotesSold} lotes adjudicados`, icon:"🔨"},
-                      {label:"Comisiones netas",    val:fmt(totalCom),    accent:"#14B8A6", sub:"sin IVA", icon:"💰"},
-                      {label:"G. adm. motorizados", val:fmt(totalGAdm),   accent:"#f59e0b", sub:"vehículos", icon:"🚗"},
-                      {label:"IVA 19%",             val:fmt(iva),         accent:"#ef4444", sub:"sobre ingresos AF", icon:"📋"},
-                      {label:"Ingreso neto",        val:fmt(neto),        accent:"#8b5cf6", sub:"empresa", icon:"✅"},
+                      {label:"Venta total",        val:fmt(ventaTotal),  accent:"#06B6D4", sub:`${lotesSold} lotes adjudicados`, icon:""},
+                      {label:"Comisiones netas",    val:fmt(totalCom),    accent:"#14B8A6", sub:"sin IVA", icon:""},
+                      {label:"G. adm. motorizados", val:fmt(totalGAdm),   accent:"#f59e0b", sub:"vehículos", icon:""},
+                      {label:"IVA 19%",             val:fmt(iva),         accent:"#ef4444", sub:"sobre ingresos AF", icon:""},
+                      {label:"Ingreso neto",        val:fmt(neto),        accent:"#8b5cf6", sub:"empresa", icon:""},
                     ].map((c,i)=>(
                       <div key={i} style={{
                         background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:14,
@@ -7737,12 +7737,12 @@ function exportCSV(){
                       ))}
                     </div>
                     <button onClick={copiarDatos} style={{background:"rgba(56,178,246,.12)",border:"1px solid rgba(56,178,246,.25)",color:"var(--ac)",borderRadius:8,padding:".45rem .9rem",fontSize:".75rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
-                      📋 Copiar datos
+                      Copiar datos
                     </button>
                   </div>
                 ) : (
                   <div style={{background:"rgba(245,158,11,.07)",border:"1px solid rgba(245,158,11,.2)",borderRadius:8,padding:".6rem 1rem",fontSize:".78rem",color:"#f59e0b",fontWeight:600}}>
-                    ⚠️ Sin datos bancarios — notificar al postor para que los complete
+                    ⚠ Sin datos bancarios — notificar al postor para que los complete
                   </div>
                 )}
               </div>
@@ -7798,11 +7798,11 @@ function exportCSV(){
                             casa:session?.casaNombre||"Casa de Remates",logo_url:null,devolucion_url:devUrl})});
                         enviados++;
                       }
-                      notify(`📧 ${enviados} correos enviados.`,"sold");
+                      notify(`${enviados} correos enviados.`,"sold");
                     } catch { notify("Error al enviar.","inf"); }
                     finally { setNotifNcLoading(false); }
                   }}>
-                    {notifNcLoading ? "Enviando..." : "📧 Notificar pendientes"}
+                    {notifNcLoading ? "Enviando..." : "Notificar pendientes"}
                   </button>
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:".75rem"}}>
@@ -8224,7 +8224,7 @@ function exportCSV(){
                           <div className={`bid-ticker${bidTimer<=5?" urgent":""}${bidTimer<=2?" critical":""}`}>
                             <div className="bt-num" style={{color:bidTimer>8?"var(--gr)":bidTimer>4?"var(--yl)":"var(--rd)",fontSize:bidTimer<=3?"1.7rem":"1.35rem"}}>{bidTimer}</div>
                             <div>
-                              <div className="bt-info">{bidTimer<=2?"¡ADJUDICANDO AHORA!":bidTimer<=5?"⚠ Última oportunidad":"Adjudica en"}</div>
+                              <div className="bt-info">{bidTimer<=2?"¡ADJUDICANDO AHORA!":bidTimer<=5?"Última oportunidad":"Adjudica en"}</div>
                               <div className="bt-leader">{lastBidder||"—"} lidera · {fmt((bids[idx]?.current||0))}</div>
                             </div>
                           </div>
@@ -8337,7 +8337,7 @@ function exportCSV(){
               {importDone && (
                 <div style={{textAlign:"center",padding:"2rem 1rem"}}>
                   <div style={{fontSize:"3rem",marginBottom:".75rem"}}>
-                    {importDone.errors === 0 ? "✅" : "⚠️"}
+                    {importDone.errors === 0 ? "✓" : "⚠"}
                   </div>
                   <div style={{fontSize:"1.2rem",fontWeight:800,color:"#0f172a",marginBottom:".5rem"}}>
                     {importDone.ok} lote{importDone.ok!==1?"s":""} importado{importDone.ok!==1?"s":""} correctamente
@@ -8348,7 +8348,7 @@ function exportCSV(){
                     </div>
                   )}
                   <div style={{marginTop:"1.25rem",padding:"1rem 1.25rem",background:"rgba(6,182,212,.07)",border:"1px solid rgba(6,182,212,.2)",borderRadius:10,fontSize:".84rem",color:"#0f172a",lineHeight:1.6}}>
-                    💡 <strong>Lotes importados.</strong> Puedes agregar fotos a cada lote desde el módulo de <strong>Lotes</strong>.
+                    <strong>Lotes importados.</strong> Puedes agregar fotos a cada lote desde el módulo de <strong>Lotes</strong>.
                   </div>
                   <div style={{display:"flex",gap:".75rem",justifyContent:"center",marginTop:"1.5rem"}}>
                     <button onClick={()=>{ setImportModal(false); setImportRows([]); setImportDone(null); setPage("lotes"); }}
@@ -9229,7 +9229,7 @@ function exportCSV(){
           <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:16,width:"100%",maxWidth:520,padding:"1.75rem",position:"relative"}}>
             <button onClick={()=>setAiLoteModal(false)} style={{position:"absolute",top:"1rem",right:"1rem",background:"transparent",border:"none",color:"var(--mu)",fontSize:"1.2rem",cursor:"pointer",lineHeight:1}}>×</button>
             <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:"1.25rem"}}>
-              <span style={{fontSize:"1.3rem"}}>✨</span>
+              
               <div>
                 <div style={{fontFamily:"Poppins,sans-serif",fontWeight:800,fontSize:"1rem",color:"var(--wh)"}}>Describir lote con IA</div>
                 <div style={{fontSize:".72rem",color:"var(--mu)"}}>Sube una foto y la IA genera título y descripción automáticamente</div>
@@ -9294,7 +9294,7 @@ function exportCSV(){
                 } catch(e){ notify("Error al generar: "+e.message,"inf"); }
                 finally{ setAiLoteLoading(false); }
               }}>
-              {aiLoteLoading ? "Generando descripción…" : "✨ Generar con IA"}
+              {aiLoteLoading ? "Generando descripción…" : "Generar con IA"}
             </button>
           </div>
         </div>
@@ -9307,7 +9307,7 @@ function exportCSV(){
           <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:16,width:"100%",maxWidth:560,padding:"1.75rem",position:"relative"}}>
             <button onClick={()=>{ setAiRemateModal(null); setAiRemateResult(null); }} style={{position:"absolute",top:"1rem",right:"1rem",background:"transparent",border:"none",color:"var(--mu)",fontSize:"1.2rem",cursor:"pointer",lineHeight:1}}>×</button>
             <div style={{display:"flex",alignItems:"center",gap:".6rem",marginBottom:"1.25rem"}}>
-              <span style={{fontSize:"1.3rem"}}>✨</span>
+              
               <div>
                 <div style={{fontFamily:"Poppins,sans-serif",fontWeight:800,fontSize:"1rem",color:"var(--wh)"}}>Resumen ejecutivo IA</div>
                 <div style={{fontSize:".72rem",color:"var(--mu)"}}>{aiRemateModal.name} — {aiRemateModal.fecha}</div>
@@ -9362,7 +9362,7 @@ function exportCSV(){
                   } catch(e){ notify("Error al generar: "+e.message,"inf"); }
                   finally{ setAiRemateLoading(false); }
                 }}>
-                {aiRemateLoading ? "Generando resumen…" : "✨ Generar resumen ejecutivo"}
+                {aiRemateLoading ? "Generando resumen…" : "Generar resumen ejecutivo"}
               </button>
             )}
           </div>

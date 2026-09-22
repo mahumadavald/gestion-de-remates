@@ -113,7 +113,7 @@ export default function PageCasas({ session, supabase, dbLicencias, setDbLicenci
                 <div style={{ display: "flex", gap: "1.5rem", fontSize: ".72rem", color: "var(--mu2)", paddingTop: ".3rem" }}>
                   {casa.email    && <span>✉ {casa.email}</span>}
                   {casa.telefono && <span>☎ {casa.telefono}</span>}
-                  {casa.direccion && <span>📍 {casa.direccion}</span>}
+                  {casa.direccion && <span>{casa.direccion}</span>}
                 </div>
               )}
             </div>

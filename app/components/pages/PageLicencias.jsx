@@ -72,7 +72,7 @@ export default function PageLicencias({ dbLicencias, actualizarLicencia, renovar
                   {casa.licencia_estado !== "bloqueado" && (
                     <button style={{ fontSize: ".68rem", padding: ".3rem .7rem", background: "rgba(224,82,82,.08)", border: "1px solid rgba(224,82,82,.25)", borderRadius: 6, color: "var(--rd)", cursor: "pointer" }}
                       onClick={() => { if (window.confirm(`¿Bloquear acceso a ${casa.nombre}?`)) actualizarLicencia(casa.id, "bloqueado"); }}>
-                      🔒 Bloquear
+                      Bloquear
                     </button>
                   )}
                 </div>

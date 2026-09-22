@@ -379,14 +379,14 @@ export default function EntregarPage() {
       <div className="body">
         <div style={{padding:"1.5rem 0 1rem"}}>
           <div style={{fontSize:"1.15rem",fontWeight:800,color:"var(--wh)",marginBottom:".4rem"}}>
-            Hola, {session?.name?.split(" ")[0]} 👋
+            Hola, {session?.name?.split(" ")[0]}
           </div>
           <div style={{fontSize:".85rem",color:"var(--mu)"}}>Selecciona el remate para gestionar las entregas</div>
         </div>
         <div className="section-label">Remates disponibles</div>
         {remates.length === 0 ? (
           <div className="empty-state">
-            <div style={{fontSize:"2rem",marginBottom:".5rem"}}>📦</div>
+            
             No hay remates disponibles.
           </div>
         ) : remates.map(r => (
@@ -461,7 +461,7 @@ export default function EntregarPage() {
 
             {notFound && (
               <div className="fade" style={{textAlign:"center",padding:"1.5rem",color:"var(--mu)",background:"var(--s2)",borderRadius:12,border:"1px solid var(--b1)"}}>
-                <div style={{fontSize:"1.5rem",marginBottom:".5rem"}}>🔍</div>
+                
                 Comprador #{numStr} no encontrado en este remate.
               </div>
             )}
@@ -536,7 +536,7 @@ export default function EntregarPage() {
               <div style={{display:"flex",justifyContent:"center",padding:"2rem"}}><Spinner/></div>
             ) : porEntregar.length === 0 ? (
               <div className="empty-state">
-                <div style={{fontSize:"2.5rem",marginBottom:".75rem"}}>🎉</div>
+                
                 <div style={{fontWeight:700,color:"var(--wh2)",marginBottom:".4rem"}}>Todo entregado</div>
                 <div style={{fontSize:".82rem"}}>No hay compradores con entregas pendientes.</div>
               </div>
@@ -571,7 +571,7 @@ export default function EntregarPage() {
               <div style={{display:"flex",justifyContent:"center",padding:"2rem"}}><Spinner/></div>
             ) : entregados.length === 0 ? (
               <div className="empty-state">
-                <div style={{fontSize:"2.5rem",marginBottom:".75rem"}}>📦</div>
+                
                 <div style={{fontWeight:700,color:"var(--wh2)",marginBottom:".4rem"}}>Sin entregas aún</div>
                 <div style={{fontSize:".82rem"}}>Los lotes entregados aparecen aquí.</div>
               </div>
