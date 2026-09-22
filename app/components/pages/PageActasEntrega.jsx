@@ -5,7 +5,7 @@ const ESTADOS = {
   pendiente:       { label: "Por Llegar",       color: "#f59e0b", bg: "#fef3c7" },
   por_recepcionar: { label: "Por Recepcionar",  color: "#3b82f6", bg: "#dbeafe" },
   recepcionada:    { label: "Recepcionada",      color: "#10b981", bg: "#d1fae5" },
-  enviada_victor:  { label: "Enviada a Víctor",  color: "#8b5cf6", bg: "#ede9fe" },
+  enviada_victor:  { label: "Enviada",  color: "#8b5cf6", bg: "#ede9fe" },
 };
 
 const FLUJO = ["pendiente","por_recepcionar","recepcionada","enviada_victor"];
@@ -301,7 +301,7 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
     const actions = {
       pendiente:       { label:"Marcar 'Por Recepcionar'", estado:"por_recepcionar", color:"#3b82f6" },
       por_recepcionar: { label:"Recepcionar Bienes",       estado:"recepcionada",    color:"#10b981" },
-      recepcionada:    { label:"Enviar a Víctor",          estado:"enviada_victor",  color:"#8b5cf6" },
+      recepcionada:    { label:"Enviar",          estado:"enviada_victor",  color:"#8b5cf6" },
       enviada_victor:  null,
     };
     return actions[acta.estado];
@@ -606,7 +606,7 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
                 <div style={{ marginTop:6, display:"flex", flexDirection:"column", gap:4 }}>
                   <span>Creada: {fmtDateTime(modal.created_at)}</span>
                   {modal.fecha_recepcion && <span>Recepcionada: {fmtDateTime(modal.fecha_recepcion)} por <b>{modal.recepcionado_por}</b></span>}
-                  {modal.fecha_enviada_victor && <span>Enviada a Víctor: {fmtDateTime(modal.fecha_enviada_victor)}</span>}
+                  {modal.fecha_enviada_victor && <span>Enviada: {fmtDateTime(modal.fecha_enviada_victor)}</span>}
                   {lotesDeEstaActa.length > 0 && (
                     <span>Lotes creados: <b>{lotesDeEstaActa.map(l=>l.codigo||l.nombre).join(", ")}</b></span>
                   )}
@@ -678,7 +678,7 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
                 )}
                 {confirm.action.estado === "enviada_victor" && (
                   <div style={{ background:"#ede9fe", border:"1px solid #c4b5fd", borderRadius:8, padding:"10px 12px", fontSize:".8rem", color:"#4c1d95", marginBottom:12 }}>
-                    Se marcará como enviada a Víctor para coordinar la fecha del remate.
+                    Se marcará como enviada para coordinar la fecha del remate.
                   </div>
                 )}
                 <div style={{ display:"flex", gap:8 }}>
@@ -717,7 +717,7 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
         <TabBtn id="pendiente"       label="Por Llegar"/>
         <TabBtn id="por_recepcionar" label="Por Recepcionar"/>
         <TabBtn id="recepcionada"    label="Recepcionadas"/>
-        <TabBtn id="enviada_victor"  label="Enviadas a Víctor"/>
+        <TabBtn id="enviada_victor"  label="Enviadas"/>
         <TabBtn id="todas"           label="Todas"/>
       </div>
 
