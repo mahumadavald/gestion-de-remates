@@ -10,6 +10,7 @@ import PageConfig        from "./components/pages/PageConfig";
 import PageKPIs          from "./components/pages/PageKPIs";
 import PageActasEntrega   from "./components/pages/PageActasEntrega";
 import PageActasRecepcion from "./components/pages/PageActasRecepcion";
+import PageCausas         from "./components/pages/PageCausas";
 
 // ── Supabase client ───────────────────────────────────────────────
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -2142,6 +2143,7 @@ function Dashboard({ session, onLogout }) {
   const [dbBodegas, setDbBodegas] = useState([]);
   const [dbActas, setDbActas]           = useState([]);
   const [dbActasRecepcion, setDbActasRecepcion] = useState([]);
+  const [dbCausas, setDbCausas]               = useState([]);
   const [desdeActaModal, setDesdeActaModal] = useState(false);
   const [desdeActaSel,   setDesdeActaSel]   = useState(null);    // acta seleccionada
   const [desdeActaBienes, setDesdeActaBienes] = useState([]);    // [{...bien,checked,base}]
@@ -2422,8 +2424,11 @@ function Dashboard({ session, onLogout }) {
           (session?.casaId
             ? supabase.from("actas_recepcion_vehiculos").select("*").eq("casa_id", session.casaId).order("created_at",{ascending:false})
             : supabase.from("actas_recepcion_vehiculos").select("*").order("created_at",{ascending:false})),
+          (session?.casaId
+            ? supabase.from("causas").select("*").eq("casa_id", session.casaId).order("created_at",{ascending:false})
+            : supabase.from("causas").select("*").order("created_at",{ascending:false})),
         ]);
-        const [remRes, lotRes, posRes, usrRes, bodRes, liqRes, garRes, actasRes, actasRecRes] = await Promise.race([fetches, timeout]);
+        const [remRes, lotRes, posRes, usrRes, bodRes, liqRes, garRes, actasRes, actasRecRes, causasRes] = await Promise.race([fetches, timeout]);
         if (mounted) {
           if (remRes?.data) setDbRemates(remRes.data);
           if (lotRes?.data) setDbLotes(lotRes.data);
@@ -2441,6 +2446,7 @@ function Dashboard({ session, onLogout }) {
           if (bodRes?.data)    setDbBodegas(bodRes.data);
           if (actasRes?.data)  setDbActas(actasRes.data);
           if (actasRecRes?.data) setDbActasRecepcion(actasRecRes.data);
+          if (causasRes?.data)  setDbCausas(causasRes.data);
           if (garRes?.data) setDbGarantias(garRes.data.map(g => ({
             id:          g.id,
             postor:      g.postor || "",
@@ -4445,6 +4451,13 @@ function exportCSV(){
             <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="14" height="12" rx="1.5"/><path d="M4 6h3M4 9h3M9 6h3M9 9h3M4 12h8"/><path d="M1 5h14"/></svg></span>
             <span className="sb-label">Actas Recepción Veh.</span>
           </div>
+          <div className={`sb-item${page==="causas"?" on":""}`} onClick={()=>{setPage("causas");setMobileMenu(false);}}>
+            <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M2 3h12M2 6h8M2 9h10M2 12h6"/><circle cx="13" cy="11" r="2.5"/><path d="M15 13l-1.5-1.5"/></svg></span>
+            <span className="sb-label">Causas</span>
+            {dbCausas.filter(c=>["notificada","aceptada","acta_recibida","bienes_recepcionados","fecha_solicitada","fecha_aprobada"].includes(c.estado)).length > 0 && (
+              <span className="sb-badge">{dbCausas.filter(c=>["notificada","aceptada","acta_recibida","bienes_recepcionados","fecha_solicitada","fecha_aprobada"].includes(c.estado)).length}</span>
+            )}
+          </div>
           <div className={`sb-item${page==="bodegas"?" on":""}`} onClick={()=>{setPage("bodegas");setMobileMenu(false);}}>
             <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="6" width="14" height="9" rx="1.5"/><path d="M4 6V4a4 4 0 018 0v2"/><path d="M8 9v3"/><circle cx="8" cy="9" r=".8" fill="currentColor"/></svg></span>
             <span className="sb-label">Bodegas</span>
@@ -4551,7 +4564,7 @@ function exportCSV(){
         )}
 
         {/* ══ SELECTOR DE REMATE (pantalla inicial) ══ */}
-        {!remateActivo && !["remates","dashboard","config","usuarios","licencias","casas","clientes","actas-entrega","actas-recepcion"].includes(page) && (
+        {!remateActivo && !["remates","dashboard","config","usuarios","licencias","casas","clientes","actas-entrega","actas-recepcion","causas"].includes(page) && (
           <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"3rem 2rem",gap:"2rem",flexShrink:0}}>
             <div style={{textAlign:"center"}}>
               <svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="var(--ac)" strokeWidth="1.5" strokeLinecap="round" style={{marginBottom:"1rem"}}><rect x="6" y="8" width="40" height="36" rx="4"/><path d="M6 18h40M18 8v10M34 8v10"/></svg>
@@ -7787,6 +7800,7 @@ function exportCSV(){
         {page==="bodegas" && <PageBodegas session={session} supabase={supabase} dbBodegas={dbBodegas} setDbBodegas={setDbBodegas} dbLotes={dbLotes} usuarios={usuarios} notify={notify}/>}
         {page==="actas-entrega" && <PageActasEntrega session={session} supabase={supabase} dbActas={dbActas} setDbActas={setDbActas} dbBodegas={dbBodegas} dbLotes={dbLotes} setDbLotes={setDbLotes} notify={notify}/>}
         {page==="actas-recepcion" && <PageActasRecepcion session={session} supabase={supabase} dbActasRecepcion={dbActasRecepcion} setDbActasRecepcion={setDbActasRecepcion} dbLotes={dbLotes} setDbLotes={setDbLotes} dbLicencias={dbLicencias} notify={notify}/>}
+        {page==="causas" && <PageCausas session={session} supabase={supabase} dbCausas={dbCausas} setDbCausas={setDbCausas} dbRemates={dbRemates} dbLotes={dbLotes} setDbLotes={setDbLotes} notify={notify}/>}
 
         {/* ══ DEVOLUCIONES ══ */}
         {page==="devoluciones" && (()=>{
