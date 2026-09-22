@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useMemo } from "react";
+import FirmaCanvas from "../FirmaCanvas";
 
 const ESTADOS = {
   pendiente:       { label: "Por Llegar",       color: "#f59e0b", bg: "#fef3c7" },
@@ -41,6 +42,7 @@ const FORM_VACIO = {
   doc_anotaciones_vigentes:false, doc_liquidaciones_sueldo:false,
   doc_contrato_trabajo:false, doc_carpeta_tributaria:false, doc_otros:"",
   bodega_id:"", notas:"", direccion_entrega:"",
+  firma_url:"",
 };
 
 export default function PageActasEntrega({ session, supabase, dbActas, setDbActas, dbBodegas, dbLotes, setDbLotes, notify }) {
@@ -51,8 +53,9 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
   const [saving, setSaving]       = useState(false);
   const [search, setSearch]       = useState("");
   const [confirm, setConfirm]     = useState(null);   // { acta, action }
-  const [uploadFile, setUploadFile] = useState(null);
-  const [uploading, setUploading]   = useState(false);
+  const [uploadFile, setUploadFile]       = useState(null);
+  const [uploading, setUploading]         = useState(false);
+  const [uploadFirmaBlob, setUploadFirmaBlob] = useState(null);
 
   // ── Modal crear lotes desde acta ───────────────────────────────────
   const [modalLotes, setModalLotes] = useState(null);   // {acta}
@@ -108,6 +111,7 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
   const abrirNueva = () => {
     setForm({ ...FORM_VACIO, bodega_id: isBodegaAdmin && session?.bodegaId ? session.bodegaId : "" });
     setUploadFile(null);
+    setUploadFirmaBlob(null);
     setModal("nueva");
   };
 
@@ -118,8 +122,10 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
       fecha_resolucion:       acta.fecha_resolucion || "",
       fecha_entrega_esperada: acta.fecha_entrega_esperada || "",
       deudor_remuneracion:    acta.deudor_remuneracion ? String(acta.deudor_remuneracion) : "",
+      firma_url:              acta.firma_url || "",
     });
     setUploadFile(null);
+    setUploadFirmaBlob(null);
     setModal(acta);
   };
 
@@ -134,6 +140,39 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
     if (error) { notify("Error subiendo archivo: " + error.message, "inf"); return null; }
     const { data } = supabase.storage.from("actas-entrega").getPublicUrl(path);
     return data.publicUrl;
+  };
+
+  // ── Firma deudor ──────────────────────────────────────────────────
+  const firmaConfirmEntrega = async (blob) => {
+    const actaId = modal !== "nueva" ? modal?.id : null;
+    const campo = "firma_url";
+    if (!actaId) {
+      // Acta nueva: guardar URL temporal en form, se sube junto con el acta
+      setF(campo, URL.createObjectURL(blob));
+      // Guardar blob en ref para subirlo al guardar
+      setUploadFirmaBlob(blob);
+      notify("Firma registrada — guarda el acta para persistirla.", "inf");
+      return;
+    }
+    const path = `entrega/${actaId}_${Date.now()}.png`;
+    const { error } = await supabase.storage.from("firmas").upload(path, blob, { upsert: true, contentType: "image/png" });
+    if (error) { notify("Error subiendo firma: " + error.message, "inf"); return; }
+    const { data: pd } = supabase.storage.from("firmas").getPublicUrl(path);
+    const url = pd.publicUrl;
+    const { error: e2 } = await supabase.from("actas_entrega").update({ firma_url: url }).eq("id", actaId);
+    if (e2) { notify("Error guardando firma.", "inf"); return; }
+    setDbActas(p => p.map(a => a.id === actaId ? { ...a, firma_url: url } : a));
+    setF(campo, url);
+    notify("Firma del deudor guardada.", "sold");
+  };
+
+  const firmaBorrarEntrega = async () => {
+    const actaId = modal !== "nueva" ? modal?.id : null;
+    setF("firma_url", "");
+    setUploadFirmaBlob(null);
+    if (!actaId) return;
+    await supabase.from("actas_entrega").update({ firma_url: null }).eq("id", actaId);
+    setDbActas(p => p.map(a => a.id === actaId ? { ...a, firma_url: null } : a));
   };
 
   // ── Guardar / Crear ─────────────────────────────────────────────
@@ -175,17 +214,26 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
     if (modal === "nueva") {
       const { data, error } = await supabase.from("actas_entrega").insert({ ...payload, estado:"pendiente" }).select().single();
       if (error) { notify("Error: " + error.message, "inf"); setSaving(false); return; }
-      const url = await uploadActaFile(data.id);
+      const updates = {};
+      const archivoUrl = await uploadActaFile(data.id);
+      if (archivoUrl) updates.acta_url = archivoUrl;
+      // Subir firma si el usuario la dibujó antes de guardar
+      if (uploadFirmaBlob) {
+        const path = `entrega/${data.id}_${Date.now()}.png`;
+        const { error: fe } = await supabase.storage.from("firmas").upload(path, uploadFirmaBlob, { upsert: true, contentType: "image/png" });
+        if (!fe) { const { data: pd } = supabase.storage.from("firmas").getPublicUrl(path); updates.firma_url = pd.publicUrl; }
+      }
       let actaFinal = data;
-      if (url) {
-        await supabase.from("actas_entrega").update({ acta_url: url }).eq("id", data.id);
-        actaFinal = { ...data, acta_url: url };
+      if (Object.keys(updates).length) {
+        await supabase.from("actas_entrega").update(updates).eq("id", data.id);
+        actaFinal = { ...data, ...updates };
       }
       setDbActas(p => [actaFinal, ...p]);
+      setUploadFirmaBlob(null);
       notify("Acta creada.", "sold");
     } else {
-      const url = await uploadActaFile(modal.id);
-      const finalPayload = url ? { ...payload, acta_url: url } : payload;
+      const archivoUrl = await uploadActaFile(modal.id);
+      const finalPayload = archivoUrl ? { ...payload, acta_url: archivoUrl } : payload;
       const { error } = await supabase.from("actas_entrega").update(finalPayload).eq("id", modal.id);
       if (error) { notify("Error: " + error.message, "inf"); setSaving(false); return; }
       setDbActas(p => p.map(a => a.id === modal.id ? { ...a, ...finalPayload } : a));
@@ -354,6 +402,7 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
           {acta.fecha_entrega_esperada && <span style={{color:"#f59e0b",fontWeight:600}}>Esperado: {fmtDate(acta.fecha_entrega_esperada)}</span>}
           {acta.fecha_recepcion && <span style={{color:"#10b981"}}>Recibido: {fmtDateTime(acta.fecha_recepcion)}</span>}
           {acta.acta_url && <span style={{color:"var(--ac)"}}>Archivo adjunto</span>}
+          {acta.firma_url && <span style={{color:"#10b981", fontWeight:600}}>Firmado por deudor</span>}
           {lotesDeEstaActa.length > 0 && <span style={{color:"#8b5cf6"}}>{lotesDeEstaActa.length} lote{lotesDeEstaActa.length!==1?"s":""} creado{lotesDeEstaActa.length!==1?"s":""}</span>}
         </div>
 
@@ -598,6 +647,17 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
 
             <Section title="Notas Internas">
               <textarea className="fi" value={form.notas||""} onChange={e=>setF("notas",e.target.value)} placeholder="Observaciones del equipo..." rows={3} style={{resize:"vertical"}}/>
+            </Section>
+
+            <Section title="Firma del Deudor">
+              <div style={{ fontSize:".76rem", color:"var(--mu)", marginBottom:4 }}>
+                El deudor firma en pantalla al momento de la entrega.
+              </div>
+              <FirmaCanvas
+                firmaUrl={form.firma_url || null}
+                onConfirm={firmaConfirmEntrega}
+                onBorrar={firmaBorrarEntrega}
+              />
             </Section>
 
             {isEditing && (

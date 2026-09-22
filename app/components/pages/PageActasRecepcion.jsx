@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useMemo } from "react";
+import FirmaCanvas from "../FirmaCanvas";
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 
@@ -77,8 +78,8 @@ const FORM_VACIO = {
   estado_neumaticos: "", estado_pintura: "",
   marca_bateria: "", marca_neumaticos: "", nivel_combustible: "",
   observaciones: "", diagrama_daños: "",
-  entrega_nombre: "", entrega_rut: "",
-  recibe_nombre: "", recibe_rut: "",
+  entrega_nombre: "", entrega_rut: "", firma_entrega_url: "",
+  recibe_nombre: "", recibe_rut: "",  firma_recibe_url: "",
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -170,11 +171,13 @@ export default function PageActasRecepcion({ session, supabase, dbActasRecepcion
         nivel_combustible: form.nivel_combustible || null,
         observaciones:    form.observaciones || null,
         diagrama_daños:   form.diagrama_daños || null,
-        entrega_nombre:   form.entrega_nombre || null,
-        entrega_rut:      form.entrega_rut || null,
-        recibe_nombre:    form.recibe_nombre || null,
-        recibe_rut:       form.recibe_rut || null,
-        estado:           editando?.estado || "borrador",
+        entrega_nombre:    form.entrega_nombre || null,
+        entrega_rut:       form.entrega_rut || null,
+        firma_entrega_url: form.firma_entrega_url || null,
+        recibe_nombre:     form.recibe_nombre || null,
+        recibe_rut:        form.recibe_rut || null,
+        firma_recibe_url:  form.firma_recibe_url || null,
+        estado:            editando?.estado || "borrador",
       };
 
       let data, error;
@@ -262,6 +265,39 @@ export default function PageActasRecepcion({ session, supabase, dbActasRecepcion
     }
     if (setDbLotes) setDbLotes(prev => [lote, ...prev]);
     notify(`Lote creado: ${lote.nombre}`, "sold");
+  };
+
+  // ── Firmas ──
+  const uploadFirma = async (tipo, blob, actaId) => {
+    const path = `recepcion/${actaId}_${tipo}_${Date.now()}.png`;
+    const { error } = await supabase.storage.from("firmas").upload(path, blob, { upsert: true, contentType: "image/png" });
+    if (error) { notify("Error subiendo firma: " + error.message, "inf"); return null; }
+    const { data } = supabase.storage.from("firmas").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const firmaConfirm = async (tipo, blob) => {
+    const campo = tipo === "entrega" ? "firma_entrega_url" : "firma_recibe_url";
+    // Si no hay acta guardada aún, guardar en form local
+    if (!editando?.id) { set(campo, URL.createObjectURL(blob)); notify("Firma registrada — guarda el acta para persistirla.", "inf"); return; }
+    const url = await uploadFirma(tipo, blob, editando.id);
+    if (!url) return;
+    const { data, error } = await supabase
+      .from("actas_recepcion_vehiculos").update({ [campo]: url }).eq("id", editando.id).select().single();
+    if (error) { notify("Error guardando firma.", "inf"); return; }
+    setDbActasRecepcion(prev => prev.map(a => a.id === data.id ? data : a));
+    setEditando(data);
+    set(campo, url);
+    notify("Firma guardada.", "sold");
+  };
+
+  const firmaBorrar = async (tipo) => {
+    const campo = tipo === "entrega" ? "firma_entrega_url" : "firma_recibe_url";
+    set(campo, "");
+    if (!editando?.id) return;
+    const { data } = await supabase
+      .from("actas_recepcion_vehiculos").update({ [campo]: null }).eq("id", editando.id).select().single();
+    if (data) { setDbActasRecepcion(prev => prev.map(a => a.id === data.id ? data : a)); setEditando(data); }
   };
 
   // ── Filtro lista ──
@@ -602,9 +638,12 @@ export default function PageActasRecepcion({ session, supabase, dbActasRecepcion
                 <label style={{ fontSize: ".69rem", fontWeight: 600, color: "var(--mu2)", display: "block", marginBottom: ".25rem" }}>RUT</label>
                 <input {...fi()} value={form.entrega_rut} onChange={e => set("entrega_rut", e.target.value)} placeholder="12.345.678-9" />
               </div>
-              <div style={{ marginTop: ".5rem", height: 48, borderBottom: "2px solid var(--b2)", display: "flex", alignItems: "flex-end", paddingBottom: ".25rem" }}>
-                <span style={{ fontSize: ".65rem", color: "var(--mu)" }}>Firma</span>
-              </div>
+              <FirmaCanvas
+                label="Firma"
+                firmaUrl={form.firma_entrega_url || null}
+                onConfirm={blob => firmaConfirm("entrega", blob)}
+                onBorrar={() => firmaBorrar("entrega")}
+              />
             </div>
           </div>
           <div>
@@ -618,9 +657,12 @@ export default function PageActasRecepcion({ session, supabase, dbActasRecepcion
                 <label style={{ fontSize: ".69rem", fontWeight: 600, color: "var(--mu2)", display: "block", marginBottom: ".25rem" }}>RUT</label>
                 <input {...fi()} value={form.recibe_rut} onChange={e => set("recibe_rut", e.target.value)} placeholder="12.345.678-9" />
               </div>
-              <div style={{ marginTop: ".5rem", height: 48, borderBottom: "2px solid var(--b2)", display: "flex", alignItems: "flex-end", paddingBottom: ".25rem" }}>
-                <span style={{ fontSize: ".65rem", color: "var(--mu)" }}>Firma</span>
-              </div>
+              <FirmaCanvas
+                label="Firma"
+                firmaUrl={form.firma_recibe_url || null}
+                onConfirm={blob => firmaConfirm("recibe", blob)}
+                onBorrar={() => firmaBorrar("recibe")}
+              />
             </div>
           </div>
         </div>
