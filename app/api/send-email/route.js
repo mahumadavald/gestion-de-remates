@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "../_lib/auth";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL     = process.env.FROM_EMAIL || "noreply@gestionderemates.cl";
+const FROM_EMAIL     = process.env.FROM_EMAIL || process.env.RESEND_FROM_EMAIL || "noreply@gestionderemates.cl";
 
 // Tipos que requieren sesión activa (llamados desde el Dashboard)
 const TIPOS_INTERNOS = new Set(["verificado", "bienvenida_postor", "no_comprador"]);
@@ -123,7 +123,7 @@ export async function POST(req) {
     } = body;
 
     const fechaStr = fecha
-      ? new Date(fecha).toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+      ? (() => { const [y,m,d] = fecha.split("-").map(Number); return new Date(y,m-1,d).toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long",year:"numeric"}); })()
       : null;
 
     const esOnline = modalidad && modalidad.toLowerCase().includes("online");
