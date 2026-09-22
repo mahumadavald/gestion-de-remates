@@ -4541,7 +4541,7 @@ function exportCSV(){
 
         {/* ══ SELECTOR DE REMATE (pantalla inicial) ══ */}
         {!remateActivo && !["remates","dashboard","config","usuarios","licencias","casas","clientes"].includes(page) && (
-          <div className="page" style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"70vh",gap:"2rem"}}>
+          <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"3rem 2rem",gap:"2rem",flexShrink:0}}>
             <div style={{textAlign:"center"}}>
               <svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="var(--ac)" strokeWidth="1.5" strokeLinecap="round" style={{marginBottom:"1rem"}}><rect x="6" y="8" width="40" height="36" rx="4"/><path d="M6 18h40M18 8v10M34 8v10"/></svg>
               <div style={{fontSize:"1.3rem",fontWeight:800,color:"var(--wh2)",marginBottom:".4rem"}}>Selecciona un remate</div>
