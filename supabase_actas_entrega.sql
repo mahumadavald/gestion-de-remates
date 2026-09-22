@@ -88,6 +88,12 @@ create policy "actas_entrega_casa"
     (select role from usuarios where id = auth.uid()) = 'admin'
   );
 
+-- Columna acta_id en lotes (vincula lotes creados desde un acta)
+alter table lotes add column if not exists acta_id uuid references actas_entrega(id);
+
+-- Bucket de Storage para archivos de actas (crear también desde Supabase Dashboard > Storage)
+-- Nombre del bucket: actas-entrega (público o privado según preferencia)
+
 -- Índices
 create index if not exists actas_entrega_casa_id    on actas_entrega(casa_id);
 create index if not exists actas_entrega_bodega_id  on actas_entrega(bodega_id);

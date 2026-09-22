@@ -7516,7 +7516,7 @@ function exportCSV(){
 
         {/* ══ BODEGAS ══ */}
         {page==="bodegas" && <PageBodegas session={session} supabase={supabase} dbBodegas={dbBodegas} setDbBodegas={setDbBodegas} dbLotes={dbLotes} usuarios={usuarios} notify={notify}/>}
-        {page==="actas-entrega" && <PageActasEntrega session={session} supabase={supabase} dbActas={dbActas} setDbActas={setDbActas} dbBodegas={dbBodegas} notify={notify}/>}
+        {page==="actas-entrega" && <PageActasEntrega session={session} supabase={supabase} dbActas={dbActas} setDbActas={setDbActas} dbBodegas={dbBodegas} dbLotes={dbLotes} setDbLotes={setDbLotes} notify={notify}/>}
 
         {/* ══ DEVOLUCIONES ══ */}
         {page==="devoluciones" && (()=>{
