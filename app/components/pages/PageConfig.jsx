@@ -1,6 +1,7 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
+import FirmaCanvas from "../FirmaCanvas";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -10,6 +11,19 @@ const supabase = createClient(
 export default function PageConfig({ session, notify }) {
   const [nombre, setNombre] = useState(session?.name || "");
   const [email, setEmail]   = useState(session?.email || "");
+  const [firmaMartilleroUrl, setFirmaMartilleroUrl] = useState("");
+  const [timbreUrl, setTimbreUrl] = useState("");
+  const [timbreFile, setTimbreFile] = useState(null);
+  const [savingFirma, setSavingFirma] = useState(false);
+
+  useEffect(() => {
+    if (!session?.casaId) return;
+    supabase.from("casas").select("firma_martillero_url, timbre_url").eq("id", session.casaId).single()
+      .then(({ data }) => {
+        if (data?.firma_martillero_url) setFirmaMartilleroUrl(data.firma_martillero_url);
+        if (data?.timbre_url) setTimbreUrl(data.timbre_url);
+      });
+  }, [session?.casaId]);
   const [passActual,    setPassActual]    = useState("");
   const [passNueva,     setPassNueva]     = useState("");
   const [passConfirmar, setPassConfirmar] = useState("");
@@ -45,6 +59,43 @@ export default function PageConfig({ session, notify }) {
       .eq("id", session?.casaId);
     if (error) { notify("Error al guardar: " + error.message, "inf"); return; }
     notify(`Gasto admin motorizado actualizado a $${val.toLocaleString("es-CL")}.`, "sold");
+  };
+
+  const guardarFirmaTimbre = async (firmaBlobArg) => {
+    if (!session?.casaId) return;
+    setSavingFirma(true);
+    try {
+      const updates = {};
+
+      // Subir firma si hay blob nuevo
+      if (firmaBlobArg) {
+        const path = `config/${session.casaId}_firma_martillero.png`;
+        const { error } = await supabase.storage.from("firmas").upload(path, firmaBlobArg, { upsert: true, contentType: "image/png" });
+        if (error) { notify("Error subiendo firma: " + error.message, "inf"); return; }
+        const { data: pd } = supabase.storage.from("firmas").getPublicUrl(path);
+        updates.firma_martillero_url = pd.publicUrl;
+        setFirmaMartilleroUrl(pd.publicUrl);
+      }
+
+      // Subir timbre si se seleccionó archivo
+      if (timbreFile) {
+        const ext  = timbreFile.name.split(".").pop();
+        const path = `config/${session.casaId}_timbre.${ext}`;
+        const { error } = await supabase.storage.from("firmas").upload(path, timbreFile, { upsert: true });
+        if (error) { notify("Error subiendo timbre: " + error.message, "inf"); return; }
+        const { data: pd } = supabase.storage.from("firmas").getPublicUrl(path);
+        updates.timbre_url = pd.publicUrl;
+        setTimbreUrl(pd.publicUrl);
+        setTimbreFile(null);
+      }
+
+      if (!Object.keys(updates).length) return;
+      const { error } = await supabase.from("casas").update(updates).eq("id", session.casaId);
+      if (error) { notify("Error guardando: " + error.message, "inf"); return; }
+      notify("Firma y timbre guardados.", "sold");
+    } finally {
+      setSavingFirma(false);
+    }
   };
 
   return (
@@ -106,6 +157,56 @@ export default function PageConfig({ session, notify }) {
             <button className="btn-primary" style={{ fontSize: ".78rem" }} onClick={guardarGastoMotorizado}>
               Guardar configuración
             </button>
+          </div>
+        )}
+        {session?.casaId && (
+          <div style={{ background: "var(--s2)", border: "1px solid var(--b1)", borderRadius: 12, padding: "1.1rem 1.2rem" }}>
+            <div style={{ fontSize: ".72rem", fontWeight: 700, color: "var(--mu)", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: ".3rem" }}>Firma y timbre del martillero</div>
+            <div style={{ fontSize: ".72rem", color: "var(--mu)", marginBottom: "1rem" }}>
+              Se precarga automáticamente en cada acta de recepción como "quien recibe".
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.2rem" }}>
+              <div>
+                <FirmaCanvas
+                  label="Firma del martillero"
+                  firmaUrl={firmaMartilleroUrl || null}
+                  onConfirm={blob => guardarFirmaTimbre(blob)}
+                  onBorrar={() => { setFirmaMartilleroUrl(""); supabase.from("casas").update({ firma_martillero_url: null }).eq("id", session.casaId); }}
+                  disabled={savingFirma}
+                />
+              </div>
+              <div>
+                <div style={{ fontSize: ".68rem", fontWeight: 700, color: "var(--mu)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: ".5rem" }}>Timbre</div>
+                {timbreUrl && (
+                  <div style={{ border: "1px solid #10b981", borderRadius: 9, overflow: "hidden", marginBottom: ".5rem" }}>
+                    <div style={{ background: "#fff", padding: ".4rem", display: "flex", justifyContent: "center" }}>
+                      <img src={timbreUrl} alt="Timbre" style={{ maxHeight: 90, maxWidth: "100%", objectFit: "contain" }} />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: ".3rem .7rem", background: "#d1fae5" }}>
+                      <span style={{ fontSize: ".68rem", color: "#059669", fontWeight: 700 }}>Timbre cargado</span>
+                      <button onClick={() => { setTimbreUrl(""); supabase.from("casas").update({ timbre_url: null }).eq("id", session.casaId); }}
+                        style={{ fontSize: ".65rem", color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}>
+                        Quitar
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {!timbreUrl && (
+                  <div style={{ border: "1.5px dashed var(--b2)", borderRadius: 9, padding: "1.2rem", display: "flex", flexDirection: "column", alignItems: "center", gap: ".4rem" }}>
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--mu)" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="7" width="22" height="14" rx="2"/><path d="M9 7V5a2 2 0 014 0v2M15 7V5a2 2 0 014 0v2M7 14h14"/></svg>
+                    <span style={{ fontSize: ".72rem", color: "var(--mu)" }}>Sube una imagen del timbre</span>
+                  </div>
+                )}
+                <input type="file" accept="image/*" onChange={e => setTimbreFile(e.target.files[0] || null)}
+                  style={{ fontSize: ".74rem", color: "var(--fgp)", marginTop: ".5rem" }} />
+                {timbreFile && (
+                  <button className="btn-primary" style={{ fontSize: ".74rem", marginTop: ".5rem" }} onClick={() => guardarFirmaTimbre(null)} disabled={savingFirma}>
+                    {savingFirma ? "Subiendo..." : "Guardar timbre"}
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

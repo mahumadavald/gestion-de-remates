@@ -122,7 +122,7 @@ function fi(extra) {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export default function PageActasRecepcion({ session, supabase, dbActasRecepcion, setDbActasRecepcion, dbLotes, setDbLotes, notify }) {
+export default function PageActasRecepcion({ session, supabase, dbActasRecepcion, setDbActasRecepcion, dbLotes, setDbLotes, dbLicencias, notify }) {
 
   const [vista,    setVista]    = useState("lista");   // lista | form
   const [editando, setEditando] = useState(null);      // null = nueva acta
@@ -130,9 +130,24 @@ export default function PageActasRecepcion({ session, supabase, dbActasRecepcion
   const [saving,   setSaving]   = useState(false);
   const [busqueda, setBusqueda] = useState("");
 
+  // Firma del martillero precargada desde config de la casa
+  const casaConfig = (dbLicencias || []).find(c => c.id === session?.casaId) || {};
+  const firmaMartillero = casaConfig.firma_martillero_url || "";
+
   // ── Navegar a form ──
-  const abrirNueva = () => { setForm(FORM_VACIO); setEditando(null); setVista("form"); };
-  const abrirEditar = (acta) => { setForm({ ...FORM_VACIO, ...acta }); setEditando(acta); setVista("form"); };
+  const abrirNueva = () => {
+    setForm({ ...FORM_VACIO, firma_recibe_url: firmaMartillero });
+    setEditando(null);
+    setVista("form");
+  };
+  const abrirEditar = (acta) => {
+    setForm({
+      ...FORM_VACIO, ...acta,
+      firma_recibe_url: acta.firma_recibe_url || firmaMartillero,
+    });
+    setEditando(acta);
+    setVista("form");
+  };
   const volver = () => { setVista("lista"); setEditando(null); };
 
   // ── Helpers de form ──
