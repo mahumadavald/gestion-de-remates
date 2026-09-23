@@ -2187,10 +2187,16 @@ function Dashboard({ session, onLogout }) {
   };
 
   useEffect(() => {
-    if (session?.role !== "admin") return;
-    supabase.from("casas").select("*").order("nombre").then(({data}) => {
-      if (data) setDbLicencias(data);
-    });
+    if (!session) return;
+    if (session.role === "admin") {
+      supabase.from("casas").select("*").order("nombre").then(({data}) => {
+        if (data) setDbLicencias(data);
+      });
+    } else if (session.casaId) {
+      supabase.from("casas").select("*").eq("id", session.casaId).then(({data}) => {
+        if (data) setDbLicencias(data);
+      });
+    }
   }, [session]);
 
   const actualizarLicencia = async (casaId, estado) => {
