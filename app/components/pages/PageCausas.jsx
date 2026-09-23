@@ -71,6 +71,40 @@ function CheckItem({ label, checked, onChange, sublabel }) {
   </div>;
 }
 
+/* ── Parsear fecha de Excel (serial number o string) ─────────── */
+function parseExcelDate(val) {
+  if (!val && val !== 0) return null;
+  // Número serial de Excel (ej: 46000)
+  if (typeof val === "number" || (typeof val === "string" && /^\d{4,6}$/.test(val.trim()) && Number(val) > 1000)) {
+    const n = Number(val);
+    if (n > 59) { // corrección por bug de 1900-02-29 en Excel
+      const d = new Date(Math.round((n - 25569) * 86400 * 1000));
+      if (!isNaN(d)) return d.toISOString().slice(0, 10);
+    }
+    return null;
+  }
+  const s = String(val).trim();
+  if (!s) return null;
+  // DD.MM.YYYY o DD/MM/YYYY o DD-MM-YYYY
+  const m1 = s.match(/^(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})$/);
+  if (m1) return `${m1[3]}-${m1[2].padStart(2,"0")}-${m1[1].padStart(2,"0")}`;
+  // YYYY-MM-DD ya correcto
+  const m2 = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m2) return `${m2[1]}-${m2[2].padStart(2,"0")}-${m2[3].padStart(2,"0")}`;
+  // MM/DD/YYYY (formato EEUU)
+  const m3 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m3) {
+    const [,a,b,y] = m3;
+    // si primer número > 12 es DD/MM
+    if (Number(a) > 12) return `${y}-${b.padStart(2,"0")}-${a.padStart(2,"0")}`;
+    return `${y}-${a.padStart(2,"0")}-${b.padStart(2,"0")}`;
+  }
+  // intentar Date.parse como fallback
+  const d = new Date(s);
+  if (!isNaN(d)) return d.toISOString().slice(0, 10);
+  return null;
+}
+
 /* ── Detectar columnas Excel automáticamente ─────────────────── */
 function detectCol(headers, keywords) {
   return headers.findIndex(h=>keywords.some(k=>String(h).toLowerCase().includes(k)));
@@ -94,7 +128,6 @@ function parseExcelRows(raw) {
     const minRaw = String(r[iMin]||"").trim();
     const minimo = minRaw.toLowerCase().includes("mejor") ? "M/P" : minRaw || null;
     const com  = parseFloat(String(r[iCom]||"7").replace(/[^\d.]/g,"")) || 7;
-    const fechaRaw = iFecha>=0 ? String(r[iFecha]||"").trim() : null;
     return {
       _row:i+2, rol, tipo,
       tribunal:          String(r[iTrib]||"").trim()||null,
@@ -103,7 +136,7 @@ function parseExcelRows(raw) {
       bienes_descripcion:String(r[iBien]||"").trim()||null,
       minimo, comision_pct: com,
       bases_notas:       iNota>=0 ? String(r[iNota]||"").trim()||null : null,
-      fecha_remate:      fechaRaw && fechaRaw.match(/\d/)  ? fechaRaw : null,
+      fecha_remate:      parseExcelDate(iFecha>=0 ? r[iFecha] : null),
       error: !rol ? "ROL vacío" : null,
     };
   });
