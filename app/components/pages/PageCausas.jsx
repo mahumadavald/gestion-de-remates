@@ -292,25 +292,8 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
       aprobado_remate_at: new Date().toISOString(),
       aprobado_remate_por: session?.nombre || session?.user?.email || "—",
     });
-    if (data && !causa.lote_id) {
-      const codigo = `L-${causa.rol.replace(/[^A-Z0-9]/g,"").slice(0,6)}-${Date.now().toString().slice(-3)}`;
-      const { data:lote, error:loteErr } = await supabase.from("lotes").insert({
-        casa_id:session?.casaId||null, causa_id:causa.id, codigo,
-        nombre:causa.bienes_descripcion?.slice(0,80)||causa.rol,
-        descripcion:causa.bienes_descripcion||null, expediente:causa.rol,
-        mandante:causa.empresa_deudora||null,
-        categoria:causa.tipo==="concursal"?"Concursal":"Judicial",
-        base: causa.minimo && !isNaN(parseFloat(String(causa.minimo).replace(/\D/g,""))) ? parseFloat(String(causa.minimo).replace(/\D/g,"")) : 0,
-        comision:causa.comision_pct||7, tipo_remate:causa.tipo,
-        estado:"disponible", orden:(dbLotes?.length||0)+1,
-      }).select().single();
-      if (!loteErr && lote) {
-        await patchCausa(causa.id, { lote_id:lote.id });
-        if (setDbLotes) setDbLotes(prev=>[...(prev||[]),lote]);
-      }
-    }
     setSaving(false);
-    notify("✅ Remate aprobado — lote creado para Pre-Remate.","sold");
+    notify("✅ Remate aprobado. Creá los lotes desde Lotes → Desde Causa.","sold");
   };
 
   /* ── Crear lote ── */

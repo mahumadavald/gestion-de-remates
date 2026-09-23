@@ -2150,6 +2150,10 @@ function Dashboard({ session, onLogout }) {
   const [desdeActaSel,   setDesdeActaSel]   = useState(null);    // acta seleccionada
   const [desdeActaBienes, setDesdeActaBienes] = useState([]);    // [{...bien,checked,base}]
   const [desdeActaSaving, setDesdeActaSaving] = useState(false);
+  const [desdeCausaModal,  setDesdeCausaModal]  = useState(false);
+  const [desdeCausaSel,    setDesdeCausaSel]    = useState(null);
+  const [desdeCausaLotes,  setDesdeCausaLotes]  = useState([]);
+  const [desdeCausaSaving, setDesdeCausaSaving] = useState(false);
   const [bodegaForm, setBodegaForm] = useState({id:null,nombre:"",ciudad:"",activa:true});
   const [bodegaModal, setBodegaModal] = useState(false);
 
@@ -5067,6 +5071,10 @@ function exportCSV(){
           // Actas recepcionadas que aún no tienen todos sus lotes creados
           const actasDisponibles = dbActas.filter(a => a.estado === "recepcionada" && (a.bienes||[]).some(b=>b.descripcion?.trim()));
 
+          // Causas con bienes ya recepcionados (para crear lotes manuales)
+          const ESTADOS_CON_BIENES = ["bienes_recepcionados","bases_enviadas","publicaciones_ok","fecha_aprobada","remate_aprobado","en_remate"];
+          const causasConBienes = dbCausas.filter(c => ESTADOS_CON_BIENES.includes(c.estado));
+
           const abrirDesdeActa = (acta) => {
             setDesdeActaSel(acta);
             setDesdeActaBienes((acta.bienes||[]).filter(b=>b.descripcion?.trim()).map(b=>({...b,checked:true,base:""})));
@@ -5106,6 +5114,41 @@ function exportCSV(){
             setDesdeActaModal(false);
             setDesdeActaSel(null);
             notify(`${ok} lote${ok!==1?"s":""} creado${ok!==1?"s":""} — aparecen en Revisión de Lotes.`,"sold");
+          };
+
+          const crearLotesDesdeCausa = async () => {
+            const validos = desdeCausaLotes.filter(l => l.nombre?.trim());
+            if (!validos.length) { notify("Agregá al menos un lote con nombre.","inf"); return; }
+            setDesdeCausaSaving(true);
+            let ok = 0;
+            for (let i=0; i<validos.length; i++) {
+              const l = validos[i];
+              const base = parseFloat(String(l.base||"0").replace(/\D/g,""))||0;
+              const { error } = await supabase.from("lotes").insert({
+                casa_id:    session?.casaId||null,
+                causa_id:   desdeCausaSel.id,
+                codigo:     `L-${String(Date.now()+i).slice(-5)}`,
+                nombre:     l.nombre.trim(),
+                expediente: desdeCausaSel.rol||null,
+                mandante:   desdeCausaSel.empresa_deudora||null,
+                categoria:  desdeCausaSel.tipo==="concursal"?"Concursal":"Judicial",
+                base, minimo:base||null,
+                incremento: base?Math.max(Math.round(base*0.05),5000):10000,
+                comision:   desdeCausaSel.comision_pct||7,
+                tipo_iva:"EX", afecto_iva:false,
+                cantidad:   parseInt(l.cantidad)||1,
+                estado:     "pendiente_revision",
+                orden:      dbLotes.length+ok+1,
+              });
+              if (!error) ok++;
+            }
+            const {data:lotData} = await supabase.from("lotes").select("*").order("orden");
+            if (lotData) setDbLotes(lotData);
+            setDesdeCausaSaving(false);
+            setDesdeCausaModal(false);
+            setDesdeCausaSel(null);
+            setDesdeCausaLotes([]);
+            notify(`${ok} lote${ok!==1?"s":""} creado${ok!==1?"s":""} desde causa.`,"sold");
           };
 
           return (
@@ -5183,6 +5226,101 @@ function exportCSV(){
               </div>
             )}
 
+            {/* Modal Desde Causa */}
+            {desdeCausaModal && (
+              <div className="modal-overlay" onClick={()=>{setDesdeCausaModal(false);setDesdeCausaSel(null);setDesdeCausaLotes([]);}}>
+                <div className="modal" style={{maxWidth:680,maxHeight:"90vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
+                  <div className="modal-header">
+                    <span className="modal-title">Crear Lotes desde Causa</span>
+                    <button className="modal-close" onClick={()=>{setDesdeCausaModal(false);setDesdeCausaSel(null);setDesdeCausaLotes([]);}}>✕</button>
+                  </div>
+                  <div style={{padding:"0 1.2rem 1.2rem",display:"flex",flexDirection:"column",gap:12}}>
+                    {!desdeCausaSel ? (
+                      <>
+                        <div style={{fontSize:".8rem",color:"var(--mu)"}}>Seleccioná una causa para crear sus lotes. Podés agregar cuantos lotes necesites.</div>
+                        {causasConBienes.length === 0 ? (
+                          <div style={{textAlign:"center",padding:"2rem",color:"var(--mu)",fontSize:".85rem"}}>No hay causas con bienes recepcionados disponibles.</div>
+                        ) : (
+                          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                            {causasConBienes.map(c => {
+                              const lotesExistentes = dbLotes.filter(l=>l.causa_id===c.id).length;
+                              return (
+                                <div key={c.id}
+                                  onClick={()=>{
+                                    setDesdeCausaSel(c);
+                                    setDesdeCausaLotes([{nombre:c.bienes_descripcion?.slice(0,80)||"",base:"",cantidad:1}]);
+                                  }}
+                                  style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,padding:"10px 14px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                                  <div>
+                                    <div style={{fontWeight:700,fontSize:".85rem",color:"var(--fgp)"}}>{c.empresa_deudora||c.deudor_nombre||c.rol}</div>
+                                    <div style={{fontSize:".75rem",color:"var(--mu)",marginTop:2}}>
+                                      Rol: {c.rol} · {c.tipo==="concursal"?"Concursal":"Judicial"} · {c.estado?.replace(/_/g," ")}
+                                    </div>
+                                  </div>
+                                  <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
+                                    {lotesExistentes>0 && <span style={{fontSize:".72rem",color:"#8b5cf6"}}>{lotesExistentes} lote{lotesExistentes!==1?"s":""} ya creado{lotesExistentes!==1?"s":""}</span>}
+                                    <span style={{fontSize:".75rem",color:"var(--ac)",fontWeight:600}}>Seleccionar →</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:"10px 14px",fontSize:".8rem",color:"var(--mu)"}}>
+                          <b style={{color:"var(--fgp)"}}>{desdeCausaSel.empresa_deudora||desdeCausaSel.rol}</b> — Rol {desdeCausaSel.rol} · {desdeCausaSel.tipo==="concursal"?"Concursal":"Judicial"}
+                          <button onClick={()=>{setDesdeCausaSel(null);setDesdeCausaLotes([]);}} style={{marginLeft:12,fontSize:".72rem",color:"var(--ac)",background:"none",border:"none",cursor:"pointer"}}>← Cambiar causa</button>
+                        </div>
+                        <div style={{display:"flex",gap:6,fontSize:".72rem",color:"var(--mu)",fontWeight:600,padding:"0 2px"}}>
+                          <span style={{flex:2}}>Nombre del lote</span>
+                          <span style={{flex:1,textAlign:"right"}}>Precio base</span>
+                          <span style={{width:64,textAlign:"center"}}>Cant.</span>
+                          {desdeCausaLotes.length>1 && <span style={{width:24}}/>}
+                        </div>
+                        <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                          {desdeCausaLotes.map((l,i)=>(
+                            <div key={i} style={{display:"flex",alignItems:"center",gap:6,background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:8,padding:"8px 10px"}}>
+                              <div style={{flex:2}}>
+                                <input className="fi" value={l.nombre}
+                                  onChange={e=>setDesdeCausaLotes(p=>p.map((x,j)=>j===i?{...x,nombre:e.target.value}:x))}
+                                  placeholder="Nombre del lote" style={{width:"100%",fontSize:".82rem"}}/>
+                              </div>
+                              <div style={{flex:1}}>
+                                <input className="fi" value={l.base}
+                                  onChange={e=>setDesdeCausaLotes(p=>p.map((x,j)=>j===i?{...x,base:e.target.value}:x))}
+                                  placeholder="$ 0" style={{width:"100%",textAlign:"right",fontSize:".8rem"}}/>
+                              </div>
+                              <div style={{width:64}}>
+                                <input className="fi" type="number" min={1} value={l.cantidad}
+                                  onChange={e=>setDesdeCausaLotes(p=>p.map((x,j)=>j===i?{...x,cantidad:e.target.value}:x))}
+                                  style={{width:"100%",textAlign:"center",fontSize:".8rem"}}/>
+                              </div>
+                              {desdeCausaLotes.length > 1 && (
+                                <button onClick={()=>setDesdeCausaLotes(p=>p.filter((_,j)=>j!==i))}
+                                  style={{background:"none",border:"none",cursor:"pointer",color:"#ef4444",fontSize:"1rem",flexShrink:0,padding:"0 4px",lineHeight:1}}>✕</button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <button onClick={()=>setDesdeCausaLotes(p=>[...p,{nombre:"",base:"",cantidad:1}])}
+                          style={{alignSelf:"flex-start",padding:"5px 14px",borderRadius:8,border:"1px dashed var(--b1)",background:"transparent",color:"var(--mu)",fontSize:".78rem",cursor:"pointer"}}>
+                          + Agregar lote
+                        </button>
+                        <div style={{display:"flex",gap:8,marginTop:4}}>
+                          <button className="btn-primary" onClick={crearLotesDesdeCausa} disabled={desdeCausaSaving} style={{fontSize:".8rem"}}>
+                            {desdeCausaSaving ? "Creando…" : `Crear ${desdeCausaLotes.filter(l=>l.nombre?.trim()).length} lote${desdeCausaLotes.filter(l=>l.nombre?.trim()).length!==1?"s":""}`}
+                          </button>
+                          <button className="btn-secondary" onClick={()=>{setDesdeCausaModal(false);setDesdeCausaSel(null);setDesdeCausaLotes([]);}} style={{fontSize:".8rem"}}>Cancelar</button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="filter-row" style={{marginBottom:"1rem"}}>
               {[["todos","Todos"],["sin-asignar","Sin remate"],["publicado","Publicado"],["vendido","Vendido"],["sin vender","Sin vender"]].map(([val,label]) => (
                 <button key={val} className={`filter-btn${filterTab===val?" on":""}`} onClick={()=>{setFilterTab(val);setSelectedLoteIds(new Set());}}>{label}</button>
@@ -5191,12 +5329,20 @@ function exportCSV(){
             <div className="table-card">
               <div className="table-head">
                 <div className="table-title">{lotesMostrar.length} lotes{remateName ? ` — ${remateName}` : ""}</div>
-                {actasDisponibles.length > 0 && (
-                  <button onClick={()=>{setDesdeActaModal(true);setDesdeActaSel(null);}}
-                    style={{padding:"5px 14px",borderRadius:8,border:"1px solid #8b5cf6",background:"transparent",color:"#8b5cf6",fontSize:".78rem",fontWeight:600,cursor:"pointer"}}>
-                    Desde Acta
-                  </button>
-                )}
+                <div style={{display:"flex",gap:8}}>
+                  {causasConBienes.length > 0 && (
+                    <button onClick={()=>{setDesdeCausaModal(true);setDesdeCausaSel(null);setDesdeCausaLotes([]);}}
+                      style={{padding:"5px 14px",borderRadius:8,border:"1px solid #059669",background:"transparent",color:"#059669",fontSize:".78rem",fontWeight:600,cursor:"pointer"}}>
+                      Desde Causa
+                    </button>
+                  )}
+                  {actasDisponibles.length > 0 && (
+                    <button onClick={()=>{setDesdeActaModal(true);setDesdeActaSel(null);}}
+                      style={{padding:"5px 14px",borderRadius:8,border:"1px solid #8b5cf6",background:"transparent",color:"#8b5cf6",fontSize:".78rem",fontWeight:600,cursor:"pointer"}}>
+                      Desde Acta
+                    </button>
+                  )}
+                </div>
               </div>
               <div style={{overflowX:"auto"}}>
                 <table>
