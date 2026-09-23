@@ -432,7 +432,7 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
     <div className="modal-overlay" onClick={() => setModalLotes(null)}>
       <div className="modal" style={{ maxWidth:620, maxHeight:"90vh", overflowY:"auto" }} onClick={e=>e.stopPropagation()}>
         <div className="modal-header">
-          <span className="modal-title">Crear Lotes desde Acta</span>
+          <span className="modal-title">Crear lotes desde acta</span>
           <button className="modal-close" onClick={()=>setModalLotes(null)}>✕</button>
         </div>
         <div style={{ padding:"0 1.2rem 1.2rem", display:"flex", flexDirection:"column", gap:12 }}>

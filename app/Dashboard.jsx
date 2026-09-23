@@ -3505,27 +3505,27 @@ function exportCSV(){
   const PAGE_TITLE = {
     dashboard:"Dashboard", remates:"Remates", sala:"Sala en vivo",
     // Pre Remate
-    "nuevo-remate":"Nuevo Remate", "ingreso-vendedores":"Ingreso Vendedores",
+    "nuevo-remate":"Nuevo remate", "ingreso-vendedores":"Ingreso vendedores",
     lotes:"Ingreso Lotes", planilla:"Planilla de Remate",
     "lotes-vendedor":"Lotes por Vendedor",
     // Clientes
-    clientes:"Listado Clientes", postores:"Ingreso Cliente",
+    clientes:"Listado clientes", postores:"Ingreso Cliente",
     // Garantía
     preinscriptos:"Pre Inscritos Web", garantias:"Ingresar Garantía",
     reimprimir:"Reimprimir Comprobante", devoluciones:"Devoluciones de Garantía",
     "participantes-online":"Participantes Online",
     // Post Remate
-    adjudicac:"Participantes", factura:"Balance por Remate",
+    adjudicac:"Participantes", factura:"Balance por remate",
     vendedores:"Liquidar Vendedores", liquidac:"Liquidar Compradores",
     "liq-masivo":"Generar Liquidaciones Masivo", "env-masivo":"Enviar Liquidaciones Masivo",
     retiro:"Retiro de Bienes",
     // Resto
     reportes:"Estadísticas", config:"Configuración",
     usuarios:"Usuarios", licencias:"Licencias", casas:"Casas de Remates",
-    kpis:"TAKKA Board", bodegas:"Bodegas", entregas:"Retiro de Bienes",
+    kpis:"TAKKA board", bodegas:"Bodegas", entregas:"Retiro de Bienes",
     "resultado-remate":"Resultado de Remate", "lotes-revision":"Revisión de Lotes",
-    "actas-entrega":"Actas de Entrega",
-    "actas-recepcion":"Actas Recepción Vehículos",
+    "actas-entrega":"Actas de entrega",
+    "actas-recepcion":"Actas recepción vehículos",
   };
 
   return (
@@ -3663,7 +3663,7 @@ function exportCSV(){
                       )}
                       {dbVendedores.length===0 && (
                         <div style={{fontSize:".68rem",color:"var(--mu)",marginTop:".3rem"}}>
-                          Sin vendedores — <span style={{color:"var(--ac)",cursor:"pointer",textDecoration:"underline"}} onClick={()=>{setModal(null);setPage("ingreso-vendedores");}}>agregar en Ingreso Vendedores</span>
+                          Sin vendedores — <span style={{color:"var(--ac)",cursor:"pointer",textDecoration:"underline"}} onClick={()=>{setModal(null);setPage("ingreso-vendedores");}}>agregar en Ingreso vendedores</span>
                         </div>
                       )}
                     </div>
@@ -3985,7 +3985,7 @@ function exportCSV(){
               </div>
             </>}
             {modal==="nuevo-vendedor" && <>
-              <div className="modal-title">Agregar Vendedor / Consignatario</div>
+              <div className="modal-title">Agregar vendedor / consignatario</div>
               <div className="form-grid">
                 <div className="fg full"><label className="fl">Nombre completo / Razón social *</label>
                   <input className="fi" placeholder="Juan Pérez Soto / Empresa SpA" value={nuevoVendedorForm.nombre} onChange={e=>setNuevoVendedorForm(f=>({...f,nombre:e.target.value}))}/>
@@ -4345,12 +4345,12 @@ function exportCSV(){
           <div className="sb-section">Pre Remate</div>
           <div className="sb-item" onClick={()=>{setPage("remates");setModal("nuevo-remate");setMobileMenu(false);}}>
             <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M8 3v10M3 8h10"/></svg></span>
-            <span className="sb-label">Nuevo Remate</span>
+            <span className="sb-label">Nuevo remate</span>
           </div>
           {(()=>{
             const pendRevCount = dbLotes.filter(l=>l.estado==="pendiente_revision"&&(session?.role==="admin"||!session?.casaId||l.casa_id===session?.casaId)).length;
             return [
-              {id:"ingreso-vendedores", icon:"vendedor", label:"Ingreso Vendedores"},
+              {id:"ingreso-vendedores", icon:"vendedor", label:"Ingreso vendedores"},
               {id:"lotes",              icon:"lotes",    label:"Ingreso Lotes"},
               {id:"lotes-revision",     icon:"lotes",    label:"Revisar Lotes",  badge: pendRevCount||null},
               {id:"planilla",           icon:"lotes",    label:"Planilla"},
@@ -4376,7 +4376,7 @@ function exportCSV(){
           </div>
           <div className={`sb-item${page==="clientes"?" on":""}`} onClick={()=>{setPage("clientes");setMobileMenu(false);}}>
             <span className="sb-icon"><Icon name="postores"/></span>
-            <span className="sb-label">Listado Clientes</span>
+            <span className="sb-label">Listado clientes</span>
           </div>
 
           {/* ── GARANTÍA ── */}
@@ -4400,7 +4400,7 @@ function exportCSV(){
           {[
             {id:"resultado-remate", icon:"reportes", label:"Resultado de Remate"},
             {id:"adjudicac",  icon:"adjudic",  label:"Participantes"},
-            {id:"factura",    icon:"factura",  label:"Balance por Remate"},
+            {id:"factura",    icon:"factura",  label:"Balance por remate"},
             {id:"vendedores", icon:"vendedor", label:"Liquidar Vendedores"},
             {id:"liquidac",   icon:"liq",      label:"Liquidar Compradores", badge:liquidaciones.filter(l=>!l.enviado).length||undefined},
             {id:"liq-masivo", icon:"liq",      label:"Generar Liq. Masivo"},
@@ -4419,11 +4419,11 @@ function exportCSV(){
           <div className="sb-section">Analytics</div>
           <div className={`sb-item${(page==="kpis"||page==="reportes")?" on":""}`} onClick={()=>{setPage("kpis");setMobileMenu(false);}}>
             <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/></svg></span>
-            <span className="sb-label">TAKKA Board</span>
+            <span className="sb-label">TAKKA board</span>
           </div>
           <div className={`sb-item${page==="factura"?" on":""}`} onClick={()=>{setPage("factura");setMobileMenu(false);}}>
             <span className="sb-icon"><Icon name="reportes"/></span>
-            <span className="sb-label">Balance por Remate</span>
+            <span className="sb-label">Balance por remate</span>
           </div>
 
           {/* ── SISTEMA ── */}
@@ -4454,14 +4454,14 @@ function exportCSV(){
             return (
               <div className={`sb-item${page==="actas-entrega"?" on":""}`} onClick={()=>{setPage("actas-entrega");setMobileMenu(false);}}>
                 <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M5 6h6M5 9h6M5 12h3"/></svg></span>
-                <span className="sb-label">Actas de Entrega</span>
+                <span className="sb-label">Actas de entrega</span>
                 {actasBadge > 0 && <span className="sb-badge">{actasBadge}</span>}
               </div>
             );
           })()}
           <div className={`sb-item${page==="actas-recepcion"?" on":""}`} onClick={()=>{setPage("actas-recepcion");setMobileMenu(false);}}>
             <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="14" height="12" rx="1.5"/><path d="M4 6h3M4 9h3M9 6h3M9 9h3M4 12h8"/><path d="M1 5h14"/></svg></span>
-            <span className="sb-label">Actas Recepción Veh.</span>
+            <span className="sb-label">Actas recepción veh.</span>
           </div>
           <div className={`sb-item${page==="causas"?" on":""}`} onClick={()=>{setPage("causas");setMobileMenu(false);}}>
             <span className="sb-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M2 3h12M2 6h8M2 9h10M2 12h6"/><circle cx="13" cy="11" r="2.5"/><path d="M15 13l-1.5-1.5"/></svg></span>
@@ -4570,7 +4570,7 @@ function exportCSV(){
               {(page==="postores"||page==="clientes") && <button className="btn-primary" onClick={()=>setModal("nuevo-postor")}>+ Agregar cliente</button>}
               {page==="garantias" && <button className="btn-primary" onClick={()=>setModal("nueva-garantia")}>+ Registrar garantia</button>}
               {page==="planilla" && <button className="btn-primary" onClick={printPlanillaRemate}>Abrir / Imprimir</button>}
-              {page==="ingreso-vendedores" && <button className="btn-primary" onClick={()=>setModal("nuevo-vendedor")}>+ Agregar Vendedor</button>}
+              {page==="ingreso-vendedores" && <button className="btn-primary" onClick={()=>setModal("nuevo-vendedor")}>+ Agregar vendedor</button>}
             </div>
           </div>
         )}
@@ -4635,7 +4635,7 @@ function exportCSV(){
                       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><line x1="9" y1="2" x2="9" y2="16"/><line x1="2" y1="9" x2="16" y2="9"/></svg>
                     </div>
                     <div>
-                      <div style={{fontWeight:800,fontSize:"1rem",color:"#fff",marginBottom:".2rem"}}>Nuevo Remate</div>
+                      <div style={{fontWeight:800,fontSize:"1rem",color:"#fff",marginBottom:".2rem"}}>Nuevo remate</div>
                       <div style={{fontSize:".75rem",color:"rgba(255,255,255,.75)"}}>Crear un nuevo evento</div>
                     </div>
                     <div style={{position:"absolute",right:-20,top:-20,width:90,height:90,borderRadius:"50%",background:"rgba(255,255,255,.07)"}}/>
@@ -4649,7 +4649,7 @@ function exportCSV(){
                       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><rect x="2" y="2" width="14" height="14" rx="3"/><path d="M6 9h6M9 6v6"/></svg>
                     </div>
                     <div>
-                      <div style={{fontWeight:800,fontSize:"1rem",color:"#fff",marginBottom:".2rem"}}>Agregar Lote</div>
+                      <div style={{fontWeight:800,fontSize:"1rem",color:"#fff",marginBottom:".2rem"}}>Agregar lote</div>
                       <div style={{fontSize:".75rem",color:"rgba(255,255,255,.75)"}}>Catalogar artículo</div>
                     </div>
                     <div style={{position:"absolute",right:-20,top:-20,width:90,height:90,borderRadius:"50%",background:"rgba(255,255,255,.07)"}}/>
@@ -5149,7 +5149,7 @@ function exportCSV(){
               <div className="modal-overlay" onClick={()=>{setDesdeActaModal(false);setDesdeActaSel(null);}}>
                 <div className="modal" style={{maxWidth:600,maxHeight:"90vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
                   <div className="modal-header">
-                    <span className="modal-title">Crear Lotes desde Acta</span>
+                    <span className="modal-title">Crear lotes desde acta</span>
                     <button className="modal-close" onClick={()=>{setDesdeActaModal(false);setDesdeActaSel(null);}}>✕</button>
                   </div>
                   <div style={{padding:"0 1.2rem 1.2rem",display:"flex",flexDirection:"column",gap:12}}>
@@ -5222,7 +5222,7 @@ function exportCSV(){
               <div className="modal-overlay" onClick={()=>{setDesdeCausaModal(false);setDesdeCausaSel(null);setDesdeCausaLotes([]);}}>
                 <div className="modal" style={{maxWidth:680,maxHeight:"90vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
                   <div className="modal-header">
-                    <span className="modal-title">Crear Lotes desde Causa</span>
+                    <span className="modal-title">Crear lotes desde causa</span>
                     <button className="modal-close" onClick={()=>{setDesdeCausaModal(false);setDesdeCausaSel(null);setDesdeCausaLotes([]);}}>✕</button>
                   </div>
                   <div style={{padding:"0 1.2rem 1.2rem",display:"flex",flexDirection:"column",gap:12}}>
@@ -9081,14 +9081,14 @@ function exportCSV(){
               <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"45vh",gap:".75rem",color:"var(--mu)"}}>
                 <svg width="44" height="44" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="20" cy="14" r="7"/><path d="M7 36c0-7.2 5.8-13 13-13s13 5.8 13 13"/></svg>
                 <div style={{fontSize:".9rem",fontWeight:600,color:"var(--wh2)"}}>Sin vendedores aún</div>
-                <div style={{fontSize:".78rem",color:"var(--mu)",textAlign:"center",maxWidth:320}}>Agrega vendedores con el botón <strong style={{color:"var(--wh2)"}}>+ Agregar Vendedor</strong> para poder seleccionarlos al ingresar lotes.</div>
-                <button className="btn-primary" onClick={()=>setModal("nuevo-vendedor")}>+ Agregar Vendedor</button>
+                <div style={{fontSize:".78rem",color:"var(--mu)",textAlign:"center",maxWidth:320}}>Agrega vendedores con el botón <strong style={{color:"var(--wh2)"}}>+ Agregar vendedor</strong> para poder seleccionarlos al ingresar lotes.</div>
+                <button className="btn-primary" onClick={()=>setModal("nuevo-vendedor")}>+ Agregar vendedor</button>
               </div>
             ) : (
               <div className="table-card">
                 <div className="table-head">
                   <div className="table-title">{todos.length} vendedores</div>
-                  <button className="btn-primary" style={{fontSize:".75rem"}} onClick={()=>setModal("nuevo-vendedor")}>+ Agregar Vendedor</button>
+                  <button className="btn-primary" style={{fontSize:".75rem"}} onClick={()=>setModal("nuevo-vendedor")}>+ Agregar vendedor</button>
                 </div>
                 <div style={{overflowX:"auto"}}>
                   <table>
