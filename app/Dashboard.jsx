@@ -14,7 +14,9 @@ import PageActasRecepcion from "./components/pages/PageActasRecepcion";
 import PageCausas         from "./components/pages/PageCausas";
 import { toDisplay }      from "./lib/toDisplay";
 import PageBodega         from "./components/pages/PageBodega";
-
+import PageRemates        from "./components/pages/PageRemates";
+import PageLotes          from "./components/pages/PageLotes";
+import PageSala           from "./components/pages/PageSala";
 
 
 // fetch autenticado — adjunta el JWT de Supabase como Bearer token
@@ -750,41 +752,6 @@ tr:hover td{background:rgba(56,178,246,.04);}
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return <div className="ctt"><div style={{color:"var(--mu)",marginBottom:".15rem",fontSize:".65rem"}}>{label}</div><div style={{color:"var(--ac)",fontWeight:700}}>{payload[0].value >= 10 ? `$${payload[0].value}M` : payload[0].value}</div></div>;
-};
-
-// ── BID RING ──────────────────────────────────────────────────────
-const BidRing = ({ seconds, total, nextAmount, increment }) => {
-  const r = 20, circ = 2 * Math.PI * r, offset = circ * (1 - seconds / total);
-  const color = seconds > 8 ? "#14B8A6" : seconds > 4 ? "#f6ad55" : "#f56565";
-  const urgent = seconds <= 5;
-  const adjudicando = seconds <= 1;
-  return (
-    <div className="bid-ring-wrap" style={{
-      background: urgent ? `rgba(${adjudicando?"239,68,68":"245,158,11"},.1)` : "rgba(56,178,246,.06)",
-      border: `1px solid rgba(${adjudicando?"239,68,68":"245,158,11"},.${urgent?".3":"18"})`,
-      animation: urgent ? "losepulse 0.6s infinite" : "none",
-    }}>
-      <div className="bid-ring-outer">
-        <svg className="bid-ring-svg" width="52" height="52" viewBox="0 0 52 52">
-          <circle className="bid-ring-bg" cx="26" cy="26" r={r}/>
-          <circle className="bid-ring-fill" cx="26" cy="26" r={r} stroke={color} strokeDasharray={circ} strokeDashoffset={offset}/>
-        </svg>
-        <div className="bid-ring-num" style={{color, fontSize: seconds <= 9 ? "1.4rem" : "1.2rem"}}>{seconds}</div>
-      </div>
-      <div style={{flex:1}}>
-        {adjudicando
-          ? <div style={{fontWeight:900,fontSize:"1rem",color:"#f56565",letterSpacing:".03em"}}>¡ADJUDICANDO!</div>
-          : urgent
-            ? <><div className="bid-ring-label" style={{color:"#f6ad55"}}>Última oportunidad</div>
-                <div className="bid-ring-next">{fmt(nextAmount)}</div>
-                <div className="bid-ring-inc">Incremento: +{fmtS(increment)}</div></>
-            : <><div className="bid-ring-label">Próxima puja en</div>
-                <div className="bid-ring-next">{fmt(nextAmount)}</div>
-                <div className="bid-ring-inc">Incremento: +{fmtS(increment)}</div></>
-        }
-      </div>
-    </div>
-  );
 };
 
 // ── SVG ICONS ─────────────────────────────────────────────────────
@@ -4670,139 +4637,29 @@ function exportCSV(){
         )}
 
         {/* ══ REMATES ══ */}
-        {page==="remates" && (
-          <div className="page">
-            {/* Banner contextual según rol */}
-            {session?.role==="admin"
-              ? <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".7rem 1rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:8,fontSize:".74rem",color:"var(--mu2)"}}>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--yl)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M7 6v4M7 4.5v.01"/></svg>
-                  <span>Vista admin — ves todos los remates de todos los clientes. Lo ideal es que <strong style={{color:"var(--wh2)"}}>cada casa de remates cree y gestione los suyos</strong> desde su propio acceso.</span>
-                </div>
-              : <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".7rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:8,fontSize:".74rem",color:"var(--mu2)"}}>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M7 6v4M7 4.5v.01"/></svg>
-                  <span>Solo ves los remates de <strong style={{color:"var(--wh2)"}}>{session?.casaNombre}</strong>. Crea y gestiona tus propios remates desde aquí.</span>
-                </div>
-            }
-            <div className="filter-row" style={{marginBottom:"1rem"}}>
-              {["todos","borrador","publicado","en_vivo","finalizado"].map(f => (
-                <button key={f} className={`filter-btn${filterTab===f?" on":""}`} onClick={()=>setFilterTab(f)}>
-                  {f==="todos"?"Todos":f==="borrador"?"Borrador":f==="publicado"?"Publicado":f==="en_vivo"?"En vivo":"Finalizado"}
-                </button>
-              ))}
-            </div>
-            <div className="table-card">
-              <div className="table-head"><div className="table-title">{REMATES_MERGED.filter(r=>filterTab==="todos"||r.estado===filterTab).length} remates</div></div>
-              <table>
-                <thead><tr><th>Código</th><th>Nombre</th><th>Fecha y hora</th><th>Modalidad</th><th>Estado</th>{session?.role==="admin"&&<th>Casa</th>}<th></th></tr></thead>
-                <tbody>
-                  {REMATES_MERGED.filter(r=>filterTab==="todos"||r.estado===filterTab).map(r => {
-                    const ESTADO_LABELS = {borrador:"Borrador",publicado:"Publicado",en_vivo:"● En vivo",finalizado:"Finalizado",activo:"Publicado",cerrado:"Finalizado"};
-                    const nextEstado = {borrador:"publicado",publicado:"en_vivo",en_vivo:"finalizado"};
-                    const nextLabel  = {borrador:"→ Publicar",publicado:"→ Activar",en_vivo:"→ Finalizar"};
-                    return (
-                    <tr key={r.id}>
-                      <td className="mono" style={{fontSize:".7rem"}}>{r.id}</td>
-                      <td style={{fontWeight:600}}>{r.name}</td>
-                      <td className="mono" style={{fontSize:".75rem"}}>{r.fecha}{r.hora&&<span style={{color:"var(--mu)",marginLeft:".4rem"}}>{r.hora}</span>}</td>
-                      <td className="mono">{r.modal}</td>
-                      <td><span className={`pill p-${r.estado}`}>{ESTADO_LABELS[r.estado]||r.estado}</span></td>
-                      {session?.role==="admin" && (
-                        <td><span style={{fontSize:".68rem",fontWeight:600,color:"var(--mu2)",background:"var(--s3)",border:"1px solid var(--b1)",borderRadius:5,padding:".1rem .45rem",whiteSpace:"nowrap"}}>{r.casa||"Remates Ahumada"}</span></td>
-                      )}
-                      <td>
-                        <div style={{display:"flex",gap:".35rem",flexWrap:"nowrap",alignItems:"center"}}>
-                          {/* Activar como remate de trabajo */}
-                          {(remateActivo?.supabaseId||remateActivo?.id)===(r.supabaseId||r.id) ? (
-                            <span style={{fontSize:".66rem",fontWeight:700,color:"#34d399",display:"flex",alignItems:"center",gap:".25rem",padding:".2rem .5rem",background:"rgba(52,211,153,.1)",border:"1px solid rgba(52,211,153,.3)",borderRadius:5}}>
-                              <div className="ldot" style={{background:"#34d399",width:6,height:6}}/> Activo
-                            </span>
-                          ) : (
-                            <button className="btn-sec" style={{fontSize:".66rem",whiteSpace:"nowrap",color:"var(--ac)",border:"1px solid rgba(6,182,212,.3)"}}
-                              onClick={()=>{ setRemateActivo(r); notify(`Trabajando en: ${r.name}`,"sold"); }}>
-                              ↳ Trabajar aquí
-                            </button>
-                          )}
-                          {/* Cambiar estado */}
-                          {nextEstado[r.estado] && r.supabaseId && (
-                            <button className="btn-sec" style={{fontSize:".66rem",whiteSpace:"nowrap",color:r.estado==="publicado"?"var(--gr)":r.estado==="en_vivo"?"var(--mu)":"var(--ac)"}}
-                              onClick={async()=>{
-                                await updateRemateEstado(r.supabaseId, nextEstado[r.estado]);
-                                notify(`Remate ${nextLabel[r.estado].replace("→ ","").toLowerCase()}.`,"sold");
-                              }}>
-                              {nextLabel[r.estado]}
-                            </button>
-                          )}
-                          {/* Abrir sala */}
-                          {(r.estado==="publicado"||r.estado==="en_vivo"||r.estado==="activo") && (
-                            <button className="btn-primary" style={{fontSize:".7rem",whiteSpace:"nowrap"}} onClick={async()=>{
-                              setSalaRemateId(r.supabaseId||r.id);
-                              let mapped = [];
-                              if(r.supabaseId){
-                                // 1º buscar lotes asignados a este remate
-                                const {data:lotesRemate} = await supabase.from("lotes").select("*").eq("remate_id",r.supabaseId).order("orden");
-                                if(lotesRemate&&lotesRemate.length>0){
-                                  mapped = lotesRemate.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:l.incremento||Math.round((l.base||0)*0.05)||100000}));
-                                } else {
-                                  // fallback: todos los lotes disponibles de esta casa
-                                  const {data:lotesAll} = await supabase.from("lotes").select("*").eq("estado","disponible").order("orden");
-                                  if(lotesAll&&lotesAll.length>0){
-                                    mapped = lotesAll.map(l=>({id:l.id,supabaseId:l.id,remateId:r.supabaseId,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:l.incremento||Math.round((l.base||0)*0.05)||100000}));
-                                    notify("Cargados todos los lotes disponibles (sin asignación de remate).","inf");
-                                  } else {
-                                    notify("No hay lotes disponibles. Agrega lotes primero.","inf");
-                                  }
-                                }
-                              }
-                              if(mapped.length>0){
-                                setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
-                                setIdx(0); setAState("waiting"); setBidTimer(null);
-                                setRemateActivo(r); setPage("sala"); notify("Sala abierta.","sold");
-                              } else {
-                                setIdx(0); setAState("waiting"); setBidTimer(null);
-                                setRemateActivo(r); setPage("sala");
-                              }
-                            }}>Abrir sala</button>
-                          )}
-                          {(r.estado==="finalizado"||r.estado==="cerrado") && (<>
-                            <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap",color:"var(--gr)",border:"1px solid rgba(20,184,166,.25)"}}
-                              onClick={()=>{ setSelectedRemate(r.id||r.supabaseId); setPage("liquidac"); }}>
-                              Ver liquidaciones
-                            </button>
-                            <button className="btn-sec" style={{fontSize:".7rem",whiteSpace:"nowrap",background:"linear-gradient(135deg,rgba(6,182,212,.12),rgba(20,184,166,.12))",border:"1px solid rgba(6,182,212,.3)",color:"var(--ac)",fontWeight:700}}
-                              onClick={()=>{ setAiRemateResult(null); setAiRemateModal(r); }}>
-                              Resumen IA
-                            </button>
-                          </>)}
-                          {/* Eliminar remate — solo admin o martillero de la misma casa */}
-                          {r.supabaseId && (session?.role === "admin" || (session?.role === "martillero" && r.casaId === session?.casaId)) && (
-                            confirmDelRemate === r.supabaseId
-                              ? <><button className="btn-sec" style={{fontSize:".66rem",whiteSpace:"nowrap",color:"var(--rd)",border:"1px solid rgba(239,68,68,.5)",padding:".2rem .5rem",fontWeight:700}}
-                                    onClick={async()=>{
-                                      setConfirmDelRemate(null);
-                                      await supabase.from("pujas").delete().eq("remate_id", r.supabaseId);
-                                      await supabase.from("postores").delete().eq("remate_id", r.supabaseId);
-                                      await supabase.from("lotes").delete().eq("remate_id", r.supabaseId);
-                                      const {error} = await supabase.from("remates").delete().eq("id", r.supabaseId);
-                                      if(error){ notify("Error al eliminar el remate.","inf"); console.error(error); return; }
-                                      setDbRemates(prev => prev.filter(x => x.id !== r.supabaseId));
-                                      notify(`Remate "${r.name}" eliminado.`, "inf");
-                                    }}>¿Seguro? Sí</button>
-                                  <button className="btn-sec" style={{fontSize:".66rem",padding:".2rem .5rem"}} onClick={()=>setConfirmDelRemate(null)}>No</button></>
-                              : <button className="btn-sec" style={{fontSize:".66rem",whiteSpace:"nowrap",color:"var(--rd)",border:"1px solid rgba(239,68,68,.25)",padding:".2rem .5rem"}}
-                                  onClick={()=>setConfirmDelRemate(r.supabaseId)}>
-                                  Eliminar
-                                </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        {page==="remates" && <PageRemates
+          session={session}
+          filterTab={filterTab}
+          setFilterTab={setFilterTab}
+          REMATES_MERGED={REMATES_MERGED}
+          remateActivo={remateActivo}
+          setRemateActivo={setRemateActivo}
+          confirmDelRemate={confirmDelRemate}
+          setConfirmDelRemate={setConfirmDelRemate}
+          setSalaRemateId={setSalaRemateId}
+          setLots={setLots}
+          setBids={setBids}
+          setIdx={setIdx}
+          setAState={setAState}
+          setBidTimer={setBidTimer}
+          setSelectedRemate={setSelectedRemate}
+          setAiRemateModal={setAiRemateModal}
+          setAiRemateResult={setAiRemateResult}
+          notify={notify}
+          setPage={setPage}
+          setDbRemates={setDbRemates}
+          updateRemateEstado={updateRemateEstado}
+        />}
 
         {/* ══ LOTES: REVISIÓN DE BODEGA ══ */}
         {page==="lotes-revision" && (()=>{
@@ -4881,455 +4738,41 @@ function exportCSV(){
         })()}
 
         {/* ══ LOTES ══ */}
-        {page==="lotes" && (()=>{
-          const lotesOrdenados = (lotesFiltroRemate
-            ? dbLotes.filter(l => l.remate_id === lotesFiltroRemate)
-            : dbLotes
-          ).slice().sort((a,b)=>(a.orden||0)-(b.orden||0));
-          const lotesMostrar = filterTab==="todos"
-            ? lotesOrdenados
-            : filterTab==="sin-asignar"
-              ? lotesOrdenados.filter(l=>!l.remate_id)
-              : lotesOrdenados.filter(l=>l.estado===filterTab);
-          const fmtClp = n => n ? Number(n).toLocaleString("es-CL") : "—";
-
-          const moverLote = async (loteId, dir) => {
-            const arr = lotesOrdenados;
-            const idx = arr.findIndex(l => l.id === loteId);
-            const ti  = idx + dir;
-            if(idx < 0 || ti < 0 || ti >= arr.length) return;
-            const a = arr[idx], b = arr[ti];
-            const oA = a.orden ?? idx+1, oB = b.orden ?? ti+1;
-            setDbLotes(prev => prev.map(l => {
-              if(l.id === a.id) return {...l, orden: oB};
-              if(l.id === b.id) return {...l, orden: oA};
-              return l;
-            }));
-            Promise.all([
-              supabase.from("lotes").update({orden: oB}).eq("id", a.id),
-              supabase.from("lotes").update({orden: oA}).eq("id", b.id),
-            ]).catch(e => console.warn("reorder:", e));
-          };
-
-          const remateName = lotesFiltroRemate
-            ? REMATES_MERGED.find(r=>(r.supabaseId||r.id)===lotesFiltroRemate)?.name||""
-            : "";
-
-          // Actas recepcionadas que aún tienen bienes sin convertir a lotes
-          const actasDisponibles = dbActas.filter(a => {
-            if (a.estado !== "recepcionada") return false;
-            const totalBienes = (a.bienes||[]).filter(b=>b.descripcion?.trim()).length;
-            if (!totalBienes) return false;
-            const lotesCreados = dbLotes.filter(l => l.acta_id === a.id).length;
-            return lotesCreados < totalBienes;
-          });
-
-          // Causas con bienes ya recepcionados (para crear lotes manuales)
-          const ESTADOS_CON_BIENES = ["bienes_recepcionados","bases_enviadas","publicaciones_ok","fecha_aprobada","remate_aprobado","en_remate"];
-          const causasConBienes = dbCausas.filter(c => ESTADOS_CON_BIENES.includes(c.estado));
-
-          const abrirDesdeActa = (acta) => {
-            setDesdeActaSel(acta);
-            setDesdeActaBienes((acta.bienes||[]).filter(b=>b.descripcion?.trim()).map(b=>({...b,checked:true,base:""})));
-          };
-
-          const crearLotesDesdeActa = async () => {
-            const seleccionados = desdeActaBienes.filter(b=>b.checked && b.descripcion?.trim());
-            if (!seleccionados.length) { notify("Selecciona al menos un bien.","inf"); return; }
-            setDesdeActaSaving(true);
-            let ok = 0;
-            for (let i=0; i<seleccionados.length; i++) {
-              const b = seleccionados[i];
-              const base = parseFloat(String(b.base||"0").replace(/\D/g,""))||0;
-              const catMap = {"Vehículo":"Vehículo","Bien Inmueble":"Inmueble"};
-              const { error } = await supabase.from("lotes").insert({
-                casa_id:     session?.casaId||null,
-                bodega_id:   desdeActaSel.bodega_id||session?.bodegaId||null,
-                acta_id:     desdeActaSel.id,
-                codigo:      `L-${String(Date.now()+i).slice(-5)}`,
-                nombre:      b.descripcion.trim(),
-                descripcion: [b.tipo!=="Bien Mueble"?b.tipo:null, b.cantidad>1?`Cantidad: ${b.cantidad}`:null, `Rol: ${desdeActaSel.rol_causa}`, `Mandante: ${desdeActaSel.deudor_nombre}`].filter(Boolean).join(" | "),
-                mandante:    desdeActaSel.deudor_nombre||null,
-                expediente:  desdeActaSel.rol_causa||null,
-                categoria:   catMap[b.tipo]||"Muebles",
-                base, minimo:base||null,
-                incremento:  base?Math.max(Math.round(base*0.05),5000):10000,
-                comision:    7, tipo_iva:"EX", afecto_iva:false,
-                cantidad:    parseInt(b.cantidad)||1,
-                estado:      "pendiente_revision",
-                orden:       dbLotes.length+ok+1,
-              });
-              if (!error) ok++;
-            }
-            const {data:lotData} = await supabase.from("lotes").select("*").order("orden");
-            if (lotData) setDbLotes(lotData);
-            setDesdeActaSaving(false);
-            setDesdeActaModal(false);
-            setDesdeActaSel(null);
-            notify(`${ok} lote${ok!==1?"s":""} creado${ok!==1?"s":""} — aparecen en Revisión de Lotes.`,"sold");
-          };
-
-          const crearLotesDesdeCausa = async () => {
-            const validos = desdeCausaLotes.filter(l => l.nombre?.trim());
-            if (!validos.length) { notify("Agregá al menos un lote con nombre.","inf"); return; }
-            setDesdeCausaSaving(true);
-            let ok = 0;
-            let firstLoteId = null;
-            for (let i=0; i<validos.length; i++) {
-              const l = validos[i];
-              const base = parseFloat(String(l.base||"0").replace(/\D/g,""))||0;
-              const { data:newLote, error } = await supabase.from("lotes").insert({
-                casa_id:    session?.casaId||null,
-                bodega_id:  session?.bodegaId||null,
-                causa_id:   desdeCausaSel.id,
-                codigo:     `L-${String(Date.now()+i).slice(-5)}`,
-                nombre:     l.nombre.trim(),
-                expediente: desdeCausaSel.rol||null,
-                mandante:   desdeCausaSel.empresa_deudora||null,
-                categoria:  desdeCausaSel.tipo==="concursal"?"Concursal":"Judicial",
-                base, minimo:base||null,
-                incremento: base?Math.max(Math.round(base*0.05),5000):10000,
-                comision:   desdeCausaSel.comision_pct||7,
-                tipo_iva:"EX", afecto_iva:false,
-                cantidad:   parseInt(l.cantidad)||1,
-                estado:     "pendiente_revision",
-                orden:      dbLotes.length+ok+1,
-              }).select("id").single();
-              if (!error) {
-                ok++;
-                if (i === 0 && newLote) firstLoteId = newLote.id;
-              }
-            }
-            // Vincular la causa al primer lote creado para que asignarRemate funcione
-            if (firstLoteId) await supabase.from("causas").update({lote_id: firstLoteId}).eq("id", desdeCausaSel.id);
-            const {data:lotData} = await supabase.from("lotes").select("*").order("orden");
-            if (lotData) setDbLotes(lotData);
-            setDesdeCausaSaving(false);
-            setDesdeCausaModal(false);
-            setDesdeCausaSel(null);
-            setDesdeCausaLotes([]);
-            notify(`${ok} lote${ok!==1?"s":""} creado${ok!==1?"s":""} desde causa.`,"sold");
-          };
-
-          return (
-          <div className="page">
-            {/* Modal Desde Acta */}
-            {desdeActaModal && (
-              <div className="modal-overlay" onClick={()=>{setDesdeActaModal(false);setDesdeActaSel(null);}}>
-                <div className="modal" style={{maxWidth:600,maxHeight:"90vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
-                  <div className="modal-header">
-                    <span className="modal-title">Crear lotes desde acta</span>
-                    <button className="modal-close" onClick={()=>{setDesdeActaModal(false);setDesdeActaSel(null);}}>✕</button>
-                  </div>
-                  <div style={{padding:"0 1.2rem 1.2rem",display:"flex",flexDirection:"column",gap:12}}>
-                    {!desdeActaSel ? (
-                      <>
-                        <div style={{fontSize:".8rem",color:"var(--mu)"}}>Selecciona un acta recepcionada para importar sus bienes como lotes.</div>
-                        {actasDisponibles.length === 0 ? (
-                          <div style={{textAlign:"center",padding:"2rem",color:"var(--mu)",fontSize:".85rem"}}>No hay actas recepcionadas con bienes disponibles.</div>
-                        ) : (
-                          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                            {actasDisponibles.map(a => {
-                              const yaCreados = dbLotes.filter(l=>l.acta_id===a.id).length;
-                              return (
-                                <div key={a.id}
-                                  onClick={()=>abrirDesdeActa(a)}
-                                  style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,padding:"10px 14px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                                  <div>
-                                    <div style={{fontWeight:700,fontSize:".85rem",color:"var(--fgp)"}}>{a.deudor_nombre}</div>
-                                    <div style={{fontSize:".75rem",color:"var(--mu)",marginTop:2}}>Rol: {a.rol_causa} · {(a.bienes||[]).filter(b=>b.descripcion?.trim()).length} bienes · {dbBodegas.find(b=>b.id===a.bodega_id)?.nombre||"Sin bodega"}</div>
-                                  </div>
-                                  <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
-                                    {yaCreados>0 && <span style={{fontSize:".72rem",color:"#8b5cf6"}}>{yaCreados} lote{yaCreados!==1?"s":""} ya creado{yaCreados!==1?"s":""}</span>}
-                                    <span style={{fontSize:".75rem",color:"var(--ac)",fontWeight:600}}>Seleccionar →</span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:"10px 14px",fontSize:".8rem",color:"var(--mu)"}}>
-                          <b style={{color:"var(--fgp)"}}>{desdeActaSel.deudor_nombre}</b> — Rol {desdeActaSel.rol_causa}
-                          <button onClick={()=>setDesdeActaSel(null)} style={{marginLeft:12,fontSize:".72rem",color:"var(--ac)",background:"none",border:"none",cursor:"pointer"}}>← Cambiar acta</button>
-                        </div>
-                        <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                          {desdeActaBienes.map((b,i)=>(
-                            <div key={i} style={{display:"flex",alignItems:"center",gap:10,background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:8,padding:"10px 12px"}}>
-                              <input type="checkbox" checked={b.checked}
-                                onChange={e=>setDesdeActaBienes(p=>p.map((x,j)=>j===i?{...x,checked:e.target.checked}:x))}
-                                style={{width:16,height:16,accentColor:"var(--ac)",cursor:"pointer",flexShrink:0}}/>
-                              <div style={{flex:1,minWidth:0}}>
-                                <div style={{fontWeight:600,fontSize:".82rem",color:"var(--fgp)"}}>{b.descripcion}</div>
-                                <div style={{fontSize:".72rem",color:"var(--mu)"}}>{b.tipo} · {b.cantidad} unid. · {b.estado}</div>
-                              </div>
-                              <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3}}>
-                                <label style={{fontSize:".68rem",color:"var(--mu)"}}>Precio base</label>
-                                <input className="fi" value={b.base} onChange={e=>setDesdeActaBienes(p=>p.map((x,j)=>j===i?{...x,base:e.target.value}:x))}
-                                  placeholder="$ 0" style={{width:110,textAlign:"right",fontSize:".8rem"}} disabled={!b.checked}/>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div style={{display:"flex",gap:8}}>
-                          <button className="btn-primary" onClick={crearLotesDesdeActa} disabled={desdeActaSaving} style={{fontSize:".8rem"}}>
-                            {desdeActaSaving?"Creando...": `Crear ${desdeActaBienes.filter(b=>b.checked).length} lote${desdeActaBienes.filter(b=>b.checked).length!==1?"s":""}`}
-                          </button>
-                          <button className="btn-secondary" onClick={()=>{setDesdeActaModal(false);setDesdeActaSel(null);}} style={{fontSize:".8rem"}}>Cancelar</button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Modal Desde Causa */}
-            {desdeCausaModal && (
-              <div className="modal-overlay" onClick={()=>{setDesdeCausaModal(false);setDesdeCausaSel(null);setDesdeCausaLotes([]);}}>
-                <div className="modal" style={{maxWidth:680,maxHeight:"90vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
-                  <div className="modal-header">
-                    <span className="modal-title">Crear lotes desde causa</span>
-                    <button className="modal-close" onClick={()=>{setDesdeCausaModal(false);setDesdeCausaSel(null);setDesdeCausaLotes([]);}}>✕</button>
-                  </div>
-                  <div style={{padding:"0 1.2rem 1.2rem",display:"flex",flexDirection:"column",gap:12}}>
-                    {!desdeCausaSel ? (
-                      <>
-                        <div style={{fontSize:".8rem",color:"var(--mu)"}}>Seleccioná una causa para crear sus lotes. Podés agregar cuantos lotes necesites.</div>
-                        {causasConBienes.length === 0 ? (
-                          <div style={{textAlign:"center",padding:"2rem",color:"var(--mu)",fontSize:".85rem"}}>No hay causas con bienes recepcionados disponibles.</div>
-                        ) : (
-                          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                            {causasConBienes.map(c => {
-                              const lotesExistentes = dbLotes.filter(l=>l.causa_id===c.id).length;
-                              return (
-                                <div key={c.id}
-                                  onClick={()=>{
-                                    setDesdeCausaSel(c);
-                                    setDesdeCausaLotes([{nombre:c.bienes_descripcion?.slice(0,80)||"",base:"",cantidad:1}]);
-                                  }}
-                                  style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:10,padding:"10px 14px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                                  <div>
-                                    <div style={{fontWeight:700,fontSize:".85rem",color:"var(--fgp)"}}>{c.empresa_deudora||c.deudor_nombre||c.rol}</div>
-                                    <div style={{fontSize:".75rem",color:"var(--mu)",marginTop:2}}>
-                                      Rol: {c.rol} · {c.tipo==="concursal"?"Concursal":"Judicial"} · {c.estado?.replace(/_/g," ")}
-                                    </div>
-                                  </div>
-                                  <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
-                                    {lotesExistentes>0 && <span style={{fontSize:".72rem",color:"#8b5cf6"}}>{lotesExistentes} lote{lotesExistentes!==1?"s":""} ya creado{lotesExistentes!==1?"s":""}</span>}
-                                    <span style={{fontSize:".75rem",color:"var(--ac)",fontWeight:600}}>Seleccionar →</span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:"10px 14px",fontSize:".8rem",color:"var(--mu)"}}>
-                          <b style={{color:"var(--fgp)"}}>{desdeCausaSel.empresa_deudora||desdeCausaSel.rol}</b> — Rol {desdeCausaSel.rol} · {desdeCausaSel.tipo==="concursal"?"Concursal":"Judicial"}
-                          <button onClick={()=>{setDesdeCausaSel(null);setDesdeCausaLotes([]);}} style={{marginLeft:12,fontSize:".72rem",color:"var(--ac)",background:"none",border:"none",cursor:"pointer"}}>← Cambiar causa</button>
-                        </div>
-                        <div style={{display:"flex",gap:6,fontSize:".72rem",color:"var(--mu)",fontWeight:600,padding:"0 2px"}}>
-                          <span style={{flex:2}}>Nombre del lote</span>
-                          <span style={{flex:1,textAlign:"right"}}>Precio base</span>
-                          <span style={{width:64,textAlign:"center"}}>Cant.</span>
-                          {desdeCausaLotes.length>1 && <span style={{width:24}}/>}
-                        </div>
-                        <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                          {desdeCausaLotes.map((l,i)=>(
-                            <div key={i} style={{display:"flex",alignItems:"center",gap:6,background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:8,padding:"8px 10px"}}>
-                              <div style={{flex:2}}>
-                                <input className="fi" value={l.nombre}
-                                  onChange={e=>setDesdeCausaLotes(p=>p.map((x,j)=>j===i?{...x,nombre:e.target.value}:x))}
-                                  placeholder="Nombre del lote" style={{width:"100%",fontSize:".82rem"}}/>
-                              </div>
-                              <div style={{flex:1}}>
-                                <input className="fi" value={l.base}
-                                  onChange={e=>setDesdeCausaLotes(p=>p.map((x,j)=>j===i?{...x,base:e.target.value}:x))}
-                                  placeholder="$ 0" style={{width:"100%",textAlign:"right",fontSize:".8rem"}}/>
-                              </div>
-                              <div style={{width:64}}>
-                                <input className="fi" type="number" min={1} value={l.cantidad}
-                                  onChange={e=>setDesdeCausaLotes(p=>p.map((x,j)=>j===i?{...x,cantidad:e.target.value}:x))}
-                                  style={{width:"100%",textAlign:"center",fontSize:".8rem"}}/>
-                              </div>
-                              {desdeCausaLotes.length > 1 && (
-                                <button onClick={()=>setDesdeCausaLotes(p=>p.filter((_,j)=>j!==i))}
-                                  style={{background:"none",border:"none",cursor:"pointer",color:"#ef4444",fontSize:"1rem",flexShrink:0,padding:"0 4px",lineHeight:1}}>✕</button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                        <button onClick={()=>setDesdeCausaLotes(p=>[...p,{nombre:"",base:"",cantidad:1}])}
-                          style={{alignSelf:"flex-start",padding:"5px 14px",borderRadius:8,border:"1px dashed var(--b1)",background:"transparent",color:"var(--mu)",fontSize:".78rem",cursor:"pointer"}}>
-                          + Agregar lote
-                        </button>
-                        <div style={{display:"flex",gap:8,marginTop:4}}>
-                          <button className="btn-primary" onClick={crearLotesDesdeCausa} disabled={desdeCausaSaving} style={{fontSize:".8rem"}}>
-                            {desdeCausaSaving ? "Creando…" : `Crear ${desdeCausaLotes.filter(l=>l.nombre?.trim()).length} lote${desdeCausaLotes.filter(l=>l.nombre?.trim()).length!==1?"s":""}`}
-                          </button>
-                          <button className="btn-secondary" onClick={()=>{setDesdeCausaModal(false);setDesdeCausaSel(null);setDesdeCausaLotes([]);}} style={{fontSize:".8rem"}}>Cancelar</button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="filter-row" style={{marginBottom:"1rem"}}>
-              {[["todos","Todos"],["sin-asignar","Sin remate"],["publicado","Publicado"],["vendido","Vendido"],["sin vender","Sin vender"]].map(([val,label]) => (
-                <button key={val} className={`filter-btn${filterTab===val?" on":""}`} onClick={()=>{setFilterTab(val);setSelectedLoteIds(new Set());}}>{label}</button>
-              ))}
-            </div>
-            <div className="table-card">
-              <div className="table-head">
-                <div className="table-title">{lotesMostrar.length} lotes{remateName ? ` — ${remateName}` : ""}</div>
-                <div style={{display:"flex",gap:8}}>
-                  {causasConBienes.length > 0 && (
-                    <button onClick={()=>{setDesdeCausaModal(true);setDesdeCausaSel(null);setDesdeCausaLotes([]);}}
-                      style={{padding:"5px 14px",borderRadius:8,border:"1px solid #059669",background:"transparent",color:"#059669",fontSize:".78rem",fontWeight:600,cursor:"pointer"}}>
-                      Desde Causa
-                    </button>
-                  )}
-                  {actasDisponibles.length > 0 && (
-                    <button onClick={()=>{setDesdeActaModal(true);setDesdeActaSel(null);}}
-                      style={{padding:"5px 14px",borderRadius:8,border:"1px solid #8b5cf6",background:"transparent",color:"#8b5cf6",fontSize:".78rem",fontWeight:600,cursor:"pointer"}}>
-                      Desde Acta
-                    </button>
-                  )}
-                </div>
-              </div>
-              <div style={{overflowX:"auto"}}>
-                <table>
-                  <thead>
-                    <tr>
-                      <th style={{width:36,textAlign:"center"}}>
-                        <input type="checkbox"
-                          checked={lotesMostrar.length>0 && lotesMostrar.every(l=>selectedLoteIds.has(l.id))}
-                          onChange={e=>{
-                            if(e.target.checked) setSelectedLoteIds(new Set(lotesMostrar.map(l=>l.id)));
-                            else setSelectedLoteIds(new Set());
-                          }}/>
-                      </th>
-                      <th style={{textAlign:"center",width:56}}>Lote</th>
-                      <th style={{textAlign:"center",width:52}}>Cant.</th>
-                      <th>Descripción</th>
-                      <th>Propietario</th>
-                      {dbBodegas.length > 0 && <th style={{textAlign:"center"}}>Bodega</th>}
-                      <th style={{textAlign:"right"}}>Mínimo</th>
-                      <th style={{textAlign:"center"}}>Com.</th>
-                      <th style={{textAlign:"center"}}>Estado</th>
-                      <th style={{textAlign:"center"}}>Acción</th>
-                      <th style={{textAlign:"center",width:56}}>Orden</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {lotesMostrar.length === 0 ? (
-                      <tr><td colSpan={dbBodegas.length>0?11:10} style={{textAlign:"center",color:"var(--mu)",padding:"2rem",fontSize:".8rem"}}>
-                        {lotesFiltroRemate ? "Este remate no tiene lotes aún. Usa + Agregar lote." : "No hay lotes registrados."}
-                      </td></tr>
-                    ) : lotesMostrar.map((l,i) => {
-                      const idxTotal = lotesOrdenados.findIndex(x=>x.id===l.id);
-                      const puedeSubir = idxTotal > 0;
-                      const puedeBajar = idxTotal < lotesOrdenados.length-1;
-                      return (
-                        <tr key={l.id}>
-                          <td style={{textAlign:"center"}}>
-                            <input type="checkbox" checked={selectedLoteIds.has(l.id)}
-                              onChange={e=>{setSelectedLoteIds(prev=>{const n=new Set(prev);e.target.checked?n.add(l.id):n.delete(l.id);return n;});}}/>
-                          </td>
-                          <td style={{textAlign:"center"}}>
-                            <span style={{fontWeight:900,fontSize:".88rem",color:"var(--ac)",fontFamily:"Inter,sans-serif"}}>{l.orden??idxTotal+1}</span>
-                          </td>
-                          <td style={{textAlign:"center"}}>{l.cantidad||1}</td>
-                          <td style={{fontWeight:600}}>{l.nombre||"—"}</td>
-                          <td className="mono">{l.propietario||"—"}</td>
-                          {dbBodegas.length > 0 && (
-                            <td style={{textAlign:"center"}}>
-                              {l.bodega_id ? (
-                                <span style={{fontSize:".65rem",fontWeight:700,padding:"2px 7px",borderRadius:20,background:"rgba(6,182,212,.1)",color:"var(--ac)",border:"1px solid rgba(6,182,212,.25)",whiteSpace:"nowrap"}}>
-                                  {dbBodegas.find(b=>b.id===l.bodega_id)?.nombre||"—"}
-                                </span>
-                              ) : <span style={{color:"var(--mu)",fontSize:".7rem"}}>—</span>}
-                            </td>
-                          )}
-                          <td style={{textAlign:"right",fontFamily:"Inter,sans-serif",fontWeight:600}}>${fmtClp(l.base)}</td>
-                          <td style={{textAlign:"center"}}>
-                            <span style={{color:"var(--ac)",fontWeight:700,fontFamily:"Inter,sans-serif",fontSize:".76rem"}}>{l.comision||3}%</span>
-                          </td>
-                          <td style={{textAlign:"center"}}>
-                            <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
-                              <span className={`pill p-${(l.estado||"publicado").replace(" ","-")}`}>{l.estado||"publicado"}</span>
-                              {l.afecto_iva && <span style={{fontSize:".6rem",fontWeight:700,color:"var(--yl)",background:"rgba(234,179,8,.1)",border:"1px solid rgba(234,179,8,.28)",borderRadius:4,padding:"1px 5px"}}>IVA</span>}
-                            </div>
-                          </td>
-                          <td style={{textAlign:"center"}}>
-                            <button className="btn-sec" style={{fontSize:".68rem",padding:".2rem .65rem"}}
-                              onClick={()=>{
-                                setEditLoteData({
-                                  id:          l.id,
-                                  nombre:      l.nombre||"",
-                                  propietario: l.propietario||"",
-                                  categoria:   l.categoria||"",
-                                  base:        l.base||"",
-                                  minimo:      l.minimo||"",
-                                  comision:    l.comision||"",
-                                  estado:      l.estado||"disponible",
-                                  orden:       l.orden||idxTotal+1,
-                                  cantidad:    l.cantidad||1,
-                                  ppu:         l.precio_por_unidad||false,
-                                  afectoIva:   l.afecto_iva||false,
-                                });
-                                setModal("editar-lote");
-                              }}>Editar</button>
-                            <button className="btn-sec" style={{fontSize:".68rem",padding:".2rem .65rem",marginTop:3,background:"rgba(6,182,212,.08)",color:"var(--ac)",borderColor:"rgba(6,182,212,.3)"}}
-                              onClick={()=>{setAsignarLoteId(l.id);setAsignarRemateId(l.remate_id||"");setModal("asignar-remate");}}>
-                              {l.remate_id?"Reasignar":"Asignar"}
-                            </button>
-                          </td>
-                          <td style={{textAlign:"center"}}>
-                            <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-                              <button onClick={()=>moverLote(l.id,-1)} disabled={!puedeSubir} title="Subir"
-                                style={{width:24,height:20,display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid var(--b1)",borderRadius:4,background:"transparent",cursor:puedeSubir?"pointer":"default",opacity:puedeSubir?1:.18,padding:0}}>
-                                <svg width="8" height="6" viewBox="0 0 10 8" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 6l4-4 4 4"/></svg>
-                              </button>
-                              <button onClick={()=>moverLote(l.id,1)} disabled={!puedeBajar} title="Bajar"
-                                style={{width:24,height:20,display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid var(--b1)",borderRadius:4,background:"transparent",cursor:puedeBajar?"pointer":"default",opacity:puedeBajar?1:.18,padding:0}}>
-                                <svg width="8" height="6" viewBox="0 0 10 8" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 2l4 4 4-4"/></svg>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            {selectedLoteIds.size > 0 && (
-              <div style={{position:"fixed",bottom:"1.5rem",left:"50%",transform:"translateX(-50%)",
-                background:"#1f2937",color:"#fff",borderRadius:12,padding:".75rem 1.25rem",
-                display:"flex",alignItems:"center",gap:"1rem",boxShadow:"0 8px 30px rgba(0,0,0,.3)",
-                zIndex:200,fontSize:".82rem",fontWeight:600,whiteSpace:"nowrap"}}>
-                <span style={{color:"rgba(255,255,255,.75)"}}>{selectedLoteIds.size} lote{selectedLoteIds.size!==1?"s":""} seleccionado{selectedLoteIds.size!==1?"s":""}</span>
-                <button onClick={()=>{setAsignarLoteId(null);setAsignarRemateId("");setModal("asignar-remate");}}
-                  style={{background:"var(--ac)",color:"#fff",border:"none",borderRadius:8,padding:".4rem .9rem",fontWeight:700,cursor:"pointer",fontSize:".78rem"}}>
-                  Asignar a remate
-                </button>
-                <button onClick={()=>setSelectedLoteIds(new Set())}
-                  style={{background:"transparent",color:"rgba(255,255,255,.55)",border:"1px solid rgba(255,255,255,.18)",borderRadius:8,padding:".4rem .75rem",cursor:"pointer",fontSize:".75rem"}}>
-                  Cancelar
-                </button>
-              </div>
-            )}
-          </div>
-          );
-        })()}
+        {page==="lotes" && <PageLotes
+          session={session}
+          filterTab={filterTab}
+          setFilterTab={setFilterTab}
+          lotesFiltroRemate={lotesFiltroRemate}
+          dbLotes={dbLotes}
+          setDbLotes={setDbLotes}
+          REMATES_MERGED={REMATES_MERGED}
+          dbActas={dbActas}
+          dbBodegas={dbBodegas}
+          dbCausas={dbCausas}
+          desdeActaModal={desdeActaModal}
+          setDesdeActaModal={setDesdeActaModal}
+          desdeActaSel={desdeActaSel}
+          setDesdeActaSel={setDesdeActaSel}
+          desdeActaBienes={desdeActaBienes}
+          setDesdeActaBienes={setDesdeActaBienes}
+          desdeActaSaving={desdeActaSaving}
+          setDesdeActaSaving={setDesdeActaSaving}
+          desdeCausaModal={desdeCausaModal}
+          setDesdeCausaModal={setDesdeCausaModal}
+          desdeCausaSel={desdeCausaSel}
+          setDesdeCausaSel={setDesdeCausaSel}
+          desdeCausaLotes={desdeCausaLotes}
+          setDesdeCausaLotes={setDesdeCausaLotes}
+          desdeCausaSaving={desdeCausaSaving}
+          setDesdeCausaSaving={setDesdeCausaSaving}
+          selectedLoteIds={selectedLoteIds}
+          setSelectedLoteIds={setSelectedLoteIds}
+          setEditLoteData={setEditLoteData}
+          setModal={setModal}
+          setAsignarLoteId={setAsignarLoteId}
+          setAsignarRemateId={setAsignarRemateId}
+          notify={notify}
+        />}
 
         {/* ══ POSTORES ══ */}
         {(page==="postores"||page==="clientes") && (()=>{
@@ -8034,473 +7477,65 @@ function exportCSV(){
         })()}
 
         {/* ══ SALA EN VIVO ══ */}
-        {page==="sala" && (
-          <div style={{display:"flex",flexDirection:"column",height:"100vh",overflow:"hidden"}}>
-            <div className="topbar">
-              <div className="topbar-left">
-                <button className="btn-sec" onClick={()=>setPage("remates")}>← Volver</button>
-                <div className="topbar-title">Sala en vivo</div>
-                {/* Selector de remate en sala */}
-                <select className="fsel" style={{maxWidth:200,fontSize:".75rem",flexShrink:1,minWidth:0}}
-                  value={salaRemateId||""}
-                  onChange={async e=>{
-                    const rid = e.target.value;
-                    setSalaRemateId(rid);
-                    if(rid){
-                      const {data:lr} = await supabase.from("lotes").select("*").eq("remate_id",rid).order("orden");
-                      if(lr&&lr.length>0){
-                        const mapped = lr.map(l=>({id:l.id,supabaseId:l.id,remateId:l.remate_id,name:l.nombre,cat:l.categoria||"Muebles",base:l.base||0,imgs:Array.isArray(l.imagenes)?l.imagenes:(l.imagenes?[l.imagenes]:[]),desc:l.descripcion||"",inc:Math.round((l.base||0)*0.05)||100000}));
-                        setLots(mapped); setBids(mapped.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
-                      } else {
-                        setLots(LOTES_SALA); setBids(LOTES_SALA.map(l=>({current:l.base,count:0,history:[],status:"waiting",winner:null})));
-                        notify("Este remate no tiene lotes aún.","inf");
-                      }
-                      setIdx(0); setAState("waiting"); setBidTimer(null);
-                    }
-                  }}>
-                  <option value="">— Seleccionar remate —</option>
-                  {REMATES_MERGED.map(r=>(
-                    <option key={r.supabaseId||r.id} value={r.supabaseId||r.id}>{r.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="topbar-right">
-                {/* Modalidad selector */}
-                <div className="mod-tabs">
-                  {[["presencial","Presencial"],["hibrido","Hibrido"],["online","Online"]].map(([k,l])=>(
-                    <button key={k} className={`mod-tab${modalidad===k?" on":""}`} onClick={()=>setModalidad(k)}>{l}</button>
-                  ))}
-                </div>
-                {aState==="live" && <div className="tb-live"><div className="ldot"/>Transmitiendo</div>}
-                <button className="btn-sec" style={{fontSize:".7rem"}} title="Abrir pantalla para proyección en sala"
-                  onClick={()=>{
-                    const rem = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===salaRemateId);
-                    const slug = session?.casa || rem?.casaSlug || "";
-                    if (!slug) { notify("Selecciona un remate primero para abrir la pantalla de sala.","inf"); return; }
-                    window.open(`/display/${slug}`,"_blank","width=1280,height=720");
-                  }}>
-                  Pantalla sala
-                </button>
-                {bids.every(b=>b.status==="sold"||bids[idx].count>0) && (
-                  <button className="btn-primary" style={{fontSize:".7rem"}} onClick={cerrarRemateCompleto}>Cerrar remate</button>
-                )}
-              </div>
-            </div>
-
-            <div className="sala-wrap-new">
-
-              {/* Sin lotes cargados */}
-              {!item && (
-                <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",flex:1,gap:"1.2rem",color:"var(--wh2)",textAlign:"center",padding:"3rem 2rem"}}>
-                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" style={{opacity:.3}}>
-                    <rect x="6" y="10" width="44" height="36" rx="4"/><circle cx="28" cy="28" r="8"/><path d="M22 10l3-5h6l3 5"/>
-                  </svg>
-                  <div style={{fontSize:"1.1rem",fontWeight:700}}>Selecciona un remate con lotes</div>
-                  <div style={{fontSize:".85rem",color:"var(--mu)",maxWidth:340,lineHeight:1.6}}>
-                    Elige un remate en el selector de arriba, o ve a <strong style={{color:"var(--ac)",cursor:"pointer"}} onClick={()=>setPage("remates")}>Remates</strong> y haz clic en <strong>Abrir sala</strong>.
-                  </div>
-                  <button className="btn-primary" onClick={()=>setPage("remates")}>Ir a Remates →</button>
-                </div>
-              )}
-
-              {item && <div className="sala-body">
-
-                {/* ── LEFT CARD: foto + timer ── */}
-                <div className="sala-left-card">
-                  {/* Live badge */}
-                  <div className="sala-live-badge">
-                    <span style={{fontSize:".65rem"}}>●</span>
-                    {aState==="live" ? "Live Now" : aState==="sold" ? "Adjudicado" : "En espera"}
-                  </div>
-
-                  {/* Lot title */}
-                  <div className="sala-lot-title">
-                    LOTE {String(idx+1).padStart(2,"0")} — {item.name}
-                  </div>
-
-                  {/* Photo + Camera — side by side */}
-                  <div className="sala-photo-wrap">
-
-                    {/* ── FOTO PRINCIPAL ── */}
-                    <div className="sala-photo-main">
-                      {(item.imgs||[]).length > 0 ? (
-                        <>
-                          <img
-                            src={item.imgs[photoIdx % item.imgs.length]}
-                            alt={item.name}
-                            style={{width:"100%",height:"100%",objectFit:"cover",display:"block",transition:"opacity .3s"}}
-                          />
-                          {item.imgs.length > 1 && (
-                            <>
-                              <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p-1+item.imgs.length)%item.imgs.length); startCarousel(item.imgs); }}
-                                style={{position:"absolute",left:6,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
-                                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M8 2L4 6l4 4"/></svg>
-                              </button>
-                              <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p+1)%item.imgs.length); startCarousel(item.imgs); }}
-                                style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
-                                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 2l4 4-4 4"/></svg>
-                              </button>
-                              <div style={{position:"absolute",bottom:6,left:"50%",transform:"translateX(-50%)",display:"flex",gap:4}}>
-                                {item.imgs.map((_,i)=>(
-                                  <div key={i} onClick={()=>setPhotoIdx(i)}
-                                    style={{width:i===photoIdx%item.imgs.length?14:6,height:6,borderRadius:3,background:i===photoIdx%item.imgs.length?"var(--ac)":"rgba(255,255,255,.4)",cursor:"pointer",transition:"all .2s"}}/>
-                                ))}
-                              </div>
-                            </>
-                          )}
-                          {ctrlTab==="control" && <>
-                          <button onClick={()=>removePhoto(idx, photoIdx%item.imgs.length)}
-                            style={{position:"absolute",top:6,left:6,background:"rgba(224,82,82,.7)",border:"none",borderRadius:4,padding:".12rem .35rem",fontSize:".62rem",color:"#fff",cursor:"pointer"}}>
-                            Quitar
-                          </button>
-                          <label htmlFor={`phadd${idx}`}
-                            style={{position:"absolute",top:6,right:6,background:"rgba(56,178,246,.85)",borderRadius:5,padding:".15rem .45rem",fontSize:".62rem",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:".2rem"}}>
-                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 1v8M1 5h8"/></svg>
-                            Foto
-                            <input id={`phadd${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
-                          </label>
-                          </>}
-                        </>
-                      ) : (
-                        <label htmlFor={`ph${idx}`} className="sala-photo-placeholder" style={{cursor:"pointer"}}>
-                          <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="var(--mu)" strokeWidth="1.5"><rect x="3" y="6" width="26" height="20" rx="3"/><circle cx="16" cy="16" r="5"/><path d="M12 6l2-3h4l2 3"/></svg>
-                          <div style={{fontSize:".72rem",color:"var(--mu2)"}}>Agregar fotos del lote</div>
-                          <input id={`ph${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
-                        </label>
-                      )}
-
-                      {/* Botón cámara — solo visible en tab control */}
-                      {ctrlTab==="control" && (
-                      <button
-                        onClick={camActiva ? detenerCamara : activarCamara}
-                        style={{position:"absolute",bottom:6,left:6,display:"flex",alignItems:"center",gap:".3rem",padding:".22rem .55rem",background:camActiva?"rgba(224,82,82,.82)":"rgba(0,0,0,.58)",border:"none",borderRadius:5,color:"#fff",fontSize:".62rem",fontWeight:700,cursor:"pointer",backdropFilter:"blur(4px)"}}
-                        title="Cámara martillero (solo preview)"
-                      >
-                        <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M1 3h8l3 3v5H1V3z"/><circle cx="5" cy="8" r="1.5"/></svg>
-                        {camActiva ? "Apagar cam" : "Cámara"}
-                      </button>
-                      )}
-
-                      {/* Indicador REC grabación de pantalla */}
-                      {grabando && (
-                        <div style={{position:"absolute",bottom:6,right:6,display:"flex",alignItems:"center",gap:".3rem",padding:".22rem .55rem",background:"rgba(224,82,82,.85)",borderRadius:5,color:"#fff",fontSize:".62rem",fontWeight:800,backdropFilter:"blur(4px)"}}>
-                          <span style={{width:6,height:6,borderRadius:"50%",background:"#fff",animation:"pulse .8s infinite"}}/>
-                          REC
-                        </div>
-                      )}
-                    </div>
-
-                    {/* ── CÁMARA LATERAL (solo desktop) ── */}
-                    {camActiva && (
-                      <div className="sala-cam-side">
-                        <video ref={videoRef} autoPlay muted playsInline style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
-                        <div className="sala-cam-side-label">CAM</div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Timer */}
-                  <div className="sala-timer">
-                    <span>Tiempo restante:</span>
-                    {aState==="live" && bidTimer!==null && bidTimer>0 ? (
-                      <span className={`sala-timer-num${bidTimer<=2?" critical":bidTimer<=5?" urgent":" safe"}`}>
-                        00:00:{String(bidTimer).padStart(2,"0")}
-                      </span>
-                    ) : (
-                      <span className="sala-timer-num" style={{color:"var(--mu)"}}>—</span>
-                    )}
-                  </div>
-
-                  {/* ── LOTES PRÓXIMOS ── */}
-                  <div className="sala-lotes-proximos">
-                    <div className="sala-lotes-proximos-title">
-                      <span>{lots.length} lotes en remate</span>
-                      <span style={{color:"var(--mu)",fontWeight:400}}> · próximos</span>
-                    </div>
-                    <div className="sala-lotes-proximos-list">
-                      {lots.map((l,i)=>{
-                        const b = bids[i]||{};
-                        const esCurrent = i===idx;
-                        const esAdj = b.status==="sold";
-                        return (
-                          <div key={i} className={`sala-lote-mini${esCurrent?" current":esAdj?" adj":""}`}
-                            style={{cursor:"pointer"}}
-                            onClick={()=>{ if(!esCurrent){ setIdx(i); setAState("waiting"); setBidTimer(null); } }}>
-                            {l.imgs?.[0]
-                              ? <img src={l.imgs[0]} alt="" className="sala-lote-mini-img"/>
-                              : <div className="sala-lote-mini-img sala-lote-mini-noimg"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
-                            }
-                            <div className="sala-lote-mini-info">
-                              <div className="sala-lote-mini-num">Lote {i+1}</div>
-                              <div className="sala-lote-mini-name">{l.name}</div>
-                            </div>
-                            <div className="sala-lote-mini-status">
-                              {esAdj ? <span style={{color:"var(--gr)",fontSize:".65rem",fontWeight:700}}>✓ Adj.</span>
-                               : esCurrent ? <span style={{color:"var(--ac)",fontSize:".65rem",fontWeight:700}}>● Actual</span>
-                               : <span style={{color:"var(--mu)",fontSize:".65rem"}}>Pendiente</span>}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── RIGHT COLUMN ── */}
-                <div className="sala-right-col">
-
-                  {/* ── Top bid card ── */}
-                  <div className="sala-bid-card">
-                    <div className="sala-bid-header">
-                      <div>
-                        <div className="sala-bid-label">Oferta actual:</div>
-                        <div className={`sala-bid-amount${flash?" flash":""}`}>{fmt(bid.current)}</div>
-                      </div>
-                    </div>
-
-
-                    {/* Last bids */}
-                    <div className="sala-last-bids-title">Últimas pujas:</div>
-                    <div className="sala-last-bids" ref={feedRef}>
-                      {bid.history.length===0
-                        ? <div className="sala-no-bids">Sin pujas aún</div>
-                        : [...bid.history].reverse().slice(0,8).map((b,i) => {
-                          const initials = (b.bidder||"?").split(" ").map(w=>w[0]||"").join("").slice(0,2).toUpperCase();
-                          const avatarColors = ["var(--ac)","#a78bfa","var(--yl)","var(--gr)"];
-                          return (
-                            <div key={i} className="sala-bid-row">
-                              <div className="sala-bid-avatar" style={{background:avatarColors[i%avatarColors.length]}}>
-                                {b.mine?"Yo":initials}
-                              </div>
-                              <div className="sala-bid-name">
-                                {b.mine?"Tu (P-0245)":b.bidder}
-                                {b.online && <span className="sala-bid-tag web" style={{marginLeft:4}}>WEB</span>}
-                                {b.presencial && <span className="sala-bid-tag pres" style={{marginLeft:4}}>PRES</span>}
-                              </div>
-                              <div>
-                                <div className="sala-bid-amount-sm">{fmt(b.amount)}</div>
-                                <div className="sala-bid-time">{b.time}</div>
-                              </div>
-                            </div>
-                          );
-                        })
-                      }
-                    </div>
-
-                    {/* Tabs control/postor */}
-                    <div className="ctrl-tabs" style={{marginBottom:".75rem"}}>
-                      {[["control","Control Martillero"],["postor","Vista Postor"]].map(([k,l]) => (
-                        <button key={k} className={`ctrl-tab${ctrlTab===k?" on":""}`} onClick={()=>setCtrlTab(k)}>{l}</button>
-                      ))}
-                    </div>
-
-                    {/* CONTROL TAB */}
-                    {ctrlTab==="control" && (
-                      <div style={{display:"flex",flexDirection:"column",gap:".6rem"}}>
-
-                        {/* Lote activo */}
-                        <div>
-                          <div style={{fontSize:".6rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".28rem"}}>Lote activo</div>
-                          <select className="asel" style={{marginBottom:0}} value={idx} onChange={e=>{setIdx(Number(e.target.value));resetAuction();setCurInc(lots[Number(e.target.value)]?.inc||500000);}}>
-                            {lots.map((it,i) => <option key={i} value={i}>Lote {String(i+1).padStart(2,"0")} — {it.name}</option>)}
-                          </select>
-                        </div>
-
-                        {/* Incremento */}
-                        <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:10,padding:".6rem .7rem"}}>
-                          <div style={{display:"flex",alignItems:"baseline",gap:".5rem",marginBottom:".4rem"}}>
-                            <span style={{fontSize:".6rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em"}}>Incremento</span>
-                            <span style={{fontSize:"1.15rem",fontWeight:800,color:"var(--ac)"}}>{fmtS(curInc)}</span>
-                          </div>
-                          <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:".2rem",marginBottom:".35rem"}}>
-                            {INC_OPTIONS.map(v => (
-                              <button key={v} className={`inc-btn${curInc===v?" on":""}`} onClick={()=>setCurInc(v)}>{fmtS(v)}</button>
-                            ))}
-                          </div>
-                          <div style={{display:"flex",gap:".3rem"}}>
-                            <input
-                              placeholder="Personalizado..."
-                              value={customMonto}
-                              onChange={e=>setCustomMonto(e.target.value)}
-                              onKeyDown={e=>{ if(e.key==="Enter"&&customMonto){ const n=parseInt(customMonto.replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} } }}
-                              style={{flex:1,padding:".28rem .5rem",background:"var(--s2)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".7rem",fontFamily:"Inter,sans-serif"}}
-                            />
-                            <button onClick={()=>{ const n=parseInt((customMonto||"").replace(/\D/g,"")); if(n>0){setCurInc(n);setCustomMonto("");} }}
-                              style={{padding:".28rem .6rem",background:"var(--ac)",border:"none",borderRadius:6,color:"#fff",fontSize:".67rem",fontWeight:700,cursor:"pointer"}}>
-                              Usar
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Acciones */}
-                        <div style={{display:"flex",flexDirection:"column",gap:".25rem"}}>
-                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".25rem"}}>
-                            <button className="ab g" onClick={startAuction} disabled={aState==="live"}>▶ Iniciar</button>
-                            <button className="ab y" onClick={pauseAuction} disabled={aState!=="live"}>⏸ Pausar</button>
-                          </div>
-                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".25rem"}}>
-                            <button className="ab" style={{background:"rgba(167,139,250,.08)",color:"#a78bfa",border:"1px solid rgba(167,139,250,.2)",fontSize:".68rem"}} onClick={repetirLote}>↺ Repetir</button>
-                            <button className="ab" style={{background:"transparent",color:"var(--mu2)",border:"1px solid var(--b2)",fontSize:".68rem"}} onClick={pasarLote} disabled={idx>=lots.length-1}>→ Pasar</button>
-                            <button className="ab r" style={{fontSize:".68rem"}} onClick={resetAuction}>⟳ Reset</button>
-                          </div>
-                        </div>
-
-                        {/* Postura presencial */}
-                        <div style={{padding:".5rem .65rem",background:"rgba(246,173,85,.06)",border:"1px solid rgba(246,173,85,.2)",borderRadius:8}}>
-                          <div style={{fontSize:".6rem",fontWeight:700,color:"var(--yl)",marginBottom:".3rem",display:"flex",alignItems:"center",gap:".3rem"}}>
-                            <svg width="9" height="9" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
-                            Postura presencial
-                          </div>
-                          <div style={{display:"flex",gap:".3rem"}}>
-                            <input placeholder="Paleta" value={presPaleta} onChange={e=>setPresPaleta(e.target.value)}
-                              style={{width:58,padding:".28rem .4rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
-                            <input placeholder="Monto" value={presMonto} onChange={e=>setPresMonto(e.target.value)}
-                              onKeyDown={e=>e.key==="Enter"&&registrarPresencial()}
-                              style={{flex:1,padding:".28rem .4rem",background:"var(--s1)",border:"1px solid var(--b2)",borderRadius:6,color:"var(--wh2)",fontSize:".72rem",fontFamily:"Inter,sans-serif"}}/>
-                            <button onClick={registrarPresencial}
-                              style={{padding:".28rem .55rem",background:"rgba(246,173,85,.2)",border:"1px solid rgba(246,173,85,.4)",borderRadius:6,color:"var(--yl)",fontSize:".75rem",fontWeight:700,cursor:"pointer"}}>
-                              ✓
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* CTA principal */}
-                        {aState!=="live" && (
-                          <button
-                            className="sala-place-bid-btn"
-                            onClick={startAuction}
-                            disabled={aState==="sold"}
-                          >
-                            {aState==="sold" ? "✓ Lote adjudicado" : "▶ Iniciar subasta"}
-                          </button>
-                        )}
-                        {aState==="live" && (
-                          adjSinPujas && bids[idx]?.count===0
-                            ? <div style={{display:"flex",gap:".4rem",alignItems:"center",flexWrap:"wrap"}}>
-                                <span style={{fontSize:".65rem",color:"var(--yl)",flex:1}}>Sin pujas. ¿Adjudicar igual?</span>
-                                <button onClick={()=>adjudicar()} style={{padding:".3rem .65rem",background:"rgba(245,158,11,.15)",border:"1px solid rgba(245,158,11,.4)",borderRadius:6,color:"var(--yl)",fontSize:".68rem",cursor:"pointer",fontWeight:700}}>Sí</button>
-                                <button onClick={()=>setAdjSinPujas(false)} style={{padding:".3rem .65rem",background:"transparent",border:"1px solid rgba(255,255,255,.1)",borderRadius:6,color:"var(--mu)",fontSize:".68rem",cursor:"pointer"}}>No</button>
-                              </div>
-                            : <button onClick={()=>adjudicar()}
-                                style={{width:"100%",padding:".4rem",background:"transparent",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,color:"var(--mu)",fontSize:".68rem",cursor:"pointer",letterSpacing:".03em"}}>
-                                Adjudicar manualmente
-                              </button>
-                        )}
-
-                        {/* Estado */}
-                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".35rem"}}>
-                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:".45rem .5rem",textAlign:"center"}}>
-                            <div style={{fontSize:".58rem",color:"var(--mu)",marginBottom:".12rem",textTransform:"uppercase",letterSpacing:".04em"}}>Oferta</div>
-                            <div style={{fontSize:".75rem",fontWeight:800,color:"var(--wh2)",fontVariantNumeric:"tabular-nums"}}>{fmt(bid.current)}</div>
-                          </div>
-                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:".45rem .5rem",textAlign:"center"}}>
-                            <div style={{fontSize:".58rem",color:"var(--mu)",marginBottom:".12rem",textTransform:"uppercase",letterSpacing:".04em"}}>Pujas</div>
-                            <div style={{fontSize:".75rem",fontWeight:800,color:"var(--wh2)"}}>{bid.count}</div>
-                          </div>
-                          <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:".45rem .5rem",textAlign:"center"}}>
-                            <div style={{fontSize:".58rem",color:"var(--mu)",marginBottom:".12rem",textTransform:"uppercase",letterSpacing:".04em"}}>Estado</div>
-                            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:".28rem"}}>
-                              <div style={{width:5,height:5,borderRadius:"50%",background:sColor,flexShrink:0}}/>
-                              <div style={{fontSize:".65rem",fontWeight:700,color:sColor,whiteSpace:"nowrap"}}>{sLabel}</div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* BidTicker */}
-                        {bidTimer!==null&&bidTimer>0&&aState==="live" && (
-                          <div className={`bid-ticker${bidTimer<=5?" urgent":""}${bidTimer<=2?" critical":""}`}>
-                            <div className="bt-num" style={{color:bidTimer>8?"var(--gr)":bidTimer>4?"var(--yl)":"var(--rd)",fontSize:bidTimer<=3?"1.7rem":"1.35rem"}}>{bidTimer}</div>
-                            <div>
-                              <div className="bt-info">{bidTimer<=2?"¡ADJUDICANDO AHORA!":bidTimer<=5?"Última oportunidad":"Adjudica en"}</div>
-                              <div className="bt-leader">{lastBidder||"—"} lidera · {fmt((bids[idx]?.current||0))}</div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Panel post-adjudicación */}
-                        {adjCountdown && (
-                          <div style={{background:"rgba(20,184,166,.07)",border:"1px solid rgba(20,184,166,.35)",borderRadius:10,padding:".7rem .85rem",display:"flex",flexDirection:"column",gap:".45rem"}}>
-                            <div style={{display:"flex",alignItems:"center",gap:".45rem"}}>
-                              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="var(--gr)" strokeWidth="1.5"/><path d="M5 8l2 2 4-4" stroke="var(--gr)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                              <div style={{fontSize:".73rem",fontWeight:700,color:"var(--gr)"}}>Lote adjudicado correctamente</div>
-                            </div>
-                            <div style={{display:"flex",gap:".4rem"}}>
-                              <button onClick={avanzarSiguienteLote} disabled={idx>=lots.length-1}
-                                style={{flex:1,padding:".48rem",background:"var(--gr)",border:"none",borderRadius:7,color:"#fff",fontSize:".76rem",fontWeight:700,cursor:"pointer",opacity:idx>=lots.length-1?.4:1}}>
-                                Siguiente lote →
-                              </button>
-                              <button onClick={revertirAdjudicacion}
-                                style={{padding:".48rem .7rem",background:"rgba(239,68,68,.1)",border:"1px solid rgba(239,68,68,.3)",borderRadius:7,color:"#f87171",fontSize:".73rem",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>
-                                ↩ Revertir
-                              </button>
-                            </div>
-                            {idx>=lots.length-1 && <div style={{fontSize:".63rem",color:"var(--mu)",textAlign:"center"}}>Último lote — remate finalizado</div>}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* POSTOR TAB */}
-                    {ctrlTab==="postor" && (
-                      <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
-
-                        {/* Oferta actual — bloque central */}
-                        <div style={{textAlign:"center",padding:"1rem .5rem .5rem"}}>
-                          <div style={{fontSize:".6rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".1em",marginBottom:".4rem"}}>Oferta actual</div>
-                          <div className={`bap${flash?" flash":""}`} style={{fontSize:"2.8rem",lineHeight:1}}>{fmt(bid.current)}</div>
-                          {aState==="live" && (
-                            <div style={{fontSize:".75rem",color:"var(--mu)",marginTop:".4rem"}}>
-                              Siguiente: <strong style={{color:"var(--wh)"}}>{fmt(bid.current+curInc)}</strong>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Timer */}
-                        {aState==="live"&&bidTimer!==null&&bidTimer>0 &&
-                          <BidRing seconds={bidTimer} total={BID_TIMER} nextAmount={bid.current+curInc} increment={curInc}/>
-                        }
-
-                        {/* Estado ganando — botón verde oscuro */}
-                        {aState==="live" && iAmWinning && (
-                          <button className="sala-place-bid-btn" disabled
-                            style={{background:"rgba(20,184,166,.15)",color:"var(--gr)",border:"1px solid rgba(20,184,166,.35)",fontSize:"1rem",padding:"1rem",cursor:"default"}}>
-                            ✓ Vas ganando
-                          </button>
-                        )}
-
-                        {/* Estado perdiendo — botón PUJAR prominente */}
-                        {aState==="live" && lastBidder!==null && !iAmWinning && (<>
-                          <div style={{textAlign:"center",fontSize:".72rem",color:"var(--rd)",fontWeight:600}}>
-                            Te superaron — puja para recuperar el lote
-                          </div>
-                          <button className="sala-place-bid-btn" onClick={()=>placeBid()}
-                            style={{fontSize:"1.05rem",padding:"1rem",letterSpacing:".01em"}}>
-                            Pujar {fmt(bid.current+curInc)}
-                          </button>
-                        </>)}
-
-                        {/* Sin pujas aún */}
-                        {aState==="live" && lastBidder===null && (
-                          <button className="sala-place-bid-btn" onClick={()=>placeBid()}
-                            style={{fontSize:"1.05rem",padding:"1rem",letterSpacing:".01em"}}>
-                            Pujar {fmt(bid.current+curInc)}
-                          </button>
-                        )}
-
-                        {aState==="waiting" && <button className="sala-place-bid-btn" disabled style={{padding:"1rem",fontSize:".95rem"}}>Esperando inicio...</button>}
-                        {aState==="paused"  && <button className="sala-place-bid-btn" disabled style={{padding:"1rem",fontSize:".95rem"}}>Pausado</button>}
-                        {aState==="sold"    && <button className="sala-place-bid-btn adj" disabled style={{padding:"1rem",fontSize:".95rem"}}>✓ Adjudicado</button>}
-                      </div>
-                    )}
-
-
-                  </div>{/* end sala-bid-card */}
-
-                </div>{/* end sala-right-col */}
-              </div>}{/* end sala-body */}
-            </div>{/* end sala-wrap-new */}
-          </div>
-        )}
+        {page==="sala" && <PageSala
+          session={session}
+          salaRemateId={salaRemateId}
+          setSalaRemateId={setSalaRemateId}
+          REMATES_MERGED={REMATES_MERGED}
+          lots={lots}
+          setLots={setLots}
+          bids={bids}
+          setBids={setBids}
+          idx={idx}
+          setIdx={setIdx}
+          aState={aState}
+          setAState={setAState}
+          bidTimer={bidTimer}
+          setBidTimer={setBidTimer}
+          photoIdx={photoIdx}
+          setPhotoIdx={setPhotoIdx}
+          ctrlTab={ctrlTab}
+          setCtrlTab={setCtrlTab}
+          modalidad={modalidad}
+          setModalidad={setModalidad}
+          flash={flash}
+          curInc={curInc}
+          setCurInc={setCurInc}
+          customMonto={customMonto}
+          setCustomMonto={setCustomMonto}
+          presPaleta={presPaleta}
+          setPresPaleta={setPresPaleta}
+          presMonto={presMonto}
+          setPresMonto={setPresMonto}
+          adjSinPujas={adjSinPujas}
+          setAdjSinPujas={setAdjSinPujas}
+          adjCountdown={adjCountdown}
+          lastBidder={lastBidder}
+          camActiva={camActiva}
+          grabando={grabando}
+          feedRef={feedRef}
+          videoRef={videoRef}
+          photoIntervalRef={photoIntervalRef}
+          BID_TIMER={BID_TIMER}
+          notify={notify}
+          setPage={setPage}
+          startAuction={startAuction}
+          pauseAuction={pauseAuction}
+          repetirLote={repetirLote}
+          pasarLote={pasarLote}
+          resetAuction={resetAuction}
+          registrarPresencial={registrarPresencial}
+          adjudicar={adjudicar}
+          avanzarSiguienteLote={avanzarSiguienteLote}
+          revertirAdjudicacion={revertirAdjudicacion}
+          cerrarRemateCompleto={cerrarRemateCompleto}
+          handlePhoto={handlePhoto}
+          removePhoto={removePhoto}
+          startCarousel={startCarousel}
+          activarCamara={activarCamara}
+          detenerCamara={detenerCamara}
+          placeBid={placeBid}
+        />}
 
       {/* ══ MODAL IMPORTAR EXCEL ══ */}
       {importModal && (
