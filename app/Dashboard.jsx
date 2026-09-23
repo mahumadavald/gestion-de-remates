@@ -1978,7 +1978,7 @@ export default function Root() {
     if (!supabase) { setLoading(false); return; }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
-      if (event === "SIGNED_OUT") { setSession(null); }
+      if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !s)) { setSession(null); }
     });
 
     const url = typeof window !== "undefined" ? window.location.href : "";
