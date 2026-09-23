@@ -403,13 +403,14 @@ export default function EntregarPage() {
   const wmap = winnersMap();
 
   const porEntregar = allPostores
-    .filter(p => p.pagado)
+    .filter(p => p.pagado || (wmap[p.numero] || []).some(l => l.estado === "pagado"))
     .map(p => ({ ...p, liqsPend: (wmap[p.numero] || []).filter(l => !l.retiro) }))
     .filter(p => p.liqsPend.length > 0);
 
   const entregados = allLiquidaciones.filter(l => l.retiro);
 
-  const lotesPendTotal = allPostores.filter(p => p.pagado)
+  const lotesPendTotal = allPostores
+    .filter(p => p.pagado || (wmap[p.numero] || []).some(l => l.estado === "pagado"))
     .flatMap(p => (wmap[p.numero] || []).filter(l => !l.retiro));
 
   return (

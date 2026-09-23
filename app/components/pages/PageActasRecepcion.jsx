@@ -162,6 +162,7 @@ export default function PageActasRecepcion({ session, supabase, dbActasRecepcion
     try {
       const payload = {
         casa_id:          session?.casaId || null,
+        bodega_id:        session?.bodegaId || null,
         rol:              form.rol || null,
         caratulado:       form.caratulado || null,
         tribunal:         form.tribunal || null,

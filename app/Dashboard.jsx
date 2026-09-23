@@ -5068,8 +5068,14 @@ function exportCSV(){
             ? REMATES_MERGED.find(r=>(r.supabaseId||r.id)===lotesFiltroRemate)?.name||""
             : "";
 
-          // Actas recepcionadas que aún no tienen todos sus lotes creados
-          const actasDisponibles = dbActas.filter(a => a.estado === "recepcionada" && (a.bienes||[]).some(b=>b.descripcion?.trim()));
+          // Actas recepcionadas que aún tienen bienes sin convertir a lotes
+          const actasDisponibles = dbActas.filter(a => {
+            if (a.estado !== "recepcionada") return false;
+            const totalBienes = (a.bienes||[]).filter(b=>b.descripcion?.trim()).length;
+            if (!totalBienes) return false;
+            const lotesCreados = dbLotes.filter(l => l.acta_id === a.id).length;
+            return lotesCreados < totalBienes;
+          });
 
           // Causas con bienes ya recepcionados (para crear lotes manuales)
           const ESTADOS_CON_BIENES = ["bienes_recepcionados","bases_enviadas","publicaciones_ok","fecha_aprobada","remate_aprobado","en_remate"];
@@ -6800,7 +6806,16 @@ function exportCSV(){
 
                       {/* Acciones */}
                       <div style={{display:"flex",gap:".6rem",marginTop:"1rem"}}>
-                        <button className="btn-sec" style={{flex:1,fontSize:".75rem"}} onClick={()=>notify("Correo enviado al vendedor.","sold")}>
+                        <button className="btn-sec" style={{flex:1,fontSize:".75rem"}} onClick={async ()=>{
+                          const vend = dbVendedores.find(v=>v.nombre===vendedorSel);
+                          if (!vend?.email) { notify("El vendedor no tiene email registrado.", "inf"); return; }
+                          try {
+                            const res = await fetch("/api/send-email", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ to:vend.email, subject:`Liquidación de ventas — ${session?.casaNombre||"TAKKA"}`, html:`<p>Estimado ${vendedorSel},</p><p>Su liquidación de ventas está disponible. Líquido a pagar: <strong>${fmt(liquidoAPagar)}</strong>.</p>` }) });
+                            const d = await res.json();
+                            if (d.ok) notify("Correo enviado al vendedor.", "sold");
+                            else notify("Error al enviar: " + (d.error||"intenta de nuevo"), "inf");
+                          } catch { notify("Error de red al enviar correo.", "inf"); }
+                        }}>
                           Enviar correo
                         </button>
                         <button className="btn-primary" style={{flex:1,fontSize:".75rem"}} onClick={generarPDFVendedor}>

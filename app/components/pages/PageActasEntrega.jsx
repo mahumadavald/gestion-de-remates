@@ -413,7 +413,7 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
               {next.label}
             </button>
           )}
-          {acta.estado === "recepcionada" && acta.bienes?.some(b=>b.descripcion?.trim()) && !lotesDeEstaActa.length && (
+          {acta.estado === "recepcionada" && acta.bienes?.some(b=>b.descripcion?.trim()) && lotesDeEstaActa.length < (acta.bienes?.filter(b=>b.descripcion?.trim()).length || 0) && (
             <button onClick={() => abrirCrearLotes(acta)}
               style={{ padding:"5px 14px", borderRadius:8, border:"1px solid #8b5cf6", background:"transparent", color:"#8b5cf6", fontSize:".76rem", fontWeight:600, cursor:"pointer" }}>
               + Crear Lotes
