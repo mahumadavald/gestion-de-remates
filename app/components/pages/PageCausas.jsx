@@ -415,14 +415,21 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
                   {c.liquidador && <span style={{ fontSize:".65rem", color:"var(--mu)" }}>{c.liquidador}</span>}
                   {c.minimo && <span style={{ marginLeft:"auto", fontSize:".65rem", fontFamily:"monospace", color:"var(--fgs)" }}>{c.minimo}</span>}
                 </div>
-                {/* Fila 3: mini checklist + próxima acción */}
+                {/* Fila 3: progreso de pasos + próxima acción */}
                 <div style={{ display:"flex", alignItems:"center", gap:".35rem", marginTop:".25rem" }}>
                   <div style={{ display:"flex", gap:".15rem" }}>
-                    {["J","K","L","B","N","O"].map((col,i)=>{
-                      const done = [c.designacion_martillero,c.aviso_entrega,c.acta_recepcion_ok,
-                        c.bases_enviadas||["bases_enviadas","publicaciones_ok","fecha_aprobada","en_remate","completada"].includes(c.estado),
-                        c.aviso_diario,c.aviso_boletin_concursal][i];
-                      return <div key={col} title={["Designación","Aviso entrega","Acta recepción","Bases","Aviso diario","Boletín"][i]} style={{ width:12,height:12,borderRadius:2,background:done?"#10b981":"var(--b1)",display:"flex",alignItems:"center",justifyContent:"center" }}>
+                    {[
+                      { id:"acta_recibida",        tip:"Acta recibida"      },
+                      { id:"bienes_recepcionados",  tip:"Bienes en bodega"   },
+                      { id:"bases_enviadas",        tip:"Bases enviadas"     },
+                      { id:"publicaciones_ok",      tip:"Publicaciones OK"   },
+                      { id:"fecha_aprobada",        tip:"Fecha aprobada"     },
+                      { id:"en_remate",             tip:"En remate"          },
+                    ].map(({id,tip})=>{
+                      const idxStep = FLUJO.indexOf(id);
+                      const idxCausa = FLUJO.indexOf(c.estado);
+                      const done = idxCausa >= idxStep;
+                      return <div key={id} title={tip} style={{ width:12,height:12,borderRadius:2,background:done?"#10b981":"var(--b1)",display:"flex",alignItems:"center",justifyContent:"center",transition:"background .2s" }}>
                         {done&&<span style={{ color:"#fff",fontSize:".45rem",fontWeight:900 }}>✓</span>}
                       </div>;
                     })}
