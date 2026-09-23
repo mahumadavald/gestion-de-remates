@@ -407,7 +407,7 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
           <div style={{ display:"flex", alignItems:"center", gap:".55rem", marginBottom:".65rem", flexWrap:"wrap" }}>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:".65rem", fontWeight:700, color:"var(--mu)", textTransform:"uppercase", letterSpacing:".07em" }}>Seguimiento</div>
-              <div style={{ fontSize:"1rem", fontWeight:800, color:"var(--fgp)" }}>Causas judiciales</div>
+              <div style={{ fontSize:"1rem", fontWeight:800, color:"var(--fgp)" }}>Causas concursales y judiciales</div>
             </div>
             <input ref={xlsxRef} type="file" accept=".xlsx,.xls,.csv" style={{ display:"none" }}
               onChange={e=>{ if(e.target.files[0]) handleExcelFile(e.target.files[0]); }}/>
