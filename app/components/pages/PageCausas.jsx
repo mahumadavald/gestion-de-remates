@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useRef } from "react";
 import FirmaEnPDF from "../FirmaEnPDF";
+import ChecklistJuridico from "../ChecklistJuridico";
 
 /* ══════════════════════════════════════════════════════════════════
    CRONOGRAMA REMATES — columnas del xlsx mapeadas al sistema:
@@ -24,11 +25,12 @@ const ESTADOS = [
   { id:"en_remate",            label:"En remate",           short:"En remate",   color:"#f97316", bg:"#fff7ed" },
   { id:"completada",           label:"Completada",          short:"Completada",  color:"#22c55e", bg:"#f0fdf4" },
   { id:"suspendida",           label:"Suspendida",          short:"Suspendida",  color:"#ef4444", bg:"#fef2f2" },
+  { id:"remate_aprobado",      label:"Remate aprobado",     short:"R.Aprob.",    color:"#059669", bg:"#ecfdf5" },
   // compatibilidad con estado viejo
   { id:"fecha_solicitada",     label:"Bases enviadas",      short:"Bases",       color:"#06b6d4", bg:"#ecfeff" },
 ];
 const ESTADO_MAP = Object.fromEntries(ESTADOS.map(e=>[e.id,e]));
-const FLUJO = ["aceptada","acta_recibida","bienes_recepcionados","bases_enviadas","publicaciones_ok","fecha_aprobada","en_remate","completada"];
+const FLUJO = ["aceptada","acta_recibida","bienes_recepcionados","bases_enviadas","publicaciones_ok","fecha_aprobada","remate_aprobado","en_remate","completada"];
 const ACTIVAS = FLUJO.slice(0,-1);
 
 /* ── Acciones Victor por estado ─────────────────────────────── */
@@ -143,7 +145,7 @@ function parseExcelRows(raw) {
   });
 }
 
-const EMPTY = { tipo:"concursal", rol:"", tribunal:"", empresa_deudora:"", liquidador:"", bienes_descripcion:"", minimo:"", comision_pct:"7", notas:"" };
+const EMPTY = { tipo:"concursal", rol:"", tribunal:"", empresa_deudora:"", liquidador:"", bienes_descripcion:"", minimo:"", comision_pct:"7", notas:"", tipo_procedimiento:"", caratulado:"", ejecutante:"", rut_ejecutado:"" };
 
 /* ══ COMPONENTE PRINCIPAL ════════════════════════════════════════ */
 export default function PageCausas({ session, supabase, dbCausas, setDbCausas, dbRemates, dbLotes, setDbLotes, dbBodegas, dbLicencias, notify }) {
@@ -218,6 +220,10 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
       minimo: form.minimo.trim()||null,
       comision_pct: parseFloat(form.comision_pct)||7,
       notas: form.notas.trim()||null,
+      tipo_procedimiento: form.tipo_procedimiento||null,
+      caratulado: form.caratulado.trim()||null,
+      ejecutante: form.ejecutante.trim()||null,
+      rut_ejecutado: form.rut_ejecutado.trim()||null,
       estado:"aceptada", fecha_aceptacion:new Date().toISOString().slice(0,10),
     }).select().single();
     setSaving(false);
@@ -275,6 +281,36 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
     if (!window.confirm("¿Marcar como suspendida?")) return;
     const data = await patchCausa(causa.id, { estado:"suspendida" });
     if (data) notify("Causa suspendida.","inf");
+  };
+
+  /* ── Aprobar remate (desde checklist jurídico) ── */
+  const aprobarRemate = async (causa) => {
+    if (!window.confirm("¿Confirmar que el remate está aprobado y listo para Pre-Remate?")) return;
+    setSaving(true);
+    const data = await patchCausa(causa.id, {
+      estado:"remate_aprobado",
+      aprobado_remate_at: new Date().toISOString(),
+      aprobado_remate_por: session?.nombre || session?.user?.email || "—",
+    });
+    if (data && !causa.lote_id) {
+      const codigo = `L-${causa.rol.replace(/[^A-Z0-9]/g,"").slice(0,6)}-${Date.now().toString().slice(-3)}`;
+      const { data:lote, error:loteErr } = await supabase.from("lotes").insert({
+        casa_id:session?.casaId||null, causa_id:causa.id, codigo,
+        nombre:causa.bienes_descripcion?.slice(0,80)||causa.rol,
+        descripcion:causa.bienes_descripcion||null, expediente:causa.rol,
+        mandante:causa.empresa_deudora||null,
+        categoria:causa.tipo==="concursal"?"Concursal":"Judicial",
+        base: causa.minimo && !isNaN(parseFloat(String(causa.minimo).replace(/\D/g,""))) ? parseFloat(String(causa.minimo).replace(/\D/g,"")) : 0,
+        comision:causa.comision_pct||7, tipo_remate:causa.tipo,
+        estado:"disponible", orden:(dbLotes?.length||0)+1,
+      }).select().single();
+      if (!loteErr && lote) {
+        await patchCausa(causa.id, { lote_id:lote.id });
+        if (setDbLotes) setDbLotes(prev=>[...(prev||[]),lote]);
+      }
+    }
+    setSaving(false);
+    notify("✅ Remate aprobado — lote creado para Pre-Remate.","sold");
   };
 
   /* ── Crear lote ── */
@@ -418,7 +454,7 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
 
         {/* Stats */}
         <div style={{ padding:".4rem .9rem", display:"flex", gap:".28rem", flexWrap:"wrap", borderBottom:"1px solid var(--b1)", flexShrink:0 }}>
-          {["notificada","aceptada","acta_recibida","bienes_recepcionados","bases_enviadas","publicaciones_ok","fecha_aprobada","en_remate"].map(est=>{
+          {["notificada","aceptada","acta_recibida","bienes_recepcionados","bases_enviadas","publicaciones_ok","fecha_aprobada","remate_aprobado","en_remate"].map(est=>{
             const n=causas.filter(c=>c.estado===est||(est==="bases_enviadas"&&c.estado==="fecha_solicitada")).length;
             if (!n) return null;
             const e=ESTADO_MAP[est];
@@ -466,6 +502,7 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
                       { id:"bases_enviadas",        tip:"Bases enviadas"     },
                       { id:"publicaciones_ok",      tip:"Publicaciones OK"   },
                       { id:"fecha_aprobada",        tip:"Fecha aprobada"     },
+                      { id:"remate_aprobado",        tip:"Remate aprobado"   },
                       { id:"en_remate",             tip:"En remate"          },
                     ].map(({id,tip})=>{
                       const idxStep = FLUJO.indexOf(id);
@@ -511,10 +548,37 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
               <label style={lbl}>Deudor (empresa/persona)</label>
               <input className="fi" placeholder="Agrícola Dalcahue SPA" value={form.empresa_deudora} onChange={e=>setForm(p=>({...p,empresa_deudora:e.target.value}))} style={{ width:"100%" }}/>
             </div>
-            <div style={{ gridColumn:"1/-1" }}>
-              <label style={lbl}>Liquidador</label>
-              <input className="fi" value={form.liquidador} onChange={e=>setForm(p=>({...p,liquidador:e.target.value}))} style={{ width:"100%" }}/>
+            {form.tipo==="concursal" && (
+              <div>
+                <label style={lbl}>Tipo procedimiento</label>
+                <select className="fi" value={form.tipo_procedimiento} onChange={e=>setForm(p=>({...p,tipo_procedimiento:e.target.value}))} style={{ width:"100%" }}>
+                  <option value="">— Seleccionar —</option>
+                  <option value="ordinaria">Ordinaria</option>
+                  <option value="simplificada">Simplificada/Sumaria</option>
+                </select>
+              </div>
+            )}
+            <div style={{ gridColumn: form.tipo==="concursal"?"auto":"1/-1" }}>
+              <label style={lbl}>{form.tipo==="judicial"?"Ejecutante/Acreedor":"Liquidador"}</label>
+              <input className="fi" value={form.tipo==="judicial"?form.ejecutante:form.liquidador}
+                onChange={e=>setForm(p=>form.tipo==="judicial"?{...p,ejecutante:e.target.value}:{...p,liquidador:e.target.value})} style={{ width:"100%" }}/>
             </div>
+            {form.tipo==="judicial" && (
+              <>
+                <div style={{ gridColumn:"1/-1" }}>
+                  <label style={lbl}>Caratulado</label>
+                  <input className="fi" placeholder="Banco X con Empresa Y" value={form.caratulado} onChange={e=>setForm(p=>({...p,caratulado:e.target.value}))} style={{ width:"100%" }}/>
+                </div>
+                <div>
+                  <label style={lbl}>Ejecutado</label>
+                  <input className="fi" value={form.empresa_deudora} onChange={e=>setForm(p=>({...p,empresa_deudora:e.target.value}))} style={{ width:"100%" }}/>
+                </div>
+                <div>
+                  <label style={lbl}>RUT ejecutado</label>
+                  <input className="fi" placeholder="12.345.678-9" value={form.rut_ejecutado} onChange={e=>setForm(p=>({...p,rut_ejecutado:e.target.value}))} style={{ width:"100%" }}/>
+                </div>
+              </>
+            )}
             <div style={{ gridColumn:"1/-1" }}>
               <label style={lbl}>Juzgado / Tribunal</label>
               <input className="fi" placeholder="2° Juzgado Civil de Rancagua" value={form.tribunal} onChange={e=>setForm(p=>({...p,tribunal:e.target.value}))} style={{ width:"100%" }}/>
@@ -639,6 +703,21 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
                 <div style={{ fontSize:".88rem",fontWeight:800,color:"#1d4ed8" }}>{causelected.estado==="completada"?"✅ Completada":"🔨 En remate"}</div>
               </div>
             )}
+            {causelected.estado==="remate_aprobado" && (
+              <div style={{ background:"#ecfdf5",border:"2px solid #4ade80",borderRadius:13,padding:".9rem 1.1rem" }}>
+                <div style={{ fontSize:".88rem",fontWeight:800,color:"#059669" }}>✅ Remate aprobado — listo para Pre-Remate</div>
+                {causelected.aprobado_remate_por && (
+                  <div style={{ fontSize:".72rem",color:"#065f46",marginTop:".25rem" }}>
+                    Aprobado por {causelected.aprobado_remate_por}{causelected.aprobado_remate_at ? ` el ${new Date(causelected.aprobado_remate_at).toLocaleString("es-CL")}` : ""}
+                  </div>
+                )}
+                {causelected.lote_id && (
+                  <div style={{ marginTop:".45rem",fontSize:".74rem",color:"#059669",fontWeight:700 }}>
+                    ✓ Lote creado — ir a Lotes para organizar el Pre-Remate
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* ══ CHECKLIST (columnas K,L,M,N,O,P del xlsx) ═══ */}
             <div style={{ background:"var(--s2)", border:"1px solid var(--b1)", borderRadius:12, padding:".9rem 1.1rem" }}>
@@ -712,6 +791,25 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
                   style={{ width:"100%",fontSize:".73rem",padding:".3rem .5rem" }}/>
               </div>
             </div>
+
+            {/* ══ CHECKLIST JURÍDICO ═══════════════════════════ */}
+            <details style={{ background:"var(--s2)", border:"1px solid var(--b1)", borderRadius:12 }} open={causelected.estado==="remate_aprobado"||!causelected.checklist_data||Object.keys(causelected.checklist_data||{}).length===0}>
+              <summary style={{ padding:".85rem 1.1rem", cursor:"pointer", fontSize:".76rem", fontWeight:700, color:"var(--fgp)", userSelect:"none", listStyle:"none", display:"flex", alignItems:"center", gap:".5rem" }}>
+                <span>▶</span>
+                <span>Checklist jurídico — {causelected.tipo==="judicial"?"10 pasos judiciales":"9 pasos concursales"}</span>
+                <span style={{ marginLeft:"auto", fontSize:".65rem", color:"var(--mu)", background:causelected.estado==="remate_aprobado"?"#ecfdf5":"var(--s2)", border:"1px solid var(--b1)", borderRadius:10, padding:".06rem .45rem" }}>
+                  {causelected.tipo==="judicial"?"J01–J10":"C01–C09"}
+                </span>
+              </summary>
+              <div style={{ padding:".5rem 1.1rem .9rem" }}>
+                <ChecklistJuridico
+                  causa={causelected}
+                  session={session}
+                  onPatch={upd=>patchCausa(causelected.id,upd)}
+                  onAprobar={()=>aprobarRemate(causelected)}
+                />
+              </div>
+            </details>
 
             {/* ══ Acta de recepción (nuestra firma) ════════════ */}
             <div style={{ background:"var(--s2)", border:"1px solid var(--b1)", borderRadius:12, padding:".9rem 1.1rem" }}>
