@@ -1,5 +1,5 @@
 'use client'
-import React from "react";
+import React, { useState } from "react";
 
 const PLANES = {
   trial:       { label: "Trial",       color: "#f6ad55", bg: "rgba(246,173,85,.1)",  precio: "Gratis" },
@@ -18,6 +18,7 @@ const diasRestantes = (fecha) => {
 };
 
 export default function PageLicencias({ dbLicencias, actualizarLicencia, renovarLicencia, cambiarPlan, guardarNota }) {
+  const [confirmBloquear, setConfirmBloquear] = useState(null);
   return (
     <div className="page">
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -70,10 +71,17 @@ export default function PageLicencias({ dbLicencias, actualizarLicencia, renovar
                       onClick={() => actualizarLicencia(casa.id, "suspendido")}>⏸ Suspender</button>
                   )}
                   {casa.licencia_estado !== "bloqueado" && (
-                    <button style={{ fontSize: ".68rem", padding: ".3rem .7rem", background: "rgba(224,82,82,.08)", border: "1px solid rgba(224,82,82,.25)", borderRadius: 6, color: "var(--rd)", cursor: "pointer" }}
-                      onClick={() => { if (window.confirm(`¿Bloquear acceso a ${casa.nombre}?`)) actualizarLicencia(casa.id, "bloqueado"); }}>
-                      Bloquear
-                    </button>
+                    confirmBloquear === casa.id
+                      ? <>
+                          <button style={{ fontSize: ".68rem", padding: ".3rem .7rem", background: "rgba(224,82,82,.18)", border: "1px solid rgba(224,82,82,.5)", borderRadius: 6, color: "var(--rd)", cursor: "pointer", fontWeight: 700 }}
+                            onClick={() => { actualizarLicencia(casa.id, "bloqueado"); setConfirmBloquear(null); }}>¿Seguro? Sí</button>
+                          <button style={{ fontSize: ".68rem", padding: ".3rem .7rem", background: "none", border: "1px solid var(--b1)", borderRadius: 6, color: "var(--mu)", cursor: "pointer" }}
+                            onClick={() => setConfirmBloquear(null)}>No</button>
+                        </>
+                      : <button style={{ fontSize: ".68rem", padding: ".3rem .7rem", background: "rgba(224,82,82,.08)", border: "1px solid rgba(224,82,82,.25)", borderRadius: 6, color: "var(--rd)", cursor: "pointer" }}
+                          onClick={() => setConfirmBloquear(casa.id)}>
+                          Bloquear
+                        </button>
                   )}
                 </div>
               </div>

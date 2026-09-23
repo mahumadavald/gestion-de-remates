@@ -2355,6 +2355,10 @@ function Dashboard({ session, onLogout }) {
   const [statsAnio,  setStatsAnio]  = useState(new Date().getFullYear());
   const [statsMes,   setStatsMes]   = useState(new Date().getMonth());
   const [adjCountdown,    setAdjCountdown]    = useState(null); // countdown auto-avance
+  const [adjSinPujas,     setAdjSinPujas]     = useState(false); // confirmación inline para adjudicar sin pujas
+  const [confirmDelRemate, setConfirmDelRemate] = useState(null);
+  const [confirmDelLote,   setConfirmDelLote]   = useState(null);
+  const [confirmDelPostor, setConfirmDelPostor] = useState(null);
 
   const timerRef       = useRef(null);
   const bidTimerRef    = useRef(null);
@@ -2641,7 +2645,10 @@ function Dashboard({ session, onLogout }) {
   const doAdjudicar = (manual=false) => {
     if (adjudicandoRef.current) return; // evita doble ejecución (timer + click simultáneo)
     if (manual && (bids[idx]?.count || 0) === 0) {
-      if (!window.confirm("Este lote no tiene pujas. ¿Adjudicar al precio base sin comprador registrado?")) return;
+      if (!adjSinPujas) { adjudicandoRef.current = false; setAdjSinPujas(true); return; }
+      setAdjSinPujas(false);
+    } else {
+      setAdjSinPujas(false);
     }
     adjudicandoRef.current = true;
     const winner   = bids[idx]?.winner || null;
@@ -4953,22 +4960,23 @@ function exportCSV(){
                           </>)}
                           {/* Eliminar remate — solo admin o martillero de la misma casa */}
                           {r.supabaseId && (session?.role === "admin" || (session?.role === "martillero" && r.casaId === session?.casaId)) && (
-                            <button className="btn-sec" style={{fontSize:".66rem",whiteSpace:"nowrap",color:"var(--rd)",border:"1px solid rgba(239,68,68,.25)",padding:".2rem .5rem"}}
-                              onClick={async()=>{
-                                const msg = r.estado === "en_vivo"
-                                  ? `"${r.name}" está EN VIVO. ¿Seguro que quieres eliminarlo? Se borrarán lotes y postores. Esta acción no se puede deshacer.`
-                                  : `¿Eliminar "${r.name}"? Se eliminarán también los lotes y postores asociados. Esta acción no se puede deshacer.`;
-                                if(!window.confirm(msg)) return;
-                                await supabase.from("pujas").delete().eq("remate_id", r.supabaseId);
-                                await supabase.from("postores").delete().eq("remate_id", r.supabaseId);
-                                await supabase.from("lotes").delete().eq("remate_id", r.supabaseId);
-                                const {error} = await supabase.from("remates").delete().eq("id", r.supabaseId);
-                                if(error){ notify("Error al eliminar el remate.","inf"); console.error(error); return; }
-                                setDbRemates(prev => prev.filter(x => x.id !== r.supabaseId));
-                                notify(`Remate "${r.name}" eliminado.`, "inf");
-                              }}>
-                              Eliminar
-                            </button>
+                            confirmDelRemate === r.supabaseId
+                              ? <><button className="btn-sec" style={{fontSize:".66rem",whiteSpace:"nowrap",color:"var(--rd)",border:"1px solid rgba(239,68,68,.5)",padding:".2rem .5rem",fontWeight:700}}
+                                    onClick={async()=>{
+                                      setConfirmDelRemate(null);
+                                      await supabase.from("pujas").delete().eq("remate_id", r.supabaseId);
+                                      await supabase.from("postores").delete().eq("remate_id", r.supabaseId);
+                                      await supabase.from("lotes").delete().eq("remate_id", r.supabaseId);
+                                      const {error} = await supabase.from("remates").delete().eq("id", r.supabaseId);
+                                      if(error){ notify("Error al eliminar el remate.","inf"); console.error(error); return; }
+                                      setDbRemates(prev => prev.filter(x => x.id !== r.supabaseId));
+                                      notify(`Remate "${r.name}" eliminado.`, "inf");
+                                    }}>¿Seguro? Sí</button>
+                                  <button className="btn-sec" style={{fontSize:".66rem",padding:".2rem .5rem"}} onClick={()=>setConfirmDelRemate(null)}>No</button></>
+                              : <button className="btn-sec" style={{fontSize:".66rem",whiteSpace:"nowrap",color:"var(--rd)",border:"1px solid rgba(239,68,68,.25)",padding:".2rem .5rem"}}
+                                  onClick={()=>setConfirmDelRemate(r.supabaseId)}>
+                                  Eliminar
+                                </button>
                           )}
                         </div>
                       </td>
@@ -4994,7 +5002,8 @@ function exportCSV(){
           };
 
           const eliminarLote = async (lote) => {
-            if (!window.confirm(`¿Eliminar "${lote.nombre}"? Esta acción no se puede deshacer.`)) return;
+            if (confirmDelLote !== lote.id) { setConfirmDelLote(lote.id); return; }
+            setConfirmDelLote(null);
             await supabase.from("lotes").delete().eq("id",lote.id);
             setDbLotes(prev => prev.filter(l => l.id !== lote.id));
             notify("Lote eliminado.","inf");
@@ -5040,8 +5049,12 @@ function exportCSV(){
                     <div style={{display:"flex",gap:".5rem",alignItems:"center",flexShrink:0}}>
                       <button className="btn-sec" style={{fontSize:".72rem",padding:".28rem .65rem"}}
                         onClick={()=>abrirEdicion(lote)}>Editar</button>
-                      <button style={{fontSize:".72rem",padding:".32rem .8rem",borderRadius:8,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.06)",color:"#dc2626",cursor:"pointer",fontFamily:"inherit",fontWeight:600}}
-                        onClick={()=>eliminarLote(lote)}>✕ Rechazar</button>
+                      {confirmDelLote === lote.id
+                        ? <><button style={{fontSize:".72rem",padding:".32rem .8rem",borderRadius:8,border:"1px solid rgba(239,68,68,.5)",background:"rgba(239,68,68,.16)",color:"#dc2626",cursor:"pointer",fontFamily:"inherit",fontWeight:700}}
+                              onClick={()=>eliminarLote(lote)}>¿Seguro?</button>
+                            <button className="btn-sec" style={{fontSize:".72rem",padding:".28rem .55rem"}} onClick={()=>setConfirmDelLote(null)}>No</button></>
+                        : <button style={{fontSize:".72rem",padding:".32rem .8rem",borderRadius:8,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.06)",color:"#dc2626",cursor:"pointer",fontFamily:"inherit",fontWeight:600}}
+                            onClick={()=>eliminarLote(lote)}>✕ Rechazar</button>}
                       <button className="btn-primary" style={{fontSize:".75rem",padding:".32rem .9rem"}}
                         onClick={()=>publicarLote(lote)}>✓ Publicar</button>
                     </div>
@@ -5755,13 +5768,17 @@ function exportCSV(){
                               }}>Deshacer</button>
                           )}
                           {session.role==="admin" && p.supabaseId && (
-                            <button className="btn-sec" style={{fontSize:".65rem",padding:".22rem .55rem",color:"#f87171",borderColor:"rgba(248,113,113,.3)"}}
-                              onClick={async()=>{
-                                if(!window.confirm(`¿Eliminar a ${p.name}? Esta acción no se puede deshacer.`)) return;
-                                const {error} = await supabase.from("postores").delete().eq("id",p.supabaseId);
-                                if(!error){ const {data} = await supabase.from("postores").select("*").order("numero"); if(data) setDbPostores(data); notify(`${p.name} eliminado.`,"inf"); }
-                                else notify("Error al eliminar postor.","inf");
-                              }}>Eliminar</button>
+                            confirmDelPostor === p.supabaseId
+                              ? <><button className="btn-sec" style={{fontSize:".65rem",padding:".22rem .55rem",color:"#f87171",borderColor:"rgba(248,113,113,.5)",fontWeight:700}}
+                                    onClick={async()=>{
+                                      setConfirmDelPostor(null);
+                                      const {error} = await supabase.from("postores").delete().eq("id",p.supabaseId);
+                                      if(!error){ const {data} = await supabase.from("postores").select("*").order("numero"); if(data) setDbPostores(data); notify(`${p.name} eliminado.`,"inf"); }
+                                      else notify("Error al eliminar postor.","inf");
+                                    }}>¿Seguro?</button>
+                                  <button className="btn-sec" style={{fontSize:".65rem",padding:".22rem .4rem"}} onClick={()=>setConfirmDelPostor(null)}>No</button></>
+                              : <button className="btn-sec" style={{fontSize:".65rem",padding:".22rem .55rem",color:"#f87171",borderColor:"rgba(248,113,113,.3)"}}
+                                  onClick={()=>setConfirmDelPostor(p.supabaseId)}>Eliminar</button>
                           )}
                           {p.supabaseId && (
                             <button className="btn-sec" style={{fontSize:".65rem",padding:".22rem .55rem"}}
@@ -8543,13 +8560,16 @@ function exportCSV(){
                           </button>
                         )}
                         {aState==="live" && (
-                          <button onClick={()=>{
-                            if(bids[idx]?.count===0 && !window.confirm("Este lote no tiene pujas. ¿Adjudicar sin ganador?")) return;
-                            adjudicar();
-                          }}
-                            style={{width:"100%",padding:".4rem",background:"transparent",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,color:"var(--mu)",fontSize:".68rem",cursor:"pointer",letterSpacing:".03em"}}>
-                            Adjudicar manualmente
-                          </button>
+                          adjSinPujas && bids[idx]?.count===0
+                            ? <div style={{display:"flex",gap:".4rem",alignItems:"center",flexWrap:"wrap"}}>
+                                <span style={{fontSize:".65rem",color:"var(--yl)",flex:1}}>Sin pujas. ¿Adjudicar igual?</span>
+                                <button onClick={()=>adjudicar()} style={{padding:".3rem .65rem",background:"rgba(245,158,11,.15)",border:"1px solid rgba(245,158,11,.4)",borderRadius:6,color:"var(--yl)",fontSize:".68rem",cursor:"pointer",fontWeight:700}}>Sí</button>
+                                <button onClick={()=>setAdjSinPujas(false)} style={{padding:".3rem .65rem",background:"transparent",border:"1px solid rgba(255,255,255,.1)",borderRadius:6,color:"var(--mu)",fontSize:".68rem",cursor:"pointer"}}>No</button>
+                              </div>
+                            : <button onClick={()=>adjudicar()}
+                                style={{width:"100%",padding:".4rem",background:"transparent",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,color:"var(--mu)",fontSize:".68rem",cursor:"pointer",letterSpacing:".03em"}}>
+                                Adjudicar manualmente
+                              </button>
                         )}
 
                         {/* Estado */}

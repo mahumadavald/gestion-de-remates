@@ -27,6 +27,7 @@ const FORM_INICIAL = { id: null, nombre: "", usuario: "", email: "", pass: "", r
 export default function PageUsuarios({ session, supabase, dbBodegas, dbLicencias, usuarios, setUsuarios, notify }) {
   const [usuarioForm, setUsuarioForm] = useState(FORM_INICIAL);
   const [usuarioModal, setUsuarioModal] = useState(false);
+  const [confirmEliminar, setConfirmEliminar] = useState(null);
 
   const CASAS_LISTA_REAL = [{ id: null, nombre: "TAKKA (Admin global)" }, ...dbLicencias];
   const resetUsuarioForm = () => setUsuarioForm(FORM_INICIAL);
@@ -65,7 +66,8 @@ export default function PageUsuarios({ session, supabase, dbBodegas, dbLicencias
   const editarUsuario = (u) => { setUsuarioForm({ ...u, pass: "", bodegaId: u.bodegaId || null }); setUsuarioModal("editar"); };
 
   const eliminarUsuario = async (id) => {
-    if (!window.confirm("¿Eliminar este usuario? No podrá iniciar sesión.")) return;
+    if (confirmEliminar !== id) { setConfirmEliminar(id); return; }
+    setConfirmEliminar(null);
     const res = await authFetch(supabase, "/api/admin/delete-user", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
     const result = await res.json();
     if (!res.ok) { notify("Error al eliminar: " + result.error, "inf"); return; }
@@ -166,10 +168,17 @@ export default function PageUsuarios({ session, supabase, dbBodegas, dbLicencias
                   <div style={{ display: "flex", gap: ".4rem" }}>
                     <button className="btn-sec" style={{ fontSize: ".68rem", padding: ".25rem .6rem" }} onClick={() => editarUsuario(u)}>✎ Editar</button>
                     {u.id !== session?.id && (
-                      <button style={{ fontSize: ".68rem", padding: ".25rem .6rem", background: "rgba(224,82,82,.08)", border: "1px solid rgba(224,82,82,.2)", borderRadius: 6, color: "var(--rd)", cursor: "pointer" }}
-                        onMouseEnter={e => e.currentTarget.style.background = "rgba(224,82,82,.18)"}
-                        onMouseLeave={e => e.currentTarget.style.background = "rgba(224,82,82,.08)"}
-                        onClick={() => eliminarUsuario(u.id)}>Eliminar</button>
+                      confirmEliminar === u.id
+                        ? <>
+                            <button style={{ fontSize: ".68rem", padding: ".25rem .6rem", background: "rgba(224,82,82,.18)", border: "1px solid rgba(224,82,82,.5)", borderRadius: 6, color: "var(--rd)", cursor: "pointer", fontWeight: 700 }}
+                              onClick={() => eliminarUsuario(u.id)}>¿Seguro? Sí</button>
+                            <button className="btn-sec" style={{ fontSize: ".68rem", padding: ".25rem .6rem" }}
+                              onClick={() => setConfirmEliminar(null)}>No</button>
+                          </>
+                        : <button style={{ fontSize: ".68rem", padding: ".25rem .6rem", background: "rgba(224,82,82,.08)", border: "1px solid rgba(224,82,82,.2)", borderRadius: 6, color: "var(--rd)", cursor: "pointer" }}
+                            onMouseEnter={e => e.currentTarget.style.background = "rgba(224,82,82,.18)"}
+                            onMouseLeave={e => e.currentTarget.style.background = "rgba(224,82,82,.08)"}
+                            onClick={() => eliminarUsuario(u.id)}>Eliminar</button>
                     )}
                   </div>
                 </td>

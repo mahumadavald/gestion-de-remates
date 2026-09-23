@@ -158,6 +158,7 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
   const [filterEstado, setFilterEstado] = useState("activas");
   const [filterBodega, setFilterBodega] = useState("");
   const [asignandoRemate, setAsignandoRemate] = useState(false);
+  const [confirmAcc, setConfirmAcc] = useState(null); // "suspender" | "aprobar" | null
   const [remateSelId, setRemateSelId]         = useState("");
   const [excelRows, setExcelRows]   = useState([]);
   const [excelSel, setExcelSel]     = useState(new Set());
@@ -278,14 +279,16 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
 
   /* ── Suspender ── */
   const suspender = async (causa) => {
-    if (!window.confirm("¿Marcar como suspendida?")) return;
+    if (confirmAcc !== "suspender") { setConfirmAcc("suspender"); return; }
+    setConfirmAcc(null);
     const data = await patchCausa(causa.id, { estado:"suspendida" });
     if (data) notify("Causa suspendida.","inf");
   };
 
   /* ── Aprobar remate (desde checklist jurídico) ── */
   const aprobarRemate = async (causa) => {
-    if (!window.confirm("¿Confirmar que el remate está aprobado y listo para Pre-Remate?")) return;
+    if (confirmAcc !== "aprobar") { setConfirmAcc("aprobar"); return; }
+    setConfirmAcc(null);
     setSaving(true);
     const data = await patchCausa(causa.id, {
       estado:"remate_aprobado",
@@ -896,10 +899,16 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
 
             {/* Suspender */}
             {!["completada","suspendida","en_remate"].includes(causelected.estado)&&(
-              <button onClick={()=>suspender(causelected)}
-                style={{ background:"none",border:"1px solid #fca5a5",borderRadius:8,padding:".38rem",cursor:"pointer",fontSize:".71rem",color:"#b91c1c",fontWeight:600,textAlign:"center" }}>
-                Marcar como suspendida
-              </button>
+              confirmAcc === "suspender"
+                ? <div style={{display:"flex",gap:".5rem",alignItems:"center"}}>
+                    <span style={{fontSize:".71rem",color:"#b91c1c",fontWeight:600}}>¿Marcar suspendida?</span>
+                    <button onClick={()=>suspender(causelected)} style={{background:"#b91c1c",border:"none",borderRadius:6,padding:".3rem .7rem",cursor:"pointer",fontSize:".71rem",color:"#fff",fontWeight:700}}>Sí</button>
+                    <button onClick={()=>setConfirmAcc(null)} style={{background:"none",border:"1px solid var(--b1)",borderRadius:6,padding:".3rem .7rem",cursor:"pointer",fontSize:".71rem",color:"var(--mu)"}}>No</button>
+                  </div>
+                : <button onClick={()=>suspender(causelected)}
+                    style={{ background:"none",border:"1px solid #fca5a5",borderRadius:8,padding:".38rem",cursor:"pointer",fontSize:".71rem",color:"#b91c1c",fontWeight:600,textAlign:"center" }}>
+                    Marcar como suspendida
+                  </button>
             )}
           </div>
         </div>
