@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "./supabase";
 
-const DashboardContext = createContext(null);
+export const DashboardContext = createContext(null);
 
 export function DashboardProvider({ session, children }) {
   const [dbRemates,   setDbRemates]   = useState([]);
