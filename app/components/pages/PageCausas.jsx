@@ -166,8 +166,9 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
   const xlsxRef = useRef();
   const [firmaModal, setFirmaModal] = useState(null); // { file, causa, avanzar }
 
-  const casaConfig     = (dbLicencias||[]).find(c => c.id === session?.casaId) || {};
+  const casaConfig      = (dbLicencias||[]).find(c => c.id === session?.casaId) || {};
   const firmaMartillero = casaConfig.firma_martillero_url || null;
+  const timbreUrl       = casaConfig.timbre_url || null;
 
   const causas = dbCausas||[];
   const rematesFuturos = (dbRemates||[]).filter(r=>{
@@ -241,8 +242,8 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
   const subirActa = async (causa, file, avanzar=false) => {
     if (!file) return;
     const isPDF = file.name.toLowerCase().endsWith(".pdf");
-    // Si es PDF y hay firma precargada, abrir modal de posicionamiento
-    if (isPDF && firmaMartillero) {
+    // Si es PDF y hay firma o timbre precargado, abrir modal de posicionamiento
+    if (isPDF && (firmaMartillero || timbreUrl)) {
       setFirmaModal({ file, causa, avanzar });
       return;
     }
@@ -372,6 +373,7 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
         <FirmaEnPDF
           pdfFile={firmaModal.file}
           firmaUrl={firmaMartillero}
+          timbreUrl={timbreUrl}
           onConfirm={onFirmaConfirm}
           onCancel={() => setFirmaModal(null)}
         />
