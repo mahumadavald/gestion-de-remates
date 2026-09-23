@@ -1,5 +1,6 @@
 'use client'
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import FirmaCanvas from "../FirmaCanvas";
 
 /* ══════════════════════════════════════════════════════════════════
    PageBodega — vista tablet para recepción de bienes
@@ -15,82 +16,6 @@ function fmt(d) {
 function fmtDT(ts) {
   if (!ts) return "—";
   return new Date(ts).toLocaleString("es-CL",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
-}
-
-/* ── Canvas firma ─────────────────────────────────────────────── */
-function FirmaCanvas({ onFirma, firmaData }) {
-  const canvasRef = useRef();
-  const drawing   = useRef(false);
-  const lastPos   = useRef(null);
-
-  const getPos = (e, canvas) => {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width  / rect.width;
-    const scaleY = canvas.height / rect.height;
-    if (e.touches) {
-      const t = e.touches[0];
-      return { x:(t.clientX-rect.left)*scaleX, y:(t.clientY-rect.top)*scaleY };
-    }
-    return { x:(e.clientX-rect.left)*scaleX, y:(e.clientY-rect.top)*scaleY };
-  };
-
-  const startDraw = (e) => {
-    e.preventDefault();
-    drawing.current = true;
-    const pos = getPos(e, canvasRef.current);
-    lastPos.current = pos;
-    const ctx = canvasRef.current.getContext("2d");
-    ctx.beginPath(); ctx.arc(pos.x, pos.y, 1.5, 0, Math.PI*2); ctx.fillStyle="#1a1a1a"; ctx.fill();
-  };
-  const draw = (e) => {
-    e.preventDefault();
-    if (!drawing.current) return;
-    const canvas = canvasRef.current;
-    const ctx    = canvas.getContext("2d");
-    const pos    = getPos(e, canvas);
-    ctx.beginPath();
-    ctx.moveTo(lastPos.current.x, lastPos.current.y);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.strokeStyle = "#1a1a1a";
-    ctx.lineWidth   = 2.5;
-    ctx.lineCap     = "round";
-    ctx.lineJoin    = "round";
-    ctx.stroke();
-    lastPos.current = pos;
-  };
-  const stopDraw = (e) => {
-    e?.preventDefault();
-    if (!drawing.current) return;
-    drawing.current = false;
-    onFirma(canvasRef.current.toDataURL("image/png"));
-  };
-
-  const limpiar = () => {
-    const ctx = canvasRef.current.getContext("2d");
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    onFirma(null);
-  };
-
-  return (
-    <div style={{ width:"100%" }}>
-      <div style={{ border:"2px solid #e5e7eb", borderRadius:12, background:"#fff", overflow:"hidden", touchAction:"none", position:"relative" }}>
-        <canvas ref={canvasRef} width={700} height={220}
-          style={{ display:"block", width:"100%", height:"auto", cursor:"crosshair" }}
-          onMouseDown={startDraw} onMouseMove={draw} onMouseUp={stopDraw} onMouseLeave={stopDraw}
-          onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={stopDraw}
-        />
-        {!firmaData && (
-          <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", color:"#d1d5db", fontSize:"1rem", pointerEvents:"none", whiteSpace:"nowrap" }}>
-            Firmar aquí
-          </div>
-        )}
-      </div>
-      <button onClick={limpiar}
-        style={{ marginTop:".5rem", background:"none", border:"1px solid #e5e7eb", borderRadius:7, padding:".3rem .8rem", fontSize:".75rem", color:"#6b7280", cursor:"pointer" }}>
-        Borrar firma
-      </button>
-    </div>
-  );
 }
 
 /* ══ COMPONENTE PRINCIPAL ════════════════════════════════════════ */
@@ -363,7 +288,7 @@ export default function PageBodega({ session, supabase, onLogout }) {
           <div style={{ fontSize:".76rem", color:"#6b7280", marginBottom:".8rem" }}>
             El deudor debe firmar en el recuadro de abajo para confirmar la entrega de los bienes.
           </div>
-          <FirmaCanvas onFirma={setFirma} firmaData={firma}/>
+          <FirmaCanvas onFirma={setFirma} firmaUrl={firma} onBorrar={() => setFirma(null)} height={190} />
           {firma && (
             <div style={{ marginTop:".5rem", display:"flex", alignItems:"center", gap:".4rem" }}>
               <span style={{ fontSize:".72rem", color:"#10b981", fontWeight:700 }}>✓ Firma registrada</span>

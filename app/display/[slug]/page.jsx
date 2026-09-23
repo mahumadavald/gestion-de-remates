@@ -319,6 +319,7 @@ export default function DisplayPage({ params }) {
   const [ganador,    setGanador]    = useState(null);
   const [historial,  setHistorial]  = useState([]);
   const [timer,      setTimer]      = useState(15);
+  const BID_TIMER = 15;
   const [estado,     setEstado]     = useState("waiting");
   const [flash,      setFlash]      = useState(false);
   const [photoIdx,   setPhotoIdx]   = useState(0);
@@ -374,7 +375,22 @@ export default function DisplayPage({ params }) {
             const fotos = Array.isArray(loteActual.imagenes) ? loteActual.imagenes : (loteActual.imagenes ? [loteActual.imagenes] : []);
             const l = { ...loteActual, fotos };
             setLoteActivo(l); loteActivoRef.current = l;
-            setOferta(loteActual.base || 0); setEstado("live");
+            setEstado("live");
+
+            // Calcular tiempo restante basado en la última puja
+            const { data: ultimaPuja } = await supabase
+              .from("pujas").select("created_at, monto")
+              .eq("lote_id", loteActual.id)
+              .order("created_at", { ascending: false }).limit(1).maybeSingle();
+
+            if (ultimaPuja) {
+              const elapsed = Math.floor((Date.now() - new Date(ultimaPuja.created_at).getTime()) / 1000);
+              setTimer(Math.max(1, BID_TIMER - elapsed));
+              setOferta(ultimaPuja.monto);
+            } else {
+              setOferta(loteActual.base || 0);
+              setTimer(BID_TIMER);
+            }
           }
         }
       });
@@ -393,7 +409,12 @@ export default function DisplayPage({ params }) {
         if (puja.lote_id !== loteActivoRef.current.id) return;
         setOferta(puja.monto);
         setGanador(`Paleta ${String(puja.numero_postor).padStart(3,"0")}`);
-        setEstado("live"); setTimer(15);
+        setEstado("live");
+        // Sincronizar timer desde timestamp de la puja para evitar drift
+        const elapsed = puja.created_at
+          ? Math.floor((Date.now() - new Date(puja.created_at).getTime()) / 1000)
+          : 0;
+        setTimer(Math.max(1, BID_TIMER - elapsed));
         setFlash(true); setTimeout(()=>setFlash(false),800);
         setHistorial(prev=>[{
           pal:`P-${String(puja.numero_postor).padStart(4,"0")}`, monto:puja.monto,
@@ -408,7 +429,7 @@ export default function DisplayPage({ params }) {
           const lc = { ...l, fotos };
           setLoteActivo(lc); loteActivoRef.current = lc;
           setOferta(l.base||0); setGanador(null); setHistorial([]);
-          setEstado("live"); setTimer(15); setPhotoIdx(0);
+          setEstado("live"); setTimer(BID_TIMER); setPhotoIdx(0);
         }
         if (l.estado==="vendido") setEstado("sold");
       })

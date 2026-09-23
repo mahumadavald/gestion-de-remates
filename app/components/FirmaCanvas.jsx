@@ -1,7 +1,9 @@
 'use client'
 import React, { useRef, useState, useEffect, useCallback } from "react";
 
-export default function FirmaCanvas({ label, firmaUrl, onConfirm, onBorrar, disabled }) {
+// onFirma: modo auto-save — fires dataURL on every stopDraw (no "Confirmar" button needed)
+// height: canvas height in px (default 110)
+export default function FirmaCanvas({ label, firmaUrl, onConfirm, onBorrar, disabled, onFirma, height = 110 }) {
   const canvasRef   = useRef(null);
   const lastPos     = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -56,7 +58,10 @@ export default function FirmaCanvas({ label, firmaUrl, onConfirm, onBorrar, disa
   const stopDraw = useCallback(() => {
     setIsDrawing(false);
     lastPos.current = null;
-  }, []);
+    if (onFirma && canvasRef.current) {
+      onFirma(canvasRef.current.toDataURL("image/png"));
+    }
+  }, [onFirma]);
 
   // Touch events necesitan passive:false para poder llamar preventDefault
   useEffect(() => {
@@ -80,12 +85,12 @@ export default function FirmaCanvas({ label, firmaUrl, onConfirm, onBorrar, disa
     const rect = canvas.getBoundingClientRect();
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, rect.width / dpr * dpr, rect.height / dpr * dpr);
-    // reinit
     ctx.strokeStyle = "#111";
     ctx.lineWidth   = 2.2;
     ctx.lineCap     = "round";
     ctx.lineJoin    = "round";
     setHasLines(false);
+    if (onFirma) onFirma(null);
   };
 
   const confirmar = async () => {
@@ -134,7 +139,7 @@ export default function FirmaCanvas({ label, firmaUrl, onConfirm, onBorrar, disa
             overflow: "hidden", background: "#fff", cursor: disabled ? "default" : "crosshair" }}>
             <canvas
               ref={canvasRef}
-              style={{ display: "block", width: "100%", height: 110, touchAction: "none" }}
+              style={{ display: "block", width: "100%", height: height, touchAction: "none" }}
               onMouseDown={startDraw}
               onMouseMove={draw}
               onMouseUp={stopDraw}
@@ -154,13 +159,15 @@ export default function FirmaCanvas({ label, firmaUrl, onConfirm, onBorrar, disa
                 fontFamily: "Inter,sans-serif", opacity: hasLines ? 1 : .4 }}>
               Borrar
             </button>
-            <button onClick={confirmar} disabled={!hasLines || saving}
-              style={{ flex: 2, fontSize: ".72rem", padding: ".32rem", background: "#10b981",
-                border: "none", borderRadius: 6, color: "#fff", fontWeight: 700,
-                cursor: hasLines && !saving ? "pointer" : "default", fontFamily: "Inter,sans-serif",
-                opacity: hasLines && !saving ? 1 : .5 }}>
-              {saving ? "Guardando..." : "Confirmar firma"}
-            </button>
+            {!onFirma && (
+              <button onClick={confirmar} disabled={!hasLines || saving}
+                style={{ flex: 2, fontSize: ".72rem", padding: ".32rem", background: "#10b981",
+                  border: "none", borderRadius: 6, color: "#fff", fontWeight: 700,
+                  cursor: hasLines && !saving ? "pointer" : "default", fontFamily: "Inter,sans-serif",
+                  opacity: hasLines && !saving ? 1 : .5 }}>
+                {saving ? "Guardando..." : "Confirmar firma"}
+              </button>
+            )}
           </div>
         </div>
       )}
