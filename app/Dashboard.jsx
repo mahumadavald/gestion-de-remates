@@ -4576,40 +4576,31 @@ function exportCSV(){
         )}
 
         {/* ══ SELECTOR DE REMATE (pantalla inicial) ══ */}
-        {!remateActivo && !["remates","dashboard","config","usuarios","licencias","casas","clientes","actas-entrega","actas-recepcion","causas"].includes(page) && (
-          <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"3rem 2rem",gap:"2rem",flexShrink:0}}>
-            <div style={{textAlign:"center"}}>
-              <svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="var(--ac)" strokeWidth="1.5" strokeLinecap="round" style={{marginBottom:"1rem"}}><rect x="6" y="8" width="40" height="36" rx="4"/><path d="M6 18h40M18 8v10M34 8v10"/></svg>
-              <div style={{fontSize:"1.3rem",fontWeight:800,color:"var(--wh2)",marginBottom:".4rem"}}>Selecciona un remate</div>
-              <div style={{fontSize:".85rem",color:"var(--mu)",maxWidth:340}}>Elige el remate con el que quieres trabajar. Todo lo que veas estará dentro de ese remate.</div>
+        {!["remates","dashboard","config","usuarios","licencias","casas","clientes","actas-entrega","actas-recepcion","causas"].includes(page) && (
+          <div style={{display:"flex",alignItems:"center",gap:".6rem",padding:".45rem .9rem",marginBottom:".85rem",background:"rgba(6,182,212,.05)",border:"1px solid rgba(6,182,212,.18)",borderRadius:9,flexWrap:"wrap",flexShrink:0}}>
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="1" y="2" width="12" height="10" rx="2"/><path d="M1 6h12M5 2v4M9 2v4"/></svg>
+            <span style={{fontSize:".72rem",color:"var(--mu)",fontWeight:600,whiteSpace:"nowrap"}}>Remate:</span>
+            {remateActivo
+              ? <span style={{fontSize:".75rem",fontWeight:700,color:"var(--ac)",padding:".15rem .5rem",background:"rgba(6,182,212,.12)",border:"1px solid rgba(6,182,212,.25)",borderRadius:5,whiteSpace:"nowrap"}}>{remateActivo.name}</span>
+              : <span style={{fontSize:".72rem",color:"var(--mu2)",fontStyle:"italic"}}>ninguno seleccionado</span>
+            }
+            <div style={{display:"flex",gap:".35rem",flexWrap:"wrap",flex:1}}>
+              {REMATES_MERGED.filter(r=>r.estado!=="cerrado"&&r.estado!=="finalizado").map(r=>{
+                const esActivo = (remateActivo?.supabaseId||remateActivo?.id)===(r.supabaseId||r.id);
+                return (
+                  <button key={r.id||r.supabaseId}
+                    onClick={()=>{ setRemateActivo(r); notify(`Remate: ${r.name}`,"sold"); }}
+                    style={{fontSize:".68rem",fontWeight:esActivo?700:500,padding:".18rem .55rem",borderRadius:5,border:`1px solid ${esActivo?"rgba(6,182,212,.5)":"var(--b2)"}`,background:esActivo?"rgba(6,182,212,.15)":"var(--s2)",color:esActivo?"var(--ac)":"var(--mu2)",cursor:"pointer",whiteSpace:"nowrap"}}>
+                    {r.name}
+                  </button>
+                );
+              })}
+              {REMATES_MERGED.length === 0 && (
+                <button onClick={()=>setPage("remates")} style={{fontSize:".68rem",padding:".18rem .55rem",borderRadius:5,border:"1px dashed var(--b2)",background:"transparent",color:"var(--mu)",cursor:"pointer"}}>Crear remate →</button>
+              )}
             </div>
-            {REMATES_MERGED.length === 0 ? (
-              <div style={{textAlign:"center",color:"var(--mu)",fontSize:".85rem"}}>
-                No hay remates creados aún.
-                <br/>
-                <button className="btn-primary" style={{marginTop:"1rem"}} onClick={()=>setPage("remates")}>Crear primer remate →</button>
-              </div>
-            ) : (
-              <div style={{width:"100%",maxWidth:520,display:"flex",flexDirection:"column",gap:".65rem"}}>
-                {REMATES_MERGED.map(r => {
-                  const activo = r.estado==="activo"||r.estado==="publicado"||r.estado==="en_vivo";
-                  return (
-                    <button key={r.id||r.supabaseId}
-                      onClick={()=>{ setRemateActivo(r); notify(`Trabajando en: ${r.name}`,"sold"); }}
-                      style={{display:"flex",alignItems:"center",gap:"1rem",padding:"1rem 1.25rem",background:"var(--s2)",border:`1px solid ${activo?"rgba(6,182,212,.35)":"var(--b1)"}`,borderRadius:12,cursor:"pointer",textAlign:"left",transition:"border-color .15s,background .15s",width:"100%"}}>
-                      <div style={{width:10,height:10,borderRadius:"50%",background:activo?"#34d399":r.estado==="cerrado"||r.estado==="finalizado"?"#6b7280":"#f59e0b",flexShrink:0}}/>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontWeight:700,fontSize:".88rem",color:"var(--wh2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</div>
-                        <div style={{fontSize:".72rem",color:"var(--mu)",marginTop:".1rem"}}>{r.fecha}{r.hora?` · ${r.hora}`:""} · {r.modal||r.modalidad||"—"}</div>
-                      </div>
-                      <span style={{fontSize:".68rem",fontWeight:700,color:activo?"var(--ac)":"var(--mu)",whiteSpace:"nowrap",padding:".2rem .55rem",background:activo?"rgba(6,182,212,.1)":"var(--s3)",border:`1px solid ${activo?"rgba(6,182,212,.25)":"var(--b2)"}`,borderRadius:5}}>
-                        {r.estado==="activo"||r.estado==="publicado"?"Activo":r.estado==="en_vivo"?"En vivo":r.estado==="cerrado"||r.estado==="finalizado"?"Cerrado":"Borrador"}
-                      </span>
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--mu)" strokeWidth="1.8" strokeLinecap="round"><path d="M5 3l4 4-4 4"/></svg>
-                    </button>
-                  );
-                })}
-              </div>
+            {remateActivo && (
+              <button onClick={()=>setRemateActivo(null)} style={{fontSize:".65rem",padding:".15rem .45rem",borderRadius:4,border:"1px solid var(--b2)",background:"transparent",color:"var(--mu)",cursor:"pointer",whiteSpace:"nowrap",marginLeft:"auto"}}>✕ Quitar</button>
             )}
           </div>
         )}
