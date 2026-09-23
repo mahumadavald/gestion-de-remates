@@ -145,7 +145,7 @@ function parseExcelRows(raw) {
 const EMPTY = { tipo:"concursal", rol:"", tribunal:"", empresa_deudora:"", liquidador:"", bienes_descripcion:"", minimo:"", comision_pct:"7", notas:"" };
 
 /* ══ COMPONENTE PRINCIPAL ════════════════════════════════════════ */
-export default function PageCausas({ session, supabase, dbCausas, setDbCausas, dbRemates, dbLotes, setDbLotes, notify }) {
+export default function PageCausas({ session, supabase, dbCausas, setDbCausas, dbRemates, dbLotes, setDbLotes, dbBodegas, notify }) {
   const [selected, setSelected]     = useState(null);
   const [view, setView]             = useState("lista");
   const [form, setForm]             = useState(EMPTY);
@@ -153,6 +153,7 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
   const [uploadingActa, setUploadingActa] = useState(false);
   const [search, setSearch]         = useState("");
   const [filterEstado, setFilterEstado] = useState("activas");
+  const [filterBodega, setFilterBodega] = useState("");
   const [asignandoRemate, setAsignandoRemate] = useState(false);
   const [remateSelId, setRemateSelId]         = useState("");
   const [excelRows, setExcelRows]   = useState([]);
@@ -173,6 +174,7 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
     if (filterEstado==="activas"    && !ACTIVAS.includes(c.estado)) return false;
     if (filterEstado==="completadas" && c.estado!=="completada")     return false;
     if (!["activas","completadas","todas"].includes(filterEstado) && c.estado!==filterEstado) return false;
+    if (filterBodega && c.bodega_id !== filterBodega) return false;
     if (search) {
       const q=search.toLowerCase();
       return (c.rol||"").toLowerCase().includes(q)||(c.empresa_deudora||"").toLowerCase().includes(q)||(c.tribunal||"").toLowerCase().includes(q)||(c.liquidador||"").toLowerCase().includes(q);
@@ -371,6 +373,13 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
               <option value="completadas">Completadas</option>
               <option value="suspendida">Suspendidas</option>
             </select>
+            {(dbBodegas||[]).length>0 && (
+              <select value={filterBodega} onChange={e=>setFilterBodega(e.target.value)}
+                style={{ fontSize:".71rem", padding:".3rem .5rem", border:"1px solid var(--b1)", borderRadius:7, background:"var(--s2)", color:"var(--fgp)" }}>
+                <option value="">Todas las bodegas</option>
+                {(dbBodegas||[]).map(b=><option key={b.id} value={b.id}>{b.nombre}</option>)}
+              </select>
+            )}
           </div>
         </div>
 
