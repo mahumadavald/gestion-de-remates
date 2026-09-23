@@ -309,7 +309,7 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
       categoria:causa.tipo==="concursal"?"Concursal":"Judicial",
       base: causa.minimo && !isNaN(parseFloat(String(causa.minimo).replace(/\D/g,""))) ? parseFloat(String(causa.minimo).replace(/\D/g,"")) : 0,
       comision:causa.comision_pct||7, tipo_remate:causa.tipo,
-      estado:"disponible", orden:(dbLotes?.length||0)+1,
+      estado:"pendiente_revision", orden:(dbLotes?.length||0)+1,
     }).select().single();
     if (loteErr) { setSaving(false); notify("Error: "+loteErr.message,"inf"); return; }
     await patchCausa(causa.id,{lote_id:lote.id});

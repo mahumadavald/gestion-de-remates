@@ -2614,7 +2614,8 @@ function Dashboard({ session, onLogout }) {
     const amt = (bids[idx]?.current||0) + inc;
     const bidderName = session?.name ? `${session.name} (Online)` : "Postor Online";
     setBids(p=>{const n=[...p];const c=n[idx];n[idx]={...c,current:amt,count:c.count+1,history:[{bidder:bidderName,amount:amt,time:new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),mine:true},...c.history.slice(0,19)],winner:bidderName};return n;});
-    setLastBidder("me"); setBidTimer(BID_TIMER); 
+    setLastBidder("me"); setBidTimer(BID_TIMER);
+    savePuja(amt, 0);
     setFlash(true); setTimeout(()=>setFlash(false),600); notify("Puja registrada.");
   };
 
@@ -2641,6 +2642,9 @@ function Dashboard({ session, onLogout }) {
 
     setBids(p=>{const n=[...p];n[idx]={...n[idx],status:"sold"};return n;});
     setAState("sold"); setBidTimer(null);
+    // Sincronizar estado con Supabase para que /display muestre overlay "ADJUDICADO"
+    const loteIdAdj = lots[idx]?.supabaseId;
+    if (loteIdAdj) supabase.from("lotes").update({estado:"vendido"}).eq("id", loteIdAdj).then(({error}) => { if(error) console.warn("doAdjudicar update:", error); });
     // Mostrar panel de control manual — el martillero decide cuándo avanzar
     setAdjCountdown(true);
 
@@ -2853,6 +2857,8 @@ function Dashboard({ session, onLogout }) {
     setLiqReview({ compradores, fecha: new Date().toLocaleDateString("es-CL"), remateNombre: remateActualNombre, remateId: salaRemateId||"" });
     notify("Remate cerrado. Revisando liquidaciones antes de enviar.", "sold");
     setPage("liquidac");
+    // Marcar el remate como finalizado en Supabase
+    if (salaRemateId) updateRemateEstado(salaRemateId, "finalizado");
 
     // Auto-generar devoluciones para postores con garantía que NO adjudicaron ningún lote
     const winners = new Set(
@@ -2898,7 +2904,9 @@ function Dashboard({ session, onLogout }) {
 
   const startAuction  = () => {
     setAState("live"); setBidTimer(null); setLastBidder(null);
-    // Iniciar grabación de pantalla completa automáticamente al arrancar el remate
+    // Sincronizar estado con Supabase para que /display muestre el lote activo
+    const loteId = lots[idx]?.supabaseId;
+    if (loteId) supabase.from("lotes").update({estado:"en_subasta"}).eq("id", loteId).then(({error}) => { if(error) console.warn("startAuction update:", error); });
     iniciarGrabacionPantalla();
   };
   const pauseAuction  = () => { setAState("paused"); setBidTimer(null); };
@@ -5113,10 +5121,11 @@ function exportCSV(){
             if (!validos.length) { notify("Agregá al menos un lote con nombre.","inf"); return; }
             setDesdeCausaSaving(true);
             let ok = 0;
+            let firstLoteId = null;
             for (let i=0; i<validos.length; i++) {
               const l = validos[i];
               const base = parseFloat(String(l.base||"0").replace(/\D/g,""))||0;
-              const { error } = await supabase.from("lotes").insert({
+              const { data:newLote, error } = await supabase.from("lotes").insert({
                 casa_id:    session?.casaId||null,
                 causa_id:   desdeCausaSel.id,
                 codigo:     `L-${String(Date.now()+i).slice(-5)}`,
@@ -5131,9 +5140,14 @@ function exportCSV(){
                 cantidad:   parseInt(l.cantidad)||1,
                 estado:     "pendiente_revision",
                 orden:      dbLotes.length+ok+1,
-              });
-              if (!error) ok++;
+              }).select("id").single();
+              if (!error) {
+                ok++;
+                if (i === 0 && newLote) firstLoteId = newLote.id;
+              }
             }
+            // Vincular la causa al primer lote creado para que asignarRemate funcione
+            if (firstLoteId) await supabase.from("causas").update({lote_id: firstLoteId}).eq("id", desdeCausaSel.id);
             const {data:lotData} = await supabase.from("lotes").select("*").order("orden");
             if (lotData) setDbLotes(lotData);
             setDesdeCausaSaving(false);

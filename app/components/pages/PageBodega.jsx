@@ -246,7 +246,7 @@ export default function PageBodega({ session, supabase, onLogout }) {
       {/* Lista */}
       <div style={{ flex:1, padding:"1rem", display:"flex", flexDirection:"column", gap:".75rem" }}>
         {loading && <div style={{ textAlign:"center", color:"#6b7280", padding:"3rem", fontSize:".85rem" }}>Cargando…</div>}
-        {!loading && causas.length===0 && (
+        {!loading && tab==="pendientes" && causasPendientes.length===0 && (
           <div style={{ textAlign:"center", padding:"4rem 2rem", color:"#6b7280" }}>
             <div style={{ fontSize:"3rem", marginBottom:".5rem" }}>🏭</div>
             <div style={{ fontSize:"1rem", fontWeight:700, marginBottom:".3rem" }}>Sin causas pendientes</div>
