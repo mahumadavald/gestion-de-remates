@@ -5133,6 +5133,7 @@ function exportCSV(){
               const base = parseFloat(String(l.base||"0").replace(/\D/g,""))||0;
               const { data:newLote, error } = await supabase.from("lotes").insert({
                 casa_id:    session?.casaId||null,
+                bodega_id:  session?.bodegaId||null,
                 causa_id:   desdeCausaSel.id,
                 codigo:     `L-${String(Date.now()+i).slice(-5)}`,
                 nombre:     l.nombre.trim(),
