@@ -228,7 +228,7 @@ export default function CatalogoPage({ params }) {
             href="https://takka.cl"
             style={{ color: "#0e7490", fontWeight: 700, textDecoration: "none" }}
           >
-            Pecker
+            TAKKA
           </a>
           {" · takka.cl"}
         </div>

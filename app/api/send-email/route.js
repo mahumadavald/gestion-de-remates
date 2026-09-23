@@ -88,7 +88,7 @@ function tr(label, value) {
   `;
 }
 
-// ── Footer con logo Pecker ────────────────────────────────────────────
+// ── Footer con logo TAKKA ─────────────────────────────────────────────
 const FOOTER = `
   <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 36px;text-align:center;">
     <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:6px;">
