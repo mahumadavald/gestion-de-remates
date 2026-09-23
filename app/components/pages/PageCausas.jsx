@@ -32,8 +32,8 @@ const ACTIVAS = FLUJO.slice(0,-1);
 
 /* ── Acciones Victor por estado ─────────────────────────────── */
 const VICTOR_ACCION = {
-  notificada:           { label:"Subir acta de recepción",     desc:"Adjuntá el acta firmada (PDF o Word) para continuar.",       next:"acta_recibida",        fecha:"fecha_recepcion_acta",    needsActa:true  },
-  aceptada:             { label:"Subir acta de recepción",     desc:"Adjuntá el acta firmada (PDF o Word) para continuar.",       next:"acta_recibida",        fecha:"fecha_recepcion_acta",    needsActa:true  },
+  notificada:           { label:"Subir acta de recepción",     desc:"Subí el acta firmada solo por nosotros (aún no por el deudor). PDF o Word.",  next:"acta_recibida",        fecha:"fecha_recepcion_acta",    needsActa:true  },
+  aceptada:             { label:"Subir acta de recepción",     desc:"Subí el acta firmada solo por nosotros (aún no por el deudor). PDF o Word.",  next:"acta_recibida",        fecha:"fecha_recepcion_acta",    needsActa:true  },
   acta_recibida:        { label:"Confirmar bienes en bodega",  desc:"Los bienes llegaron físicamente a la bodega.",               next:"bienes_recepcionados", fecha:"fecha_recepcion_bienes",  needsActa:false },
   bienes_recepcionados: { label:"Enviar bases y propuestas",   desc:"Se enviaron las bases al tribunal con la fecha propuesta.",   next:"bases_enviadas",       fecha:"fecha_solicitud_remate",  needsActa:false },
   bases_enviadas:       { label:"Publicaciones listas",        desc:"Se publicó en el diario y en el boletín concursal.",         next:"publicaciones_ok",     fecha:null,                      needsActa:false },
@@ -598,22 +598,17 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
               </div>
             )}
 
-            {/* ══ CHECKLIST (columnas J,K,L,M,N,O,P del xlsx) ═══ */}
+            {/* ══ CHECKLIST (columnas K,L,M,N,O,P del xlsx) ═══ */}
             <div style={{ background:"var(--s2)", border:"1px solid var(--b1)", borderRadius:12, padding:".9rem 1.1rem" }}>
               <div style={secTit}>Trámites del cronograma</div>
 
-              {/* J: Designación Martillero */}
-              <CheckItem label="Designación martillero" sublabel="Columna J — el tribunal designa al martillero"
-                checked={!!causelected.designacion_martillero}
-                onChange={()=>toggleCheck(causelected,"designacion_martillero",!causelected.designacion_martillero)}/>
-
               {/* K: Aviso de Entrega */}
-              <CheckItem label="Aviso de entrega" sublabel="Columna K — notificación al deudor sobre entrega"
+              <CheckItem label="Aviso de entrega al deudor" sublabel="Columna K — notificación formal al deudor sobre la entrega"
                 checked={!!causelected.aviso_entrega}
                 onChange={()=>toggleCheck(causelected,"aviso_entrega",!causelected.aviso_entrega)}/>
 
-              {/* L: Acta de Recepción */}
-              <CheckItem label="Acta de recepción" sublabel="Columna L — acta firmada recibida (subir archivo abajo)"
+              {/* L: Acta de Recepción firmada por ambas partes */}
+              <CheckItem label="Acta de recepción — firmada por ambas partes" sublabel="Columna L — acta con firma del deudor y del martillero"
                 checked={!!causelected.acta_recepcion_ok}
                 onChange={()=>toggleCheck(causelected,"acta_recepcion_ok",!causelected.acta_recepcion_ok)}/>
 
@@ -676,17 +671,20 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
               </div>
             </div>
 
-            {/* ══ Acta de recepción (archivo) ═══════════════════ */}
+            {/* ══ Acta de recepción (nuestra firma) ════════════ */}
             <div style={{ background:"var(--s2)", border:"1px solid var(--b1)", borderRadius:12, padding:".9rem 1.1rem" }}>
-              <div style={secTit}>Acta de entrega (archivo)</div>
+              <div style={secTit}>Acta de recepción — solo nuestra firma</div>
+              <div style={{ fontSize:".69rem", color:"var(--mu)", marginBottom:".6rem" }}>
+                Este es el acta que firmamos nosotros al recibir los bienes, antes de que la firme el deudor.
+              </div>
               {causelected.acta_url?(
                 <div style={{ display:"flex",alignItems:"center",gap:".65rem" }}>
                   <div style={{ flex:1,minWidth:0 }}>
-                    <div style={{ fontSize:".72rem",fontWeight:700,color:"#10b981" }}>✓ Archivo adjunto</div>
+                    <div style={{ fontSize:".72rem",fontWeight:700,color:"#10b981" }}>✓ Archivo subido</div>
                     <div style={{ fontSize:".65rem",color:"var(--mu)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{causelected.acta_nombre}</div>
                   </div>
                   <a href={causelected.acta_url} target="_blank" rel="noreferrer"
-                    style={{ fontSize:".69rem",color:"var(--ac)",textDecoration:"none",border:"1px solid var(--ac)",borderRadius:7,padding:".26rem .6rem",fontWeight:700,whiteSpace:"nowrap" }}>Ver acta</a>
+                    style={{ fontSize:".69rem",color:"var(--ac)",textDecoration:"none",border:"1px solid var(--ac)",borderRadius:7,padding:".26rem .6rem",fontWeight:700,whiteSpace:"nowrap" }}>Ver</a>
                   <button onClick={()=>actaRef.current?.click()} style={{ ...btnSec,fontSize:".69rem",padding:".26rem .6rem",whiteSpace:"nowrap" }}>{uploadingActa?"Subiendo…":"Reemplazar"}</button>
                 </div>
               ):(
