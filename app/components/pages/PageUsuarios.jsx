@@ -10,7 +10,7 @@ async function authFetch(supabase, url, opts = {}) {
   });
 }
 
-const ROLES_DISPONIBLES = ["admin", "martillero", "spotter", "postremate", "garantias", "solo lectura"];
+const ROLES_DISPONIBLES = ["admin", "martillero", "bodega", "spotter", "postremate", "garantias", "solo lectura"];
 
 const ROLE_COLOR = {
   "admin":        { bg: "rgba(224,82,82,.12)",  color: "#e05252", border: "rgba(224,82,82,.25)" },
@@ -183,6 +183,7 @@ export default function PageUsuarios({ session, supabase, dbBodegas, dbLicencias
           {[
             { rol: "admin",       desc: "Acceso total al sistema y gestión de usuarios" },
             { rol: "martillero",  desc: "Sala en vivo, lotes, remates y postores" },
+            { rol: "bodega",      desc: "Solo recepción de bienes con firma digital del deudor" },
             { rol: "postremate",  desc: "Adjudicaciones, liquidaciones y devoluciones" },
             { rol: "garantias",   desc: "Solo módulo de garantías" },
             { rol: "solo lectura",desc: "Ve todo pero no puede modificar nada" },

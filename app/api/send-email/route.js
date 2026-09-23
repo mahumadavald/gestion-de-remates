@@ -432,7 +432,41 @@ export async function POST(req) {
       results.push({ destino: "no_comprador", ...r });
     }
 
-    // ── 6. Solicitud de DEMO desde la landing ────────────────────────
+    // ── 6. Notificación de RECEPCIÓN al martillero ──────────────────
+    if (tipo === "recepcion_causa" && body.email_victor) {
+      const { rol, empresa_deudora, bienes, nombre_deudor, rut_deudor, fecha_hora } = body;
+      const dtStr = fecha_hora ? new Date(fecha_hora).toLocaleString("es-CL",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "—";
+      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
+        <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+          ${buildHeader({ casa:"TAKKA", logo_url:null, titulo:"Bienes recepcionados ✓", subtitulo:`Causa ${esc(rol)} — podés solicitar fecha de remate` })}
+          <div style="background:#ffffff;padding:28px 36px;">
+            <p style="font-size:15px;color:#374151;margin:0 0 20px;line-height:1.6;">
+              Los bienes de la causa <strong>${esc(rol)}</strong> fueron recibidos en bodega y firmados por el deudor.
+              Ya podés solicitar la fecha de remate al tribunal.
+            </p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:20px;">
+              ${tr("ROL", rol)}
+              ${tr("Empresa / Deudor", empresa_deudora)}
+              ${tr("Bienes recibidos", bienes)}
+              ${tr("Entregado por", nombre_deudor)}
+              ${rut_deudor ? tr("RUT deudor", rut_deudor) : ""}
+              ${tr("Fecha y hora", dtStr)}
+            </table>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0fdf4">
+              <tr><td style="background-color:#f0fdf4;border-left:4px solid #10b981;padding:14px 16px;font-size:13px;color:#065f46;line-height:1.6;">
+                <strong>Próximo paso:</strong> enviar las bases y propuestas al tribunal solicitando fecha de remate.
+              </td></tr>
+            </table>
+          </div>
+          ${FOOTER}
+        </div>
+      </body></html>`;
+      const r = await sendMail({ to:body.email_victor, subject:`Bienes recepcionados — ${esc(rol)} listo para solicitar fecha`, html });
+      results.push({ destino:"recepcion_causa", ...r });
+    }
+
+    // ── 7. Solicitud de DEMO desde la landing ────────────────────────
     if (tipo === "demo") {
       const { nombre, correo, registro, remates, lotes, sistema } = body;
       const casaDemo = body.casa || "—";

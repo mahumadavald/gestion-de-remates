@@ -11,6 +11,7 @@ import PageKPIs          from "./components/pages/PageKPIs";
 import PageActasEntrega   from "./components/pages/PageActasEntrega";
 import PageActasRecepcion from "./components/pages/PageActasRecepcion";
 import PageCausas         from "./components/pages/PageCausas";
+import PageBodega         from "./components/pages/PageBodega";
 
 // ── Supabase client ───────────────────────────────────────────────
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -2068,6 +2069,7 @@ export default function Root() {
   if (session.role === "postor")    { if (typeof window !== "undefined") window.location.href = "/postor"; return null; }
   if (session.role === "comprador") return <BuyerView user={session} onLogout={handleLogout}/>;
   if (session.role === "spotter")   return <SpotterView user={session} onLogout={handleLogout}/>;
+  if (session.role === "bodega")    return <PageBodega session={session} supabase={supabase} onLogout={handleLogout}/>;
   return <Dashboard session={session} onLogout={handleLogout}/>;
 }
 
