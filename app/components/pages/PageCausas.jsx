@@ -27,12 +27,12 @@ const ESTADOS = [
   { id:"fecha_solicitada",     label:"Bases enviadas",      short:"Bases",       color:"#06b6d4", bg:"#ecfeff" },
 ];
 const ESTADO_MAP = Object.fromEntries(ESTADOS.map(e=>[e.id,e]));
-const FLUJO = ["notificada","aceptada","acta_recibida","bienes_recepcionados","bases_enviadas","publicaciones_ok","fecha_aprobada","en_remate","completada"];
+const FLUJO = ["aceptada","acta_recibida","bienes_recepcionados","bases_enviadas","publicaciones_ok","fecha_aprobada","en_remate","completada"];
 const ACTIVAS = FLUJO.slice(0,-1);
 
 /* ── Acciones Victor por estado ─────────────────────────────── */
 const VICTOR_ACCION = {
-  notificada:           { label:"Aceptar esta causa",          desc:"Confirmá que aceptás llevar adelante este remate.",          next:"aceptada",             fecha:"fecha_aceptacion",        needsActa:false },
+  notificada:           { label:"Subir acta de recepción",     desc:"Adjuntá el acta firmada (PDF o Word) para continuar.",       next:"acta_recibida",        fecha:"fecha_recepcion_acta",    needsActa:true  },
   aceptada:             { label:"Subir acta de recepción",     desc:"Adjuntá el acta firmada (PDF o Word) para continuar.",       next:"acta_recibida",        fecha:"fecha_recepcion_acta",    needsActa:true  },
   acta_recibida:        { label:"Confirmar bienes en bodega",  desc:"Los bienes llegaron físicamente a la bodega.",               next:"bienes_recepcionados", fecha:"fecha_recepcion_bienes",  needsActa:false },
   bienes_recepcionados: { label:"Enviar bases y propuestas",   desc:"Se enviaron las bases al tribunal con la fecha propuesta.",   next:"bases_enviadas",       fecha:"fecha_solicitud_remate",  needsActa:false },
@@ -210,7 +210,7 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
       minimo: form.minimo.trim()||null,
       comision_pct: parseFloat(form.comision_pct)||7,
       notas: form.notas.trim()||null,
-      estado:"notificada", fecha_notificacion:new Date().toISOString().slice(0,10),
+      estado:"aceptada", fecha_aceptacion:new Date().toISOString().slice(0,10),
     }).select().single();
     setSaving(false);
     if (error) { notify("Error: "+error.message,"inf"); return; }
@@ -331,7 +331,7 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
       bienes_descripcion:r.bienes_descripcion, minimo:r.minimo,
       comision_pct:r.comision_pct||7, bases_notas:r.bases_notas,
       fecha_remate:r.fecha_remate||null,
-      estado:"notificada", fecha_notificacion:hoy,
+      estado:"aceptada", fecha_aceptacion:hoy,
     }))).select();
     setExcelSaving(false);
     if (error) { notify("Error: "+error.message,"inf"); return; }
