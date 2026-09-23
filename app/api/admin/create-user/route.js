@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { requireAdmin } from "../../_lib/auth";
+import { requireAdmin, supabaseAdmin } from "../../_lib/auth";
 
 export async function POST(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   try {
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey) return NextResponse.json({ error: "SUPABASE_SERVICE_ROLE_KEY no configurada" }, { status: 500 });
-
-    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, serviceKey);
     const { email, password, nombre, casa_id, bodega_id, roles, activo } = await req.json();
 
     if (!email || !password) {

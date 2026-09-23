@@ -1,11 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "../_lib/auth";
 
 export const dynamic = 'force-dynamic';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 function validarRut(rut) {
   if (!rut || typeof rut !== "string") return false;

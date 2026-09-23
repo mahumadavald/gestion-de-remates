@@ -1,14 +1,9 @@
 'use client'
 import React, { useState, useEffect, use } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../../lib/supabase";
+import { fmt } from "../../lib/format";
 
 export const dynamic = 'force-dynamic';
-
-const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = SUPA_URL ? createClient(SUPA_URL, SUPA_KEY) : null;
-
-const fmt = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n);
 
 /* ─── Mismo tema oscuro que sala en vivo ─── */
 const CSS = `

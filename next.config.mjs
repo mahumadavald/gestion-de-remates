@@ -11,6 +11,15 @@ const nextConfig = {
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
+  async redirects() {
+    return [
+      {
+        source: "/participar/:slug",
+        destination: "/participar?casa=:slug",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

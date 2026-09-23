@@ -6,13 +6,7 @@ import {
 } from "recharts";
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
-const fmtCLP  = n => n != null && n > 0 ? "$" + Math.round(n).toLocaleString("es-CL") : "$0";
-const fmtMill = n => {
-  if (!n) return "0";
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
-  if (n >= 1_000)     return (n / 1_000).toFixed(0) + "K";
-  return String(Math.round(n));
-};
+import { fmtCLP, fmtMill } from "../../lib/format";
 const pct = (a, b) => b > 0 ? Math.round((a / b) * 100) : 0;
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
                "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];

@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { requireAdmin } from "../../_lib/auth";
+import { requireAdmin, supabaseAdmin } from "../../_lib/auth";
 
 export async function POST(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   try {
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
     const { id } = await req.json();
     if (!id) return NextResponse.json({ error: "ID requerido" }, { status: 400 });
 
