@@ -324,9 +324,10 @@ export default function EntregarPage() {
   // Track delivery via liquidaciones.retiro (synced with Dashboard's "Retiro de Bienes")
   const toggleEntregado = async (liq) => {
     const fecha = liq.retiro ? null : new Date().toLocaleDateString("es-CL");
-    const { error } = await supabase.from("liquidaciones").update({ retiro: fecha }).eq("id", liq.id);
+    const retiro_por = fecha ? (session?.name || session?.email || null) : null;
+    const { error } = await supabase.from("liquidaciones").update({ retiro: fecha, retiro_por }).eq("id", liq.id);
     if (error) return;
-    const updated = { ...liq, retiro: fecha };
+    const updated = { ...liq, retiro: fecha, retiro_por };
     setLotesPostor(prev => prev.map(l => l.id === liq.id ? updated : l));
     setAllLiquidaciones(prev => prev.map(l => l.id === liq.id ? updated : l));
   };
@@ -505,7 +506,7 @@ export default function EntregarPage() {
                         </div>
                         <div className="lot-info">
                           <div className="lot-nombre">{liq.lote}</div>
-                          <div className="lot-codigo">{fmtClp(liq.monto)}{liq.retiro ? ` · Retirado ${liq.retiro}` : ""}</div>
+                          <div className="lot-codigo">{fmtClp(liq.monto)}{liq.retiro ? ` · Retirado ${liq.retiro}${liq.retiro_por ? ` por ${liq.retiro_por}` : ""}` : ""}</div>
                         </div>
                         <span style={{fontSize:".65rem",fontWeight:700,padding:".18rem .5rem",borderRadius:6,
                           background:liq.retiro?"rgba(20,184,166,.1)":"rgba(245,158,11,.08)",

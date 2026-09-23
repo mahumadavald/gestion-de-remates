@@ -80,6 +80,7 @@ const FORM_VACIO = {
   observaciones: "", diagrama_daños: "",
   entrega_nombre: "", entrega_rut: "", firma_entrega_url: "",
   recibe_nombre: "", recibe_rut: "",  firma_recibe_url: "",
+  fotos_urls: [],
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -193,6 +194,7 @@ export default function PageActasRecepcion({ session, supabase, dbActasRecepcion
         recibe_nombre:     form.recibe_nombre || null,
         recibe_rut:        form.recibe_rut || null,
         firma_recibe_url:  form.firma_recibe_url || null,
+        fotos_urls:        form.fotos_urls?.length ? form.fotos_urls : null,
         estado:            editando?.estado || "borrador",
       };
 
@@ -314,6 +316,31 @@ export default function PageActasRecepcion({ session, supabase, dbActasRecepcion
     const { data } = await supabase
       .from("actas_recepcion_vehiculos").update({ [campo]: null }).eq("id", editando.id).select().single();
     if (data) { setDbActasRecepcion(prev => prev.map(a => a.id === data.id ? data : a)); setEditando(data); }
+  };
+
+  const [fotosSaving, setFotosSaving] = useState(false);
+  const uploadFotos = async (files) => {
+    if (!editando?.id) { notify("Guarda el acta antes de subir fotos.", "inf"); return; }
+    setFotosSaving(true);
+    const nuevas = [...(form.fotos_urls || [])];
+    for (const file of Array.from(files)) {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `recepcion/${editando.id}_foto_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("firmas").upload(path, file, { upsert: true, contentType: file.type });
+      if (!error) {
+        const { data } = supabase.storage.from("firmas").getPublicUrl(path);
+        nuevas.push(data.publicUrl);
+      }
+    }
+    set("fotos_urls", nuevas);
+    await supabase.from("actas_recepcion_vehiculos").update({ fotos_urls: nuevas }).eq("id", editando.id);
+    setFotosSaving(false);
+    notify(`${nuevas.length - (form.fotos_urls||[]).length} foto(s) subidas.`, "sold");
+  };
+  const eliminarFoto = async (url) => {
+    const nuevas = (form.fotos_urls || []).filter(u => u !== url);
+    set("fotos_urls", nuevas);
+    if (editando?.id) await supabase.from("actas_recepcion_vehiculos").update({ fotos_urls: nuevas }).eq("id", editando.id);
   };
 
   // ── Filtro lista ──
@@ -639,7 +666,33 @@ export default function PageActasRecepcion({ session, supabase, dbActasRecepcion
         </div>
       </div>
 
-      {/* ── Sección 6: Firmas ── */}
+      {/* ── Sección 6: Fotos del vehículo ── */}
+      <div style={{ background: "var(--s2)", border: "1px solid var(--b1)", borderRadius: 12, padding: "1.2rem 1.3rem", marginBottom: "1rem" }}>
+        <SecTitle>Fotos del vehículo</SecTitle>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: ".6rem", marginBottom: ".8rem" }}>
+          {(form.fotos_urls || []).map((url, i) => (
+            <div key={i} style={{ position: "relative", width: 90, height: 70, borderRadius: 8, overflow: "hidden", border: "1px solid var(--b1)" }}>
+              <img src={url} alt={`Foto ${i+1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <button onClick={() => eliminarFoto(url)}
+                style={{ position: "absolute", top: 2, right: 2, background: "rgba(0,0,0,.55)", border: "none", borderRadius: 4,
+                  color: "#fff", fontSize: ".65rem", lineHeight: 1, padding: "2px 4px", cursor: "pointer" }}>✕</button>
+            </div>
+          ))}
+          <label style={{ width: 90, height: 70, border: "1.5px dashed var(--b2)", borderRadius: 8, display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center", cursor: fotosSaving ? "wait" : "pointer", gap: ".2rem",
+            background: "transparent", color: "var(--mu)", fontSize: ".68rem" }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <rect x="2" y="5" width="16" height="12" rx="2"/><circle cx="10" cy="11" r="3"/><path d="M7 5l1-2h4l1 2"/>
+            </svg>
+            {fotosSaving ? "Subiendo..." : "+ Foto"}
+            <input type="file" accept="image/*" multiple style={{ display: "none" }}
+              onChange={e => e.target.files?.length && uploadFotos(e.target.files)} disabled={fotosSaving} />
+          </label>
+        </div>
+        {!editando?.id && <div style={{ fontSize: ".69rem", color: "var(--mu)" }}>Guarda el acta antes de subir fotos.</div>}
+      </div>
+
+      {/* ── Sección 7: Firmas ── */}
       <div style={{ background: "var(--s2)", border: "1px solid var(--b1)", borderRadius: 12, padding: "1.2rem 1.3rem", marginBottom: "1.5rem" }}>
         <SecTitle>Firmas</SecTitle>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.2rem" }}>

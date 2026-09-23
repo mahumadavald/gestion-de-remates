@@ -2554,6 +2554,24 @@ function Dashboard({ session, onLogout }) {
     if(id) setSalaRemateId(id);
   }, [remateActivo]);
 
+  // ── Sala: persistencia de estado para sobrevivir recargas ────────
+  useEffect(() => {
+    if (!salaRemateId) return;
+    try { localStorage.setItem("takka_sala_state", JSON.stringify({ salaRemateId, idx, aState })); } catch {}
+  }, [salaRemateId, idx, aState]);
+
+  // Restaurar idx/aState si el remateId coincide con el guardado
+  useEffect(() => {
+    if (!salaRemateId) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem("takka_sala_state") || "null");
+      if (saved?.salaRemateId === salaRemateId && saved.idx > 0) {
+        setIdx(saved.idx);
+        if (saved.aState === "live" || saved.aState === "sold") setAState(saved.aState);
+      }
+    } catch {}
+  }, [salaRemateId]);
+
   // ── Supabase: realtime pujas ─────────────────────────────────────
   useEffect(() => {
     if (!lots[idx]?.supabaseId) return;
@@ -2859,6 +2877,7 @@ function Dashboard({ session, onLogout }) {
     setPage("liquidac");
     // Marcar el remate como finalizado en Supabase
     if (salaRemateId) updateRemateEstado(salaRemateId, "finalizado");
+    try { localStorage.removeItem("takka_sala_state"); } catch {}
 
     // Auto-generar devoluciones para postores con garantía que NO adjudicaron ningún lote
     const winners = new Set(
