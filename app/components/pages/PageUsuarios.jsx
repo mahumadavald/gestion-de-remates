@@ -13,10 +13,12 @@ async function authFetch(supabase, url, opts = {}) {
 const ROLES_DISPONIBLES = ["admin", "martillero", "bodega", "spotter", "postremate", "garantias", "solo lectura"];
 
 const ROLE_COLOR = {
-  "admin":        { bg: "rgba(224,82,82,.12)",  color: "#e05252", border: "rgba(224,82,82,.25)" },
-  "martillero":   { bg: "rgba(56,178,246,.12)", color: "#38B2F6", border: "rgba(56,178,246,.25)" },
-  "postremate":   { bg: "rgba(20,184,166,.1)",  color: "#14B8A6", border: "rgba(20,184,166,.25)" },
-  "garantias":    { bg: "rgba(246,173,85,.12)", color: "#f6ad55", border: "rgba(246,173,85,.25)" },
+  "admin":        { bg: "rgba(224,82,82,.12)",   color: "#e05252", border: "rgba(224,82,82,.25)" },
+  "martillero":   { bg: "rgba(56,178,246,.12)",  color: "#38B2F6", border: "rgba(56,178,246,.25)" },
+  "bodega":       { bg: "rgba(245,158,11,.12)",  color: "#d97706", border: "rgba(245,158,11,.25)" },
+  "spotter":      { bg: "rgba(139,92,246,.12)",  color: "#7c3aed", border: "rgba(139,92,246,.25)" },
+  "postremate":   { bg: "rgba(20,184,166,.1)",   color: "#14B8A6", border: "rgba(20,184,166,.25)" },
+  "garantias":    { bg: "rgba(246,173,85,.12)",  color: "#f6ad55", border: "rgba(246,173,85,.25)" },
   "solo lectura": { bg: "rgba(255,255,255,.06)", color: "#5a7fa8", border: "rgba(255,255,255,.1)" },
 };
 
