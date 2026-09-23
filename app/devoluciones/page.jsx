@@ -230,6 +230,14 @@ function DevolucionesContent() {
             <span style={styles.infoLabel}>RUT</span>
             <span style={styles.infoValue}>{postor.rut}</span>
           </div>
+          {postor.garantia != null && postor.garantia > 0 && (
+            <div style={styles.infoRow}>
+              <span style={styles.infoLabel}>Garantía a devolver</span>
+              <span style={{ ...styles.infoValue, color: "#0e7490", fontWeight: 800 }}>
+                {new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(postor.garantia)}
+              </span>
+            </div>
+          )}
           {remate && (
             <div style={styles.infoRow}>
               <span style={styles.infoLabel}>Remate</span>
@@ -333,7 +341,7 @@ function DevolucionesContent() {
         <div style={styles.footer}>
           Powered by{" "}
           <a href="https://takka.cl" style={{ color: "#0e7490", fontWeight: 700, textDecoration: "none" }}>
-            Pecker
+            TAKKA
           </a>
           {" · takka.cl"}
         </div>
