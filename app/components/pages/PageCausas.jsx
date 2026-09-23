@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useRef } from "react";
+import FirmaEnPDF from "../FirmaEnPDF";
 
 /* ══════════════════════════════════════════════════════════════════
    CRONOGRAMA REMATES — columnas del xlsx mapeadas al sistema:
@@ -145,7 +146,7 @@ function parseExcelRows(raw) {
 const EMPTY = { tipo:"concursal", rol:"", tribunal:"", empresa_deudora:"", liquidador:"", bienes_descripcion:"", minimo:"", comision_pct:"7", notas:"" };
 
 /* ══ COMPONENTE PRINCIPAL ════════════════════════════════════════ */
-export default function PageCausas({ session, supabase, dbCausas, setDbCausas, dbRemates, dbLotes, setDbLotes, dbBodegas, notify }) {
+export default function PageCausas({ session, supabase, dbCausas, setDbCausas, dbRemates, dbLotes, setDbLotes, dbBodegas, dbLicencias, notify }) {
   const [selected, setSelected]     = useState(null);
   const [view, setView]             = useState("lista");
   const [form, setForm]             = useState(EMPTY);
@@ -163,6 +164,10 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
   const [basesNotasVal, setBasesNotasVal] = useState("");
   const actaRef = useRef();
   const xlsxRef = useRef();
+  const [firmaModal, setFirmaModal] = useState(null); // { file, causa, avanzar }
+
+  const casaConfig     = (dbLicencias||[]).find(c => c.id === session?.casaId) || {};
+  const firmaMartillero = casaConfig.firma_martillero_url || null;
 
   const causas = dbCausas||[];
   const rematesFuturos = (dbRemates||[]).filter(r=>{
@@ -235,6 +240,16 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
   /* ── Subir acta ── */
   const subirActa = async (causa, file, avanzar=false) => {
     if (!file) return;
+    const isPDF = file.name.toLowerCase().endsWith(".pdf");
+    // Si es PDF y hay firma precargada, abrir modal de posicionamiento
+    if (isPDF && firmaMartillero) {
+      setFirmaModal({ file, causa, avanzar });
+      return;
+    }
+    await _uploadActa(causa, file, avanzar);
+  };
+
+  const _uploadActa = async (causa, file, avanzar=false) => {
     setUploadingActa(true);
     const ext  = file.name.split(".").pop();
     const path = `causas/${causa.id}_acta.${ext}`;
@@ -246,6 +261,12 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
     await patchCausa(causa.id, upd);
     setUploadingActa(false);
     notify(avanzar?"Acta subida y estado actualizado.":"Acta subida.","sold");
+  };
+
+  const onFirmaConfirm = async (fileConFirma) => {
+    const { causa, avanzar } = firmaModal;
+    setFirmaModal(null);
+    await _uploadActa(causa, fileConFirma, avanzar);
   };
 
   /* ── Suspender ── */
@@ -345,6 +366,16 @@ export default function PageCausas({ session, supabase, dbCausas, setDbCausas, d
   /* ══ RENDER ════════════════════════════════════════════════════ */
   return (
     <div className="page" style={{ display:"flex", gap:0, height:"100%", overflow:"hidden" }}>
+
+      {/* Modal: posicionar firma en PDF */}
+      {firmaModal && (
+        <FirmaEnPDF
+          pdfFile={firmaModal.file}
+          firmaUrl={firmaMartillero}
+          onConfirm={onFirmaConfirm}
+          onCancel={() => setFirmaModal(null)}
+        />
+      )}
 
       {/* ── Lista ───────────────────────────────────────────────── */}
       <div style={{ flex: causelected&&view==="lista"?"0 0 420px":1, display:"flex", flexDirection:"column",
