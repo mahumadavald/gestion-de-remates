@@ -11,6 +11,7 @@ import PageKPIs          from "./components/pages/PageKPIs";
 import PageActasEntrega   from "./components/pages/PageActasEntrega";
 import PageActasRecepcion from "./components/pages/PageActasRecepcion";
 import PageCausas         from "./components/pages/PageCausas";
+import { toDisplay }      from "./lib/toDisplay";
 import PageBodega         from "./components/pages/PageBodega";
 
 // ── Supabase client ───────────────────────────────────────────────
@@ -2236,7 +2237,7 @@ function Dashboard({ session, onLogout }) {
   // Merge: usa datos de Supabase si hay, fallback a mock
   const REMATES_MERGED = dbRemates.length > 0 ? dbRemates.map(r => ({
     id:         r.codigo || r.id,
-    name:       r.nombre,
+    name:       toDisplay(r.nombre),
     fecha:      new Date(r.fecha).toLocaleDateString("es-CL",{day:"2-digit",month:"short",year:"numeric"}),
     hora:       r.hora||"",
     lotes:      r.total_lotes || 0,
@@ -2251,7 +2252,7 @@ function Dashboard({ session, onLogout }) {
 
   const LOTES_MERGED = dbLotes.length > 0 ? dbLotes.map(l => ({
     id:      l.codigo || l.id,
-    name:    l.nombre,
+    name:    toDisplay(l.nombre),
     cat:     l.categoria,
     base:    l.base,
     min:     l.minimo,
@@ -4659,7 +4660,7 @@ function exportCSV(){
                 {/* Remates Activos — debajo de los botones */}
                 <div style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:16,padding:"1.2rem 1.3rem"}}>
                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1rem"}}>
-                    <div style={{fontSize:".95rem",fontWeight:700,color:"var(--wh2)"}}>Remates Activos</div>
+                    <div style={{fontSize:".95rem",fontWeight:700,color:"var(--wh2)"}}>Remates activos</div>
                     <button className="btn-sec" style={{fontSize:".72rem"}} onClick={()=>setPage("remates")}>Ver todos</button>
                   </div>
                   <div style={{display:"flex",flexDirection:"column",gap:".75rem"}}>
@@ -4718,7 +4719,7 @@ function exportCSV(){
                 ].map((s,i)=>(
                   <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:16,padding:"1.2rem 1.4rem",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:`3px solid ${s.color}`}}>
                     <div>
-                      <div style={{fontSize:".72rem",color:"var(--mu)",marginBottom:".35rem",textTransform:"uppercase",letterSpacing:".04em"}}>{s.label}</div>
+                      <div style={{fontSize:".72rem",color:"var(--mu)",marginBottom:".35rem",letterSpacing:".04em"}}>{s.label}</div>
                       <div style={{fontSize:"2.2rem",fontWeight:800,color:"var(--wh2)",lineHeight:1}}>{s.val}</div>
                     </div>
                     <div style={{width:44,height:44,background:`${s.color}18`,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -4766,7 +4767,7 @@ function exportCSV(){
                       {label:"Lotes adjudicados",           val:hasData?lotesAdj:"—",                                    color:"#34d399"},
                     ].map((k,i)=>(
                       <div key={i} style={{background:"var(--s2)",border:"1px solid var(--b1)",borderRadius:14,padding:"1rem 1.2rem",borderLeft:`3px solid ${k.color}`}}>
-                        <div style={{fontSize:".68rem",color:"var(--mu)",textTransform:"uppercase",letterSpacing:".04em",marginBottom:".4rem"}}>{k.label}</div>
+                        <div style={{fontSize:".68rem",color:"var(--mu)",letterSpacing:".04em",marginBottom:".4rem"}}>{k.label}</div>
                         <div style={{fontSize:"1.6rem",fontWeight:800,color:"var(--wh2)",lineHeight:1}}>{k.val}</div>
                       </div>
                     ))}
