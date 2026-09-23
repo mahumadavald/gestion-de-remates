@@ -1,53 +1,46 @@
 'use client'
 import React, { useRef, useState, useEffect, useCallback } from "react";
 
-// Versión debe coincidir exactamente con pdfjs-dist en package.json
 const WORKER_SRC = `https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.worker.min.mjs`;
 
 export default function FirmaEnPDF({ pdfFile, firmaUrl, timbreUrl, onConfirm, onCancel }) {
   const canvasRef = useRef();
   const wrapRef   = useRef();
 
-  const [loading,   setLoading]   = useState(true);
-  const [applying,  setApplying]  = useState(false);
-  const [pdfError,  setPdfError]  = useState(null);
+  const [pdfDoc,     setPdfDoc]     = useState(null);
+  const [numPages,   setNumPages]   = useState(1);
+  const [currentPage,setCurrentPage]= useState(1);
 
-  // Posición firma (fracción 0-1 del canvas)
-  const [firmaPos,  setFirmaPos]  = useState({ x: 0.55, y: 0.75, w: 0.28, h: 0.08 });
-  // Posición timbre
-  const [timbrePos, setTimbrePos] = useState({ x: 0.05, y: 0.75, w: 0.18, h: 0.18 });
+  const [loading,    setLoading]    = useState(true);
+  const [applying,   setApplying]   = useState(false);
+  const [pdfError,   setPdfError]   = useState(null);
 
-  // Qué se está arrastrando: "firma" | "timbre" | null
-  const [dragging,    setDragging]    = useState(null);
-  const [dragOff,     setDragOff]     = useState({ x: 0, y: 0 });
+  const [firmaPos,   setFirmaPos]   = useState({ x: 0.55, y: 0.75, w: 0.28, h: 0.08 });
+  const [timbrePos,  setTimbrePos]  = useState({ x: 0.05, y: 0.75, w: 0.18, h: 0.18 });
+  const [dragging,   setDragging]   = useState(null);
+  const [dragOff,    setDragOff]    = useState({ x: 0, y: 0 });
 
-  // Bytes pre-cargados (evita CORS al confirmar)
   const firmaBytes  = useRef(null);
   const timbreBytes = useRef(null);
 
-  /* ── Pre-cargar bytes de firma y timbre ─────────────────────── */
+  /* ── Pre-cargar bytes ────────────────────────────────────────── */
   useEffect(() => {
-    if (firmaUrl) {
-      fetch(firmaUrl)
-        .then(r => r.arrayBuffer())
-        .then(b => { firmaBytes.current = b; })
-        .catch(e => console.warn("No se pudo precargar firma:", e));
-    }
+    if (firmaUrl) fetch(firmaUrl).then(r=>r.arrayBuffer()).then(b=>{firmaBytes.current=b;})
+      .catch(e=>console.warn("No se pudo precargar firma:", e));
   }, [firmaUrl]);
 
   useEffect(() => {
-    if (timbreUrl) {
-      fetch(timbreUrl)
-        .then(r => r.arrayBuffer())
-        .then(b => { timbreBytes.current = b; })
-        .catch(e => console.warn("No se pudo precargar timbre:", e));
-    }
+    if (timbreUrl) fetch(timbreUrl).then(r=>r.arrayBuffer()).then(b=>{timbreBytes.current=b;})
+      .catch(e=>console.warn("No se pudo precargar timbre:", e));
   }, [timbreUrl]);
 
-  /* ── Renderizar primera página del PDF ─────────────────────── */
+  /* ── Cargar documento PDF ────────────────────────────────────── */
   useEffect(() => {
     if (!pdfFile) return;
     let cancelled = false;
+    setPdfDoc(null);
+    setCurrentPage(1);
+    setNumPages(1);
     setPdfError(null);
     setLoading(true);
 
@@ -55,12 +48,31 @@ export default function FirmaEnPDF({ pdfFile, firmaUrl, timbreUrl, onConfirm, on
       try {
         const pdfjs = await import("pdfjs-dist");
         pdfjs.GlobalWorkerOptions.workerSrc = WORKER_SRC;
-
         const arrayBuffer = await pdfFile.arrayBuffer();
-        const pdf  = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-        const page = await pdf.getPage(1);
-        const vp   = page.getViewport({ scale: 1.5 });
+        const doc = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+        if (!cancelled) {
+          setNumPages(doc.numPages);
+          setPdfDoc(doc);
+        }
+      } catch (e) {
+        console.error("FirmaEnPDF load:", e);
+        if (!cancelled) { setPdfError("Error al cargar el PDF: " + e.message); setLoading(false); }
+      }
+    })();
 
+    return () => { cancelled = true; };
+  }, [pdfFile]);
+
+  /* ── Renderizar página cuando cambia el doc o la página ──────── */
+  useEffect(() => {
+    if (!pdfDoc) return;
+    let cancelled = false;
+    setLoading(true);
+
+    (async () => {
+      try {
+        const page = await pdfDoc.getPage(currentPage);
+        const vp   = page.getViewport({ scale: 1.5 });
         if (cancelled) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -70,16 +82,13 @@ export default function FirmaEnPDF({ pdfFile, firmaUrl, timbreUrl, onConfirm, on
         await page.render({ canvasContext: ctx, viewport: vp }).promise;
         if (!cancelled) setLoading(false);
       } catch (e) {
-        console.error("FirmaEnPDF render:", e);
-        if (!cancelled) {
-          setPdfError("Error al cargar el PDF: " + e.message);
-          setLoading(false);
-        }
+        console.error("FirmaEnPDF render page:", e);
+        if (!cancelled) { setPdfError("Error al renderizar página: " + e.message); setLoading(false); }
       }
     })();
 
     return () => { cancelled = true; };
-  }, [pdfFile]);
+  }, [pdfDoc, currentPage]);
 
   /* ── Drag helpers ───────────────────────────────────────────── */
   const getRect = () => canvasRef.current?.getBoundingClientRect() || { left:0, top:0, width:1, height:1 };
@@ -93,16 +102,12 @@ export default function FirmaEnPDF({ pdfFile, firmaUrl, timbreUrl, onConfirm, on
 
   const moveDrag = useCallback((clientX, clientY) => {
     if (!dragging) return;
-    const r   = getRect();
-    const pos = dragging === "firma" ? firmaPos : timbrePos;
+    const r      = getRect();
+    const pos    = dragging === "firma" ? firmaPos : timbrePos;
     const setter = dragging === "firma" ? setFirmaPos : setTimbrePos;
     const nx = (clientX - r.left - dragOff.x) / r.width;
     const ny = (clientY - r.top  - dragOff.y) / r.height;
-    setter(p => ({
-      ...p,
-      x: Math.max(0, Math.min(1 - p.w, nx)),
-      y: Math.max(0, Math.min(1 - p.h, ny)),
-    }));
+    setter(p => ({ ...p, x: Math.max(0, Math.min(1 - p.w, nx)), y: Math.max(0, Math.min(1 - p.h, ny)) }));
   }, [dragging, dragOff, firmaPos, timbrePos]);
 
   const stopDrag = useCallback(() => setDragging(null), []);
@@ -122,23 +127,20 @@ export default function FirmaEnPDF({ pdfFile, firmaUrl, timbreUrl, onConfirm, on
     };
   }, [moveDrag, stopDrag]);
 
-  /* ── Confirmar: incrustar con pdf-lib ───────────────────────── */
+  /* ── Confirmar: incrustar en la página seleccionada ─────────── */
   const confirmar = async () => {
     setApplying(true);
     try {
       const { PDFDocument } = await import("pdf-lib");
-
       const pdfBytes = await pdfFile.arrayBuffer();
       const pdfDoc   = await PDFDocument.load(pdfBytes);
-      const page     = pdfDoc.getPages()[0];
+      const pages    = pdfDoc.getPages();
+      const page     = pages[currentPage - 1];  // página donde se colocó la firma
       const { width: pw, height: ph } = page.getSize();
 
-      // Incrustar firma
       if (firmaUrl && firmaBytes.current) {
         const isPNG = firmaUrl.toLowerCase().includes(".png") || firmaUrl.includes("image/png");
-        const embFirma = isPNG
-          ? await pdfDoc.embedPng(firmaBytes.current)
-          : await pdfDoc.embedJpg(firmaBytes.current);
+        const embFirma = isPNG ? await pdfDoc.embedPng(firmaBytes.current) : await pdfDoc.embedJpg(firmaBytes.current);
         page.drawImage(embFirma, {
           x:      firmaPos.x * pw,
           y:      ph - (firmaPos.y + firmaPos.h) * ph,
@@ -147,13 +149,9 @@ export default function FirmaEnPDF({ pdfFile, firmaUrl, timbreUrl, onConfirm, on
         });
       }
 
-      // Incrustar timbre
       if (timbreUrl && timbreBytes.current) {
         const isPNG = timbreUrl.toLowerCase().includes(".png") || timbreUrl.includes("image/png");
-        const isPNGt = timbreUrl.toLowerCase().includes(".png") || timbreUrl.includes("image/png");
-        const embTimbre = isPNGt
-          ? await pdfDoc.embedPng(timbreBytes.current)
-          : await pdfDoc.embedJpg(timbreBytes.current);
+        const embTimbre = isPNG ? await pdfDoc.embedPng(timbreBytes.current) : await pdfDoc.embedJpg(timbreBytes.current);
         page.drawImage(embTimbre, {
           x:      timbrePos.x * pw,
           y:      ph - (timbrePos.y + timbrePos.h) * ph,
@@ -174,7 +172,7 @@ export default function FirmaEnPDF({ pdfFile, firmaUrl, timbreUrl, onConfirm, on
     }
   };
 
-  /* ── Overlay draggable genérico ─────────────────────────────── */
+  /* ── Overlay draggable ──────────────────────────────────────── */
   const Overlay = ({ target, pos, imgSrc, label, color }) => (
     <div
       onMouseDown={e => { e.preventDefault(); startDrag(target, e.clientX, e.clientY); }}
@@ -212,7 +210,7 @@ export default function FirmaEnPDF({ pdfFile, firmaUrl, timbreUrl, onConfirm, on
         <div style={{ padding:"14px 18px", borderBottom:"1px solid #e5e7eb", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
           <div>
             <div style={{ fontWeight:700, fontSize:".95rem" }}>Colocar firma y timbre en el acta</div>
-            <div style={{ fontSize:".75rem", color:"#6b7280", marginTop:2 }}>Arrastrá cada recuadro al lugar correcto en el documento</div>
+            <div style={{ fontSize:".75rem", color:"#6b7280", marginTop:2 }}>Navegá entre páginas y arrastrá los recuadros al lugar correcto</div>
           </div>
           <button onClick={onCancel} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"1.2rem", color:"#9ca3af" }}>✕</button>
         </div>
@@ -221,31 +219,85 @@ export default function FirmaEnPDF({ pdfFile, firmaUrl, timbreUrl, onConfirm, on
         <div style={{ flex:1, overflow:"auto", padding:16, display:"flex", gap:16, alignItems:"flex-start" }}>
 
           {/* PDF + overlays */}
-          <div style={{ flex:1, position:"relative", minWidth:0 }} ref={wrapRef}>
-            {loading && (
-              <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:400, background:"#f9fafb", borderRadius:8, color:"#9ca3af" }}>
-                Cargando PDF…
+          <div style={{ flex:1, minWidth:0 }}>
+            {/* Navegación de páginas */}
+            {numPages > 1 && (
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8, marginBottom:8 }}>
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1 || loading}
+                  style={{ padding:"3px 10px", borderRadius:6, border:"1px solid #e5e7eb", background: currentPage===1?"#f9fafb":"#fff", cursor: currentPage===1?"default":"pointer", fontSize:".8rem", color:"#374151", fontWeight:600 }}>
+                  ← Anterior
+                </button>
+                <span style={{ fontSize:".78rem", color:"#6b7280", fontWeight:600, minWidth:90, textAlign:"center" }}>
+                  Página {currentPage} de {numPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(numPages, p + 1))}
+                  disabled={currentPage === numPages || loading}
+                  style={{ padding:"3px 10px", borderRadius:6, border:"1px solid #e5e7eb", background: currentPage===numPages?"#f9fafb":"#fff", cursor: currentPage===numPages?"default":"pointer", fontSize:".8rem", color:"#374151", fontWeight:600 }}>
+                  Siguiente →
+                </button>
+                {/* Acceso rápido a última página */}
+                {currentPage !== numPages && (
+                  <button
+                    onClick={() => setCurrentPage(numPages)}
+                    disabled={loading}
+                    style={{ padding:"3px 10px", borderRadius:6, border:"1px solid #dbeafe", background:"#eff6ff", cursor:"pointer", fontSize:".75rem", color:"#2563eb", fontWeight:600 }}>
+                    Ir a última
+                  </button>
+                )}
               </div>
             )}
-            {pdfError && (
-              <div style={{ padding:16, background:"#fef2f2", border:"1px solid #fca5a5", borderRadius:8, color:"#991b1b", fontSize:".8rem" }}>
-                {pdfError}
-              </div>
-            )}
-            <div style={{ position:"relative", display: loading || pdfError ? "none" : "inline-block", width:"100%", userSelect:"none" }}>
-              <canvas ref={canvasRef} style={{ width:"100%", height:"auto", display:"block", borderRadius:6, border:"1px solid #e5e7eb", boxShadow:"0 2px 8px rgba(0,0,0,.08)" }} />
 
-              {firmaUrl && <Overlay target="firma"  pos={firmaPos}  imgSrc={firmaUrl}  label="firma"   color="#2563eb" />}
-              {timbreUrl && <Overlay target="timbre" pos={timbrePos} imgSrc={timbreUrl} label="timbre"  color="#7c3aed" />}
+            <div style={{ position:"relative" }} ref={wrapRef}>
+              {loading && (
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:400, background:"#f9fafb", borderRadius:8, color:"#9ca3af" }}>
+                  Cargando página {currentPage}…
+                </div>
+              )}
+              {pdfError && (
+                <div style={{ padding:16, background:"#fef2f2", border:"1px solid #fca5a5", borderRadius:8, color:"#991b1b", fontSize:".8rem" }}>
+                  {pdfError}
+                </div>
+              )}
+              <div style={{ position:"relative", display: loading || pdfError ? "none" : "inline-block", width:"100%", userSelect:"none" }}>
+                <canvas ref={canvasRef} style={{ width:"100%", height:"auto", display:"block", borderRadius:6, border:"1px solid #e5e7eb", boxShadow:"0 2px 8px rgba(0,0,0,.08)" }} />
+                {firmaUrl  && <Overlay target="firma"  pos={firmaPos}  imgSrc={firmaUrl}  label="firma"  color="#2563eb" />}
+                {timbreUrl && <Overlay target="timbre" pos={timbrePos} imgSrc={timbreUrl} label="timbre" color="#7c3aed" />}
+              </div>
             </div>
+
+            {/* Indicador de página activa para firma */}
+            {!loading && !pdfError && numPages > 1 && (
+              <div style={{ marginTop:6, textAlign:"center", fontSize:".72rem", color:"#2563eb", fontWeight:600 }}>
+                La firma se incrustará en la página {currentPage}
+              </div>
+            )}
           </div>
 
           {/* Panel lateral */}
           <div style={{ width:190, flexShrink:0, display:"flex", flexDirection:"column", gap:12 }}>
             <div style={{ background:"#f0f9ff", border:"1px solid #bae6fd", borderRadius:8, padding:"10px 12px", fontSize:".75rem", color:"#0369a1", lineHeight:1.5 }}>
               <strong>¿Cómo usar?</strong><br/>
+              {numPages > 1 && <><span style={{color:"#1e40af"}}>1. Navegá a la página donde va la firma.</span><br/></>}
               Arrastrá el recuadro <span style={{color:"#2563eb",fontWeight:700}}>azul (firma)</span> y el <span style={{color:"#7c3aed",fontWeight:700}}>violeta (timbre)</span> al lugar correcto.
             </div>
+
+            {/* Saltar a página */}
+            {numPages > 1 && (
+              <div style={{ background:"#fff", border:"1px solid #e5e7eb", borderRadius:8, padding:"10px 12px" }}>
+                <div style={{ fontSize:".68rem", color:"#374151", fontWeight:700, marginBottom:6 }}>Ir a página</div>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:4 }}>
+                  {Array.from({length:numPages},(_,i)=>i+1).map(n=>(
+                    <button key={n} onClick={()=>setCurrentPage(n)}
+                      style={{ width:28, height:24, borderRadius:4, border:`1px solid ${n===currentPage?"#2563eb":"#e5e7eb"}`, background: n===currentPage?"#2563eb":"#f9fafb", color: n===currentPage?"#fff":"#374151", fontSize:".7rem", fontWeight:700, cursor:"pointer" }}>
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Vista previa firma */}
             {firmaUrl && (
@@ -290,15 +342,20 @@ export default function FirmaEnPDF({ pdfFile, firmaUrl, timbreUrl, onConfirm, on
         </div>
 
         {/* Footer */}
-        <div style={{ padding:"12px 18px", borderTop:"1px solid #e5e7eb", display:"flex", gap:10, justifyContent:"flex-end" }}>
-          <button onClick={onCancel} disabled={applying}
-            style={{ padding:".5rem 1.2rem", borderRadius:7, border:"1px solid #e5e7eb", background:"#fff", cursor:"pointer", fontSize:".82rem", color:"#374151" }}>
-            Cancelar
-          </button>
-          <button onClick={confirmar} disabled={applying || loading || (!firmaUrl && !timbreUrl)}
-            style={{ padding:".5rem 1.4rem", borderRadius:7, border:"none", background: applying?"#93c5fd":"#2563eb", color:"#fff", cursor: applying||loading?"not-allowed":"pointer", fontSize:".82rem", fontWeight:700 }}>
-            {applying ? "Incrustando…" : "✓ Confirmar y subir"}
-          </button>
+        <div style={{ padding:"12px 18px", borderTop:"1px solid #e5e7eb", display:"flex", gap:10, justifyContent:"space-between", alignItems:"center" }}>
+          <div style={{ fontSize:".72rem", color:"#6b7280" }}>
+            {numPages > 1 && `Firmando página ${currentPage} de ${numPages}`}
+          </div>
+          <div style={{ display:"flex", gap:10 }}>
+            <button onClick={onCancel} disabled={applying}
+              style={{ padding:".5rem 1.2rem", borderRadius:7, border:"1px solid #e5e7eb", background:"#fff", cursor:"pointer", fontSize:".82rem", color:"#374151" }}>
+              Cancelar
+            </button>
+            <button onClick={confirmar} disabled={applying || loading || (!firmaUrl && !timbreUrl)}
+              style={{ padding:".5rem 1.4rem", borderRadius:7, border:"none", background: applying?"#93c5fd":"#2563eb", color:"#fff", cursor: applying||loading?"not-allowed":"pointer", fontSize:".82rem", fontWeight:700 }}>
+              {applying ? "Incrustando…" : "✓ Confirmar y subir"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
