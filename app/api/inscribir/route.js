@@ -52,42 +52,50 @@ export async function POST(request) {
     return NextResponse.json({ error: "duplicate" }, { status: 409 });
   }
 
-  // 2. Número de postor
-  const { data: maxPostor } = await supabaseAdmin
-    .from("postores")
-    .select("numero")
-    .eq("remate_id", remateId)
-    .order("numero", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const numero = (maxPostor?.numero || 0) + 1;
+  // 2 + 3. Número de postor + insertar con reintentos ante colisión concurrente
+  // (SELECT MAX + INSERT puede colisionar; si hay UNIQUE en (remate_id, numero)
+  //  el DB rechaza el duplicado y reintentamos con MAX actualizado)
+  let numero, postorData, postorErr;
+  for (let intento = 0; intento < 5; intento++) {
+    const { data: maxPostor } = await supabaseAdmin
+      .from("postores")
+      .select("numero")
+      .eq("remate_id", remateId)
+      .order("numero", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    numero = (maxPostor?.numero || 0) + 1;
 
-  // 3. Insertar
-  const { data: postorData, error: postorErr } = await supabaseAdmin
-    .from("postores")
-    .insert({
-      casa_id:         casaId,
-      remate_id:       remateId,
-      numero,
-      nombre:          nombre.trim(),
-      rut:             rut.trim().toUpperCase(),
-      email:           email.trim(),
-      telefono:        telefono?.trim() || null,
-      tipo:            giro?.trim() ? "empresa" : "natural",
-      empresa:         giro?.trim() || null,
-      direccion:       direccion?.trim() || null,
-      comuna:          comuna || null,
-      estado:          "pendiente",
-      modalidad:       modalidad || "PRESENCIAL",
-      banco:           banco || null,
-      tipo_cuenta:     tipoCta || null,
-      numero_cuenta:   numCta?.trim() || null,
-      comprobante_url: comprobanteUrl || null,
-      suscrito:        suscribir ?? true,
-      user_id:         userId || null,
-    })
-    .select()
-    .single();
+    ({ data: postorData, error: postorErr } = await supabaseAdmin
+      .from("postores")
+      .insert({
+        casa_id:         casaId,
+        remate_id:       remateId,
+        numero,
+        nombre:          nombre.trim(),
+        rut:             rut.trim().toUpperCase(),
+        email:           email.trim(),
+        telefono:        telefono?.trim() || null,
+        tipo:            giro?.trim() ? "empresa" : "natural",
+        empresa:         giro?.trim() || null,
+        direccion:       direccion?.trim() || null,
+        comuna:          comuna || null,
+        estado:          "pendiente",
+        modalidad:       modalidad || "PRESENCIAL",
+        banco:           banco || null,
+        tipo_cuenta:     tipoCta || null,
+        numero_cuenta:   numCta?.trim() || null,
+        comprobante_url: comprobanteUrl || null,
+        suscrito:        suscribir ?? true,
+        user_id:         userId || null,
+      })
+      .select()
+      .single());
+
+    if (!postorErr) break;
+    // Si no es colisión de número, salir del loop
+    if (!postorErr.message?.includes("unique") && !postorErr.code?.includes("23505")) break;
+  }
 
   if (postorErr) {
     return NextResponse.json({ error: postorErr.message }, { status: 500 });
