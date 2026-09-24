@@ -3,6 +3,23 @@ import { supabaseAdmin } from "../_lib/auth";
 
 export const dynamic = 'force-dynamic';
 
+// Rate limit: 10 inscripciones por IP cada 10 minutos
+const RL_WINDOW_MS = 10 * 60 * 1000;
+const RL_MAX = 10;
+const rlMap = new Map(); // ip -> { count, resetAt }
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = rlMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rlMap.set(ip, { count: 1, resetAt: now + RL_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RL_MAX) return false;
+  entry.count++;
+  return true;
+}
+
 function validarRut(rut) {
   if (!rut || typeof rut !== "string") return false;
   const clean = rut.replace(/[.\s]/g, "").toUpperCase();
@@ -20,6 +37,11 @@ function validarRut(rut) {
 
 // POST /api/inscribir
 export async function POST(request) {
+  const ip = (request.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: "Demasiadas solicitudes. Intenta en unos minutos." }, { status: 429 });
+  }
+
   let body;
   try {
     body = await request.json();

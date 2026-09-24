@@ -2202,35 +2202,35 @@ function Dashboard({ session, onLogout }) {
     const cargar = async () => {
       setDbLoading(true);
       try {
-        const timeout = new Promise((_,rej) => setTimeout(()=>rej(new Error("timeout")), 5000));
+        const timeout = new Promise((_,rej) => setTimeout(()=>rej(new Error("timeout")), 8000));
         const lotesQuery = session?.bodegaId
-          ? supabase.from("lotes").select("*").eq("bodega_id", session.bodegaId).order("orden")
-          : supabase.from("lotes").select("*").order("orden");
+          ? supabase.from("lotes").select("*").eq("bodega_id", session.bodegaId).order("orden").limit(1000)
+          : supabase.from("lotes").select("*").order("orden").limit(1000);
         const fetches = Promise.all([
-          supabase.from("remates").select("*, casas(slug)").order("created_at", {ascending:false}),
+          supabase.from("remates").select("*, casas(slug)").order("created_at", {ascending:false}).limit(200),
           lotesQuery,
-          supabase.from("postores").select("*").order("numero"),
-          supabase.from("usuarios").select("*, casas(nombre)").order("nombre"),
+          supabase.from("postores").select("*").order("numero").limit(2000),
+          supabase.from("usuarios").select("*, casas(nombre)").order("nombre").limit(200),
           (session?.role==="admin"
-            ? supabase.from("bodegas").select("*").order("nombre")
-            : supabase.from("bodegas").select("*").eq("casa_id", session?.casaId).order("nombre")),
+            ? supabase.from("bodegas").select("*").order("nombre").limit(100)
+            : supabase.from("bodegas").select("*").eq("casa_id", session?.casaId).order("nombre").limit(100)),
           (session?.casaId
-            ? supabase.from("liquidaciones").select("*").eq("casa_id", session.casaId).order("fecha_iso", {ascending:false})
-            : supabase.from("liquidaciones").select("*").order("fecha_iso", {ascending:false})),
+            ? supabase.from("liquidaciones").select("*").eq("casa_id", session.casaId).order("fecha_iso", {ascending:false}).limit(1000)
+            : supabase.from("liquidaciones").select("*").order("fecha_iso", {ascending:false}).limit(1000)),
           (session?.casaId
-            ? supabase.from("garantias").select("*").eq("casa_id", session.casaId).order("created_at", {ascending:false})
-            : supabase.from("garantias").select("*").order("created_at", {ascending:false})),
+            ? supabase.from("garantias").select("*").eq("casa_id", session.casaId).order("created_at", {ascending:false}).limit(500)
+            : supabase.from("garantias").select("*").order("created_at", {ascending:false}).limit(500)),
           (session?.bodegaId
-            ? supabase.from("actas_entrega").select("*").eq("bodega_id", session.bodegaId).order("created_at",{ascending:false})
+            ? supabase.from("actas_entrega").select("*").eq("bodega_id", session.bodegaId).order("created_at",{ascending:false}).limit(500)
             : session?.casaId
-            ? supabase.from("actas_entrega").select("*").eq("casa_id", session.casaId).order("created_at",{ascending:false})
-            : supabase.from("actas_entrega").select("*").order("created_at",{ascending:false})),
+            ? supabase.from("actas_entrega").select("*").eq("casa_id", session.casaId).order("created_at",{ascending:false}).limit(500)
+            : supabase.from("actas_entrega").select("*").order("created_at",{ascending:false}).limit(500)),
           (session?.casaId
-            ? supabase.from("actas_recepcion_vehiculos").select("*").eq("casa_id", session.casaId).order("created_at",{ascending:false})
-            : supabase.from("actas_recepcion_vehiculos").select("*").order("created_at",{ascending:false})),
+            ? supabase.from("actas_recepcion_vehiculos").select("*").eq("casa_id", session.casaId).order("created_at",{ascending:false}).limit(500)
+            : supabase.from("actas_recepcion_vehiculos").select("*").order("created_at",{ascending:false}).limit(500)),
           (session?.casaId
-            ? supabase.from("causas").select("*").eq("casa_id", session.casaId).order("created_at",{ascending:false})
-            : supabase.from("causas").select("*").order("created_at",{ascending:false})),
+            ? supabase.from("causas").select("*").eq("casa_id", session.casaId).order("created_at",{ascending:false}).limit(500)
+            : supabase.from("causas").select("*").order("created_at",{ascending:false}).limit(500)),
         ]);
         const [remRes, lotRes, posRes, usrRes, bodRes, liqRes, garRes, actasRes, actasRecRes, causasRes] = await Promise.race([fetches, timeout]);
         if (mounted) {

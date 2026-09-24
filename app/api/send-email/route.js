@@ -7,6 +7,19 @@ const FROM_EMAIL     = process.env.FROM_EMAIL || process.env.RESEND_FROM_EMAIL |
 // Tipos que requieren sesión activa (llamados desde el Dashboard)
 const TIPOS_INTERNOS = new Set(["verificado", "bienvenida_postor", "no_comprador"]);
 
+// Rate limit: 20 emails por IP cada 10 minutos (para tipos públicos)
+const RL_WINDOW_MS = 10 * 60 * 1000;
+const RL_MAX = 20;
+const rlMap = new Map();
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = rlMap.get(ip);
+  if (!entry || now > entry.resetAt) { rlMap.set(ip, { count: 1, resetAt: now + RL_WINDOW_MS }); return true; }
+  if (entry.count >= RL_MAX) return false;
+  entry.count++;
+  return true;
+}
+
 // Escapa caracteres HTML peligrosos en datos de usuario
 function esc(s) {
   if (s == null) return "";
@@ -112,6 +125,12 @@ export async function POST(req) {
     if (TIPOS_INTERNOS.has(tipo)) {
       const auth = await requireAuth(req);
       if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    } else {
+      // Tipos públicos: rate limit por IP
+      const ip = (req.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
+      if (!checkRateLimit(ip)) {
+        return NextResponse.json({ ok: false, error: "Demasiadas solicitudes. Intenta en unos minutos." }, { status: 429 });
+      }
     }
 
     const {
