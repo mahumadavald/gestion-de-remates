@@ -94,25 +94,7 @@ CREATE POLICY "liquidaciones_update" ON liquidaciones FOR UPDATE
 CREATE POLICY "liquidaciones_delete" ON liquidaciones FOR DELETE
   USING (casa_id = auth_casa_id() OR auth_is_admin());
 
--- ── GARANTIAS ─────────────────────────────────────────────────────────────────
-ALTER TABLE garantias ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "garantias_select" ON garantias;
-DROP POLICY IF EXISTS "garantias_insert" ON garantias;
-DROP POLICY IF EXISTS "garantias_update" ON garantias;
-DROP POLICY IF EXISTS "garantias_delete" ON garantias;
-
-CREATE POLICY "garantias_select" ON garantias FOR SELECT
-  USING (casa_id = auth_casa_id() OR auth_is_admin());
-
-CREATE POLICY "garantias_insert" ON garantias FOR INSERT
-  WITH CHECK (casa_id = auth_casa_id() OR auth_is_admin());
-
-CREATE POLICY "garantias_update" ON garantias FOR UPDATE
-  USING (casa_id = auth_casa_id() OR auth_is_admin());
-
-CREATE POLICY "garantias_delete" ON garantias FOR DELETE
-  USING (casa_id = auth_casa_id() OR auth_is_admin());
+-- ── GARANTIAS — manejada en supabase_garantias.sql (tabla puede no existir aún) ─
 
 -- ── PUJAS ─────────────────────────────────────────────────────────────────────
 -- pujas se une con lotes para obtener casa_id
