@@ -14,6 +14,7 @@ export default function PageLiquidaciones() {
     liqReview, setLiqReview,
     liqExpanded, setLiqExpanded,
     GASTO_ADMIN_MOTORIZADO,
+    cargarTodasLiquidaciones,
   } = useDashboard();
 
   const generarPDFLiquidacion = async (c, fechaRemate) => {
@@ -291,6 +292,12 @@ export default function PageLiquidaciones() {
               Limpiar
             </button>
           )}
+          <button
+            onClick={async () => { await cargarTodasLiquidaciones(); notify("Histórico completo cargado", "inf"); }}
+            title="Carga liquidaciones de todos los años (por defecto solo se muestran los últimos 12 meses)"
+            style={{background:"transparent",border:"1px solid var(--b2)",borderRadius:6,color:"var(--mu2)",fontSize:".7rem",padding:".3rem .6rem",cursor:"pointer",whiteSpace:"nowrap",marginLeft:"auto"}}>
+            Ver histórico
+          </button>
         </div>
       )}
 

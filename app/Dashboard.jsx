@@ -3384,6 +3384,26 @@ function exportCSV(){
     dbLoading,
     dbGarantias, setDbGarantias,
     liquidaciones, setLiquidaciones,
+    cargarTodasLiquidaciones: async () => {
+      const q = session?.casaId
+        ? supabase.from("liquidaciones").select("*").eq("casa_id", session.casaId).order("fecha_iso", {ascending:false}).limit(5000)
+        : supabase.from("liquidaciones").select("*").order("fecha_iso", {ascending:false}).limit(5000);
+      const { data } = await q;
+      if (data) setLiquidaciones(data.map(l => ({
+        id: l.id, lote: l.lote||"", exp: l.exp||"", postor: l.postor||"",
+        email: l.email||"", monto: l.monto||0, gar: l.garantia||0,
+        saldo: l.saldo||l.monto||0, com: l.com||0, gastosAdm: l.gastos_adm||0,
+        ivaAdm: l.iva_adm||Math.round(((l.com||0)+(l.gastos_adm||0))*0.19),
+        totalAPagar: l.total_a_pagar||0, tipoRemate: l.tipo_remate||"",
+        motorizado: l.motorizado||false, comPct: l.com_pct||10,
+        ppu: l.ppu||false, cantidadLote: l.cantidad_lote||1,
+        montoUnitario: l.monto_unitario||null, afectoIva: l.afecto_iva||false,
+        estado: l.estado||"saldo pendiente", enviado: l.enviado||false,
+        facturado: l.facturado||false, retiro: l.retiro||null,
+        fecha: l.fecha||"", fechaISO: l.fecha_iso||"", remateId: l.remate_id||null,
+        remateNombre: l.remate_nombre||"",
+      })));
+    },
     remateActivo, setRemateActivo,
     lotesFiltroRemate, setLotesFiltroRemate,
     selectedRemate, setSelectedRemate,
