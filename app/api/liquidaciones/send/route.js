@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "../../_lib/auth";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL     = process.env.FROM_EMAIL || "noreply@gestionderemates.cl";
+const FROM_EMAIL     = process.env.RESEND_FROM_EMAIL || process.env.FROM_EMAIL || "TAKKA <notificaciones@takka.cl>";
 
 function esc(s) {
   if (s == null) return "";
