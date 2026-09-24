@@ -147,7 +147,7 @@ function TabRemate({ liquidaciones, dbLotes, dbPostores, dbRemates }) {
     const precioMin      = montos[montos.length - 1] || 0;
     const loteMax        = liqs.find(l => l.monto === precioMax);
     const loteMin        = liqs.find(l => l.monto === precioMin);
-    const postoresUnicos = new Set(liqs.map(l => (l.postor || "").toLowerCase().trim())).size;
+    const postoresUnicos = new Set(liqs.map(l => (l.postor || "").replace(/ \((Online|Presencial)\)$/, "").toLowerCase().trim())).size;
     const retirados      = liqs.filter(l => l.retiro).length;
     const pctRetiro      = pct(retirados, lotesVendidos);
     const pagados        = post.filter(p => p.pagado).length;
@@ -155,7 +155,7 @@ function TabRemate({ liquidaciones, dbLotes, dbPostores, dbRemates }) {
 
     const byPostor = {};
     liqs.forEach(l => {
-      const k = (l.postor || "Desconocido").trim();
+      const k = (l.postor || "Desconocido").replace(/ \((Online|Presencial)\)$/, "").trim();
       if (!byPostor[k]) byPostor[k] = { postor: k, monto: 0, lotes: 0 };
       byPostor[k].monto += l.monto || 0;
       byPostor[k].lotes += 1;
@@ -164,7 +164,7 @@ function TabRemate({ liquidaciones, dbLotes, dbPostores, dbRemates }) {
 
     const byCat = {};
     liqs.forEach(l => {
-      const lote = dbLotes.find(lot => lot.nombre === l.lote || lot.id === l.lote_id);
+      const lote = dbLotes.find(lot => (l.loteId ? lot.id === l.loteId : lot.nombre === l.lote));
       const cat  = lote?.categoria || "Sin categoría";
       if (!byCat[cat]) byCat[cat] = { cat, monto: 0, lotes: 0 };
       byCat[cat].monto += l.monto || 0;
@@ -388,14 +388,14 @@ function TabMensual({ liquidaciones, dbLotes, dbRemates }) {
     const ingresoNeto    = totalCom + totalGAdm;
     const nLotes         = liqs.length;
     const nRemates       = rematesDelMes.length;
-    const nCompradores   = new Set(liqs.map(l => (l.postor || "").toLowerCase().trim())).size;
+    const nCompradores   = new Set(liqs.map(l => (l.postor || "").replace(/ \((Online|Presencial)\)$/, "").toLowerCase().trim())).size;
     const precioPromedio = nLotes > 0 ? Math.round(totalMartillo / nLotes) : 0;
     const lotesMesIds    = new Set(rematesDelMes.map(r => r.id));
     const lotesTotales   = dbLotes.filter(l => lotesMesIds.has(l.remate_id)).length;
     const tasaAdj        = pct(nLotes, lotesTotales);
     const byPostor       = {};
     liqs.forEach(l => {
-      const k = (l.postor || "Desconocido").trim();
+      const k = (l.postor || "Desconocido").replace(/ \((Online|Presencial)\)$/, "").trim();
       if (!byPostor[k]) byPostor[k] = { postor: k, monto: 0, lotes: 0 };
       byPostor[k].monto += l.monto || 0;
       byPostor[k].lotes += 1;
