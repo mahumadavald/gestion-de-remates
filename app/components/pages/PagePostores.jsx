@@ -86,7 +86,7 @@ export default function PagePostores() {
     doc.line(10, y, W - 10, y);
     y += 7;
 
-    const BASE = "https://gestionderemates.cl";
+    const BASE = "https://takka.cl";
     const catUrl = `${BASE}/catalogo/${postor.remate_id || postor.remateId || ""}`;
     const devUrl = `${BASE}/devoluciones?p=${postor.supabaseId || postor.id}`;
     const qrApiBase = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=";
@@ -228,14 +228,14 @@ export default function PagePostores() {
                                   remate:remateInfo?.name||"Remate",fecha:remateInfo?.fecha||null,
                                   casa:casaNom,logo_url:casaInfo.logo_url||null,
                                   email_cliente:p.email,email_casa:casaInfo.email||null,
-                                  modalidad:p.modalidad||null,portal_url:"https://gestionderemates.cl/postor"})});
+                                  modalidad:p.modalidad||null,portal_url:"https://takka.cl/postor"})});
                             } catch(e){}
 
                             if(tempPass) try {
                               await authFetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
                                 body:JSON.stringify({tipo:"bienvenida_postor",nombre:p.name,email_cliente:p.email,
                                   casa:casaNom,logo_url:casaInfo.logo_url||null,email_casa:casaInfo.email||null,
-                                  temp_password:tempPass,portal_url:"https://gestionderemates.cl/postor"})});
+                                  temp_password:tempPass,portal_url:"https://takka.cl/postor"})});
                             } catch(e){}
                           }
                         }}>✓ Verificar</button>

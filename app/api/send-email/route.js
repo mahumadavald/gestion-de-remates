@@ -289,7 +289,7 @@ export async function POST(req) {
     // ── 3. Email de CONFIRMACIÓN (postor verificado por martillero) ──
     if (tipo === "verificado" && email_cliente) {
       const esRemoto = modalidad && (modalidad.toLowerCase().includes("online") || modalidad.toLowerCase().includes("remoto"));
-      const portalUrl = body.portal_url || "https://gestionderemates.cl/dashboard";
+      const portalUrl = body.portal_url || "https://takka.cl/dashboard";
 
       const mensajeAcceso = esRemoto
         ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0fdfe" style="margin:20px 0;">
@@ -388,13 +388,13 @@ export async function POST(req) {
 
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
               <tr><td align="center">
-                <a href="${body.portal_url||'https://gestionderemates.cl/postor'}" style="display:inline-block;background:linear-gradient(135deg,#0891b2,#06b6d4);color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 36px;border-radius:10px;font-family:Arial,sans-serif;">
+                <a href="${body.portal_url||'https://takka.cl/postor'}" style="display:inline-block;background:linear-gradient(135deg,#0891b2,#06b6d4);color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 36px;border-radius:10px;font-family:Arial,sans-serif;">
                   Ingresar a mi cuenta →
                 </a>
               </td></tr>
             </table>
 
-            <p style="font-size:12px;color:#9ca3af;text-align:center;margin:0 0 16px;font-family:Arial,sans-serif;">gestionderemates.cl</p>
+            <p style="font-size:12px;color:#9ca3af;text-align:center;margin:0 0 16px;font-family:Arial,sans-serif;">takka.cl</p>
             <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;font-family:Arial,sans-serif;">¿Dudas? Contacta a ${esc(casa)}${body.email_casa ? " en <a href='mailto:" + body.email_casa + "' style='color:#0891b2;'>" + body.email_casa + "</a>" : ""}.</p>
           </div>
 

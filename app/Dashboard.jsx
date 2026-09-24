@@ -6728,7 +6728,7 @@ function exportCSV(){
                               const casaInfo = casaDB || {};
                               const remateInfo = REMATES_MERGED.find(r=>(r.supabaseId||r.id)===p.remate_id);
                               const casaNom = casaInfo.nombre || "Casa de Remates";
-                              const portalUrl = "https://gestionderemates.cl/dashboard";
+                              const portalUrl = "https://takka.cl/dashboard";
 
                               // 2. Crear cuenta si no existe
                               let tempPass = null;

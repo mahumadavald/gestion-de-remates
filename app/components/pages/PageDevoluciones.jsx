@@ -157,7 +157,7 @@ export default function PageDevoluciones() {
                 if (!sinNotificar.length) { notify("No hay pendientes con email.","inf"); return; }
                 let enviados = 0;
                 for (const p of sinNotificar) {
-                  const devUrl = `https://gestionderemates.cl/devoluciones?p=${p.id}`;
+                  const devUrl = `https://takka.cl/devoluciones?p=${p.id}`;
                   await authFetch("/api/send-email",{method:"POST",headers:{"Content-Type":"application/json"},
                     body:JSON.stringify({tipo:"no_comprador",email_cliente:p.email,nombre:p.nombre||"Postor",
                       numero:p.numero||"—",remate:remateInfo?.name||"Remate",
