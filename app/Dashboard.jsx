@@ -2703,7 +2703,7 @@ function Dashboard({ session, onLogout }) {
     todasLiq.forEach(l => {
       const postorClean = (l.postor||"").replace(/ \((Online|Presencial)\)$/,"");
       const postorData = POSTORES_MERGED.find(p=>p.name===postorClean||p.razonSocial===postorClean) || null;
-      const key = postorData?.nComprador ?? postorClean || l.postor;
+      const key = postorData?.nComprador ?? (postorClean || l.postor);
       if (!byComprador[key]) byComprador[key] = { postorData, lotes:[], key };
       byComprador[key].lotes.push(l);
     });
