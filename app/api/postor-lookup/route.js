@@ -2,6 +2,23 @@ import { supabaseAdmin } from "../_lib/auth";
 
 export const dynamic = 'force-dynamic';
 
+// Rate limit: 10 lookups por IP cada 5 min — previene enumeración de RUTs
+const RL_WINDOW_MS = 5 * 60 * 1000;
+const RL_MAX = 10;
+const rlMap = new Map();
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = rlMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rlMap.set(ip, { count: 1, resetAt: now + RL_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RL_MAX) return false;
+  entry.count++;
+  return true;
+}
+
 function validarRut(rut) {
   if (!rut || typeof rut !== "string") return false;
   const clean = rut.replace(/[.\s]/g, "").toUpperCase();
@@ -19,6 +36,11 @@ function validarRut(rut) {
 
 // GET /api/postor-lookup?rut=12345678-9&casaId=UUID
 export async function GET(request) {
+  const ip = (request.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
+  if (!checkRateLimit(ip)) {
+    return Response.json({ found: false }, { status: 429 });
+  }
+
   const { searchParams } = new URL(request.url);
   const rut    = (searchParams.get("rut")    || "").trim().toUpperCase();
   const casaId = (searchParams.get("casaId") || "").trim();

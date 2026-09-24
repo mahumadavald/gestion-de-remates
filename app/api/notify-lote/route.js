@@ -5,6 +5,10 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || "mahumadavald@gmail.com";
 const FROM_EMAIL  = process.env.RESEND_FROM_EMAIL  || "TAKKA <notificaciones@takka.cl>";
 
+function esc(str) {
+  return String(str ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
 export async function POST(request) {
   const auth = await requireAuth(request);
   if (auth.error) return Response.json({ error: auth.error }, { status: auth.status });
@@ -22,7 +26,7 @@ export async function POST(request) {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to:   [ADMIN_EMAIL],
-      subject: `Nuevo lote pendiente de revisión — ${lote.nombre}`,
+      subject: `Nuevo lote pendiente de revisión — ${esc(lote.nombre)}`,
       html: `
         <div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#f9fafb;border-radius:12px;overflow:hidden;">
           <div style="background:linear-gradient(135deg,#0e7490,#06B6D4);padding:2rem;text-align:center;">
@@ -33,15 +37,15 @@ export async function POST(request) {
             <table style="width:100%;border-collapse:collapse;">
               <tr>
                 <td style="padding:.5rem 0;color:#6b7280;font-size:.85rem;width:120px;">Nombre</td>
-                <td style="padding:.5rem 0;font-weight:700;color:#111827;">${lote.nombre || "—"}</td>
+                <td style="padding:.5rem 0;font-weight:700;color:#111827;">${esc(lote.nombre) || "—"}</td>
               </tr>
               <tr style="border-top:1px solid #e5e7eb;">
                 <td style="padding:.5rem 0;color:#6b7280;font-size:.85rem;">Código</td>
-                <td style="padding:.5rem 0;color:#374151;">${lote.codigo || "—"}</td>
+                <td style="padding:.5rem 0;color:#374151;">${esc(lote.codigo) || "—"}</td>
               </tr>
               <tr style="border-top:1px solid #e5e7eb;">
                 <td style="padding:.5rem 0;color:#6b7280;font-size:.85rem;">Categoría</td>
-                <td style="padding:.5rem 0;color:#374151;">${lote.categoria || "—"}</td>
+                <td style="padding:.5rem 0;color:#374151;">${esc(lote.categoria) || "—"}</td>
               </tr>
               <tr style="border-top:1px solid #e5e7eb;">
                 <td style="padding:.5rem 0;color:#6b7280;font-size:.85rem;">Base</td>
@@ -50,12 +54,12 @@ export async function POST(request) {
               ${lote.descripcion ? `
               <tr style="border-top:1px solid #e5e7eb;">
                 <td style="padding:.5rem 0;color:#6b7280;font-size:.85rem;">Descripción</td>
-                <td style="padding:.5rem 0;color:#374151;font-size:.875rem;">${lote.descripcion}</td>
+                <td style="padding:.5rem 0;color:#374151;font-size:.875rem;">${esc(lote.descripcion)}</td>
               </tr>` : ""}
               ${bodegaAdmin ? `
               <tr style="border-top:1px solid #e5e7eb;">
                 <td style="padding:.5rem 0;color:#6b7280;font-size:.85rem;">Ingresado por</td>
-                <td style="padding:.5rem 0;color:#374151;">${bodegaAdmin}</td>
+                <td style="padding:.5rem 0;color:#374151;">${esc(bodegaAdmin)}</td>
               </tr>` : ""}
             </table>
 
