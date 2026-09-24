@@ -336,7 +336,7 @@ export default function PageLiquidaciones() {
                   remateLiqs.forEach(l=>{
                     const postorClean = (l.postor||"").replace(/ \((Online|Presencial)\)$/,"");
                     const pd = POSTORES_MERGED.find(p=>p.name===postorClean||p.razonSocial===postorClean)||null;
-                    const key = pd?.nComprador??postorClean||l.postor;
+                    const key = pd?.nComprador ?? (postorClean || l.postor);
                     if(!byComprador[key]) byComprador[key]={postorData:pd,lotes:[],key};
                     byComprador[key].lotes.push(l);
                   });
