@@ -2274,6 +2274,7 @@ function Dashboard({ session, onLogout }) {
           if (liqRes?.data) setLiquidaciones(liqRes.data.map(l => ({
             id:            l.id,
             lote:          l.lote || "",
+            loteId:        l.lote_id || null,
             exp:           l.exp || "",
             postor:        l.postor || "",
             email:         l.email || "",
@@ -2562,6 +2563,7 @@ function Dashboard({ session, onLogout }) {
         remate_id:     newLiq.remateId,
         remate_nombre: newLiq.remateNombre,
         casa_id:       session?.casaId || null,
+        lote_id:       loteIdAdj || null,
       }).select("id").single().then(({ data: row, error }) => {
         if (error) { console.error("[liquidaciones] Error al persistir:", error.message); return; }
         // Sync DB UUID back into local state so subsequent updates hit the right row
@@ -3416,7 +3418,7 @@ function exportCSV(){
         : supabase.from("liquidaciones").select("*").order("fecha_iso", {ascending:false}).limit(5000);
       const { data } = await q;
       if (data) setLiquidaciones(data.map(l => ({
-        id: l.id, lote: l.lote||"", exp: l.exp||"", postor: l.postor||"",
+        id: l.id, lote: l.lote||"", loteId: l.lote_id||null, exp: l.exp||"", postor: l.postor||"",
         email: l.email||"", monto: l.monto||0, gar: l.garantia||0,
         saldo: l.saldo||l.monto||0, com: l.com||0, gastosAdm: l.gastos_adm||0,
         ivaAdm: l.iva_adm||Math.round(((l.com||0)+(l.gastos_adm||0))*0.19),

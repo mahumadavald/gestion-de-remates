@@ -36,7 +36,10 @@ export default function PagePlanilla() {
                     <td style={{fontSize:".75rem",color:"var(--mu2)"}}>{l.propietario||"—"}</td>
                     <td style={{textAlign:"right",fontWeight:600}}>${fmtClp(l.base)}</td>
                     {(()=>{
-                      const adjLote = liquidaciones.find(liq=>liq.lote===l.nombre&&(!lotesFiltroRemate||(liq.remateId===lotesFiltroRemate)));
+                      const adjLote = liquidaciones.find(liq =>
+                        (!lotesFiltroRemate || liq.remateId === lotesFiltroRemate) &&
+                        (liq.loteId ? liq.loteId === l.id : liq.lote === l.nombre)
+                      );
                       return (<>
                         <td style={{fontSize:".75rem",color:"var(--wh2)",fontWeight:adjLote?600:400}}>{adjLote?adjLote.postor.replace(" (Online)","").replace(" (Presencial)",""):"—"}</td>
                         <td style={{textAlign:"right",fontWeight:adjLote?700:400,color:adjLote?"var(--gr)":"var(--mu)"}}>{adjLote?`$${fmtClp(adjLote.monto)}`:"—"}</td>
