@@ -2488,8 +2488,9 @@ function Dashboard({ session, onLogout }) {
     const winner   = bids[idx]?.winner || null;
     const montoUnitario = bids[idx]?.current || lots[idx]?.base;
     const loteNom  = lots[idx]?.name;
-    // Look up matching lote from DB for tipo/motorizado/ppu
-    const loteReal = LOTES_MERGED.find(l => l.name === loteNom) || {};
+    const loteIdSala = lots[idx]?.supabaseId;
+    // Buscar por ID primero (robusto), nombre como fallback para lotes cargados manualmente
+    const loteReal = LOTES_MERGED.find(l => loteIdSala ? l.id === loteIdSala : l.name === loteNom) || {};
     const tipoRemate  = loteReal.tipoRemate || "judicial";
     const motorizado  = loteReal.motorizado || lots[idx]?.cat==="Vehículo" || false;
     const comPct      = loteReal.com ?? COMISIONES[tipoRemate]?.com ?? 10;
@@ -2700,8 +2701,9 @@ function Dashboard({ session, onLogout }) {
     // Buscar datos completos del postor en POSTORES
     const byComprador = {};
     todasLiq.forEach(l => {
-      const postorData = POSTORES_MERGED.find(p=>p.name===l.postor||p.razonSocial===l.postor) || null;
-      const key = postorData?.nComprador ?? l.postor;
+      const postorClean = (l.postor||"").replace(/ \((Online|Presencial)\)$/,"");
+      const postorData = POSTORES_MERGED.find(p=>p.name===postorClean||p.razonSocial===postorClean) || null;
+      const key = postorData?.nComprador ?? postorClean || l.postor;
       if (!byComprador[key]) byComprador[key] = { postorData, lotes:[], key };
       byComprador[key].lotes.push(l);
     });
