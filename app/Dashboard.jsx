@@ -1,30 +1,41 @@
 'use client'
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { supabase } from "./lib/supabase";
 import { calcLiquidacion, printLiquidacion } from "./lib/liquidacion";
-import PageBodegas  from "./components/pages/PageBodegas";
-import PageUsuarios from "./components/pages/PageUsuarios";
-import PageLicencias from "./components/pages/PageLicencias";
-import PageCasas    from "./components/pages/PageCasas";
-import PageConfig        from "./components/pages/PageConfig";
-import PageKPIs          from "./components/pages/PageKPIs";
-import PageActasEntrega   from "./components/pages/PageActasEntrega";
-import PageActasRecepcion from "./components/pages/PageActasRecepcion";
-import PageCausas         from "./components/pages/PageCausas";
 import { toDisplay }      from "./lib/toDisplay";
-import PageBodega         from "./components/pages/PageBodega";
-import PageRemates        from "./components/pages/PageRemates";
-import PageLotes          from "./components/pages/PageLotes";
-import PageSala           from "./components/pages/PageSala";
 import { authFetch }      from "./lib/authFetch";
 import { DashboardContext } from "./lib/DashboardContext";
-import PagePostores      from "./components/pages/PagePostores";
-import PageGarantias     from "./components/pages/PageGarantias";
-import PageVendedores    from "./components/pages/PageVendedores";
-import PageLiquidaciones from "./components/pages/PageLiquidaciones";
-import PagePlanilla      from "./components/pages/PagePlanilla";
-import PageDevoluciones  from "./components/pages/PageDevoluciones";
+
+// ── Páginas ligeras — carga inmediata ───────────────────────────────
+import PageBodegas        from "./components/pages/PageBodegas";
+import PageUsuarios       from "./components/pages/PageUsuarios";
+import PageLicencias      from "./components/pages/PageLicencias";
+import PageCasas          from "./components/pages/PageCasas";
+import PageConfig         from "./components/pages/PageConfig";
+import PageKPIs           from "./components/pages/PageKPIs";
+import PageCausas         from "./components/pages/PageCausas";
+import PageBodega         from "./components/pages/PageBodega";
+import PageRemates        from "./components/pages/PageRemates";
+import PageGarantias      from "./components/pages/PageGarantias";
+import PagePlanilla       from "./components/pages/PagePlanilla";
+
+// ── Páginas pesadas — lazy (jsPDF, xlsx, qrcode, etc.) ──────────────
+const PageSala           = lazy(() => import("./components/pages/PageSala"));
+const PageLotes          = lazy(() => import("./components/pages/PageLotes"));
+const PagePostores       = lazy(() => import("./components/pages/PagePostores"));
+const PageVendedores     = lazy(() => import("./components/pages/PageVendedores"));
+const PageLiquidaciones  = lazy(() => import("./components/pages/PageLiquidaciones"));
+const PageDevoluciones   = lazy(() => import("./components/pages/PageDevoluciones"));
+const PageActasEntrega   = lazy(() => import("./components/pages/PageActasEntrega"));
+const PageActasRecepcion = lazy(() => import("./components/pages/PageActasRecepcion"));
+
+const PageFallback = () => (
+  <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"40vh",color:"var(--mu)",fontSize:".8rem",gap:".6rem"}}>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{animation:"spin 1s linear infinite"}}><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+    Cargando…
+  </div>
+);
 
 
 // ── BRAND ─────────────────────────────────────────────────────────
@@ -4657,6 +4668,9 @@ function exportCSV(){
           </div>
         )}
 
+        {/* ══ PÁGINAS (lazy-loaded dentro de Suspense) ══ */}
+        <Suspense fallback={<PageFallback/>}>
+
         {/* ══ REMATES ══ */}
         {page==="remates" && <PageRemates
           session={session}
@@ -6293,6 +6307,8 @@ function exportCSV(){
 
       {/* ══ PLANILLA DE REMATE ══ */}
       {page==="planilla" && <PagePlanilla/>}
+
+        </Suspense>
 
       {/* ══ RESULTADO DE REMATE ══ */}
       {page==="resultado-remate" && (()=>{

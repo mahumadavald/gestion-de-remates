@@ -3,7 +3,9 @@
     "dev": "next dev",
     "dev:webpack": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",
@@ -18,5 +20,8 @@
     "recharts": "^2.15.0",
     "resend": "^6.27.0",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.1"
   }
 }
