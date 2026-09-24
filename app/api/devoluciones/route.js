@@ -3,6 +3,19 @@ import { supabaseAdmin } from "../_lib/auth";
 
 export const dynamic = 'force-dynamic';
 
+// Rate limit: 5 actualizaciones por IP cada 10 min (endpoint público de escritura)
+const RL_WINDOW_MS = 10 * 60 * 1000;
+const RL_MAX = 5;
+const rlMap = new Map();
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = rlMap.get(ip);
+  if (!entry || now > entry.resetAt) { rlMap.set(ip, { count: 1, resetAt: now + RL_WINDOW_MS }); return true; }
+  if (entry.count >= RL_MAX) return false;
+  entry.count++;
+  return true;
+}
+
 // GET /api/devoluciones?p=<postor-uuid>
 // Carga los datos del postor + remate + casa para pre-rellenar el formulario.
 // El UUID actúa como token de acceso (128 bits, imposible de adivinar).
@@ -45,6 +58,11 @@ export async function GET(request) {
 // PATCH /api/devoluciones
 // Guarda los datos bancarios del postor identificado por su UUID.
 export async function PATCH(request) {
+  const ip = (request.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: "Demasiadas solicitudes. Intenta en unos minutos." }, { status: 429 });
+  }
+
   let body;
   try { body = await request.json(); }
   catch { return NextResponse.json({ error: "JSON inválido" }, { status: 400 }); }
