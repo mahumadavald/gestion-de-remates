@@ -17,22 +17,26 @@ function validarRut(rut) {
   return dv === dvCalc;
 }
 
-// GET /api/postor-lookup?rut=12345678-9
+// GET /api/postor-lookup?rut=12345678-9&casaId=UUID
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const rut = (searchParams.get("rut") || "").trim().toUpperCase();
+  const rut    = (searchParams.get("rut")    || "").trim().toUpperCase();
+  const casaId = (searchParams.get("casaId") || "").trim();
 
   if (!rut || !validarRut(rut)) {
     return Response.json({ found: false }, { status: 400 });
   }
 
-  const { data, error } = await supabaseAdmin
+  let query = supabaseAdmin
     .from("postores")
     .select("nombre, email, telefono, empresa, direccion, comuna")
     .eq("rut", rut)
     .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+
+  if (casaId) query = query.eq("casa_id", casaId);
+
+  const { data, error } = await query.maybeSingle();
 
   if (error || !data) return Response.json({ found: false });
 

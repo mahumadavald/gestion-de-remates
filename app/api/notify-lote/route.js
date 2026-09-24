@@ -1,10 +1,14 @@
 import { Resend } from "resend";
+import { requireAuth } from "../_lib/auth";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || "mahumadavald@gmail.com";
 const FROM_EMAIL  = process.env.RESEND_FROM_EMAIL  || "TAKKA <notificaciones@takka.cl>";
 
 export async function POST(request) {
+  const auth = await requireAuth(request);
+  if (auth.error) return Response.json({ error: auth.error }, { status: auth.status });
+
   try {
     const body = await request.json();
     const { lote, bodegaAdmin } = body;

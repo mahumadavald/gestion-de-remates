@@ -2288,6 +2288,7 @@ function Dashboard({ session, onLogout }) {
             afectoIva:     l.afecto_iva || false,
             estado:        l.estado || "saldo pendiente",
             enviado:       l.enviado || false,
+            facturado:     l.facturado || false,
             retiro:        l.retiro || null,
             fecha:         l.fecha || "",
             fechaISO:      l.fecha_iso || "",
@@ -4061,7 +4062,7 @@ function exportCSV(){
                         // Notificar por email al admin si es bodega
                         if(session?.roles?.includes("administrador bodega")){
                           const loteGuardado = lotData?.[lotData.length-1] || {};
-                          fetch("/api/notify-lote",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lote:{nombre:wizDatos.nombre,codigo:loteGuardado.codigo,categoria:loteGuardado.categoria,base:baseNum,descripcion:loteGuardado.descripcion},bodegaAdmin:session?.name})}).catch(()=>{});
+                          authFetch("/api/notify-lote",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lote:{nombre:wizDatos.nombre,codigo:loteGuardado.codigo,categoria:loteGuardado.categoria,base:baseNum,descripcion:loteGuardado.descripcion},bodegaAdmin:session?.name})}).catch(()=>{});
                         }
                         setModal(null); resetWiz();
                         notify(session?.roles?.includes("administrador bodega") ? "✓ Lote enviado a revisión." : "Lote guardado correctamente.","sold");

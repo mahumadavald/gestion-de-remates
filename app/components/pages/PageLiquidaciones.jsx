@@ -3,7 +3,6 @@ import { useDashboard } from "../../lib/DashboardContext";
 import { calcLiquidacion } from "../../lib/liquidacion";
 
 const fmt = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n);
-const ADJUDICACIONES = [];
 
 export default function PageLiquidaciones() {
   const {
@@ -258,15 +257,22 @@ export default function PageLiquidaciones() {
               if(rid) {
                 const r = REMATES_MERGED.find(x=>x.id===rid);
                 if(r) {
-                  const todasLiq = [...ADJUDICACIONES.map(a=>({lote:a.lote,exp:"",monto:a.monto,comPct:3,motorizado:false,postor:a.postor,rut:a.rut||"—",email:""})),...liquidaciones];
+                  const remateLiqs = liquidaciones.filter(l => l.remateId === rid);
                   const byComprador = {};
-                  todasLiq.forEach(l=>{
-                    const pd = POSTORES_MERGED.find(p=>p.name===l.postor||p.razonSocial===l.postor)||null;
-                    const key = pd?.nComprador??l.postor;
+                  remateLiqs.forEach(l=>{
+                    const postorClean = (l.postor||"").replace(/ \((Online|Presencial)\)$/,"");
+                    const pd = POSTORES_MERGED.find(p=>p.name===postorClean||p.razonSocial===postorClean)||null;
+                    const key = pd?.nComprador??postorClean||l.postor;
                     if(!byComprador[key]) byComprador[key]={postorData:pd,lotes:[],key};
                     byComprador[key].lotes.push(l);
                   });
-                  const compradores = Object.values(byComprador).map(c=>({...c,liq:calcLiquidacion(c.lotes,c.postorData,GASTO_ADMIN_MOTORIZADO),enviado:false,facturado:false}));
+                  const compradores = Object.values(byComprador).map(c=>({
+                    ...c,
+                    liq: calcLiquidacion(c.lotes, c.postorData, GASTO_ADMIN_MOTORIZADO),
+                    enviado:   c.lotes.some(l => l.enviado),
+                    pagado:    c.lotes.some(l => l.estado === "pagado"),
+                    facturado: c.lotes.some(l => l.facturado),
+                  }));
                   setLiqReview({compradores,fecha:r.fecha,remateNombre:r.name,remateId:r.id});
                 }
               } else {

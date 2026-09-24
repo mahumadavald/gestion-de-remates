@@ -358,7 +358,8 @@ function ParticiparContent() {
       // 1. Buscar en TAKKA vía API route server-side (no expone la anon key al cliente)
       let data = null;
       try {
-        const res = await fetch(`/api/postor-lookup?rut=${encodeURIComponent(rut)}`);
+        const lookupUrl = `/api/postor-lookup?rut=${encodeURIComponent(rut)}${casa?.id ? `&casaId=${encodeURIComponent(casa.id)}` : ""}`;
+        const res = await fetch(lookupUrl);
         if (!cancelled && res.ok) {
           const json = await res.json();
           if (json.found) data = json.data;
@@ -551,6 +552,7 @@ function ParticiparContent() {
         remate:        remateSeleccionado?.nombre || "Remate",
         fecha:         remateSeleccionado?.fecha || null,
         casa:          casa.nombre,
+        casaId:        casa.id,
         logo_url:      casa.logo_url || null,
         email_cliente: email.trim(),
         email_casa:    casa.email || null,

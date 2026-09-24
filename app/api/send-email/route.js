@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "../_lib/auth";
+import { requireAuth, supabaseAdmin } from "../_lib/auth";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL     = process.env.FROM_EMAIL || process.env.RESEND_FROM_EMAIL || "noreply@gestionderemates.cl";
@@ -129,6 +129,16 @@ export async function POST(req) {
     const esOnline = modalidad && modalidad.toLowerCase().includes("online");
 
     const results = [];
+
+    // Para tipos públicos, validar que la casaId exista en la BD (evita spam)
+    const casaIdBody = body.casaId || body.casa_id;
+    if ((tipo === "cliente" || tipo === "casa") && casaIdBody) {
+      const { data: casaCheck } = await supabaseAdmin
+        .from("casas").select("id").eq("id", casaIdBody).maybeSingle();
+      if (!casaCheck) {
+        return NextResponse.json({ ok: false, error: "Casa no encontrada" }, { status: 404 });
+      }
+    }
 
     // ── 1. Email al CLIENTE (pre-inscripción desde formulario) ───────
     if (tipo === "cliente" && email_cliente) {
