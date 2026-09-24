@@ -2346,22 +2346,36 @@ function Dashboard({ session, onLogout }) {
     if(id) setSalaRemateId(id);
   }, [remateActivo]);
 
-  // ── Sala: persistencia de estado para sobrevivir recargas ────────
+  // ── Sala: persistencia de estado (localStorage + Supabase) ────────
   useEffect(() => {
     if (!salaRemateId) return;
     try { localStorage.setItem("takka_sala_state", JSON.stringify({ salaRemateId, idx, aState })); } catch {}
+    // Persist to Supabase (fire-and-forget) so state survives across devices/tabs
+    supabase.from("sala_estado").upsert(
+      { remate_id: salaRemateId, idx, a_state: aState, updated_at: new Date().toISOString() },
+      { onConflict: "remate_id" }
+    ).then(({ error }) => { if (error) console.warn("[sala_estado] upsert:", error.message); });
   }, [salaRemateId, idx, aState]);
 
-  // Restaurar idx/aState si el remateId coincide con el guardado
+  // Restaurar idx/aState: lee Supabase primero, cae en localStorage
   useEffect(() => {
     if (!salaRemateId) return;
-    try {
-      const saved = JSON.parse(localStorage.getItem("takka_sala_state") || "null");
-      if (saved?.salaRemateId === salaRemateId && saved.idx > 0) {
-        setIdx(saved.idx);
-        if (saved.aState === "live" || saved.aState === "sold") setAState(saved.aState);
-      }
-    } catch {}
+    supabase.from("sala_estado").select("idx, a_state").eq("remate_id", salaRemateId).maybeSingle()
+      .then(({ data }) => {
+        if (data && data.idx > 0) {
+          setIdx(data.idx);
+          if (data.a_state === "live" || data.a_state === "sold") setAState(data.a_state);
+          return;
+        }
+        // Fallback: localStorage
+        try {
+          const saved = JSON.parse(localStorage.getItem("takka_sala_state") || "null");
+          if (saved?.salaRemateId === salaRemateId && saved.idx > 0) {
+            setIdx(saved.idx);
+            if (saved.aState === "live" || saved.aState === "sold") setAState(saved.aState);
+          }
+        } catch {}
+      });
   }, [salaRemateId]);
 
   // ── Supabase: realtime pujas ─────────────────────────────────────
