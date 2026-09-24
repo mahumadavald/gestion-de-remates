@@ -7,8 +7,31 @@ export const dynamic = 'force-dynamic';
 const AHUMADA_URL   = process.env.AHUMADA_API_URL;
 const AHUMADA_TOKEN = process.env.AHUMADA_API_TOKEN;
 
+// Rate limiting: GET (lookups) más permisivo, POST (sync) más estricto
+const RL_WINDOW_MS = 5 * 60 * 1000; // 5 min
+const RL_MAX_GET  = 30;
+const RL_MAX_POST = 5;
+const rlMap = new Map(); // `get/post:ip` -> { count, resetAt }
+
+function checkRateLimit(key, max) {
+  const now = Date.now();
+  const entry = rlMap.get(key);
+  if (!entry || now > entry.resetAt) {
+    rlMap.set(key, { count: 1, resetAt: now + RL_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= max) return false;
+  entry.count++;
+  return true;
+}
+
 // GET /api/ahumada?rut=12345678-9  →  lookup en cliente DB de Ahumada
 export async function GET(request) {
+  const ip = (request.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
+  if (!checkRateLimit(`get:${ip}`, RL_MAX_GET)) {
+    return Response.json({ found: false }, { status: 429 });
+  }
+
   const { searchParams } = new URL(request.url);
   const rut = searchParams.get("rut") || "";
 
@@ -37,6 +60,11 @@ export async function GET(request) {
 // Body: { nombre, rut, email, telefono, giro, direccion, comuna, banco,
 //         tipo_cuenta, numero_cuenta, modalidad, suscribir, comprobante_url }
 export async function POST(request) {
+  const ip = (request.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
+  if (!checkRateLimit(`post:${ip}`, RL_MAX_POST)) {
+    return Response.json({ success: false, error: "rate_limit" }, { status: 429 });
+  }
+
   let body;
   try { body = await request.json(); } catch { return Response.json({ success: false }, { status: 400 }); }
 
