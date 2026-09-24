@@ -3,6 +3,79 @@ import { useDashboard } from "../../lib/DashboardContext";
 import { calcLiquidacion } from "../../lib/liquidacion";
 
 const fmt = n => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n);
+const num = n => Math.round(n ?? 0);
+const csvEsc = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+
+function exportarCSV(liqReview) {
+  const cabecera = [
+    "N°","Nombre / Razón Social","RUT","Email","Teléfono",
+    "N° Lotes","Garantía","Total Bruto","Comisión","IVA","Total a Pagar",
+    "Enviado","Pagado","Facturado",
+  ].map(csvEsc).join(",");
+
+  const filas = liqReview.compradores.map((c) => {
+    const p = c.postorData;
+    const l = c.liq;
+    return [
+      String(c.key).padStart(2,"0"),
+      p?.razonSocial || c.lotes[0]?.postor || "",
+      p?.rut || "",
+      p?.email || "",
+      p?.tel || "",
+      c.lotes.length,
+      num(l.garantia),
+      num(l.total),
+      num(l.totalCom),
+      num(l.iva),
+      num(l.totalAPagar),
+      c.enviado   ? "Sí" : "No",
+      c.pagado    ? "Sí" : "No",
+      c.facturado ? "Sí" : "No",
+    ].map(csvEsc).join(",");
+  });
+
+  _descargarCSV(
+    [cabecera, ...filas].join("\r\n"),
+    `liquidaciones-${liqReview.remateNombre.replace(/[^a-zA-Z0-9]/g,"-")}-${liqReview.fecha||"sin-fecha"}.csv`,
+  );
+}
+
+function exportarCSVDetalle(liqReview) {
+  const cabecera = [
+    "N° Comprador","Nombre / Razón Social","RUT",
+    "Exp.","Descripción Lote","Monto Lote","Comisión %","Comisión","Gastos Adm.",
+  ].map(csvEsc).join(",");
+
+  const filas = liqReview.compradores.flatMap((c) => {
+    const p = c.postorData;
+    return (c.liq.lineas || []).map(ln => [
+      String(c.key).padStart(2,"0"),
+      p?.razonSocial || c.lotes[0]?.postor || "",
+      p?.rut || "",
+      ln.exp || "",
+      ln.lote || "",
+      num(ln.monto),
+      ln.comPct ?? 10,
+      num(ln.com),
+      num(ln.gastosAdm),
+    ].map(csvEsc).join(","));
+  });
+
+  _descargarCSV(
+    [cabecera, ...filas].join("\r\n"),
+    `liquidaciones-detalle-${liqReview.remateNombre.replace(/[^a-zA-Z0-9]/g,"-")}-${liqReview.fecha||"sin-fecha"}.csv`,
+  );
+}
+
+function _descargarCSV(contenido, nombreArchivo) {
+  const blob = new Blob(["﻿" + contenido], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = nombreArchivo;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function PageLiquidaciones() {
   const {
@@ -362,11 +435,27 @@ export default function PageLiquidaciones() {
         <div className="table-card" style={{marginBottom:"1.2rem"}}>
           <div className="table-head">
             <div className="table-title">Resumen compradores — {liqReview.fecha}</div>
-            <div style={{fontSize:".72rem",color:"var(--mu)"}}>
-              {liqReview.compradores.length} compradores · Total bruto{" "}
-              <strong style={{color:"var(--ac)"}}>
-                {fmt(liqReview.compradores.reduce((s,c)=>s+c.liq.total,0))}
-              </strong>
+            <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
+              <div style={{fontSize:".72rem",color:"var(--mu)"}}>
+                {liqReview.compradores.length} compradores · Total bruto{" "}
+                <strong style={{color:"var(--ac)"}}>
+                  {fmt(liqReview.compradores.reduce((s,c)=>s+c.liq.total,0))}
+                </strong>
+              </div>
+              <button
+                onClick={() => exportarCSV(liqReview)}
+                title="Exportar resumen por comprador (1 fila por comprador)"
+                style={{background:"transparent",border:"1px solid var(--b2)",borderRadius:6,color:"var(--mu2)",fontSize:".7rem",padding:".3rem .65rem",cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:".35rem"}}>
+                <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 13h10M7 1v8M4 6l3 3 3-3"/></svg>
+                CSV
+              </button>
+              <button
+                onClick={() => exportarCSVDetalle(liqReview)}
+                title="Exportar detalle por lote (1 fila por lote adjudicado)"
+                style={{background:"transparent",border:"1px solid var(--b2)",borderRadius:6,color:"var(--mu2)",fontSize:".7rem",padding:".3rem .65rem",cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:".35rem"}}>
+                <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 13h10M7 1v8M4 6l3 3 3-3"/></svg>
+                CSV detalle
+              </button>
             </div>
           </div>
           <table>
