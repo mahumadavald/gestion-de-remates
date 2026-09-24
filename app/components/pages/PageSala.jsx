@@ -14,7 +14,7 @@ const BidRing = ({ seconds, total, nextAmount, increment }) => {
   const adjudicando = seconds <= 1;
   return (
     <div className="bid-ring-wrap" style={{
-      background: urgent ? `rgba(${adjudicando?"239,68,68":"245,158,11"},.1)` : "rgba(56,178,246,.06)",
+      background: urgent ? `rgba(${adjudicando?"239,68,68":"245,158,11"},.1)` : "rgba(6,182,212,.06)",
       border: `1px solid rgba(${adjudicando?"239,68,68":"245,158,11"},.${urgent?".3":"18"})`,
       animation: urgent ? "losepulse 0.6s infinite" : "none",
     }}>
@@ -219,7 +219,7 @@ export default function PageSala({
                           Quitar
                         </button>
                         <label htmlFor={`phadd${idx}`}
-                          style={{position:"absolute",top:6,right:6,background:"rgba(56,178,246,.85)",borderRadius:5,padding:".15rem .45rem",fontSize:".62rem",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:".2rem"}}>
+                          style={{position:"absolute",top:6,right:6,background:"rgba(6,182,212,.85)",borderRadius:5,padding:".15rem .45rem",fontSize:".62rem",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:".2rem"}}>
                           <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 1v8M1 5h8"/></svg>
                           Foto
                           <input id={`phadd${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
@@ -259,7 +259,7 @@ export default function PageSala({
               </div>
 
               {/* Timer — barra horizontal nueva */}
-              <div style={{display:"flex",alignItems:"center",gap:".65rem",padding:".6rem 1.1rem .75rem",flexShrink:0,borderTop:"1px solid var(--b1)",background:"rgba(0,0,0,.08)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:".65rem",padding:".6rem 1.1rem .75rem",flexShrink:0,borderTop:"1px solid var(--b1)",background:"var(--s3)"}}>
                 <span style={{fontSize:".65rem",fontWeight:600,color:"var(--mu2)",whiteSpace:"nowrap"}}>Tiempo</span>
                 <div style={{flex:1,height:5,background:"var(--b1)",borderRadius:3,overflow:"hidden"}}>
                   <div style={{height:"100%",borderRadius:3,transition:"width 1s linear, background .5s",width:`${aState==="live"&&bidTimer!==null&&bidTimer>0?timerPct:0}%`,background:timerColor}}/>
@@ -280,7 +280,7 @@ export default function PageSala({
                   return (
                     <div key={i}
                       onClick={()=>{ if(!esCurrent){ setIdx(i); setAState("waiting"); setBidTimer(null); } }}
-                      style={{display:"flex",alignItems:"center",gap:".7rem",padding:".5rem .65rem",borderRadius:10,background:esCurrent?"rgba(56,178,246,.07)":"rgba(255,255,255,.025)",border:`1px solid ${esCurrent?"rgba(56,178,246,.25)":"var(--b1)"}`,cursor:esCurrent?"default":"pointer",opacity:esAdj?.65:1,transition:"border-color .2s"}}>
+                      style={{display:"flex",alignItems:"center",gap:".7rem",padding:".5rem .65rem",borderRadius:10,background:esCurrent?"rgba(6,182,212,.07)":"rgba(255,255,255,.025)",border:`1px solid ${esCurrent?"rgba(6,182,212,.25)":"var(--b1)"}`,cursor:esCurrent?"default":"pointer",opacity:esAdj?.65:1,transition:"border-color .2s"}}>
                       {l.imgs?.[0]
                         ? <img src={l.imgs[0]} alt="" style={{width:42,height:42,borderRadius:7,objectFit:"cover",flexShrink:0}}/>
                         : <div style={{width:42,height:42,borderRadius:7,background:"var(--s3)",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -321,7 +321,7 @@ export default function PageSala({
                   )}
                   <div style={{fontSize:".7rem",color:"var(--mu)",marginTop:".35rem",display:"flex",alignItems:"center",gap:".5rem"}}>
                     <span>Base {fmt(item.base||0)}</span>
-                    {bid.count>0&&<span style={{display:"inline-flex",alignItems:"center",gap:".3rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.18)",borderRadius:5,padding:".15rem .45rem",fontSize:".65rem",fontWeight:700,color:"var(--ac)"}}>
+                    {bid.count>0&&<span style={{display:"inline-flex",alignItems:"center",gap:".3rem",background:"rgba(6,182,212,.1)",border:"1px solid rgba(6,182,212,.18)",borderRadius:5,padding:".15rem .45rem",fontSize:".65rem",fontWeight:700,color:"var(--ac)"}}>
                       {bid.count} {bid.count===1?"puja":"pujas"}
                     </span>}
                     <span style={{display:"flex",alignItems:"center",gap:".28rem",marginLeft:"auto"}}>
@@ -344,7 +344,7 @@ export default function PageSala({
                     const initials = (b.bidder||"?").split(" ").map(w=>w[0]||"").join("").slice(0,2).toUpperCase();
                     const avatarColors = ["var(--ac)","#a78bfa","var(--yl)","var(--gr)"];
                     return (
-                      <div key={i} className="sala-bid-row" style={i===0?{background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.2)"}:{}}>
+                      <div key={i} className="sala-bid-row" style={i===0?{background:"rgba(6,182,212,.07)",border:"1px solid rgba(6,182,212,.2)"}:{}}>
                         <div style={{fontSize:".62rem",fontWeight:700,color:i===0?"var(--ac)":"var(--mu)",minWidth:16,textAlign:"center"}}>{i+1}</div>
                         <div className="sala-bid-avatar" style={{background:avatarColors[i%avatarColors.length]}}>
                           {b.mine?"Yo":initials}
