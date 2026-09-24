@@ -2310,6 +2310,32 @@ function Dashboard({ session, onLogout }) {
     return () => { mounted = false; };
   }, [session]);
 
+  // ── Lotes: carga lazy por remate seleccionado ─────────────────────
+  // Si el remate activo no tiene lotes en cache (p.ej. remate antiguo >2 años),
+  // los carga y agrega a dbLotes. _lotesRemateRef evita re-fetch concurrentes.
+  const _lotesRemateRef = useRef(new Set());
+  const _cargarLotesDeRemate = (remateId) => {
+    if (!remateId || !supabase) return;
+    if (_lotesRemateRef.current.has(remateId)) return; // ya cargado o en vuelo
+    if (dbLotes.some(l => l.remate_id === remateId)) {
+      _lotesRemateRef.current.add(remateId);
+      return;
+    }
+    _lotesRemateRef.current.add(remateId);
+    supabase.from("lotes").select("*").eq("remate_id", remateId).order("orden")
+      .then(({ data }) => {
+        if (data?.length) {
+          setDbLotes(prev => {
+            const nuevos = data.filter(nl => !prev.find(el => el.id === nl.id));
+            return nuevos.length ? [...prev, ...nuevos] : prev;
+          });
+        }
+      });
+  };
+
+  useEffect(() => { _cargarLotesDeRemate(selectedRemate); }, [selectedRemate]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { _cargarLotesDeRemate(lotesFiltroRemate); }, [lotesFiltroRemate]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Vendedores: persistencia en localStorage ──────────────────────
   useEffect(() => {
     try { const s = localStorage.getItem("takka_vendedores"); if(s) setDbVendedores(JSON.parse(s)); } catch {}
