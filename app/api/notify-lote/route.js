@@ -20,7 +20,7 @@ export async function POST(request) {
     if (!lote) return Response.json({ error: "Falta lote" }, { status: 400 });
 
     if (!process.env.RESEND_API_KEY) {
-      return Response.json({ ok: false, msg: "RESEND_API_KEY no configurada" }, { status: 200 });
+      return Response.json({ ok: false, error: "RESEND_API_KEY no configurada" }, { status: 200 });
     }
 
     const { data, error } = await resend.emails.send({
