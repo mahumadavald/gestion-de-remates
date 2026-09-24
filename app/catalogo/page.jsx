@@ -300,6 +300,7 @@ export default function CatalogoInternoPage() {
               <div className="stat"><div className="stat-label">Remate</div><div className="stat-value" style={{fontSize:".78rem"}}>{remateActual?.nombre}</div></div>
             </div>
 
+            <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
             <table>
               <thead>
                 <tr>
@@ -325,6 +326,7 @@ export default function CatalogoInternoPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </>
         )}
       </div>

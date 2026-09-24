@@ -186,8 +186,8 @@ button,input,select{font-family:'Inter',sans-serif;}
 /* NOTIF */
 .notif{position:fixed;top:62px;right:1.4rem;z-index:999;padding:.55rem 1.2rem;border-radius:7px;font-size:.75rem;font-weight:600;animation:si .2s ease;}
 .notif.ok  {background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.35);color:var(--gr);}
-.notif.sold{background:rgba(56,178,246,.14);border:1px solid rgba(56,178,246,.38);color:var(--ac);}
-.notif.inf {background:rgba(56,178,246,.12);border:1px solid rgba(56,178,246,.3);color:var(--acH);}
+.notif.sold{background:rgba(6,182,212,.14);border:1px solid rgba(6,182,212,.38);color:var(--ac);}
+.notif.inf {background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);color:var(--acH);}
 @keyframes si{from{transform:translateX(10px);opacity:0}to{transform:none;opacity:1}}
 
 /* STAT CARDS */
@@ -221,23 +221,23 @@ td{padding:.8rem 1.4rem;font-size:.8rem;border-bottom:1px solid var(--b1);vertic
 tbody tr:hover{background:var(--s1);}
 tbody tr:last-child td{border-bottom:none;}
 tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(56,178,246,.04);}
+tr:hover td{background:rgba(6,182,212,.04);}
 .mono{font-family:'Inter', sans-serif;font-size:.72rem;color:var(--mu2);}
 .gt{color:var(--ac);font-family:'Inter', sans-serif;font-size:.75rem;font-weight:500;}
 .pill{display:inline-flex;align-items:center;gap:.22rem;padding:.12rem .52rem;border-radius:12px;font-size:.66rem;font-weight:600;white-space:nowrap;}
-.p-activo      {background:rgba(56,178,246,.12);color:var(--ac);border:1px solid rgba(56,178,246,.28);}
+.p-activo      {background:rgba(6,182,212,.12);color:var(--ac);border:1px solid rgba(6,182,212,.28);}
 .p-cerrado     {background:rgba(90,127,168,.1); color:var(--mu2);border:1px solid var(--b1);}
 .p-borrador    {background:rgba(255,255,255,.04);color:var(--mu);border:1px solid var(--b2);}
-.p-publicado   {background:rgba(56,178,246,.1); color:var(--ac);border:1px solid rgba(56,178,246,.25);}
+.p-publicado   {background:rgba(6,182,212,.1); color:var(--ac);border:1px solid rgba(6,182,212,.25);}
 .p-en_vivo     {background:rgba(20,184,166,.12);color:var(--gr);border:1px solid rgba(20,184,166,.3);}
 .p-finalizado  {background:rgba(90,127,168,.1); color:var(--mu2);border:1px solid var(--b1);}
-.p-disponible  {background:rgba(56,178,246,.1); color:var(--ac);border:1px solid rgba(56,178,246,.25);}
+.p-disponible  {background:rgba(6,182,212,.1); color:var(--ac);border:1px solid rgba(6,182,212,.25);}
 .p-en-subasta  {background:rgba(20,184,166,.12);color:var(--gr);border:1px solid rgba(20,184,166,.3);}
 .p-vendido     {background:rgba(20,184,166,.1); color:var(--gr);border:1px solid rgba(20,184,166,.25);}
 .p-sin-vender  {background:rgba(224,82,82,.08); color:var(--rd);border:1px solid rgba(224,82,82,.2);}
 .p-retirado    {background:rgba(255,255,255,.04);color:var(--mu);border:1px solid var(--b2);}
 .p-publicado{background:rgba(20,184,166,.1); color:var(--gr);border:1px solid rgba(20,184,166,.25);}
-.p-vendido  {background:rgba(56,178,246,.12);color:var(--ac);border:1px solid rgba(56,178,246,.28);}
+.p-vendido  {background:rgba(6,182,212,.12);color:var(--ac);border:1px solid rgba(6,182,212,.28);}
 .p-sinvender{background:rgba(245,101,101,.1);color:var(--rd);border:1px solid rgba(245,101,101,.28);}
 .p-pagado   {background:rgba(20,184,166,.1); color:var(--gr);border:1px solid rgba(20,184,166,.25);}
 .p-pendiente{background:rgba(246,173,85,.1); color:var(--yl);border:1px solid rgba(246,173,85,.25);}
@@ -254,7 +254,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .fg.full{grid-column:1/-1;}
 .fl{display:block;font-size:.68rem;font-weight:600;color:var(--mu2);margin-bottom:.26rem;letter-spacing:.01em;}
 .fi{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--wh2);font-size:.82rem;padding:.55rem .78rem;transition:border-color .15s;}
-.fi:focus{outline:none;border-color:var(--ac);background:rgba(56,178,246,.05);}
+.fi:focus{outline:none;border-color:var(--ac);background:rgba(6,182,212,.05);}
 .fi::placeholder{color:var(--mu);}
 .fsel{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--wh2);font-size:.82rem;padding:.55rem .78rem;cursor:pointer;}
 .fsel:focus{outline:none;border-color:var(--ac);}
@@ -262,7 +262,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 /* Lote wizard steps */
 .wiz-steps{display:flex;gap:0;margin-bottom:1.4rem;border-bottom:1px solid var(--b1);padding-bottom:1rem;}
 .wiz-step{display:flex;align-items:center;gap:.45rem;font-size:.7rem;font-weight:600;color:var(--mu);padding:.25rem .5rem;border-radius:6px;cursor:default;transition:all .15s;flex:1;justify-content:center;}
-.wiz-step.on{color:var(--ac);background:rgba(56,178,246,.08);}
+.wiz-step.on{color:var(--ac);background:rgba(6,182,212,.08);}
 .wiz-step.done{color:var(--gr);}
 .wiz-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;background:var(--b1);color:var(--mu);flex-shrink:0;}
 .wiz-step.on .wiz-num{background:var(--ac);color:#fff;}
@@ -271,12 +271,12 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .tipo-sel{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem;}
 .tipo-opt{padding:.75rem .5rem;border-radius:9px;border:1px solid var(--b1);background:transparent;cursor:pointer;text-align:center;transition:all .15s;color:var(--mu);font-size:.72rem;font-weight:600;}
 .tipo-opt:hover{border-color:var(--b2);color:var(--mu2);}
-.tipo-opt.on{border-color:var(--ac);background:rgba(56,178,246,.1);color:var(--ac);}
+.tipo-opt.on{border-color:var(--ac);background:rgba(6,182,212,.1);color:var(--ac);}
 .tipo-opt-icon{font-size:1.3rem;margin-bottom:.3rem;display:block;}
 /* Foto upload grid */
 .foto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.8rem;}
 .foto-slot{aspect-ratio:1;border-radius:9px;border:1px dashed var(--b2);background:rgba(255,255,255,.02);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;font-size:.62rem;color:var(--mu);font-weight:600;text-align:center;}
-.foto-slot:hover{border-color:var(--ac);background:rgba(56,178,246,.05);color:var(--ac);}
+.foto-slot:hover{border-color:var(--ac);background:rgba(6,182,212,.05);color:var(--ac);}
 .foto-slot.filled{border-color:var(--ac);border-style:solid;}
 .foto-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px;}
 .foto-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);font-size:.6rem;padding:.2rem;text-align:center;color:#fff;}
@@ -284,7 +284,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .item-card{background:rgba(255,255,255,.025);border:1px solid var(--b1);border-radius:8px;padding:.7rem .85rem;display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;}
 .doc-card{background:rgba(246,173,85,.04);border:1px solid rgba(246,173,85,.15);border-radius:8px;padding:.6rem .85rem;display:flex;align-items:center;gap:.6rem;margin-bottom:.35rem;}
 .add-btn-row{border:1px dashed var(--b2);border-radius:8px;padding:.5rem;display:flex;align-items:center;justify-content:center;gap:.4rem;cursor:pointer;color:var(--mu);font-size:.72rem;font-weight:600;transition:all .15s;margin-top:.3rem;}
-.add-btn-row:hover{border-color:var(--ac);color:var(--ac);background:rgba(56,178,246,.04);}
+.add-btn-row:hover{border-color:var(--ac);color:var(--ac);background:rgba(6,182,212,.04);}
 
 /* REPORTES */
 .rep-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;margin-bottom:1.2rem;}
@@ -307,8 +307,8 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .sala-sb{background:var(--s1);border-right:1px solid var(--b1);overflow-y:auto;display:flex;flex-direction:column;}
 .sala-sbh{padding:.7rem 1rem;font-size:.68rem;font-weight:700;color:var(--wh2);border-bottom:1px solid var(--b1);letter-spacing:.02em;}
 .lc{padding:.65rem .9rem;border-bottom:1px solid rgba(26,58,92,.4);cursor:pointer;transition:background .15s;}
-.lc:hover{background:rgba(56,178,246,.06);}
-.lc.on{background:rgba(56,178,246,.1);border-left:3px solid var(--ac);}
+.lc:hover{background:rgba(6,182,212,.06);}
+.lc.on{background:rgba(6,182,212,.1);border-left:3px solid var(--ac);}
 .lth{width:100%;height:74px;border-radius:6px;object-fit:cover;margin-bottom:.38rem;border:1px solid var(--b2);}
 .lph{width:100%;height:74px;border-radius:6px;background:var(--s3);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;margin-bottom:.38rem;font-size:.7rem;font-weight:500;color:var(--mu);}
 .ln{font-size:.62rem;font-weight:600;color:var(--mu);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.12rem;}
@@ -316,7 +316,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .lpr{font-family:'Inter', sans-serif;font-size:.74rem;color:var(--ac);font-weight:500;}
 .lbdg{display:inline-block;padding:.07rem .36rem;border-radius:4px;font-size:.6rem;font-weight:600;margin-top:.2rem;}
 .blv{background:rgba(20,184,166,.1);color:var(--gr);}
-.bsd{background:rgba(56,178,246,.12);color:var(--ac);}
+.bsd{background:rgba(6,182,212,.12);color:var(--ac);}
 .bwt{background:rgba(90,127,168,.07);color:var(--mu);}
 .sala-main{padding:1.2rem 1.5rem;display:flex;flex-direction:column;gap:.95rem;overflow-y:auto;}
 
@@ -374,16 +374,16 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .sala-bid-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.85rem;}
 .sala-bid-label{font-size:.65rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.2rem;}
 .sala-bid-amount{font-size:2.1rem;font-weight:800;color:var(--ac);line-height:1;letter-spacing:-.02em;transition:color .2s;}
-.sala-bid-amount.flash{color:var(--acH);text-shadow:0 0 18px rgba(56,178,246,.45);}
-.sala-livefeed-btn{display:flex;align-items:center;gap:.35rem;padding:.32rem .7rem;background:rgba(56,178,246,.1);border:1px solid rgba(56,178,246,.25);border-radius:7px;color:var(--ac);font-size:.68rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
-.sala-livefeed-btn:hover{background:rgba(56,178,246,.18);}
+.sala-bid-amount.flash{color:var(--acH);text-shadow:0 0 18px rgba(6,182,212,.45);}
+.sala-livefeed-btn{display:flex;align-items:center;gap:.35rem;padding:.32rem .7rem;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.25);border-radius:7px;color:var(--ac);font-size:.68rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.sala-livefeed-btn:hover{background:rgba(6,182,212,.18);}
 .sala-last-bids-title{font-size:.63rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;}
 .sala-last-bids{display:flex;flex-direction:column;gap:.35rem;flex:1;min-height:80px;max-height:260px;overflow-y:auto;margin-bottom:.85rem;}
 .sala-bid-row{display:flex;align-items:center;gap:.55rem;padding:.38rem .55rem;border-radius:7px;background:rgba(255,255,255,.025);border:1px solid var(--b1);}
 .sala-bid-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#fff;flex-shrink:0;background:var(--ac);}
 .sala-bid-name{flex:1;font-size:.73rem;font-weight:600;color:var(--wh2);}
 .sala-bid-tag{padding:.03rem .28rem;border-radius:3px;font-size:.55rem;font-weight:700;}
-.sala-bid-tag.web{background:rgba(56,178,246,.15);color:var(--ac);}
+.sala-bid-tag.web{background:rgba(6,182,212,.15);color:var(--ac);}
 .sala-bid-tag.pres{background:rgba(246,173,85,.15);color:var(--yl);}
 .sala-bid-amount-sm{font-size:.8rem;font-weight:700;color:var(--ac);}
 .sala-bid-time{font-size:.6rem;color:var(--mu);}
@@ -391,7 +391,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 
 /* Place bid / adjudicar button */
 .sala-place-bid-btn{width:100%;padding:.8rem;background:var(--ac);border:none;border-radius:9px;font-size:.9rem;font-weight:700;color:#fff;cursor:pointer;transition:all .15s;letter-spacing:.01em;}
-.sala-place-bid-btn:hover:not(:disabled){background:var(--acH);transform:translateY(-1px);box-shadow:0 5px 18px rgba(56,178,246,.3);}
+.sala-place-bid-btn:hover:not(:disabled){background:var(--acH);transform:translateY(-1px);box-shadow:0 5px 18px rgba(6,182,212,.3);}
 .sala-place-bid-btn:disabled{opacity:.3;cursor:not-allowed;}
 .sala-place-bid-btn.adj{background:rgba(20,184,166,.15);color:var(--gr);border:1px solid rgba(20,184,166,.3);}
 .sala-place-bid-btn.adj:hover:not(:disabled){background:rgba(20,184,166,.25);}
@@ -415,7 +415,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .pz{position:relative;width:100%;height:215px;border-radius:10px;overflow:hidden;background:var(--s3);border:1px solid var(--b2);}
 .pzimg{width:100%;height:100%;object-fit:cover;}
 .pzph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;cursor:pointer;transition:background .2s;}
-.pzph:hover{background:rgba(56,178,246,.05);}
+.pzph:hover{background:rgba(6,182,212,.05);}
 .pzpt{font-size:.72rem;font-weight:500;color:var(--mu);}
 .pzov{position:absolute;bottom:0;left:0;right:0;padding:.55rem .85rem;background:linear-gradient(transparent,rgba(0,0,0,.75));display:flex;justify-content:flex-end;}
 .pzch{padding:.22rem .6rem;background:rgba(7,15,28,.8);border:1px solid var(--b2);border-radius:4px;font-size:.66rem;font-weight:600;color:var(--mu2);cursor:pointer;transition:border-color .15s;backdrop-filter:blur(4px);}
@@ -434,12 +434,12 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .ba-card{background:var(--s2);border:1px solid var(--b2);border-radius:9px;padding:1.15rem;}
 .bal{font-size:.65rem;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.18rem;}
 .bap{font-size:2.5rem;font-weight:800;color:var(--wh);line-height:1;margin-bottom:.12rem;letter-spacing:-.02em;transition:color .2s;}
-.bap.flash{color:var(--acH)!important;text-shadow:0 0 20px rgba(56,178,246,.5);}
+.bap.flash{color:var(--acH)!important;text-shadow:0 0 20px rgba(6,182,212,.5);}
 .banl{font-size:.73rem;color:var(--mu);margin-bottom:.88rem;}
 .banl span{color:var(--wh2);font-weight:600;}
 
 /* BID RING */
-.bid-ring-wrap{display:flex;align-items:center;gap:.85rem;margin-bottom:.88rem;padding:.75rem;background:rgba(56,178,246,.06);border:1px solid rgba(56,178,246,.18);border-radius:8px;}
+.bid-ring-wrap{display:flex;align-items:center;gap:.85rem;margin-bottom:.88rem;padding:.75rem;background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.18);border-radius:8px;}
 .bid-ring-outer{position:relative;width:52px;height:52px;flex-shrink:0;}
 .bid-ring-svg{transform:rotate(-90deg);}
 .bid-ring-bg{fill:none;stroke:var(--b1);stroke-width:4;}
@@ -451,9 +451,9 @@ tr:hover td{background:rgba(56,178,246,.04);}
 
 /* BID BUTTONS */
 .bb{width:100%;padding:1.1rem 1rem;background:var(--ac);border:none;border-radius:10px;font-size:1.15rem;font-weight:700;color:#fff;cursor:pointer;transition:all .15s;letter-spacing:.01em;}
-.bb:hover:not(:disabled){background:var(--acH);transform:translateY(-2px);box-shadow:0 6px 20px rgba(56,178,246,.35);}
+.bb:hover:not(:disabled){background:var(--acH);transform:translateY(-2px);box-shadow:0 6px 20px rgba(6,182,212,.35);}
 .bb:disabled{opacity:.22;cursor:not-allowed;}
-.bb.sold{background:transparent;color:var(--ac);border:1px solid rgba(56,178,246,.3);}
+.bb.sold{background:transparent;color:var(--ac);border:1px solid rgba(6,182,212,.3);}
 .bb.view{background:rgba(90,127,168,.07);color:var(--mu);border:1px solid var(--b1);font-size:.76rem;cursor:default;}
 
 .bb-winning{width:100%;padding:.9rem 1.1rem;background:linear-gradient(135deg,#14532d,#166534);border:1px solid rgba(34,197,94,.3);border-radius:9px;display:flex;align-items:center;gap:.7rem;animation:winpulse 2.5s infinite;}
@@ -501,14 +501,14 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .ctrl-card-title{font-size:.74rem;font-weight:700;color:var(--wh2);margin-bottom:.85rem;padding-bottom:.6rem;border-bottom:1px solid var(--b1);}
 .asel{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--wh);font-size:.8rem;padding:.5rem .75rem;cursor:pointer;margin-bottom:.7rem;}
 .asel:focus{outline:none;border-color:var(--ac);}
-.inc-ctrl{background:rgba(56,178,246,.05);border:1px solid rgba(56,178,246,.15);border-radius:8px;padding:.85rem;margin-bottom:.7rem;display:flex;flex-direction:column;height:100%;box-sizing:border-box;}
+.inc-ctrl{background:rgba(6,182,212,.05);border:1px solid rgba(6,182,212,.15);border-radius:8px;padding:.85rem;margin-bottom:.7rem;display:flex;flex-direction:column;height:100%;box-sizing:border-box;}
 .inc-title{font-size:.65rem;font-weight:700;color:var(--ac);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;}
 .inc-cur-lbl{font-size:.64rem;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.18rem;}
 .inc-cur{font-size:1.4rem;font-weight:800;color:var(--wh);letter-spacing:-.01em;margin-bottom:.45rem;}
 .inc-btns{display:grid;grid-template-columns:repeat(5,1fr);gap:.3rem;flex:1;}
 .inc-btn{padding:0;border-radius:7px;border:1px solid var(--b1);background:transparent;font-size:.72rem;font-weight:500;color:var(--mu);cursor:pointer;transition:all .15s;width:100%;height:100%;min-height:2rem;}
-.inc-btn:hover{border-color:var(--ac);color:var(--ac);background:rgba(56,178,246,.05);}
-.inc-btn.on{background:rgba(56,178,246,.15);border-color:var(--ac);color:var(--ac);font-weight:700;}
+.inc-btn:hover{border-color:var(--ac);color:var(--ac);background:rgba(6,182,212,.05);}
+.inc-btn.on{background:rgba(6,182,212,.15);border-color:var(--ac);color:var(--ac);font-weight:700;}
 .ab-list{display:flex;flex-direction:column;gap:.33rem;}
 .ab{padding:.58rem .9rem;border-radius:7px;border:none;font-size:.74rem;font-weight:600;cursor:pointer;transition:all .15s;}
 .ab:disabled{opacity:.22;cursor:not-allowed;}
@@ -527,7 +527,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .ls-card{background:rgba(255,255,255,.025);border:1px solid var(--b1);border-radius:7px;padding:.65rem;text-align:center;}
 .ls-v{font-size:1rem;font-weight:800;color:var(--wh);line-height:1;}
 .ls-l{font-size:.58rem;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-top:.1rem;}
-.bid-ticker{margin-top:.65rem;background:rgba(56,178,246,.06);border:1px solid rgba(56,178,246,.18);border-radius:7px;padding:.6rem;display:flex;align-items:center;gap:.55rem;transition:background .3s,border .3s;}
+.bid-ticker{margin-top:.65rem;background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.18);border-radius:7px;padding:.6rem;display:flex;align-items:center;gap:.55rem;transition:background .3s,border .3s;}
 .bid-ticker.urgent{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);}
 .bid-ticker.critical{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.35);animation:losepulse .5s infinite;}
 .bt-num{font-size:1.35rem;font-weight:800;min-width:24px;text-align:center;transition:color .5s;}
@@ -545,7 +545,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .gar-step-n{font-size:.65rem;font-weight:700;color:var(--ac);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.22rem;}
 .gar-step-v{font-size:1.55rem;font-weight:800;color:var(--wh);line-height:1;letter-spacing:-.01em;}
 .gar-step-l{font-size:.68rem;color:var(--mu);margin-top:.12rem;}
-.gar-info{background:rgba(56,178,246,.07);border:1px solid rgba(56,178,246,.2);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.1rem;display:flex;align-items:flex-start;gap:.65rem;}
+.gar-info{background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.2);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.1rem;display:flex;align-items:flex-start;gap:.65rem;}
 .gar-info-text{font-size:.76rem;color:var(--mu2);line-height:1.55;}
 .gar-info-text strong{color:var(--wh2);}
 .paleta-badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:7px;background:var(--ac);color:#fff;font-size:.82rem;font-weight:800;flex-shrink:0;}
@@ -569,7 +569,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .exp-badge{display:inline-block;padding:.08rem .42rem;background:rgba(255,255,255,.04);border:1px solid var(--b1);border-radius:4px;font-family:'Inter', sans-serif;font-size:.62rem;color:var(--mu2);}
 .role-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:4px;font-size:.65rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
 .role-badge.admin{background:rgba(246,173,85,.12);color:#f6ad55;border:1px solid rgba(246,173,85,.25);}
-.role-badge.martillero{background:rgba(56,178,246,.12);color:#38B2F6;border:1px solid rgba(56,178,246,.25);}
+.role-badge.martillero{background:rgba(6,182,212,.12);color:#38B2F6;border:1px solid rgba(6,182,212,.25);}
 .role-badge.comprador{background:rgba(20,184,166,.1);color:#14B8A6;border:1px solid rgba(20,184,166,.22);}
 
 /* LIQUIDACIONES */
@@ -614,7 +614,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
 .chat-send:hover{background:var(--acH);}
 .mod-tabs{display:flex;gap:.3rem;padding:.52rem .65rem;border-bottom:1px solid var(--b1);flex-shrink:0;}
 .mod-tab{padding:.26rem .65rem;border-radius:5px;border:1px solid var(--b1);background:transparent;font-size:.65rem;font-weight:600;color:var(--mu);cursor:pointer;transition:all .15s;}
-.mod-tab.on{background:rgba(56,178,246,.15);border-color:var(--ac);color:var(--ac);}
+.mod-tab.on{background:rgba(6,182,212,.15);border-color:var(--ac);color:var(--ac);}
 .mod-tab:hover:not(.on){border-color:var(--b2);color:var(--mu2);}
 
 /* ── MOBILE RESPONSIVE ── */
@@ -681,7 +681,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
   .ctrl-tab{padding:.55rem .5rem;font-size:.76rem;text-align:center;border-radius:0;}
   .ctrl-tab:first-child{border-radius:7px 0 0 7px;border:1px solid var(--b1);}
   .ctrl-tab:last-child{border-radius:0 7px 7px 0;border:1px solid var(--b1);border-left:none;}
-  .ctrl-tab.on{background:rgba(56,178,246,.12);}
+  .ctrl-tab.on{background:rgba(6,182,212,.12);}
 
   /* Control Martillero: single column */
   .ctrl-grid{grid-template-columns:1fr;gap:.6rem;}
@@ -707,6 +707,7 @@ tr:hover td{background:rgba(56,178,246,.04);}
   .sala-wrap > aside:last-child{display:none;}
 
   /* NEW AuctionHub layout — mobile */
+  .sala-page-root{height:auto!important;overflow:visible!important;min-height:100svh;}
   .sala-wrap-new{height:auto;overflow:visible;}
   .sala-body{grid-template-columns:1fr;overflow:visible;padding:.6rem;}
   .sala-left-card{min-height:420px;}
@@ -982,7 +983,7 @@ const AUTH_CSS = `
     letter-spacing: .04em; text-transform: uppercase;
   }
   .role-badge.admin     { background: rgba(246,173,85,.12); color: #f6ad55; border: 1px solid rgba(246,173,85,.25); }
-  .role-badge.martillero{ background: rgba(56,178,246,.12); color: #38B2F6; border: 1px solid rgba(56,178,246,.25); }
+  .role-badge.martillero{ background: rgba(6,182,212,.12); color: #38B2F6; border: 1px solid rgba(6,182,212,.25); }
   .role-badge.comprador { background: rgba(20,184,166,.1);  color: #14B8A6; border: 1px solid rgba(20,184,166,.22); }
 
   @media (max-width: 900px) {
@@ -1389,7 +1390,7 @@ function BuyerView({ user, onLogout }) {
     .bv-root { min-height: 100vh; background: #0d1117; font-family: 'Inter', sans-serif; color: #e0eaf4; }
     .bv-header { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.5rem; background: #1F2937; border-bottom: 1px solid rgba(255,255,255,.07); position: sticky; top: 0; z-index: 10; }
     .bv-casa { font-size: .82rem; font-weight: 700; color: #e0eaf4; }
-    .bv-paleta { font-family: 'Inter', sans-serif; font-size: .75rem; background: rgba(56,178,246,.15); color: #38B2F6; border: 1px solid rgba(56,178,246,.3); padding: .18rem .55rem; border-radius: 4px; }
+    .bv-paleta { font-family: 'Inter', sans-serif; font-size: .75rem; background: rgba(6,182,212,.15); color: #38B2F6; border: 1px solid rgba(6,182,212,.3); padding: .18rem .55rem; border-radius: 4px; }
     .bv-logout { background: transparent; border: 1px solid rgba(255,255,255,.1); color: #4a6a8a; font-size: .72rem; padding: .3rem .7rem; border-radius: 5px; cursor: pointer; }
     .bv-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,.07); background: #1F2937; padding: 0 1.5rem; }
     .bv-tab { padding: .75rem 1.2rem; font-size: .78rem; font-weight: 600; color: #4a6a8a; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; display: flex; align-items: center; gap: .4rem; }
@@ -1415,17 +1416,17 @@ function BuyerView({ user, onLogout }) {
     .bv-hist-num { font-size: .75rem; font-weight: 600; color: #4a6a8a; font-family: 'Inter', sans-serif; }
     .bv-hist-monto { font-size: .8rem; font-weight: 700; color: #e0eaf4; font-family: 'Inter', sans-serif; }
     .bv-hist-time { font-size: .68rem; color: #364d70; font-family: 'Inter', sans-serif; }
-    .bv-info { padding: .85rem 1.1rem; background: rgba(56,178,246,.05); border: 1px solid rgba(56,178,246,.12); border-radius: 10px; font-size: .76rem; color: #4a6a8a; line-height: 1.7; }
+    .bv-info { padding: .85rem 1.1rem; background: rgba(6,182,212,.05); border: 1px solid rgba(6,182,212,.12); border-radius: 10px; font-size: .76rem; color: #4a6a8a; line-height: 1.7; }
     /* Catálogo */
     .bv-search { width:100%; padding:.65rem .9rem; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:9px; color:#e0eaf4; font-family:'Inter',sans-serif; font-size:.85rem; outline:none; }
     .bv-search:focus { border-color:#38B2F6; }
     .bv-cat-pills { display:flex; gap:.5rem; flex-wrap:wrap; margin:.75rem 0; }
     .bv-cat-pill { padding:.3rem .75rem; border-radius:20px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); font-size:.72rem; font-weight:600; color:#4a6a8a; cursor:pointer; transition:all .15s; }
-    .bv-cat-pill.on { background:rgba(56,178,246,.15); border-color:rgba(56,178,246,.4); color:#38B2F6; }
+    .bv-cat-pill.on { background:rgba(6,182,212,.15); border-color:rgba(6,182,212,.4); color:#38B2F6; }
     .bv-lote-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; }
     @media(max-width:500px){ .bv-lote-grid{grid-template-columns:1fr;} }
     .bv-lote-card { background:#1F2937; border:1px solid rgba(255,255,255,.07); border-radius:11px; overflow:hidden; transition:border .15s; }
-    .bv-lote-card:hover { border-color:rgba(56,178,246,.3); }
+    .bv-lote-card:hover { border-color:rgba(6,182,212,.3); }
     .bv-lote-card.watched { border-color:rgba(246,173,85,.35); }
     .bv-lote-img { width:100%; height:140px; object-fit:cover; background:rgba(255,255,255,.03); display:flex; align-items:center; justify-content:center; }
     .bv-lote-info { padding:.75rem; }
@@ -1437,7 +1438,7 @@ function BuyerView({ user, onLogout }) {
     .bv-empty { text-align:center; padding:2rem; color:#4a6a8a; font-size:.82rem; }
     /* Esperando */
     .bv-waiting { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 1.5rem; text-align:center; gap:1rem; }
-    .bv-waiting-icon { width:64px; height:64px; border-radius:50%; background:rgba(56,178,246,.08); border:1px solid rgba(56,178,246,.2); display:flex; align-items:center; justify-content:center; }
+    .bv-waiting-icon { width:64px; height:64px; border-radius:50%; background:rgba(6,182,212,.08); border:1px solid rgba(6,182,212,.2); display:flex; align-items:center; justify-content:center; }
   `;
 
   return (
@@ -1539,7 +1540,7 @@ function BuyerView({ user, onLogout }) {
                 </div>
                 <div style={{fontWeight:700,color:"#e0eaf4"}}>Esperando inicio del remate</div>
                 <div style={{fontSize:".78rem",color:"#4a6a8a"}}>El martillero iniciará en breve. Puedes revisar el catálogo mientras tanto.</div>
-                <button style={{padding:".5rem 1rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.25)",borderRadius:8,color:"#38B2F6",fontSize:".78rem",fontWeight:600,cursor:"pointer"}}
+                <button style={{padding:".5rem 1rem",background:"rgba(6,182,212,.1)",border:"1px solid rgba(6,182,212,.25)",borderRadius:8,color:"#38B2F6",fontSize:".78rem",fontWeight:600,cursor:"pointer"}}
                   onClick={()=>setTabView("catalogo")}>Ver catálogo →</button>
               </div>
             )}
@@ -1614,7 +1615,7 @@ function BuyerView({ user, onLogout }) {
                         <div style={{fontSize:".6rem",color:"#4a6a8a",marginBottom:".1rem"}}>Base</div>
                         <div className="bv-lote-card-price">{fmt(lote.base||0)}</div>
                       </div>
-                      <span style={{fontSize:".62rem",padding:".15rem .45rem",borderRadius:5,background:"rgba(56,178,246,.1)",color:"#38B2F6",fontWeight:700,border:"1px solid rgba(56,178,246,.2)"}}>
+                      <span style={{fontSize:".62rem",padding:".15rem .45rem",borderRadius:5,background:"rgba(6,182,212,.1)",color:"#38B2F6",fontWeight:700,border:"1px solid rgba(6,182,212,.2)"}}>
                         {lote.estado||"disponible"}
                       </span>
                     </div>
@@ -3519,7 +3520,7 @@ function exportCSV(){
                   <div style={{display:"flex",gap:".5rem",marginBottom:"1rem"}}>
                     {[{k:"MUEBLES",icon:null,label:"Muebles"},{k:"VEHICULOS",icon:null,label:"Vehículo"},{k:"INMUEBLES",icon:null,label:"Inmueble"}].map(o=>(
                       <div key={o.k} onClick={()=>{setWizTipo(o.k);setLoteForm(f=>({...f,motorizado:o.k==="VEHICULOS"}));}}
-                        style={{flex:1,padding:".6rem .5rem",textAlign:"center",cursor:"pointer",borderRadius:8,border:`2px solid ${wizTipo===o.k?"var(--ac)":"var(--b2)"}`,background:wizTipo===o.k?"rgba(56,178,246,.1)":"var(--s2)",transition:"all .15s"}}>
+                        style={{flex:1,padding:".6rem .5rem",textAlign:"center",cursor:"pointer",borderRadius:8,border:`2px solid ${wizTipo===o.k?"var(--ac)":"var(--b2)"}`,background:wizTipo===o.k?"rgba(6,182,212,.1)":"var(--s2)",transition:"all .15s"}}>
                         
                         <div style={{fontSize:".72rem",fontWeight:wizTipo===o.k?700:500,color:wizTipo===o.k?"var(--ac)":"var(--mu2)"}}>{o.label}</div>
                       </div>
@@ -3527,7 +3528,7 @@ function exportCSV(){
                   </div>
                   <div className="form-grid">
                     {lotesFiltroRemate ? (
-                      <div className="fg full" style={{padding:".55rem .8rem",background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.2)",borderRadius:8}}>
+                      <div className="fg full" style={{padding:".55rem .8rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.2)",borderRadius:8}}>
                         <div style={{fontSize:".63rem",fontWeight:700,textTransform:"uppercase",letterSpacing:".07em",color:"var(--mu)",marginBottom:2}}>Remate</div>
                         <div style={{fontWeight:700,color:"var(--ac)",fontSize:".82rem"}}>{REMATES_MERGED.find(r=>(r.supabaseId||r.id)===lotesFiltroRemate)?.name||"Remate seleccionado"}</div>
                       </div>
@@ -3785,7 +3786,7 @@ function exportCSV(){
                               <div style={{fontSize:".76rem",fontWeight:600,color:"var(--wh2)"}}>{doc.label}</div>
                               <div style={{fontSize:".63rem",color:"var(--mu)"}}>{adj?.archivo?<span style={{color:"var(--gr)"}}>✓ {adj.archivo.name}</span>:doc.desc}</div>
                             </div>
-                            <label style={{fontSize:".68rem",fontWeight:600,color:adj?.archivo?"var(--mu)":"var(--ac)",cursor:"pointer",whiteSpace:"nowrap",padding:".25rem .55rem",border:`1px solid ${adj?.archivo?"var(--b2)":"rgba(56,178,246,.3)"}`,borderRadius:6,background:adj?.archivo?"transparent":"rgba(56,178,246,.06)"}}>
+                            <label style={{fontSize:".68rem",fontWeight:600,color:adj?.archivo?"var(--mu)":"var(--ac)",cursor:"pointer",whiteSpace:"nowrap",padding:".25rem .55rem",border:`1px solid ${adj?.archivo?"var(--b2)":"rgba(6,182,212,.3)"}`,borderRadius:6,background:adj?.archivo?"transparent":"rgba(6,182,212,.06)"}}>
                               {adj?.archivo?"Cambiar":"+ Adjuntar"}
                               <input type="file" accept=".pdf,.jpg,.png" style={{display:"none"}} onChange={e=>e.target.files[0]&&setWizDocs(docs=>{const ex=docs.find(d=>d.key===doc.key);return ex?docs.map(d=>d.key===doc.key?{...d,archivo:e.target.files[0]}:d):[...docs,{id:Date.now(),key:doc.key,nombre:doc.label,archivo:e.target.files[0]}];})}/>
                             </label>
@@ -3809,7 +3810,7 @@ function exportCSV(){
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M7 1v12M1 7h12"/></svg> Agregar documento / acta
                   </div>
                   {/* Resumen final */}
-                  <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:9,fontSize:".73rem",color:"var(--mu2)",lineHeight:1.7}}>
+                  <div style={{marginTop:"1rem",padding:".75rem 1rem",background:"rgba(6,182,212,.05)",border:"1px solid rgba(6,182,212,.15)",borderRadius:9,fontSize:".73rem",color:"var(--mu2)",lineHeight:1.7}}>
                     <div style={{fontWeight:700,color:"var(--wh2)",marginBottom:".3rem"}}>Resumen del lote</div>
                     <div><strong style={{color:"var(--wh2)"}}>{wizDatos.nombre||"—"}</strong> · {wizTipo||"—"} · Com. <strong style={{color:"var(--ac)"}}>{loteForm.tipoRemate==="judicial"?"10":loteForm.tipoRemate==="concursal"?"7":(loteForm.comCustom||"?")}%</strong> <span style={{fontSize:".65rem",color:"var(--mu)"}}>{loteForm.tipoRemate==="judicial"?"(judicial - fijo por ley)":loteForm.tipoRemate==="concursal"?"(concursal - fijo por ley)":"(privado)"}</span></div>
                     <div style={{color:"var(--mu2)",fontSize:".72rem"}}>{wizTipo==="VEHICULOS"?`${Object.values(wizFotos).filter(Boolean).length}/4 fotos`:`${wizItems.filter(x=>x.foto).length} foto(s)`} · {wizDocs.filter(d=>d.archivo).length} documento(s) adjunto(s)</div>
@@ -3819,7 +3820,7 @@ function exportCSV(){
             </>}
             {modal==="nuevo-postor" && <>
               <div className="modal-title">Registrar postor</div>
-              <div style={{padding:".55rem .85rem",background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.2)",borderRadius:7,fontSize:".74rem",color:"var(--mu2)",marginBottom:".9rem",lineHeight:1.55}}>
+              <div style={{padding:".55rem .85rem",background:"rgba(6,182,212,.07)",border:"1px solid rgba(6,182,212,.2)",borderRadius:7,fontSize:".74rem",color:"var(--mu2)",marginBottom:".9rem",lineHeight:1.55}}>
                 Al registrarse se asignará un <strong style={{color:"var(--wh2)"}}>N° de comprador</strong> automáticamente.
               </div>
               <div className="form-grid">
@@ -3842,7 +3843,7 @@ function exportCSV(){
                   </select>
                 </div>
                 <div className="fg full"><label className="fl">N° comprador asignado</label>
-                  <div className="fi" style={{fontFamily:"Inter,sans-serif",fontWeight:700,color:"var(--ac)",background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.25)",display:"flex",alignItems:"center"}}>
+                  <div className="fi" style={{fontFamily:"Inter,sans-serif",fontWeight:700,color:"var(--ac)",background:"rgba(6,182,212,.07)",border:"1px solid rgba(6,182,212,.25)",display:"flex",alignItems:"center"}}>
                     #{String((dbPostores.length||POSTORES_MERGED.length)+1).padStart(2,"0")} — asignado automáticamente
                   </div>
                 </div>
@@ -5038,7 +5039,7 @@ function exportCSV(){
                           {tramosArr.map((t,i)=>(
                             <tr key={i} style={{borderBottom:"1px solid var(--b1)"}}>
                               <td style={{padding:".5rem .75rem"}}>
-                                <span style={{padding:".15rem .5rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:5,fontFamily:"Inter,sans-serif",fontSize:".72rem",fontWeight:700,color:"var(--ac)"}}>{t.pct}%</span>
+                                <span style={{padding:".15rem .5rem",background:"rgba(6,182,212,.1)",border:"1px solid rgba(6,182,212,.2)",borderRadius:5,fontFamily:"Inter,sans-serif",fontSize:".72rem",fontWeight:700,color:"var(--ac)"}}>{t.pct}%</span>
                               </td>
                               <td style={{padding:".5rem .75rem",textAlign:"center",fontFamily:"Inter,sans-serif",fontSize:".76rem",color:"var(--mu2)"}}>{t.lotes.length}</td>
                               <td style={{padding:".5rem .75rem",textAlign:"right",fontFamily:"Inter,sans-serif",fontSize:".73rem",color:"var(--wh2)"}}>{fmt(t.subtotalMonto)}</td>
@@ -5101,7 +5102,7 @@ function exportCSV(){
                                 <tr key={i}>
                                   <td>
                                     <div style={{display:"flex",alignItems:"center",gap:".4rem"}}>
-                                      <div style={{width:22,height:22,borderRadius:5,background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,sans-serif",fontSize:".6rem",fontWeight:800,color:"var(--ac)",flexShrink:0}}>
+                                      <div style={{width:22,height:22,borderRadius:5,background:"rgba(6,182,212,.1)",border:"1px solid rgba(6,182,212,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,sans-serif",fontSize:".6rem",fontWeight:800,color:"var(--ac)",flexShrink:0}}>
                                         {String(postorD?.nComprador||"?").padStart(2,"0")}
                                       </div>
                                       <span style={{fontSize:".76rem",fontWeight:600}}>{a.postor}</span>
@@ -5109,7 +5110,7 @@ function exportCSV(){
                                   </td>
                                   <td style={{fontSize:".73rem",color:"var(--mu2)"}}>{a.lote}</td>
                                   <td>
-                                    {loteR?.tipoRemate && <span className="pill" style={{fontSize:".6rem",background:"rgba(56,178,246,.08)",color:"var(--ac)",border:"1px solid rgba(56,178,246,.2)"}}>{COMISIONES[loteR.tipoRemate]?.label||loteR.tipoRemate}</span>}
+                                    {loteR?.tipoRemate && <span className="pill" style={{fontSize:".6rem",background:"rgba(6,182,212,.08)",color:"var(--ac)",border:"1px solid rgba(6,182,212,.2)"}}>{COMISIONES[loteR.tipoRemate]?.label||loteR.tipoRemate}</span>}
                                   </td>
                                   <td className="gt">{fmt(a.monto||0)}</td>
                                   <td style={{fontFamily:"Inter,sans-serif",fontSize:".73rem",fontWeight:700,color:"var(--ac)",textAlign:"center"}}>{a.comPct??10}%</td>
@@ -5267,7 +5268,7 @@ function exportCSV(){
                                 <div style={{display:"flex",alignItems:"center",gap:".6rem"}}>
                                   <div style={{width:8,height:8,borderRadius:"50%",background:d.totalMartillo>0?"#34d399":"#94a3b8",flexShrink:0}}/>
                                   <div style={{fontWeight:700,fontSize:".85rem",color:"var(--wh2)"}}>{d.v}</div>
-                                  <span style={{fontSize:".65rem",padding:".15rem .5rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:4,color:"var(--ac)",fontWeight:600}}>
+                                  <span style={{fontSize:".65rem",padding:".15rem .5rem",background:"rgba(6,182,212,.1)",border:"1px solid rgba(6,182,212,.2)",borderRadius:4,color:"var(--ac)",fontWeight:600}}>
                                     {d.adjV.length}/{d.lotesV.length} lotes vendidos
                                   </span>
                                 </div>
@@ -5387,7 +5388,7 @@ function exportCSV(){
           return (
             <div className="page">
               {/* Selector de remate */}
-              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".7rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:9}}>
+              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".7rem 1rem",background:"rgba(6,182,212,.05)",border:"1px solid rgba(6,182,212,.15)",borderRadius:9}}>
                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="13" height="11" rx="2"/><path d="M1 6h13M5 2v4M10 2v4"/></svg>
                 <span style={{fontSize:".75rem",fontWeight:600,color:"var(--mu2)",whiteSpace:"nowrap"}}>Remate:</span>
                 <select className="fsel" style={{flex:1,maxWidth:340}} value={retiroFiltroRemate||""} onChange={e=>setRetiroFiltroRemate(e.target.value||null)}>
@@ -5740,7 +5741,7 @@ function exportCSV(){
                           <Tooltip content={<CustomTooltip/>}/>
                           <Bar dataKey="v" radius={[4,4,0,0]}>
                             {chartData.map((entry,index)=>(
-                              <Cell key={index} fill={entry.highlight?"#38B2F6":statsView==="mes"?"rgba(56,178,246,.35)":"#38B2F6"}/>
+                              <Cell key={index} fill={entry.highlight?"#38B2F6":statsView==="mes"?"rgba(6,182,212,.35)":"#38B2F6"}/>
                             ))}
                           </Bar>
                         </BarChart>
@@ -5760,7 +5761,7 @@ function exportCSV(){
                             <div key={i}>
                               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:".3rem"}}>
                                 <div style={{display:"flex",alignItems:"center",gap:".5rem"}}>
-                                  <div style={{width:22,height:22,borderRadius:6,background:i===0?"rgba(246,173,85,.15)":i===1?"rgba(56,178,246,.1)":"rgba(255,255,255,.05)",border:`1px solid ${i===0?"rgba(246,173,85,.3)":i===1?"rgba(56,178,246,.25)":"var(--b1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".65rem",fontWeight:800,color:i===0?"var(--yl)":i===1?"var(--ac)":"var(--mu)",flexShrink:0}}>{i+1}</div>
+                                  <div style={{width:22,height:22,borderRadius:6,background:i===0?"rgba(246,173,85,.15)":i===1?"rgba(6,182,212,.1)":"rgba(255,255,255,.05)",border:`1px solid ${i===0?"rgba(246,173,85,.3)":i===1?"rgba(6,182,212,.25)":"var(--b1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".65rem",fontWeight:800,color:i===0?"var(--yl)":i===1?"var(--ac)":"var(--mu)",flexShrink:0}}>{i+1}</div>
                                   <div>
                                     <div style={{fontSize:".76rem",fontWeight:700,color:"var(--wh2)"}}>{t.postor}</div>
                                     <div style={{fontSize:".62rem",color:"var(--mu)"}}>{t.lotes} lote{t.lotes>1?"s":""}{posData?` · #${String(posData.nComprador).padStart(2,"0")}`:""}</div>
@@ -5848,7 +5849,7 @@ function exportCSV(){
                         {/* Header */}
                         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:".85rem 1.15rem",borderBottom:"1px solid var(--b1)",background:"var(--s3)"}}>
                           <div style={{display:"flex",alignItems:"center",gap:".65rem"}}>
-                            <div style={{width:26,height:26,borderRadius:7,background:"rgba(56,178,246,.12)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                            <div style={{width:26,height:26,borderRadius:7,background:"rgba(6,182,212,.12)",border:"1px solid rgba(6,182,212,.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                               <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><path d="M3 13V7M8 13V3M13 13V9"/></svg>
                             </div>
                             <div>
@@ -5856,7 +5857,7 @@ function exportCSV(){
                               <div style={{fontSize:".65rem",color:"var(--mu2)"}}>Vista exclusiva administrador — {casaStats.length} casas activas</div>
                             </div>
                           </div>
-                          <span style={{fontSize:".63rem",padding:".2rem .55rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",borderRadius:4,color:"var(--ac)",fontWeight:700,letterSpacing:".05em"}}>ADMIN</span>
+                          <span style={{fontSize:".63rem",padding:".2rem .55rem",background:"rgba(6,182,212,.1)",border:"1px solid rgba(6,182,212,.2)",borderRadius:4,color:"var(--ac)",fontWeight:700,letterSpacing:".05em"}}>ADMIN</span>
                         </div>
                         {/* Grid de casas */}
                         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:".85rem",padding:"1rem"}}>
@@ -6029,7 +6030,7 @@ function exportCSV(){
           return (
             <div className="page">
               {/* Selector de remate */}
-              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".7rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:9}}>
+              <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".7rem 1rem",background:"rgba(6,182,212,.05)",border:"1px solid rgba(6,182,212,.15)",borderRadius:9}}>
                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--ac)" strokeWidth="1.6" strokeLinecap="round"><rect x="1" y="2" width="13" height="11" rx="2"/><path d="M1 6h13M5 2v4M10 2v4"/></svg>
                 <span style={{fontSize:".75rem",fontWeight:600,color:"var(--mu2)",whiteSpace:"nowrap"}}>Remate:</span>
                 <select className="fsel" style={{flex:1,maxWidth:340}} value={lotesFiltroRemate||""} onChange={e=>setLotesFiltroRemate(e.target.value||null)}>
@@ -6398,9 +6399,9 @@ function exportCSV(){
           <div className="page" style={{paddingBottom:"2rem"}}>
 
             {/* Cabecera */}
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1.25rem",padding:"1rem 1.4rem",background:"linear-gradient(135deg,#0b1f38 0%,#0e2d4a 100%)",border:"1px solid rgba(56,178,246,.2)",borderRadius:14,flexWrap:"wrap",gap:".75rem"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1.25rem",padding:"1rem 1.4rem",background:"linear-gradient(135deg,#0b1f38 0%,#0e2d4a 100%)",border:"1px solid rgba(6,182,212,.2)",borderRadius:14,flexWrap:"wrap",gap:".75rem"}}>
               <div>
-                <div style={{fontSize:".6rem",fontWeight:700,color:"rgba(56,178,246,.7)",textTransform:"uppercase",letterSpacing:".1em",marginBottom:".25rem"}}>Resultado de Remate</div>
+                <div style={{fontSize:".6rem",fontWeight:700,color:"rgba(6,182,212,.7)",textTransform:"uppercase",letterSpacing:".1em",marginBottom:".25rem"}}>Resultado de Remate</div>
                 <div style={{fontSize:"1.15rem",fontWeight:900,color:"#fff",lineHeight:1.2}}>{remNombre}</div>
                 {remFecha && <div style={{fontSize:".72rem",color:"rgba(255,255,255,.5)",marginTop:".2rem"}}>{remFecha}</div>}
               </div>
@@ -6437,7 +6438,7 @@ function exportCSV(){
                 {/* Encabezado columnas */}
                 <div style={{display:"grid",gridTemplateColumns:"64px 40px 1fr 160px 180px 200px",alignItems:"center",padding:".55rem 1rem",background:"#0b1f38",gap:"0 .5rem"}}>
                   {["N°","Cant.","Descripción / Vendedor","Precio mínimo","Comprador","Valor martillo"].map((h,i)=>(
-                    <div key={i} style={{fontSize:".6rem",fontWeight:700,color:"rgba(56,178,246,.7)",textTransform:"uppercase",letterSpacing:".07em",textAlign:i>=3?"right":"left"}}>{h}</div>
+                    <div key={i} style={{fontSize:".6rem",fontWeight:700,color:"rgba(6,182,212,.7)",textTransform:"uppercase",letterSpacing:".07em",textAlign:i>=3?"right":"left"}}>{h}</div>
                   ))}
                 </div>
 
@@ -6455,8 +6456,8 @@ function exportCSV(){
                       {/* Badge N° */}
                       <div style={{display:"flex",alignItems:"center",justifyContent:"center"}}>
                         <div style={{width:44,height:44,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:1,
-                          background:vendido?"rgba(52,211,153,.15)":"rgba(56,178,246,.1)",
-                          border:`2px solid ${vendido?"rgba(52,211,153,.4)":"rgba(56,178,246,.25)"}`,
+                          background:vendido?"rgba(52,211,153,.15)":"rgba(6,182,212,.1)",
+                          border:`2px solid ${vendido?"rgba(52,211,153,.4)":"rgba(6,182,212,.25)"}`,
                         }}>
                           {vendido && <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3 6-7" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                           <span style={{fontFamily:"Inter,sans-serif",fontSize:vendido?".62rem":".82rem",fontWeight:900,color:vendido?"#34d399":"var(--ac)",lineHeight:1}}>
@@ -6471,7 +6472,7 @@ function exportCSV(){
                         <div style={{fontWeight:700,fontSize:".88rem",color:"var(--wh2)",lineHeight:1.25,marginBottom:".18rem"}}>{l.nombre||"—"}</div>
                         <div style={{display:"flex",gap:".5rem",alignItems:"center",flexWrap:"wrap"}}>
                           {l.propietario && <span style={{fontSize:".65rem",color:"var(--mu2)"}}><span style={{color:"var(--mu)"}}>Vendedor: </span>{l.propietario}</span>}
-                          {l.categoria && <span style={{fontSize:".6rem",padding:".1rem .4rem",background:"rgba(56,178,246,.08)",border:"1px solid rgba(56,178,246,.18)",borderRadius:4,color:"var(--ac)",fontWeight:600}}>{l.categoria}</span>}
+                          {l.categoria && <span style={{fontSize:".6rem",padding:".1rem .4rem",background:"rgba(6,182,212,.08)",border:"1px solid rgba(6,182,212,.18)",borderRadius:4,color:"var(--ac)",fontWeight:600}}>{l.categoria}</span>}
                         </div>
                       </div>
                       {/* Mínimo */}
@@ -6502,7 +6503,7 @@ function exportCSV(){
 
                 {/* Pie */}
                 {vendidos.length>0 && (
-                  <div style={{display:"grid",gridTemplateColumns:"64px 40px 1fr 160px 180px 200px",alignItems:"center",gap:"0 .5rem",padding:".75rem 1rem",background:"#0b1f38",borderTop:"2px solid rgba(56,178,246,.2)"}}>
+                  <div style={{display:"grid",gridTemplateColumns:"64px 40px 1fr 160px 180px 200px",alignItems:"center",gap:"0 .5rem",padding:".75rem 1rem",background:"#0b1f38",borderTop:"2px solid rgba(6,182,212,.2)"}}>
                     <div style={{gridColumn:"1/6",textAlign:"right",fontSize:".65rem",fontWeight:700,color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:".07em"}}>
                       Total martillo — {vendidos.length} de {lotesFiltrados.length} lotes vendidos
                     </div>

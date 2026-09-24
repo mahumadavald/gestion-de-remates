@@ -320,7 +320,7 @@ export default function PageLiquidaciones() {
           <button className="btn-primary" style={{marginTop:".5rem"}} onClick={()=>setPage("sala")}>Ir a Sala en vivo</button>
         </div>
       ) : (
-        <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1rem",padding:".75rem 1rem",background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.18)",borderRadius:9}}>
+        <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1rem",padding:".75rem 1rem",background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.18)",borderRadius:9}}>
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
           <span style={{fontSize:".78rem",fontWeight:700,color:"var(--wh2)",whiteSpace:"nowrap"}}>Remate:</span>
           <select
@@ -374,7 +374,7 @@ export default function PageLiquidaciones() {
         </div>
       )}
 
-      <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".85rem 1rem",background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.2)",borderRadius:8}}>
+      <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1.2rem",padding:".85rem 1rem",background:"rgba(6,182,212,.07)",border:"1px solid rgba(6,182,212,.2)",borderRadius:8}}>
         <div style={{flex:1}}>
           <div style={{fontSize:".82rem",fontWeight:700,color:"var(--wh2)",marginBottom:".2rem"}}>
             {liqReview
@@ -478,7 +478,7 @@ export default function PageLiquidaciones() {
                 return (
                   <tr key={ci} style={{cursor:"pointer"}} onClick={()=>setLiqExpanded(liqExpanded===ci?null:ci)}>
                     <td>
-                      <div style={{width:30,height:30,borderRadius:6,background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,sans-serif",fontSize:".78rem",fontWeight:800,color:"var(--ac)"}}>
+                      <div style={{width:30,height:30,borderRadius:6,background:"rgba(6,182,212,.1)",border:"1px solid rgba(6,182,212,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,sans-serif",fontSize:".78rem",fontWeight:800,color:"var(--ac)"}}>
                         {String(c.key).padStart(2,"0")}
                       </div>
                     </td>
@@ -539,7 +539,7 @@ export default function PageLiquidaciones() {
           <div key={ci} id={`liq-card-${ci}`} className="liq-card" style={{marginBottom:".8rem"}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom: isOpen?".9rem":"0",cursor:"pointer"}} onClick={()=>setLiqExpanded(isOpen?null:ci)}>
               <div style={{display:"flex",alignItems:"center",gap:".85rem"}}>
-                <div style={{width:38,height:38,borderRadius:8,background:"rgba(56,178,246,.12)",border:"1px solid rgba(56,178,246,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,sans-serif",fontSize:".8rem",fontWeight:700,color:"var(--ac)",flexShrink:0}}>
+                <div style={{width:38,height:38,borderRadius:8,background:"rgba(6,182,212,.12)",border:"1px solid rgba(6,182,212,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,sans-serif",fontSize:".8rem",fontWeight:700,color:"var(--ac)",flexShrink:0}}>
                   {String(c.key).padStart(2,"0")}
                 </div>
                 <div>
@@ -603,7 +603,7 @@ export default function PageLiquidaciones() {
                           <td style={{padding:".45rem .5rem",fontFamily:"Inter,sans-serif",fontSize:".7rem",color:"var(--mu2)"}}>{ln.exp||`Lote ${li+1}`}</td>
                           <td style={{padding:".45rem .5rem",textAlign:"center",color:"var(--mu2)"}}>1</td>
                           <td style={{padding:".45rem .5rem",color:"var(--mu2)"}}>Comision {ln.comPct}%</td>
-                          <td style={{padding:".45rem .5rem",textAlign:"center"}}><span style={{fontSize:".62rem",padding:".1rem .35rem",background:"rgba(56,178,246,.08)",borderRadius:3,color:"var(--ac)"}}>AF</span></td>
+                          <td style={{padding:".45rem .5rem",textAlign:"center"}}><span style={{fontSize:".62rem",padding:".1rem .35rem",background:"rgba(6,182,212,.08)",borderRadius:3,color:"var(--ac)"}}>AF</span></td>
                           <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"Inter,sans-serif",color:"var(--mu2)"}}>{fmt(ln.com)}</td>
                           <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"Inter,sans-serif",color:"var(--mu2)"}}>{fmt(ln.com)}</td>
                         </tr>
@@ -612,7 +612,7 @@ export default function PageLiquidaciones() {
                             <td style={{padding:".45rem .5rem",fontFamily:"Inter,sans-serif",fontSize:".7rem",color:"var(--mu2)"}}>G-ADMIN</td>
                             <td style={{padding:".45rem .5rem",textAlign:"center",color:"var(--mu2)"}}>1</td>
                             <td style={{padding:".45rem .5rem",color:"var(--yl)",fontSize:".73rem"}}>Gastos Administrativos — Vehiculo Motorizado ({ln.exp||`Lote ${li+1}`})</td>
-                            <td style={{padding:".45rem .5rem",textAlign:"center"}}><span style={{fontSize:".62rem",padding:".1rem .35rem",background:"rgba(56,178,246,.08)",borderRadius:3,color:"var(--ac)"}}>AF</span></td>
+                            <td style={{padding:".45rem .5rem",textAlign:"center"}}><span style={{fontSize:".62rem",padding:".1rem .35rem",background:"rgba(6,182,212,.08)",borderRadius:3,color:"var(--ac)"}}>AF</span></td>
                             <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"Inter,sans-serif",color:"var(--yl)"}}>{fmt(ln.gastosAdm)}</td>
                             <td style={{padding:".45rem .5rem",textAlign:"right",fontFamily:"Inter,sans-serif",color:"var(--yl)"}}>{fmt(ln.gastosAdm)}</td>
                           </tr>
@@ -638,11 +638,11 @@ export default function PageLiquidaciones() {
                       <span style={{color:"var(--wh2)"}}>Total:</span><span style={{fontFamily:"Inter,sans-serif",color:"var(--ac)"}}>{fmt(l.total)}</span>
                     </div>
                   </div>
-                  <div style={{background:"rgba(56,178,246,.06)",border:"1px solid rgba(56,178,246,.2)",borderRadius:8,padding:".8rem 1rem",fontSize:".78rem"}}>
+                  <div style={{background:"rgba(6,182,212,.06)",border:"1px solid rgba(6,182,212,.2)",borderRadius:8,padding:".8rem 1rem",fontSize:".78rem"}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:".4rem",color:"var(--mu2)"}}>
                       <span>Garantia:</span><span style={{fontFamily:"Inter,sans-serif",color:"var(--gr)"}}>{fmt(l.garantia)}</span>
                     </div>
-                    <div style={{display:"flex",justifyContent:"space-between",paddingTop:".4rem",borderTop:"1px solid rgba(56,178,246,.2)"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",paddingTop:".4rem",borderTop:"1px solid rgba(6,182,212,.2)"}}>
                       <span style={{fontWeight:700,color:"var(--wh2)",fontSize:".85rem"}}>Total a Pagar:</span>
                       <span style={{fontFamily:"Inter,sans-serif",fontWeight:800,fontSize:"1rem",color:"var(--ac)"}}>{fmt(l.totalAPagar)}</span>
                     </div>

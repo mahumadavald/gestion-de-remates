@@ -404,7 +404,7 @@ export default function PageVendedores() {
                 </div>
               </div>
 
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"1rem 1.1rem",background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.2)",borderRadius:9}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"1rem 1.1rem",background:"rgba(6,182,212,.07)",border:"1px solid rgba(6,182,212,.2)",borderRadius:9}}>
                 <div>
                   <div style={{fontSize:".65rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:".2rem"}}>Líquido a pagar al vendedor</div>
                   <div style={{fontSize:".68rem",color:"var(--mu)"}}>Ventas − comisiones − IVA</div>

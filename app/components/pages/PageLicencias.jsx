@@ -3,7 +3,7 @@ import React, { useState } from "react";
 
 const PLANES = {
   trial:       { label: "Trial",       color: "#f6ad55", bg: "rgba(246,173,85,.1)",  precio: "Gratis" },
-  basico:      { label: "Básico",      color: "#38B2F6", bg: "rgba(56,178,246,.1)",  precio: "$29.990/mes" },
+  basico:      { label: "Básico",      color: "#38B2F6", bg: "rgba(6,182,212,.1)",  precio: "$29.990/mes" },
   profesional: { label: "Profesional", color: "#14B8A6", bg: "rgba(20,184,166,.1)",  precio: "$59.990/mes" },
   enterprise:  { label: "Enterprise",  color: "#a78bfa", bg: "rgba(167,139,250,.1)", precio: "A convenir" },
 };

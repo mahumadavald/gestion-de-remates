@@ -77,6 +77,12 @@ const CSS = `
     .hero-col  { height: auto !important; overflow: visible !important; padding: 1.5rem 1.25rem 1.75rem !important; }
     .mobile-scroll-hint { display: flex !important; }
     .form-col  { height: auto !important; overflow: visible !important; }
+    .hero-trust { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 500px) {
+    .field-grid { grid-template-columns: 1fr !important; }
+    .casa-grid  { grid-template-columns: 1fr !important; }
+    .hero-trust { grid-template-columns: 1fr 1fr; }
   }
   .mobile-scroll-hint {
     display: none;

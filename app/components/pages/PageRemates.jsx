@@ -17,7 +17,7 @@ export default function PageRemates({
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--yl)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M7 6v4M7 4.5v.01"/></svg>
             <span>Vista admin — ves todos los remates de todos los clientes. Lo ideal es que <strong style={{color:"var(--wh2)"}}>cada casa de remates cree y gestione los suyos</strong> desde su propio acceso.</span>
           </div>
-        : <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".7rem 1rem",background:"rgba(56,178,246,.05)",border:"1px solid rgba(56,178,246,.15)",borderRadius:8,fontSize:".74rem",color:"var(--mu2)"}}>
+        : <div style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:"1rem",padding:".7rem 1rem",background:"rgba(6,182,212,.05)",border:"1px solid rgba(6,182,212,.15)",borderRadius:8,fontSize:".74rem",color:"var(--mu2)"}}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><circle cx="7" cy="7" r="6"/><path d="M7 6v4M7 4.5v.01"/></svg>
             <span>Solo ves los remates de <strong style={{color:"var(--wh2)"}}>{session?.casaNombre}</strong>. Crea y gestiona tus propios remates desde aquí.</span>
           </div>

@@ -105,7 +105,7 @@ export default function PageDevoluciones() {
                 </div>
               ))}
             </div>
-            <button onClick={copiarDatos} style={{background:"rgba(56,178,246,.12)",border:"1px solid rgba(56,178,246,.25)",color:"var(--ac)",borderRadius:8,padding:".45rem .9rem",fontSize:".75rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+            <button onClick={copiarDatos} style={{background:"rgba(6,182,212,.12)",border:"1px solid rgba(6,182,212,.25)",color:"var(--ac)",borderRadius:8,padding:".45rem .9rem",fontSize:".75rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
               Copiar datos
             </button>
           </div>
@@ -120,7 +120,7 @@ export default function PageDevoluciones() {
 
   return (
     <div className="page">
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"1rem",marginBottom:"1.5rem"}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:"1rem",marginBottom:"1.5rem"}}>
         {[
           {label:"Con devolución pendiente", val:conDevolucion.filter(p=>!p.devolucion_enviada).length, color:"#f59e0b"},
           {label:"Total a devolver",          val:fmtM(totalADevolver),                                 color:"#34d399"},

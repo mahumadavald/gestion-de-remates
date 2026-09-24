@@ -14,7 +14,7 @@ const ROLES_DISPONIBLES = ["admin", "martillero", "bodega", "spotter", "postrema
 
 const ROLE_COLOR = {
   "admin":        { bg: "rgba(224,82,82,.12)",   color: "#e05252", border: "rgba(224,82,82,.25)" },
-  "martillero":   { bg: "rgba(56,178,246,.12)",  color: "#38B2F6", border: "rgba(56,178,246,.25)" },
+  "martillero":   { bg: "rgba(6,182,212,.12)",  color: "#38B2F6", border: "rgba(6,182,212,.25)" },
   "bodega":       { bg: "rgba(245,158,11,.12)",  color: "#d97706", border: "rgba(245,158,11,.25)" },
   "spotter":      { bg: "rgba(139,92,246,.12)",  color: "#7c3aed", border: "rgba(139,92,246,.25)" },
   "postremate":   { bg: "rgba(20,184,166,.1)",   color: "#14B8A6", border: "rgba(20,184,166,.25)" },
@@ -96,14 +96,14 @@ export default function PageUsuarios({ session, supabase, dbBodegas, dbLicencias
           {dbLicencias.map(casa => {
             const usrsCasa = usuarios.filter(u => u.casa === casa.nombre);
             return (
-              <div key={casa.id} style={{ padding: ".75rem 1rem", background: "rgba(56,178,246,.05)", border: "1px solid rgba(56,178,246,.15)", borderRadius: 10, cursor: "pointer", transition: "border .15s" }}
+              <div key={casa.id} style={{ padding: ".75rem 1rem", background: "rgba(6,182,212,.05)", border: "1px solid rgba(6,182,212,.15)", borderRadius: 10, cursor: "pointer", transition: "border .15s" }}
                 onClick={() => { resetUsuarioForm(); setUsuarioForm(f => ({ ...f, casa: casa.nombre })); setUsuarioModal("crear"); }}
                 title="Click para crear usuario en esta casa"
-                onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(56,178,246,.4)"}
-                onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(56,178,246,.15)"}>
+                onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(6,182,212,.4)"}
+                onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(6,182,212,.15)"}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: ".4rem" }}>
                   <div style={{ fontSize: ".68rem", fontWeight: 700, color: "var(--ac)", textTransform: "uppercase", letterSpacing: ".05em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "80%" }}>{casa.nombre}</div>
-                  <span style={{ fontSize: ".6rem", padding: ".1rem .35rem", borderRadius: 4, background: "rgba(56,178,246,.12)", color: "var(--ac)", fontWeight: 700 }}>+ Agregar</span>
+                  <span style={{ fontSize: ".6rem", padding: ".1rem .35rem", borderRadius: 4, background: "rgba(6,182,212,.12)", color: "var(--ac)", fontWeight: 700 }}>+ Agregar</span>
                 </div>
                 <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--wh2)" }}>{usrsCasa.length}</div>
                 <div style={{ fontSize: ".68rem", color: "var(--mu)", marginTop: ".1rem" }}>
@@ -145,7 +145,7 @@ export default function PageUsuarios({ session, supabase, dbBodegas, dbLicencias
                 </td>
                 <td style={{ padding: ".65rem .9rem" }}>
                   {u.casa
-                    ? <div style={{ display: "inline-flex", alignItems: "center", gap: ".4rem", padding: ".2rem .6rem", background: "rgba(56,178,246,.08)", border: "1px solid rgba(56,178,246,.2)", borderRadius: 6 }}>
+                    ? <div style={{ display: "inline-flex", alignItems: "center", gap: ".4rem", padding: ".2rem .6rem", background: "rgba(6,182,212,.08)", border: "1px solid rgba(6,182,212,.2)", borderRadius: 6 }}>
                         <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="var(--ac)" strokeWidth="1.8" strokeLinecap="round"><path d="M2 12V6l5-4 5 4v6"/><path d="M5 12V9h4v3"/></svg>
                         <span style={{ fontSize: ".72rem", fontWeight: 600, color: "var(--ac)" }}>{u.casa}</span>
                       </div>
@@ -190,7 +190,7 @@ export default function PageUsuarios({ session, supabase, dbBodegas, dbLicencias
 
       <div style={{ marginTop: "1rem", padding: ".75rem 1rem", background: "var(--s2)", border: "1px solid var(--b1)", borderRadius: 9 }}>
         <div style={{ fontSize: ".65rem", fontWeight: 700, color: "var(--mu)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: ".5rem" }}>Permisos por rol</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: ".5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))", gap: ".5rem" }}>
           {[
             { rol: "admin",       desc: "Acceso total al sistema y gestión de usuarios" },
             { rol: "martillero",  desc: "Sala en vivo, lotes, remates y postores" },

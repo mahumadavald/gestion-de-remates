@@ -596,7 +596,8 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
             </Section>
 
             <Section title="Inventario de Bienes">
-              <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+              <div style={{ overflowX:"auto", WebkitOverflowScrolling:"touch", margin:"0 -4px" }}>
+              <div style={{ display:"flex", flexDirection:"column", gap:6, minWidth:400 }}>
                 <div style={{ display:"grid", gridTemplateColumns:"1fr 60px 2fr 90px auto", gap:6 }}>
                   <span style={{ fontSize:".68rem", fontWeight:700, color:"var(--mu)", padding:"0 4px" }}>TIPO</span>
                   <span style={{ fontSize:".68rem", fontWeight:700, color:"var(--mu)", textAlign:"center" }}>CANT.</span>
@@ -620,6 +621,7 @@ export default function PageActasEntrega({ session, supabase, dbActas, setDbActa
                 <button onClick={addBien} style={{ alignSelf:"flex-start", padding:"4px 12px", borderRadius:6, border:"1px dashed var(--b1)", background:"transparent", color:"var(--mu2)", fontSize:".76rem", cursor:"pointer" }}>
                   + Agregar bien
                 </button>
+              </div>
               </div>
             </Section>
 

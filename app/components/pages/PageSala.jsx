@@ -84,7 +84,7 @@ export default function PageSala({
   const vendidos     = bids.filter(b => b.status === "sold").length;
 
   return (
-    <div style={{display:"flex",flexDirection:"column",height:"100vh",overflow:"hidden"}}>
+    <div className="sala-page-root" style={{display:"flex",flexDirection:"column",height:"100vh",overflow:"hidden"}}>
 
       {/* ── Topbar ── */}
       <div className="topbar">
@@ -385,7 +385,7 @@ export default function PageSala({
                       <span style={{fontSize:".6rem",fontWeight:700,color:"var(--mu)",textTransform:"uppercase",letterSpacing:".07em"}}>Incremento</span>
                       <span style={{fontSize:"1.15rem",fontWeight:800,color:"var(--ac)"}}>{fmtS(curInc)}</span>
                     </div>
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:".2rem",marginBottom:".35rem"}}>
+                    <div className="inc-btns" style={{marginBottom:".35rem"}}>
                       {INC_OPTIONS.map(v => (
                         <button key={v} className={`inc-btn${curInc===v?" on":""}`} onClick={()=>setCurInc(v)}>{fmtS(v)}</button>
                       ))}
