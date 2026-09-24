@@ -1,5 +1,5 @@
 'use client'
-import React from "react";
+import React, { useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { fmt, fmtS } from "../../lib/format";
 
@@ -41,6 +41,18 @@ const BidRing = ({ seconds, total, nextAmount, increment }) => {
   );
 };
 
+/* ── Estilos para los tabs del panel izquierdo ── */
+const tabBase = {
+  flex: 1, padding: ".65rem 1rem",
+  fontSize: ".76rem", fontWeight: 600,
+  background: "none", border: "none", cursor: "pointer",
+  textAlign: "center",
+  borderBottom: "2px solid transparent",
+  transition: "color .2s, border-color .2s",
+};
+const tabOn  = { ...tabBase, color: "var(--ac)", borderBottomColor: "var(--ac)" };
+const tabOff = { ...tabBase, color: "var(--mu)" };
+
 export default function PageSala({
   session, salaRemateId, setSalaRemateId, REMATES_MERGED,
   lots, setLots, bids, setBids,
@@ -58,6 +70,8 @@ export default function PageSala({
   cerrarRemateCompleto, handlePhoto, removePhoto, startCarousel,
   activarCamara, detenerCamara, placeBid,
 }) {
+  const [leftTab, setLeftTab] = useState("lote");
+
   const item = lots[idx];
   const bid  = bids[idx] || {};
   const sColor = {live:"var(--gr)",sold:"var(--ac)",paused:"var(--yl)",waiting:"var(--mu)"}[aState];
@@ -65,8 +79,14 @@ export default function PageSala({
   const iAmWinning = lastBidder === "me";
   const bidTimerVal = BID_TIMER ?? BID_TIMER_D;
 
+  const timerColor   = (bidTimer??0) > 8 ? "var(--gr)" : (bidTimer??0) > 4 ? "var(--yl)" : "var(--rd)";
+  const timerPct     = ((bidTimer??0) / bidTimerVal) * 100;
+  const vendidos     = bids.filter(b => b.status === "sold").length;
+
   return (
     <div style={{display:"flex",flexDirection:"column",height:"100vh",overflow:"hidden"}}>
+
+      {/* ── Topbar ── */}
       <div className="topbar">
         <div className="topbar-left">
           <button className="btn-sec" onClick={()=>setPage("remates")}>← Volver</button>
@@ -117,6 +137,7 @@ export default function PageSala({
       </div>
 
       <div className="sala-wrap-new">
+        {/* ── Estado vacío ── */}
         {!item && (
           <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",flex:1,gap:"1.2rem",color:"var(--wh2)",textAlign:"center",padding:"3rem 2rem"}}>
             <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" style={{opacity:.3}}>
@@ -131,138 +152,191 @@ export default function PageSala({
         )}
 
         {item && <div className="sala-body">
+
+          {/* ══ PANEL IZQUIERDO ══ */}
           <div className="sala-left-card">
-            <div className="sala-live-badge">
-              <span style={{fontSize:".65rem"}}>●</span>
-              {aState==="live" ? "Live Now" : aState==="sold" ? "Adjudicado" : "En espera"}
+
+            {/* Tabs */}
+            <div style={{display:"flex",borderBottom:"1px solid var(--b1)",flexShrink:0,background:"var(--s1)",borderRadius:"14px 14px 0 0"}}>
+              <button style={leftTab==="lote"?tabOn:tabOff} onClick={()=>setLeftTab("lote")}>
+                Lote Actual
+              </button>
+              <button style={leftTab==="todos"?tabOn:tabOff} onClick={()=>setLeftTab("todos")}>
+                Todos los lotes ({lots.length})
+                {vendidos > 0 && <span style={{marginLeft:".4rem",fontSize:".6rem",color:"var(--gr)",fontWeight:700}}>{vendidos} adj.</span>}
+              </button>
             </div>
-            <div className="sala-lot-title">
-              LOTE {String(idx+1).padStart(2,"0")} — {item.name}
-            </div>
-            <div className="sala-photo-wrap">
-              <div className="sala-photo-main">
-                {(item.imgs||[]).length > 0 ? (
-                  <>
-                    <img
-                      src={item.imgs[photoIdx % item.imgs.length]}
-                      alt={item.name}
-                      style={{width:"100%",height:"100%",objectFit:"cover",display:"block",transition:"opacity .3s"}}
-                    />
-                    {item.imgs.length > 1 && (
-                      <>
-                        <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p-1+item.imgs.length)%item.imgs.length); startCarousel(item.imgs); }}
-                          style={{position:"absolute",left:6,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
-                          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M8 2L4 6l4 4"/></svg>
+
+            {leftTab === "lote" ? (<>
+
+              {/* Badge + meta */}
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:".75rem 1.1rem .3rem",flexShrink:0,gap:".5rem"}}>
+                <div className="sala-live-badge" style={{margin:0}}>
+                  <span style={{fontSize:".65rem"}}>●</span>
+                  {aState==="live" ? "Live Now" : aState==="sold" ? "Adjudicado" : "En espera"}
+                </div>
+                <div style={{fontSize:".68rem",color:"var(--mu)",fontVariantNumeric:"tabular-nums"}}>
+                  Lote {String(idx+1).padStart(2,"0")} de {lots.length}
+                </div>
+              </div>
+
+              {/* Título */}
+              <div className="sala-lot-title" style={{padding:".2rem 1.1rem .45rem"}}>
+                {item.name}
+              </div>
+
+              {/* Foto + cámara */}
+              <div className="sala-photo-wrap">
+                <div className="sala-photo-main">
+                  {(item.imgs||[]).length > 0 ? (
+                    <>
+                      <img
+                        src={item.imgs[photoIdx % item.imgs.length]}
+                        alt={item.name}
+                        style={{width:"100%",height:"100%",objectFit:"cover",display:"block",transition:"opacity .3s"}}
+                      />
+                      {item.imgs.length > 1 && (
+                        <>
+                          <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p-1+item.imgs.length)%item.imgs.length); startCarousel(item.imgs); }}
+                            style={{position:"absolute",left:6,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
+                            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M8 2L4 6l4 4"/></svg>
+                          </button>
+                          <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p+1)%item.imgs.length); startCarousel(item.imgs); }}
+                            style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
+                            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 2l4 4-4 4"/></svg>
+                          </button>
+                          <div style={{position:"absolute",bottom:6,left:"50%",transform:"translateX(-50%)",display:"flex",gap:4}}>
+                            {item.imgs.map((_,i)=>(
+                              <div key={i} onClick={()=>setPhotoIdx(i)}
+                                style={{width:i===photoIdx%item.imgs.length?14:6,height:6,borderRadius:3,background:i===photoIdx%item.imgs.length?"var(--ac)":"rgba(255,255,255,.4)",cursor:"pointer",transition:"all .2s"}}/>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                      {ctrlTab==="control" && <>
+                        <button onClick={()=>removePhoto(idx, photoIdx%item.imgs.length)}
+                          style={{position:"absolute",top:6,left:6,background:"rgba(224,82,82,.7)",border:"none",borderRadius:4,padding:".12rem .35rem",fontSize:".62rem",color:"#fff",cursor:"pointer"}}>
+                          Quitar
                         </button>
-                        <button onClick={()=>{ if(photoIntervalRef.current) clearInterval(photoIntervalRef.current); setPhotoIdx(p=>(p+1)%item.imgs.length); startCarousel(item.imgs); }}
-                          style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,.55)",border:"none",borderRadius:"50%",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
-                          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 2l4 4-4 4"/></svg>
-                        </button>
-                        <div style={{position:"absolute",bottom:6,left:"50%",transform:"translateX(-50%)",display:"flex",gap:4}}>
-                          {item.imgs.map((_,i)=>(
-                            <div key={i} onClick={()=>setPhotoIdx(i)}
-                              style={{width:i===photoIdx%item.imgs.length?14:6,height:6,borderRadius:3,background:i===photoIdx%item.imgs.length?"var(--ac)":"rgba(255,255,255,.4)",cursor:"pointer",transition:"all .2s"}}/>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                    {ctrlTab==="control" && <>
-                    <button onClick={()=>removePhoto(idx, photoIdx%item.imgs.length)}
-                      style={{position:"absolute",top:6,left:6,background:"rgba(224,82,82,.7)",border:"none",borderRadius:4,padding:".12rem .35rem",fontSize:".62rem",color:"#fff",cursor:"pointer"}}>
-                      Quitar
-                    </button>
-                    <label htmlFor={`phadd${idx}`}
-                      style={{position:"absolute",top:6,right:6,background:"rgba(56,178,246,.85)",borderRadius:5,padding:".15rem .45rem",fontSize:".62rem",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:".2rem"}}>
-                      <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 1v8M1 5h8"/></svg>
-                      Foto
-                      <input id={`phadd${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
+                        <label htmlFor={`phadd${idx}`}
+                          style={{position:"absolute",top:6,right:6,background:"rgba(56,178,246,.85)",borderRadius:5,padding:".15rem .45rem",fontSize:".62rem",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",gap:".2rem"}}>
+                          <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 1v8M1 5h8"/></svg>
+                          Foto
+                          <input id={`phadd${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
+                        </label>
+                      </>}
+                    </>
+                  ) : (
+                    <label htmlFor={`ph${idx}`} className="sala-photo-placeholder" style={{cursor:"pointer"}}>
+                      <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="var(--mu)" strokeWidth="1.5"><rect x="3" y="6" width="26" height="20" rx="3"/><circle cx="16" cy="16" r="5"/><path d="M12 6l2-3h4l2 3"/></svg>
+                      <div style={{fontSize:".72rem",color:"var(--mu2)"}}>Agregar fotos del lote</div>
+                      <input id={`ph${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
                     </label>
-                    </>}
-                  </>
-                ) : (
-                  <label htmlFor={`ph${idx}`} className="sala-photo-placeholder" style={{cursor:"pointer"}}>
-                    <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="var(--mu)" strokeWidth="1.5"><rect x="3" y="6" width="26" height="20" rx="3"/><circle cx="16" cy="16" r="5"/><path d="M12 6l2-3h4l2 3"/></svg>
-                    <div style={{fontSize:".72rem",color:"var(--mu2)"}}>Agregar fotos del lote</div>
-                    <input id={`ph${idx}`} type="file" accept="image/*" className="hid" onChange={e=>handlePhoto(idx,e)}/>
-                  </label>
-                )}
-                {ctrlTab==="control" && (
-                <button
-                  onClick={camActiva ? detenerCamara : activarCamara}
-                  style={{position:"absolute",bottom:6,left:6,display:"flex",alignItems:"center",gap:".3rem",padding:".22rem .55rem",background:camActiva?"rgba(224,82,82,.82)":"rgba(0,0,0,.58)",border:"none",borderRadius:5,color:"#fff",fontSize:".62rem",fontWeight:700,cursor:"pointer",backdropFilter:"blur(4px)"}}
-                  title="Cámara martillero (solo preview)"
-                >
-                  <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M1 3h8l3 3v5H1V3z"/><circle cx="5" cy="8" r="1.5"/></svg>
-                  {camActiva ? "Apagar cam" : "Cámara"}
-                </button>
-                )}
-                {grabando && (
-                  <div style={{position:"absolute",bottom:6,right:6,display:"flex",alignItems:"center",gap:".3rem",padding:".22rem .55rem",background:"rgba(224,82,82,.85)",borderRadius:5,color:"#fff",fontSize:".62rem",fontWeight:800,backdropFilter:"blur(4px)"}}>
-                    <span style={{width:6,height:6,borderRadius:"50%",background:"#fff",animation:"pulse .8s infinite"}}/>
-                    REC
+                  )}
+                  {ctrlTab==="control" && (
+                    <button
+                      onClick={camActiva ? detenerCamara : activarCamara}
+                      style={{position:"absolute",bottom:6,left:6,display:"flex",alignItems:"center",gap:".3rem",padding:".22rem .55rem",background:camActiva?"rgba(224,82,82,.82)":"rgba(0,0,0,.58)",border:"none",borderRadius:5,color:"#fff",fontSize:".62rem",fontWeight:700,cursor:"pointer",backdropFilter:"blur(4px)"}}
+                      title="Cámara martillero (solo preview)"
+                    >
+                      <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M1 3h8l3 3v5H1V3z"/><circle cx="5" cy="8" r="1.5"/></svg>
+                      {camActiva ? "Apagar cam" : "Cámara"}
+                    </button>
+                  )}
+                  {grabando && (
+                    <div style={{position:"absolute",bottom:6,right:6,display:"flex",alignItems:"center",gap:".3rem",padding:".22rem .55rem",background:"rgba(224,82,82,.85)",borderRadius:5,color:"#fff",fontSize:".62rem",fontWeight:800,backdropFilter:"blur(4px)"}}>
+                      <span style={{width:6,height:6,borderRadius:"50%",background:"#fff",animation:"pulse .8s infinite"}}/>
+                      REC
+                    </div>
+                  )}
+                </div>
+                {camActiva && (
+                  <div className="sala-cam-side">
+                    <video ref={videoRef} autoPlay muted playsInline style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+                    <div className="sala-cam-side-label">CAM</div>
                   </div>
                 )}
               </div>
-              {camActiva && (
-                <div className="sala-cam-side">
-                  <video ref={videoRef} autoPlay muted playsInline style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
-                  <div className="sala-cam-side-label">CAM</div>
+
+              {/* Timer — barra horizontal nueva */}
+              <div style={{display:"flex",alignItems:"center",gap:".65rem",padding:".6rem 1.1rem .75rem",flexShrink:0,borderTop:"1px solid var(--b1)",background:"rgba(0,0,0,.08)"}}>
+                <span style={{fontSize:".65rem",fontWeight:600,color:"var(--mu2)",whiteSpace:"nowrap"}}>Tiempo</span>
+                <div style={{flex:1,height:5,background:"var(--b1)",borderRadius:3,overflow:"hidden"}}>
+                  <div style={{height:"100%",borderRadius:3,transition:"width 1s linear, background .5s",width:`${aState==="live"&&bidTimer!==null&&bidTimer>0?timerPct:0}%`,background:timerColor}}/>
                 </div>
-              )}
-            </div>
-            <div className="sala-timer">
-              <span>Tiempo restante:</span>
-              {aState==="live" && bidTimer!==null && bidTimer>0 ? (
-                <span className={`sala-timer-num${bidTimer<=2?" critical":bidTimer<=5?" urgent":" safe"}`}>
-                  00:00:{String(bidTimer).padStart(2,"0")}
-                </span>
-              ) : (
-                <span className="sala-timer-num" style={{color:"var(--mu)"}}>—</span>
-              )}
-            </div>
-            <div className="sala-lotes-proximos">
-              <div className="sala-lotes-proximos-title">
-                <span>{lots.length} lotes en remate</span>
-                <span style={{color:"var(--mu)",fontWeight:400}}> · próximos</span>
+                <div style={{fontFamily:"Inter,monospace",fontSize:"1.2rem",fontWeight:800,letterSpacing:".02em",minWidth:"3.5ch",textAlign:"right",fontVariantNumeric:"tabular-nums",color:aState==="live"&&bidTimer!==null&&bidTimer>0?timerColor:"var(--mu)"}}>
+                  {aState==="live"&&bidTimer!==null&&bidTimer>0?bidTimer+"s":"—"}
+                </div>
               </div>
-              <div className="sala-lotes-proximos-list">
+
+            </>) : (
+
+              /* ── Tab "Todos los lotes" ── */
+              <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:".35rem",padding:".65rem .85rem .85rem"}}>
                 {lots.map((l,i)=>{
                   const b = bids[i]||{};
                   const esCurrent = i===idx;
                   const esAdj = b.status==="sold";
                   return (
-                    <div key={i} className={`sala-lote-mini${esCurrent?" current":esAdj?" adj":""}`}
-                      style={{cursor:"pointer"}}
-                      onClick={()=>{ if(!esCurrent){ setIdx(i); setAState("waiting"); setBidTimer(null); } }}>
+                    <div key={i}
+                      onClick={()=>{ if(!esCurrent){ setIdx(i); setAState("waiting"); setBidTimer(null); } }}
+                      style={{display:"flex",alignItems:"center",gap:".7rem",padding:".5rem .65rem",borderRadius:10,background:esCurrent?"rgba(56,178,246,.07)":"rgba(255,255,255,.025)",border:`1px solid ${esCurrent?"rgba(56,178,246,.25)":"var(--b1)"}`,cursor:esCurrent?"default":"pointer",opacity:esAdj?.65:1,transition:"border-color .2s"}}>
                       {l.imgs?.[0]
-                        ? <img src={l.imgs[0]} alt="" className="sala-lote-mini-img"/>
-                        : <div className="sala-lote-mini-img sala-lote-mini-noimg"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
+                        ? <img src={l.imgs[0]} alt="" style={{width:42,height:42,borderRadius:7,objectFit:"cover",flexShrink:0}}/>
+                        : <div style={{width:42,height:42,borderRadius:7,background:"var(--s3)",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(90,127,168,.4)" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                          </div>
                       }
-                      <div className="sala-lote-mini-info">
-                        <div className="sala-lote-mini-num">Lote {i+1}</div>
-                        <div className="sala-lote-mini-name">{l.name}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:".78rem",fontWeight:600,color:"var(--wh)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{l.name}</div>
+                        <div style={{fontSize:".63rem",color:"var(--mu)",marginTop:".15rem"}}>Lote #{i+1}{l.cat?` · ${l.cat}`:""}</div>
                       </div>
-                      <div className="sala-lote-mini-status">
-                        {esAdj ? <span style={{color:"var(--gr)",fontSize:".65rem",fontWeight:700}}>✓ Adj.</span>
-                         : esCurrent ? <span style={{color:"var(--ac)",fontSize:".65rem",fontWeight:700}}>● Actual</span>
-                         : <span style={{color:"var(--mu)",fontSize:".65rem"}}>Pendiente</span>}
+                      <div style={{textAlign:"right",flexShrink:0}}>
+                        <div style={{fontSize:".78rem",fontWeight:700,color:"var(--wh)",fontVariantNumeric:"tabular-nums"}}>{fmt(esAdj?(b.current||l.base):l.base)}</div>
+                        <div style={{fontSize:".62rem",fontWeight:700,marginTop:".15rem",color:esAdj?"var(--gr)":esCurrent?"var(--ac)":"var(--mu)"}}>
+                          {esAdj?"✓ Adjudicado":esCurrent?"● En subasta":"Pendiente"}
+                        </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
-            </div>
+            )}
           </div>
 
+          {/* ══ PANEL DERECHO ══ */}
           <div className="sala-right-col">
             <div className="sala-bid-card">
+
+              {/* Oferta grande */}
               <div className="sala-bid-header">
-                <div>
+                <div style={{flex:1}}>
                   <div className="sala-bid-label">Oferta actual:</div>
                   <div className={`sala-bid-amount${flash?" flash":""}`}>{fmt(bid.current)}</div>
+                  {bid.winner && (
+                    <div style={{fontSize:".8rem",color:"var(--mu2)",marginTop:".3rem",display:"flex",alignItems:"center",gap:".35rem"}}>
+                      <div style={{width:7,height:7,borderRadius:"50%",background:"var(--gr)",animation:"blink 1.2s infinite"}}/>
+                      {bid.winner}
+                    </div>
+                  )}
+                  <div style={{fontSize:".7rem",color:"var(--mu)",marginTop:".35rem",display:"flex",alignItems:"center",gap:".5rem"}}>
+                    <span>Base {fmt(item.base||0)}</span>
+                    {bid.count>0&&<span style={{display:"inline-flex",alignItems:"center",gap:".3rem",background:"rgba(56,178,246,.1)",border:"1px solid rgba(56,178,246,.18)",borderRadius:5,padding:".15rem .45rem",fontSize:".65rem",fontWeight:700,color:"var(--ac)"}}>
+                      {bid.count} {bid.count===1?"puja":"pujas"}
+                    </span>}
+                    <span style={{display:"flex",alignItems:"center",gap:".28rem",marginLeft:"auto"}}>
+                      <div style={{width:5,height:5,borderRadius:"50%",background:sColor,flexShrink:0}}/>
+                      <span style={{fontSize:".65rem",fontWeight:700,color:sColor}}>{sLabel}</span>
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="sala-last-bids-title">Últimas pujas:</div>
+
+              {/* Historial de pujas */}
+              <div className="sala-last-bids-title" style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <span>Últimas pujas</span>
+                {bid.history?.length>0&&<span style={{fontSize:".6rem",color:"var(--mu)",fontWeight:400}}>{bid.history.length} total</span>}
+              </div>
               <div className="sala-last-bids" ref={feedRef}>
                 {bid.history?.length===0
                   ? <div className="sala-no-bids">Sin pujas aún</div>
@@ -270,7 +344,8 @@ export default function PageSala({
                     const initials = (b.bidder||"?").split(" ").map(w=>w[0]||"").join("").slice(0,2).toUpperCase();
                     const avatarColors = ["var(--ac)","#a78bfa","var(--yl)","var(--gr)"];
                     return (
-                      <div key={i} className="sala-bid-row">
+                      <div key={i} className="sala-bid-row" style={i===0?{background:"rgba(56,178,246,.07)",border:"1px solid rgba(56,178,246,.2)"}:{}}>
+                        <div style={{fontSize:".62rem",fontWeight:700,color:i===0?"var(--ac)":"var(--mu)",minWidth:16,textAlign:"center"}}>{i+1}</div>
                         <div className="sala-bid-avatar" style={{background:avatarColors[i%avatarColors.length]}}>
                           {b.mine?"Yo":initials}
                         </div>
@@ -280,7 +355,7 @@ export default function PageSala({
                           {b.presencial && <span className="sala-bid-tag pres" style={{marginLeft:4}}>PRES</span>}
                         </div>
                         <div>
-                          <div className="sala-bid-amount-sm">{fmt(b.amount)}</div>
+                          <div className="sala-bid-amount-sm" style={i===0?{color:"var(--ac)"}:{}}>{fmt(b.amount)}</div>
                           <div className="sala-bid-time">{b.time}</div>
                         </div>
                       </div>
@@ -288,12 +363,15 @@ export default function PageSala({
                   })
                 }
               </div>
+
+              {/* Ctrl tabs */}
               <div className="ctrl-tabs" style={{marginBottom:".75rem"}}>
                 {[["control","Control Martillero"],["postor","Vista Postor"]].map(([k,l]) => (
                   <button key={k} className={`ctrl-tab${ctrlTab===k?" on":""}`} onClick={()=>setCtrlTab(k)}>{l}</button>
                 ))}
               </div>
 
+              {/* ── Control Martillero ── */}
               {ctrlTab==="control" && (
                 <div style={{display:"flex",flexDirection:"column",gap:".6rem"}}>
                   <div>
@@ -355,11 +433,7 @@ export default function PageSala({
                     </div>
                   </div>
                   {aState!=="live" && (
-                    <button
-                      className="sala-place-bid-btn"
-                      onClick={startAuction}
-                      disabled={aState==="sold"}
-                    >
+                    <button className="sala-place-bid-btn" onClick={startAuction} disabled={aState==="sold"}>
                       {aState==="sold" ? "✓ Lote adjudicado" : "▶ Iniciar subasta"}
                     </button>
                   )}
@@ -375,23 +449,6 @@ export default function PageSala({
                           Adjudicar manualmente
                         </button>
                   )}
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:".35rem"}}>
-                    <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:".45rem .5rem",textAlign:"center"}}>
-                      <div style={{fontSize:".58rem",color:"var(--mu)",marginBottom:".12rem",textTransform:"uppercase",letterSpacing:".04em"}}>Oferta</div>
-                      <div style={{fontSize:".75rem",fontWeight:800,color:"var(--wh2)",fontVariantNumeric:"tabular-nums"}}>{fmt(bid.current)}</div>
-                    </div>
-                    <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:".45rem .5rem",textAlign:"center"}}>
-                      <div style={{fontSize:".58rem",color:"var(--mu)",marginBottom:".12rem",textTransform:"uppercase",letterSpacing:".04em"}}>Pujas</div>
-                      <div style={{fontSize:".75rem",fontWeight:800,color:"var(--wh2)"}}>{bid.count}</div>
-                    </div>
-                    <div style={{background:"var(--s1)",border:"1px solid var(--b1)",borderRadius:8,padding:".45rem .5rem",textAlign:"center"}}>
-                      <div style={{fontSize:".58rem",color:"var(--mu)",marginBottom:".12rem",textTransform:"uppercase",letterSpacing:".04em"}}>Estado</div>
-                      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:".28rem"}}>
-                        <div style={{width:5,height:5,borderRadius:"50%",background:sColor,flexShrink:0}}/>
-                        <div style={{fontSize:".65rem",fontWeight:700,color:sColor,whiteSpace:"nowrap"}}>{sLabel}</div>
-                      </div>
-                    </div>
-                  </div>
                   {bidTimer!==null&&bidTimer>0&&aState==="live" && (
                     <div className={`bid-ticker${bidTimer<=5?" urgent":""}${bidTimer<=2?" critical":""}`}>
                       <div className="bt-num" style={{color:bidTimer>8?"var(--gr)":bidTimer>4?"var(--yl)":"var(--rd)",fontSize:bidTimer<=3?"1.7rem":"1.35rem"}}>{bidTimer}</div>
@@ -423,6 +480,7 @@ export default function PageSala({
                 </div>
               )}
 
+              {/* ── Vista Postor ── */}
               {ctrlTab==="postor" && (
                 <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
                   <div style={{textAlign:"center",padding:"1rem .5rem .5rem"}}>
@@ -463,6 +521,7 @@ export default function PageSala({
                   {aState==="sold"    && <button className="sala-place-bid-btn adj" disabled style={{padding:"1rem",fontSize:".95rem"}}>✓ Adjudicado</button>}
                 </div>
               )}
+
             </div>
           </div>
         </div>}
