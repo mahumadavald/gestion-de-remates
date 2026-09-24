@@ -2203,11 +2203,16 @@ function Dashboard({ session, onLogout }) {
       setDbLoading(true);
       try {
         const timeout = new Promise((_,rej) => setTimeout(()=>rej(new Error("timeout")), 8000));
+        // Filtros de fecha para evitar cargar histórico completo
+        const hace2años = new Date(); hace2años.setFullYear(hace2años.getFullYear() - 2);
+        const hace1año  = new Date(); hace1año.setFullYear(hace1año.getFullYear() - 1);
+        const cut2y = hace2años.toISOString();
+        const cut1y = hace1año.toISOString().slice(0, 10); // YYYY-MM-DD para fecha_iso
         const lotesQuery = session?.bodegaId
-          ? supabase.from("lotes").select("*").eq("bodega_id", session.bodegaId).order("orden").limit(1000)
-          : supabase.from("lotes").select("*").order("orden").limit(1000);
+          ? supabase.from("lotes").select("*").eq("bodega_id", session.bodegaId).gte("created_at", cut2y).order("orden").limit(1000)
+          : supabase.from("lotes").select("*").gte("created_at", cut2y).order("orden").limit(1000);
         const fetches = Promise.all([
-          supabase.from("remates").select("*, casas(slug)").order("created_at", {ascending:false}).limit(200),
+          supabase.from("remates").select("*, casas(slug)").order("created_at", {ascending:false}).limit(500),
           lotesQuery,
           supabase.from("postores").select("*").order("numero").limit(2000),
           supabase.from("usuarios").select("*, casas(nombre)").order("nombre").limit(200),
@@ -2215,8 +2220,8 @@ function Dashboard({ session, onLogout }) {
             ? supabase.from("bodegas").select("*").order("nombre").limit(100)
             : supabase.from("bodegas").select("*").eq("casa_id", session?.casaId).order("nombre").limit(100)),
           (session?.casaId
-            ? supabase.from("liquidaciones").select("*").eq("casa_id", session.casaId).order("fecha_iso", {ascending:false}).limit(1000)
-            : supabase.from("liquidaciones").select("*").order("fecha_iso", {ascending:false}).limit(1000)),
+            ? supabase.from("liquidaciones").select("*").eq("casa_id", session.casaId).gte("fecha_iso", cut1y).order("fecha_iso", {ascending:false}).limit(1000)
+            : supabase.from("liquidaciones").select("*").gte("fecha_iso", cut1y).order("fecha_iso", {ascending:false}).limit(1000)),
           (session?.casaId
             ? supabase.from("garantias").select("*").eq("casa_id", session.casaId).order("created_at", {ascending:false}).limit(500)
             : supabase.from("garantias").select("*").order("created_at", {ascending:false}).limit(500)),
