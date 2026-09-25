@@ -28,69 +28,87 @@ export async function POST(req) {
 
     const lotesRows = lineas.map(l => `
       <tr>
-        <td style="padding:9px 14px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;">${esc(l.lote)}${l.exp ? ` — <span style="color:#9ca3af">${esc(l.exp)}</span>` : ""}</td>
-        <td style="padding:9px 14px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;text-align:right;">${fmtCLP(l.monto)}</td>
-        <td style="padding:9px 14px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;text-align:right;">${l.comPct ?? 10}%</td>
-        <td style="padding:9px 14px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;text-align:right;">${fmtCLP(l.com)}</td>
-        <td style="padding:9px 14px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;text-align:right;color:#d97706;">${l.gastosAdm ? fmtCLP(l.gastosAdm) : "—"}</td>
+        <td style="padding:9px 14px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;font-family:Arial,sans-serif;">${esc(l.lote)}${l.exp ? ` — <span style="color:#9ca3af;">${esc(l.exp)}</span>` : ""}</td>
+        <td style="padding:9px 14px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;text-align:right;font-family:Arial,sans-serif;">${fmtCLP(l.monto)}</td>
+        <td style="padding:9px 14px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;text-align:right;font-family:Arial,sans-serif;">${l.comPct ?? 10}%</td>
+        <td style="padding:9px 14px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;text-align:right;font-family:Arial,sans-serif;">${fmtCLP(l.com)}</td>
+        <td style="padding:9px 14px;font-size:13px;border-bottom:1px solid #f3f4f6;text-align:right;color:#d97706;font-family:Arial,sans-serif;">${l.gastosAdm ? fmtCLP(l.gastosAdm) : "—"}</td>
       </tr>`).join("");
 
     const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
-  <div style="max-width:620px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0f4f8">
+  <tr><td align="center" style="padding:32px 16px;background:#f0f4f8;">
+  <table width="620" cellpadding="0" cellspacing="0" border="0" style="max-width:620px;">
 
     <!-- Header -->
-    <div style="background:linear-gradient(135deg,#0f4c5c 0%,#0891b2 60%,#06B6D4 100%);padding:28px 36px 24px;">
-      <div style="font-size:20px;font-weight:700;color:#fff;">Liquidación de Remate</div>
-      <div style="font-size:13px;color:#cce9f5;margin-top:5px;">${esc(remateNombre)}${fecha ? " · " + esc(fecha) : ""}</div>
-    </div>
+    <tr><td bgcolor="#0891b2" style="background:linear-gradient(135deg,#0f4c5c 0%,#0891b2 60%,#06B6D4 100%);padding:28px 36px 24px;border-radius:0;">
+      <div style="font-size:20px;font-weight:700;color:#fff;font-family:Arial,Helvetica,sans-serif;">Liquidación de Remate</div>
+      <div style="font-size:13px;color:#cce9f5;margin-top:5px;font-family:Arial,Helvetica,sans-serif;">${esc(remateNombre)}${fecha ? " · " + esc(fecha) : ""}</div>
+    </td></tr>
 
     <!-- Datos comprador -->
-    <div style="background:#fff;padding:24px 36px 8px;">
+    <tr><td bgcolor="#ffffff" style="background:#ffffff;padding:24px 36px 8px;font-family:Arial,Helvetica,sans-serif;">
       <p style="font-size:15px;color:#374151;margin:0 0 4px;">Estimado/a, <strong>${esc(postorNombre)}</strong></p>
-      <p style="font-size:13px;color:#6b7280;margin:0 0 20px;">RUT: ${esc(rut || "—")}</p>
-      <p style="font-size:13px;color:#374151;margin:0 0 16px;line-height:1.6;">A continuación el detalle de los bienes adjudicados en <strong>${esc(remateNombre)}</strong>.</p>
-    </div>
+      <p style="font-size:13px;color:#6b7280;margin:0 0 16px;">RUT: ${esc(rut || "—")}</p>
+      <p style="font-size:13px;color:#374151;margin:0 0 0;line-height:1.6;">A continuación el detalle de los bienes adjudicados en <strong>${esc(remateNombre)}</strong>.</p>
+    </td></tr>
 
     <!-- Tabla de lotes -->
-    <div style="background:#fff;padding:0 36px 16px;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;font-size:13px;">
-        <thead>
-          <tr style="background:#f9fafb;">
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;">Lote</th>
-            <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;">Martillo</th>
-            <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;">Com %</th>
-            <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;">Comisión</th>
-            <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;">G. Adm.</th>
-          </tr>
-        </thead>
-        <tbody>${lotesRows}</tbody>
-      </table>
-    </div>
+    <tr><td bgcolor="#ffffff" style="background:#ffffff;padding:16px 36px;">
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;min-width:480px;">
+          <thead>
+            <tr bgcolor="#f9fafb">
+              <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;font-family:Arial,sans-serif;">Lote</th>
+              <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;font-family:Arial,sans-serif;">Martillo</th>
+              <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;font-family:Arial,sans-serif;">Com %</th>
+              <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;font-family:Arial,sans-serif;">Comisión</th>
+              <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;font-family:Arial,sans-serif;">G. Adm.</th>
+            </tr>
+          </thead>
+          <tbody>${lotesRows}</tbody>
+        </table>
+      </div>
+    </td></tr>
 
     <!-- Resumen financiero -->
-    <div style="background:#fff;padding:0 36px 28px;">
+    <tr><td bgcolor="#ffffff" style="background:#ffffff;padding:0 36px 28px;font-family:Arial,Helvetica,sans-serif;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:12px;">
         ${totalEx ? `<tr><td style="padding:6px 0;font-size:13px;color:#6b7280;">Subtotal bienes (exento)</td><td style="padding:6px 0;font-size:13px;color:#374151;text-align:right;">${fmtCLP(totalEx)}</td></tr>` : ""}
         ${totalAf ? `<tr><td style="padding:6px 0;font-size:13px;color:#6b7280;">Subtotal bienes (AF)</td><td style="padding:6px 0;font-size:13px;color:#374151;text-align:right;">${fmtCLP(totalAf)}</td></tr>` : ""}
         <tr><td style="padding:6px 0;font-size:13px;color:#6b7280;">Comisiones</td><td style="padding:6px 0;font-size:13px;color:#374151;text-align:right;">${fmtCLP(totalCom)}</td></tr>
         ${iva ? `<tr><td style="padding:6px 0;font-size:13px;color:#6b7280;">IVA (19%)</td><td style="padding:6px 0;font-size:13px;color:#374151;text-align:right;">${fmtCLP(iva)}</td></tr>` : ""}
         <tr><td style="padding:6px 0;font-size:13px;color:#6b7280;">Total bruto</td><td style="padding:6px 0;font-size:13px;color:#374151;text-align:right;">${fmtCLP(total)}</td></tr>
-        ${garantia ? `<tr><td style="padding:6px 0;font-size:13px;color:#059669;">Garantía descontada</td><td style="padding:6px 0;font-size:13px;color:#059669;text-align:right;">−${fmtCLP(garantia)}</td></tr>` : ""}
+        ${garantia ? `<tr><td style="padding:6px 0;font-size:13px;color:#059669;">Garantía descontada</td><td style="padding:6px 0;font-size:13px;color:#059669;text-align:right;">&#8722;${fmtCLP(garantia)}</td></tr>` : ""}
         <tr>
-          <td style="padding:14px 0 6px;font-size:16px;font-weight:800;color:#0891b2;border-top:2px solid #e5e7eb;">TOTAL A PAGAR</td>
-          <td style="padding:14px 0 6px;font-size:16px;font-weight:800;color:#0891b2;text-align:right;border-top:2px solid #e5e7eb;">${fmtCLP(totalAPagar)}</td>
+          <td style="padding:14px 0 6px;font-size:16px;font-weight:800;color:#0891b2;border-top:2px solid #e5e7eb;font-family:Arial,Helvetica,sans-serif;">TOTAL A PAGAR</td>
+          <td style="padding:14px 0 6px;font-size:16px;font-weight:800;color:#0891b2;text-align:right;border-top:2px solid #e5e7eb;font-family:Arial,Helvetica,sans-serif;">${fmtCLP(totalAPagar)}</td>
         </tr>
       </table>
       <p style="font-size:12px;color:#9ca3af;margin:16px 0 0;">Para consultas o coordinación de pago y retiro, contacta a la casa rematadora.</p>
-    </div>
+    </td></tr>
 
     <!-- Footer -->
-    <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 36px;text-align:center;">
-      <span style="font-size:13px;font-weight:800;color:#374151;letter-spacing:.08em;">TAKKA</span>
-      <div style="font-size:11px;color:#9ca3af;margin-top:4px;"><a href="https://takka.cl" style="color:#9ca3af;text-decoration:none;">takka.cl</a></div>
-    </div>
-  </div>
+    <tr><td bgcolor="#f9fafb" style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 36px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
+      <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 6px;">
+        <tr>
+          <td style="vertical-align:middle;padding-right:8px;">
+            <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+              <rect x="2" y="4" width="32" height="9" rx="3" fill="#0891b2"/>
+              <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#0891b2"/>
+              <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
+            </svg>
+          </td>
+          <td style="vertical-align:middle;font-size:13px;font-weight:800;color:#374151;letter-spacing:.08em;font-family:Arial,Helvetica,sans-serif;">TAKKA</td>
+        </tr>
+      </table>
+      <div style="font-size:11px;color:#9ca3af;"><a href="https://takka.cl" style="color:#9ca3af;text-decoration:none;">takka.cl</a></div>
+    </td></tr>
+
+  </table>
+  </td></tr>
+</table>
 </body></html>`;
 
     const res = await fetch("https://api.resend.com/emails", {

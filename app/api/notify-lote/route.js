@@ -23,58 +23,87 @@ export async function POST(request) {
       return Response.json({ ok: false, error: "RESEND_API_KEY no configurada" }, { status: 200 });
     }
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gestion-de-remates.vercel.app";
+
+    const tr = (label, value) => !value ? "" : `
+      <tr>
+        <td style="padding:10px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;background:#f3f4f6;border-bottom:1px solid #e5e7eb;white-space:nowrap;width:38%;font-family:Arial,Helvetica,sans-serif;">${label}</td>
+        <td style="padding:10px 16px;font-size:14px;font-weight:700;color:#111827;background:#ffffff;border-bottom:1px solid #e5e7eb;font-family:Arial,Helvetica,sans-serif;">${esc(value)}</td>
+      </tr>`;
+
+    const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0f4f8">
+  <tr><td align="center" style="padding:32px 16px;background:#f0f4f8;">
+  <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+
+    <!-- Header -->
+    <tr><td bgcolor="#0891b2" style="background:linear-gradient(135deg,#0e7490 0%,#0891b2 60%,#06B6D4 100%);padding:28px 36px 24px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td style="vertical-align:middle;">
+            <div style="font-size:20px;font-weight:800;color:#ffffff;font-family:Arial,Helvetica,sans-serif;letter-spacing:-.01em;">Nuevo lote pendiente</div>
+            <div style="font-size:13px;color:#cce9f5;margin-top:5px;font-family:Arial,Helvetica,sans-serif;">Requiere revisión en el Dashboard</div>
+          </td>
+          <td style="vertical-align:middle;text-align:right;padding-left:20px;">
+            <div style="font-size:13px;font-weight:800;color:rgba(255,255,255,.85);letter-spacing:.06em;font-family:Arial,Helvetica,sans-serif;">TAKKA</div>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+
+    <!-- Cuerpo -->
+    <tr><td bgcolor="#ffffff" style="background:#ffffff;padding:24px 36px 28px;font-family:Arial,Helvetica,sans-serif;">
+      <p style="font-size:14px;color:#4b5563;margin:0 0 20px;line-height:1.7;">
+        Se registró un nuevo lote en el inventario y está pendiente de aprobación.
+      </p>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;">
+        ${tr("Nombre", lote.nombre)}
+        ${tr("Código", lote.codigo)}
+        ${tr("Categoría", lote.categoria)}
+        ${lote.base ? tr("Precio base", "$" + Number(lote.base).toLocaleString("es-CL")) : ""}
+        ${lote.descripcion ? tr("Descripción", lote.descripcion) : ""}
+        ${bodegaAdmin ? tr("Ingresado por", bodegaAdmin) : ""}
+      </table>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td align="center">
+          <a href="${appUrl}/dashboard"
+            style="display:inline-block;background:linear-gradient(135deg,#0891b2,#06B6D4);color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:14px 36px;border-radius:8px;font-family:Arial,Helvetica,sans-serif;">
+            Revisar en TAKKA &#8594;
+          </a>
+        </td></tr>
+      </table>
+    </td></tr>
+
+    <!-- Footer -->
+    <tr><td bgcolor="#f9fafb" style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 36px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
+      <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 6px;">
+        <tr>
+          <td style="vertical-align:middle;padding-right:8px;">
+            <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+              <rect x="2" y="4" width="32" height="9" rx="3" fill="#0891b2"/>
+              <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#0891b2"/>
+              <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
+            </svg>
+          </td>
+          <td style="vertical-align:middle;font-size:13px;font-weight:800;color:#374151;letter-spacing:.08em;font-family:Arial,Helvetica,sans-serif;">TAKKA</td>
+        </tr>
+      </table>
+      <div style="font-size:11px;color:#9ca3af;"><a href="https://takka.cl" style="color:#9ca3af;text-decoration:none;">takka.cl</a></div>
+    </td></tr>
+
+  </table>
+  </td></tr>
+</table>
+</body></html>`;
+
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to:   [ADMIN_EMAIL],
       subject: `Nuevo lote pendiente de revisión — ${esc(lote.nombre)}`,
-      html: `
-        <div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#f9fafb;border-radius:12px;overflow:hidden;">
-          <div style="background:linear-gradient(135deg,#0e7490,#06B6D4);padding:2rem;text-align:center;">
-            <h1 style="color:#fff;margin:0;font-size:1.4rem;font-weight:800;letter-spacing:-0.02em;">TAKKA · Nuevo lote</h1>
-            <p style="color:rgba(255,255,255,.8);margin:.4rem 0 0;font-size:.875rem;">Pendiente de revisión</p>
-          </div>
-          <div style="padding:1.75rem;">
-            <table style="width:100%;border-collapse:collapse;">
-              <tr>
-                <td style="padding:.5rem 0;color:#6b7280;font-size:.85rem;width:120px;">Nombre</td>
-                <td style="padding:.5rem 0;font-weight:700;color:#111827;">${esc(lote.nombre) || "—"}</td>
-              </tr>
-              <tr style="border-top:1px solid #e5e7eb;">
-                <td style="padding:.5rem 0;color:#6b7280;font-size:.85rem;">Código</td>
-                <td style="padding:.5rem 0;color:#374151;">${esc(lote.codigo) || "—"}</td>
-              </tr>
-              <tr style="border-top:1px solid #e5e7eb;">
-                <td style="padding:.5rem 0;color:#6b7280;font-size:.85rem;">Categoría</td>
-                <td style="padding:.5rem 0;color:#374151;">${esc(lote.categoria) || "—"}</td>
-              </tr>
-              <tr style="border-top:1px solid #e5e7eb;">
-                <td style="padding:.5rem 0;color:#6b7280;font-size:.85rem;">Base</td>
-                <td style="padding:.5rem 0;font-weight:700;color:#0e7490;">${lote.base ? "$" + Number(lote.base).toLocaleString("es-CL") : "Sin base"}</td>
-              </tr>
-              ${lote.descripcion ? `
-              <tr style="border-top:1px solid #e5e7eb;">
-                <td style="padding:.5rem 0;color:#6b7280;font-size:.85rem;">Descripción</td>
-                <td style="padding:.5rem 0;color:#374151;font-size:.875rem;">${esc(lote.descripcion)}</td>
-              </tr>` : ""}
-              ${bodegaAdmin ? `
-              <tr style="border-top:1px solid #e5e7eb;">
-                <td style="padding:.5rem 0;color:#6b7280;font-size:.85rem;">Ingresado por</td>
-                <td style="padding:.5rem 0;color:#374151;">${esc(bodegaAdmin)}</td>
-              </tr>` : ""}
-            </table>
-
-            <div style="margin-top:1.5rem;text-align:center;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://gestion-de-remates.vercel.app"}/dashboard"
-                style="display:inline-block;background:#0e7490;color:#fff;text-decoration:none;padding:.75rem 1.75rem;border-radius:8px;font-weight:700;font-size:.9rem;">
-                Revisar en TAKKA →
-              </a>
-            </div>
-          </div>
-          <div style="background:#f3f4f6;padding:1rem;text-align:center;font-size:.75rem;color:#9ca3af;">
-            TAKKA · Sistema de Gestión de Remates
-          </div>
-        </div>
-      `,
+      html,
     });
 
     if (error) return Response.json({ ok: false, error }, { status: 500 });

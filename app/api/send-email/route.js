@@ -101,20 +101,40 @@ function tr(label, value) {
   `;
 }
 
-// ── Footer con logo TAKKA ─────────────────────────────────────────────
+// ── Footer con logo TAKKA (table-based para compatibilidad con Outlook) ──
 const FOOTER = `
-  <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 36px;text-align:center;">
-    <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:6px;">
-      <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;">
-        <rect x="2" y="4" width="32" height="9" rx="3" fill="#0891b2"/>
-        <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#0891b2"/>
-        <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
-      </svg>
-      <span style="font-size:13px;font-weight:800;color:#374151;letter-spacing:.08em;">TAKKA</span>
-    </div>
-    <div style="font-size:11px;color:#9ca3af;margin-top:2px;"><a href="https://takka.cl" style="color:#9ca3af;text-decoration:none;">takka.cl</a></div>
-  </div>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr><td bgcolor="#f9fafb" style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 36px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
+      <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 6px;">
+        <tr>
+          <td style="vertical-align:middle;padding-right:8px;">
+            <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+              <rect x="2" y="4" width="32" height="9" rx="3" fill="#0891b2"/>
+              <rect x="13.5" y="13" width="9" height="19" rx="3" fill="#0891b2"/>
+              <polygon points="13.5,20.5 22.5,13 22.5,17.5 13.5,25.5" fill="rgba(255,255,255,0.72)"/>
+            </svg>
+          </td>
+          <td style="vertical-align:middle;font-size:13px;font-weight:800;color:#374151;letter-spacing:.08em;font-family:Arial,Helvetica,sans-serif;">TAKKA</td>
+        </tr>
+      </table>
+      <div style="font-size:11px;color:#9ca3af;"><a href="https://takka.cl" style="color:#9ca3af;text-decoration:none;">takka.cl</a></div>
+    </td></tr>
+  </table>
 `;
+
+// ── Wrapper externo: centra el email en todos los clientes incluyendo Outlook ──
+function emailWrap(inner) {
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0f4f8">
+  <tr><td align="center" style="padding:32px 16px;background:#f0f4f8;">
+  <table width="580" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;">
+    ${inner}
+  </table>
+  </td></tr>
+</table>
+</body></html>`;
+}
 
 export async function POST(req) {
   try {
@@ -161,43 +181,33 @@ export async function POST(req) {
 
     // ── 1. Email al CLIENTE (pre-inscripción desde formulario) ───────
     if (tipo === "cliente" && email_cliente) {
-      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
-        <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+      const html = emailWrap(`
+        <tr><td>${buildHeader({ casa, logo_url, titulo: "Pre-inscripción recibida", subtitulo: remate + (fechaStr ? " · " + fechaStr : "") })}</td></tr>
+        <tr><td bgcolor="#ffffff" style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
+          <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${esc(nombre)}</strong></p>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 20px;line-height:1.6;">Tu pre-inscripción en <strong style="color:#1a1a1a;">${esc(remate)}</strong> de <strong style="color:#1a1a1a;">${esc(casa)}</strong> fue recibida correctamente.</p>
 
-          ${buildHeader({
-            casa, logo_url,
-            titulo: "Pre-inscripción recibida",
-            subtitulo: remate + (fechaStr ? " · " + fechaStr : ""),
-          })}
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:20px;">
+            ${tr("Remate", remate)}
+            ${fechaStr ? tr("Fecha", fechaStr) : ""}
+            ${tr("RUT", rut)}
+            ${tr("Nombre", nombre)}
+            ${tr("Correo", email_cliente)}
+            ${telefono ? tr("Teléfono", telefono) : ""}
+            ${tr("Forma de participación", modalidad || "—")}
+          </table>
 
-          <div style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
-            <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${esc(nombre)}</strong></p>
-            <p style="font-size:14px;color:#6b7280;margin:0 0 20px;line-height:1.6;">Tu pre-inscripción en <strong style="color:#1a1a1a;">${esc(remate)}</strong> de <strong style="color:#1a1a1a;">${esc(casa)}</strong> fue recibida correctamente.</p>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#fffbeb">
+            <tr><td style="background-color:#fffbeb;border-left:4px solid #f59e0b;padding:14px 16px;font-size:13px;color:#92400e;line-height:1.6;">
+              <strong>Inscripción pendiente de aprobación.</strong><br>
+              ${esc(casa)} verificará tu comprobante de transferencia. Cuando sea aprobada recibirás un correo con tu número de postor e instrucciones para participar.
+            </td></tr>
+          </table>
 
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:20px;">
-              ${tr("Remate", remate)}
-              ${fechaStr ? tr("Fecha", fechaStr) : ""}
-              ${tr("RUT", rut)}
-              ${tr("Nombre", nombre)}
-              ${tr("Correo", email_cliente)}
-              ${telefono ? tr("Teléfono", telefono) : ""}
-              ${tr("Forma de participación", modalidad || "—")}
-            </table>
-
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#fffbeb">
-              <tr><td style="background-color:#fffbeb;border-left:4px solid #f59e0b;padding:14px 16px;font-size:13px;color:#92400e;line-height:1.6;">
-                <strong>Inscripción pendiente de aprobación.</strong><br>
-                ${esc(casa)} verificará tu comprobante de transferencia. Cuando sea aprobada recibirás un correo con tu número de postor e instrucciones para participar.
-              </td></tr>
-            </table>
-
-            <p style="font-size:13px;color:#6b7280;margin:20px 0 0;line-height:1.6;">¿Dudas? Contacta directamente a ${esc(casa)}${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#0891b2;'>" + email_casa + "</a>" : ""}.</p>
-          </div>
-
-          ${FOOTER}
-        </div>
-      </body></html>`;
+          <p style="font-size:13px;color:#6b7280;margin:20px 0 0;line-height:1.6;">¿Dudas? Contacta directamente a ${esc(casa)}${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#0891b2;'>" + email_casa + "</a>" : ""}.</p>
+        </td></tr>
+        <tr><td>${FOOTER}</td></tr>
+      `);
 
       const r = await sendMail({
         to: email_cliente,
@@ -218,51 +228,36 @@ export async function POST(req) {
       const datosBancarios = [banco, tipo_cuenta, numero_cuenta].filter(Boolean).join(" / ") || "—";
       const dirComuna = [direccion, comuna].filter(Boolean).join(", ") || "—";
 
-      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
-        <div style="max-width:600px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+      const html = emailWrap(`
+        <tr><td>${buildHeader({ casa, logo_url, titulo: "Notificación de nuevo participante", subtitulo: "Se registró una nueva inscripción para: " + remate + (fechaStr ? " · " + fechaStr : "") })}</td></tr>
+        <tr><td bgcolor="#ffffff" style="background:#ffffff;padding:28px 36px 32px;font-family:Arial,Helvetica,sans-serif;">
+          <p style="font-size:14px;color:#4b5563;margin:0 0 20px;line-height:1.7;">
+            El siguiente postor completó su formulario de inscripción y adjuntó el comprobante de garantía.
+          </p>
 
-          ${buildHeader({
-            casa, logo_url,
-            titulo: "Notificación de nuevo participante",
-            subtitulo: "Se registró una nueva inscripción para: " + remate + (fechaStr ? " · " + fechaStr : ""),
-          })}
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;">
+            ${trN("Nombres / Razón Social", nombre)}
+            ${trN("RUT", rut)}
+            ${trN("Correo Electrónico", email_cliente)}
+            ${trN("Teléfono", telefono)}
+            ${trN("Giro", giro)}
+            ${trN("Dirección / Comuna", dirComuna)}
+            ${trN("Datos Bancarios", datosBancarios)}
+            ${trN("Forma de Participación", modalidad)}
+          </table>
 
-          <!-- Cuerpo -->
-          <div style="background:#ffffff;padding:28px 36px 32px;">
-
-            <p style="font-size:14px;color:#4b5563;margin:0 0 20px;line-height:1.7;font-family:Arial,sans-serif;">
-              El siguiente postor completó su formulario de inscripción y adjuntó el comprobante de garantía.
-            </p>
-
-            <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;">
-              ${trN("Nombres / Razón Social", nombre)}
-              ${trN("RUT", rut)}
-              ${trN("Correo Electrónico", email_cliente)}
-              ${trN("Teléfono", telefono)}
-              ${trN("Giro", giro)}
-              ${trN("Dirección / Comuna", dirComuna)}
-              ${trN("Datos Bancarios", datosBancarios)}
-              ${trN("Forma de Participación", modalidad)}
-            </table>
-
-            ${comprobante_url ? `
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;">
-              <tr>
-                <td align="center">
-                  <a href="${comprobante_url}" target="_blank"
-                    style="display:inline-block;background:linear-gradient(135deg,#0891b2,#06b6d4);color:#ffffff;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:14px 36px;border-radius:8px;font-family:Arial,sans-serif;">
-                    Ver comprobante adjunto
-                  </a>
-                </td>
-              </tr>
-            </table>` : ""}
-
-          </div>
-
-          ${FOOTER}
-        </div>
-      </body></html>`;
+          ${comprobante_url ? `
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;">
+            <tr><td align="center">
+              <a href="${comprobante_url}" target="_blank"
+                style="display:inline-block;background:linear-gradient(135deg,#0891b2,#06b6d4);color:#ffffff;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:14px 36px;border-radius:8px;font-family:Arial,sans-serif;">
+                Ver comprobante adjunto
+              </a>
+            </td></tr>
+          </table>` : ""}
+        </td></tr>
+        <tr><td>${FOOTER}</td></tr>
+      `);
 
       // Adjuntar comprobante si existe — solo URLs de Supabase Storage (evita SSRF)
       let attachments = [];
@@ -305,38 +300,28 @@ export async function POST(req) {
             </td></tr>
           </table>`;
 
-      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0f4f8">
-          <tr><td align="center" style="padding:32px 16px;">
-          <table width="580" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+      const html = emailWrap(`
+        <tr><td>${buildHeader({ casa, logo_url, titulo: "Inscripción confirmada", subtitulo: remate + (fechaStr ? " · " + fechaStr : "") })}</td></tr>
+        <tr><td bgcolor="#ffffff" style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
+          <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${esc(nombre)}</strong></p>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">
+            Hemos confirmado tu garantía y te damos la bienvenida al remate <strong style="color:#1a1a1a;">${esc(remate)}</strong> de <strong style="color:#1a1a1a;">${esc(casa)}</strong>.
+          </p>
 
-          <tr><td>${buildHeader({ casa, logo_url, titulo: "Inscripción confirmada", subtitulo: remate + (fechaStr ? " · " + fechaStr : "") })}</td></tr>
-
-          <tr><td style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
-            <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${esc(nombre)}</strong></p>
-            <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">
-              Hemos confirmado tu garantía y te damos la bienvenida al remate <strong style="color:#1a1a1a;">${esc(remate)}</strong> de <strong style="color:#1a1a1a;">${esc(casa)}</strong>.
-            </p>
-
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0891b2">
-              <tr><td align="center" style="background-color:#0891b2;background:linear-gradient(135deg,#0f4c5c,#0891b2);border-radius:12px;padding:24px 16px;text-align:center;">
-                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#cce9f5;margin-bottom:8px;font-family:Arial,sans-serif;">Tu número de postor confirmado</div>
-                <div style="font-size:58px;font-weight:800;color:#ffffff;line-height:1;font-family:Arial,sans-serif;">#${numero}</div>
-                ${modalidad ? `<div style="font-size:13px;color:#cce9f5;margin-top:10px;text-transform:uppercase;font-family:Arial,sans-serif;">${esc(modalidad)}</div>` : ""}
-              </td></tr>
-            </table>
-
-            ${mensajeAcceso}
-
-            <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;font-family:Arial,sans-serif;">¿Dudas? Contacta directamente a <strong>${esc(casa)}</strong>${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#0891b2;'>" + email_casa + "</a>" : ""}.</p>
-          </td></tr>
-
-          <tr><td>${FOOTER}</td></tr>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0891b2">
+            <tr><td align="center" style="background-color:#0891b2;background:linear-gradient(135deg,#0f4c5c,#0891b2);border-radius:12px;padding:24px 16px;text-align:center;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#cce9f5;margin-bottom:8px;font-family:Arial,sans-serif;">Tu número de postor confirmado</div>
+              <div style="font-size:58px;font-weight:800;color:#ffffff;line-height:1;font-family:Arial,sans-serif;">#${numero}</div>
+              ${modalidad ? `<div style="font-size:13px;color:#cce9f5;margin-top:10px;text-transform:uppercase;font-family:Arial,sans-serif;">${esc(modalidad)}</div>` : ""}
+            </td></tr>
           </table>
-          </td></tr>
-        </table>
-      </body></html>`;
+
+          ${mensajeAcceso}
+
+          <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;font-family:Arial,sans-serif;">¿Dudas? Contacta directamente a <strong>${esc(casa)}</strong>${email_casa ? " en <a href='mailto:" + email_casa + "' style='color:#0891b2;'>" + email_casa + "</a>" : ""}.</p>
+        </td></tr>
+        <tr><td>${FOOTER}</td></tr>
+      `);
 
       const r = await sendMail({
         to: email_cliente,
@@ -349,21 +334,14 @@ export async function POST(req) {
     // ── 4. Email de BIENVENIDA al postor (cuenta creada en /participar) ─
     if (tipo === "bienvenida_postor" && email_cliente) {
       const { temp_password } = body;
-      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
-        <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+      const html = emailWrap(`
+        <tr><td>${buildHeader({ casa, logo_url, titulo: "Bienvenido a " + casa, subtitulo: "Tu cuenta de postor ha sido creada" })}</td></tr>
+        <tr><td bgcolor="#ffffff" style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
+          <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${esc(nombre)}</strong></p>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">Bienvenido a la plataforma de remates. Aquí encontrarás tus accesos para participar.</p>
 
-          ${buildHeader({
-            casa, logo_url,
-            titulo: "Bienvenido a " + casa,
-            subtitulo: "Tu cuenta de postor ha sido creada",
-          })}
-
-          <div style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
-            <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${esc(nombre)}</strong></p>
-            <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">Bienvenido a la plataforma de remates. Aquí encontrarás tus accesos para participar.</p>
-
-            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:20px 24px;margin-bottom:20px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f8fafc" style="margin-bottom:20px;">
+            <tr><td style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px 24px;">
               <div style="margin-bottom:14px;">
                 <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:4px;font-family:Arial,sans-serif;">Correo / Usuario</div>
                 <div style="font-size:16px;font-weight:700;color:#1a1a1a;font-family:Arial,sans-serif;">${esc(email_cliente)}</div>
@@ -371,36 +349,34 @@ export async function POST(req) {
               ${temp_password ? `
               <div>
                 <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:4px;font-family:Arial,sans-serif;">Contraseña provisoria</div>
-                <div style="font-size:24px;font-weight:800;color:#0891b2;letter-spacing:.1em;font-family:monospace;">${temp_password}</div>
+                <div style="font-size:24px;font-weight:800;color:#0891b2;letter-spacing:.1em;font-family:Courier New,monospace;">${temp_password}</div>
               </div>` : `
               <div>
                 <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:4px;font-family:Arial,sans-serif;">Contraseña</div>
                 <div style="font-size:13px;color:#374151;font-family:Arial,sans-serif;">Usa tu contraseña habitual. Si no la recuerdas, puedes recuperarla desde el portal.</div>
               </div>`}
-            </div>
+            </td></tr>
+          </table>
 
-            ${temp_password ? `
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#fffbeb" style="margin-bottom:20px;">
-              <tr><td style="background-color:#fffbeb;border-left:4px solid #f59e0b;padding:14px 16px;font-size:13px;color:#92400e;line-height:1.6;font-family:Arial,sans-serif;">
-                <strong>Al ingresar por primera vez se te pedirá crear una contraseña nueva.</strong> La clave provisoria es de un solo uso.
-              </td></tr>
-            </table>` : ""}
+          ${temp_password ? `
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#fffbeb" style="margin-bottom:20px;">
+            <tr><td style="background-color:#fffbeb;border-left:4px solid #f59e0b;padding:14px 16px;font-size:13px;color:#92400e;line-height:1.6;font-family:Arial,sans-serif;">
+              <strong>Al ingresar por primera vez se te pedirá crear una contraseña nueva.</strong> La clave provisoria es de un solo uso.
+            </td></tr>
+          </table>` : ""}
 
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
-              <tr><td align="center">
-                <a href="${body.portal_url||'https://takka.cl/postor'}" style="display:inline-block;background:linear-gradient(135deg,#0891b2,#06b6d4);color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 36px;border-radius:10px;font-family:Arial,sans-serif;">
-                  Ingresar a mi cuenta →
-                </a>
-              </td></tr>
-            </table>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
+            <tr><td align="center">
+              <a href="${body.portal_url||'https://takka.cl/postor'}" style="display:inline-block;background:linear-gradient(135deg,#0891b2,#06b6d4);color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 36px;border-radius:10px;font-family:Arial,sans-serif;">
+                Ingresar a mi cuenta &#8594;
+              </a>
+            </td></tr>
+          </table>
 
-            <p style="font-size:12px;color:#9ca3af;text-align:center;margin:0 0 16px;font-family:Arial,sans-serif;">takka.cl</p>
-            <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;font-family:Arial,sans-serif;">¿Dudas? Contacta a ${esc(casa)}${body.email_casa ? " en <a href='mailto:" + body.email_casa + "' style='color:#0891b2;'>" + body.email_casa + "</a>" : ""}.</p>
-          </div>
-
-          ${FOOTER}
-        </div>
-      </body></html>`;
+          <p style="font-size:13px;color:#6b7280;margin:0;line-height:1.6;font-family:Arial,sans-serif;">¿Dudas? Contacta a ${esc(casa)}${body.email_casa ? " en <a href='mailto:" + body.email_casa + "' style='color:#0891b2;'>" + body.email_casa + "</a>" : ""}.</p>
+        </td></tr>
+        <tr><td>${FOOTER}</td></tr>
+      `);
 
       const r = await sendMail({
         to: email_cliente,
@@ -414,44 +390,42 @@ export async function POST(req) {
     if (tipo === "no_comprador" && email_cliente) {
       const { postor_id, nombre: nombrePosNc, numero: numeroPosNc, remate: remateNc, casa: casaNc, logo_url: logoNc, devolucion_url } = body;
 
-      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-  <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
-    <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
+      const html = emailWrap(`
+        <tr><td>${buildHeader({ casa: casaNc, logo_url: logoNc, titulo: "Gracias por participar", subtitulo: remateNc })}</td></tr>
+        <tr><td bgcolor="#ffffff" style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
+          <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${esc(nombrePosNc)}</strong></p>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">
+            Gracias por participar en el remate <strong style="color:#1a1a1a;">${esc(remateNc)}</strong>. En esta oportunidad no resultaste adjudicatario de ningún lote, pero tu garantía está disponible para devolución.
+          </p>
 
-      ${buildHeader({
-        casa: casaNc, logo_url: logoNc,
-        titulo: "Gracias por participar",
-        subtitulo: remateNc,
-      })}
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ecfeff" style="margin-bottom:24px;">
+            <tr><td align="center" style="background:#ecfeff;border:2px solid #0891b2;border-radius:12px;padding:22px 16px;text-align:center;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#0e7490;margin-bottom:6px;font-family:Arial,sans-serif;">Tu número de postor</div>
+              <div style="font-size:48px;font-weight:800;color:#0891b2;line-height:1;font-family:Arial,sans-serif;">#${esc(numeroPosNc)}</div>
+            </td></tr>
+          </table>
 
-      <div style="background:#ffffff;padding:28px 36px;">
-        <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hola, <strong style="color:#1a1a1a;">${esc(nombrePosNc)}</strong></p>
-        <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">
-          Gracias por participar en el remate <strong style="color:#1a1a1a;">${esc(remateNc)}</strong>. En esta oportunidad no resultaste adjudicatario de ningún lote, pero tu garantía está disponible para devolución.
-        </p>
+          <p style="font-size:14px;color:#374151;margin:0 0 20px;line-height:1.6;">
+            Para procesar la devolución de tu garantía, registra tu cuenta bancaria haciendo click en el botón de abajo:
+          </p>
 
-        <div style="background:linear-gradient(135deg,#f0fdfe,#ecfeff);border:2px solid #0891b2;border-radius:12px;text-align:center;padding:22px 16px;margin-bottom:24px;">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#0e7490;margin-bottom:6px;">Tu número de postor</div>
-          <div style="font-size:48px;font-weight:800;color:#0891b2;line-height:1;letter-spacing:-.02em;">#${esc(numeroPosNc)}</div>
-        </div>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+            <tr><td align="center">
+              <a href="${devolucion_url}" style="display:inline-block;background:linear-gradient(135deg,#06B6D4,#14B8A6);color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:16px 36px;border-radius:10px;font-family:Arial,sans-serif;">
+                Registrar cuenta para devolución &#8594;
+              </a>
+            </td></tr>
+          </table>
 
-        <p style="font-size:14px;color:#374151;margin:0 0 20px;line-height:1.6;">
-          Para procesar la devolución de tu garantía, registra tu cuenta bancaria haciendo click en el botón de abajo:
-        </p>
-
-        <a href="${devolucion_url}" style="display:block;text-align:center;background:linear-gradient(135deg,#06B6D4,#14B8A6);color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:16px 24px;border-radius:10px;margin-bottom:24px;">
-          Registrar cuenta para devolución →
-        </a>
-
-        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;font-size:13px;color:#6b7280;line-height:1.7;">
-          <strong style="color:#374151;">¿Ya registraste tu cuenta?</strong><br>
-          Si ya completaste el formulario de devolución con el QR de tu boleta, no es necesario hacerlo nuevamente. La devolución se procesará en los próximos días hábiles.
-        </div>
-      </div>
-
-      ${FOOTER}
-    </div>
-  </body></html>`;
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f9fafb">
+            <tr><td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;font-size:13px;color:#6b7280;line-height:1.7;">
+              <strong style="color:#374151;">¿Ya registraste tu cuenta?</strong><br>
+              Si ya completaste el formulario de devolución con el QR de tu boleta, no es necesario hacerlo nuevamente. La devolución se procesará en los próximos días hábiles.
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td>${FOOTER}</td></tr>
+      `);
 
       const r = await sendMail({
         to: email_cliente,
@@ -465,32 +439,29 @@ export async function POST(req) {
     if (tipo === "recepcion_causa" && body.email_victor) {
       const { rol, empresa_deudora, bienes, nombre_deudor, rut_deudor, fecha_hora } = body;
       const dtStr = fecha_hora ? new Date(fecha_hora).toLocaleString("es-CL",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "—";
-      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
-        <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
-          ${buildHeader({ casa:"TAKKA", logo_url:null, titulo:"Bienes recepcionados ✓", subtitulo:`Causa ${esc(rol)} — podés solicitar fecha de remate` })}
-          <div style="background:#ffffff;padding:28px 36px;">
-            <p style="font-size:15px;color:#374151;margin:0 0 20px;line-height:1.6;">
-              Los bienes de la causa <strong>${esc(rol)}</strong> fueron recibidos en bodega y firmados por el deudor.
-              Ya podés solicitar la fecha de remate al tribunal.
-            </p>
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:20px;">
-              ${tr("ROL", rol)}
-              ${tr("Empresa / Deudor", empresa_deudora)}
-              ${tr("Bienes recibidos", bienes)}
-              ${tr("Entregado por", nombre_deudor)}
-              ${rut_deudor ? tr("RUT deudor", rut_deudor) : ""}
-              ${tr("Fecha y hora", dtStr)}
-            </table>
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0fdf4">
-              <tr><td style="background-color:#f0fdf4;border-left:4px solid #10b981;padding:14px 16px;font-size:13px;color:#065f46;line-height:1.6;">
-                <strong>Próximo paso:</strong> enviar las bases y propuestas al tribunal solicitando fecha de remate.
-              </td></tr>
-            </table>
-          </div>
-          ${FOOTER}
-        </div>
-      </body></html>`;
+      const html = emailWrap(`
+        <tr><td>${buildHeader({ casa:"TAKKA", logo_url:null, titulo:"Bienes recepcionados &#10003;", subtitulo:"Causa " + esc(rol) + " — podés solicitar fecha de remate" })}</td></tr>
+        <tr><td bgcolor="#ffffff" style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
+          <p style="font-size:15px;color:#374151;margin:0 0 20px;line-height:1.6;">
+            Los bienes de la causa <strong>${esc(rol)}</strong> fueron recibidos en bodega y firmados por el deudor.
+            Ya podés solicitar la fecha de remate al tribunal.
+          </p>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:20px;">
+            ${tr("ROL", rol)}
+            ${tr("Empresa / Deudor", empresa_deudora)}
+            ${tr("Bienes recibidos", bienes)}
+            ${tr("Entregado por", nombre_deudor)}
+            ${rut_deudor ? tr("RUT deudor", rut_deudor) : ""}
+            ${tr("Fecha y hora", dtStr)}
+          </table>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0fdf4">
+            <tr><td style="background-color:#f0fdf4;border-left:4px solid #10b981;padding:14px 16px;font-size:13px;color:#065f46;line-height:1.6;">
+              <strong>Próximo paso:</strong> enviar las bases y propuestas al tribunal solicitando fecha de remate.
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td>${FOOTER}</td></tr>
+      `);
       const r = await sendMail({ to:body.email_victor, subject:`Bienes recepcionados — ${esc(rol)} listo para solicitar fecha`, html });
       results.push({ destino:"recepcion_causa", ...r });
     }
@@ -499,26 +470,27 @@ export async function POST(req) {
     if (tipo === "demo") {
       const { nombre, correo, registro, remates, lotes, sistema } = body;
       const casaDemo = body.casa || "—";
-      const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-      <body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
-        <div style="max-width:580px;margin:32px auto;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10);">
-          ${buildHeader({ casa:"TAKKA", logo_url:null, titulo:"Nueva solicitud de demo", subtitulo:"Alguien quiere conocer Pecker" })}
-          <div style="background:#ffffff;padding:28px 36px;">
-            <p style="font-size:14px;color:#374151;margin:0 0 20px;line-height:1.6;">Se recibió una nueva solicitud de demo a través de la landing page.</p>
-            <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;">
-              ${tr("Nombre", nombre)}
-              ${tr("Correo", correo)}
-              ${tr("Casa de remates", casaDemo)}
-              ${tr("N° Registro Martillero", registro)}
-              ${remates ? tr("Remates / mes", remates) : ""}
-              ${lotes   ? tr("Lotes / remate", lotes)   : ""}
-              ${sistema ? tr("Sistema actual", sistema)  : ""}
-            </table>
-            <a href="mailto:${esc(correo)}" style="display:block;text-align:center;background:linear-gradient(135deg,#06B6D4,#14B8A6);color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:13px 20px;border-radius:10px;">Responder a ${esc(nombre)} →</a>
-          </div>
-          ${FOOTER}
-        </div>
-      </body></html>`;
+      const html = emailWrap(`
+        <tr><td>${buildHeader({ casa:"TAKKA", logo_url:null, titulo:"Nueva solicitud de demo", subtitulo:"Alguien quiere conocer TAKKA" })}</td></tr>
+        <tr><td bgcolor="#ffffff" style="background:#ffffff;padding:28px 36px;font-family:Arial,Helvetica,sans-serif;">
+          <p style="font-size:14px;color:#374151;margin:0 0 20px;line-height:1.6;">Se recibió una nueva solicitud de demo a través de la landing page.</p>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;">
+            ${tr("Nombre", nombre)}
+            ${tr("Correo", correo)}
+            ${tr("Casa de remates", casaDemo)}
+            ${tr("N° Registro Martillero", registro)}
+            ${remates ? tr("Remates / mes", remates) : ""}
+            ${lotes   ? tr("Lotes / remate", lotes)   : ""}
+            ${sistema ? tr("Sistema actual", sistema)  : ""}
+          </table>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td align="center">
+              <a href="mailto:${esc(correo)}" style="display:inline-block;background:linear-gradient(135deg,#06B6D4,#14B8A6);color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:13px 32px;border-radius:10px;font-family:Arial,sans-serif;">Responder a ${esc(nombre)} &#8594;</a>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td>${FOOTER}</td></tr>
+      `);
 
       const r = await sendMail({
         to: "contacto@takka.cl",
